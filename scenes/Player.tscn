@@ -1,3 +1,7 @@
 [gd_scene format=3 uid="uid://wcfvv5ncrkrn"]
 
 [node name="Player" type="Node2D" unique_id=1468507112]
+
+[node name="PLAYER" type="Label" parent="." unique_id=1623570703]
+offset_right = 40.0
+offset_bottom = 23.0
