@@ -5,3 +5,7 @@
 [node name="PLAYER" type="Label" parent="." unique_id=1623570703]
 offset_right = 40.0
 offset_bottom = 23.0
+
+[node name="heydontsaythat" type="Label" parent="." unique_id=496448974]
+offset_right = 40.0
+offset_bottom = 23.0
