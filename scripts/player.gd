@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+@export var fireball_scene: PackedScene
+
 const SPEED = 130.0
 
 const FRICTION = 1200.0
@@ -21,7 +23,20 @@ var jumped := false
 
 var jump_buffer_time := 0.0
 
+func shoot_fireball():
+	var fireball = fireball_scene.instantiate()
+
+	var mouse_pos = get_global_mouse_position()
+	var dir = (mouse_pos - global_position).normalized()
+
+	fireball.global_position = global_position + dir * 40
+	fireball.direction = dir
+
+	get_tree().current_scene.add_child(fireball)
+
 func _physics_process(delta: float) -> void:
+	if Input.is_action_just_pressed("shoot"):
+		shoot_fireball()
 	# Jump buffer
 	if Input.is_action_just_pressed("jump"):
 		jump_buffer_time = JUMP_BUFFER_DURATION
