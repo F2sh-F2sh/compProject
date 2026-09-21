@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5mi25plmt2ko"
-path="res://.godot/imported/Echidna.png-96030799ac085b7daf1c70c81065e69e.ctex"
+uid="uid://cs6fytlhinixw"
+path="res://.godot/imported/Dungeon.png-9bf19df7ce5e77735cf6962b5811b279.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/Echidna/Echidna.png"
-dest_files=["res://.godot/imported/Echidna.png-96030799ac085b7daf1c70c81065e69e.ctex"]
+source_file="res://assets/TileSet/Dungeon.png"
+dest_files=["res://.godot/imported/Dungeon.png-9bf19df7ce5e77735cf6962b5811b279.ctex"]
 
 [params]
 

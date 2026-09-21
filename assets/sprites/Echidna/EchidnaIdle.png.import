@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3i7rre2g877j"
-path="res://.godot/imported/EchidnaWalk-Sheet.png-4e971639765e202b8ef19772c7c06666.ctex"
+uid="uid://dvqqbfecyeb6f"
+path="res://.godot/imported/EchidnaIdle.png-f0695933664432d6725f97cfe15ca21b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/Echidna/EchidnaWalk-Sheet.png"
-dest_files=["res://.godot/imported/EchidnaWalk-Sheet.png-4e971639765e202b8ef19772c7c06666.ctex"]
+source_file="res://assets/sprites/Echidna/EchidnaIdle.png"
+dest_files=["res://.godot/imported/EchidnaIdle.png-f0695933664432d6725f97cfe15ca21b.ctex"]
 
 [params]
 
