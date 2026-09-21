@@ -3,7 +3,7 @@ extends CharacterBody2D
 @export var fireball_scene: PackedScene
 
 const SPEED = 130.0
-
+const SPRINT_SPEED = 220.0
 const FRICTION = 1200.0
 
 const BASE_JUMP_VELOCITY = -350.0
@@ -11,40 +11,135 @@ const MAX_JUMP_VELOCITY = -500.0
 
 const CHARGE_START_TIME = 1.0
 const MAX_CHARGE_TIME = 2.5
-
 const JUMP_BUFFER_DURATION = 0.15
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
+# --- Health & Invincibility ---
+const MAX_HEALTH: int = 5
+var current_health: int = MAX_HEALTH
+var is_invulnerable: bool = false
+var is_dead: bool = false
+
+# --- Movement & Charging ---
 var air_time := 0.0
 var charging_jump := false
 var charge_time := 0.0
 var jumped := false
-
 var jump_buffer_time := 0.0
 
-func shoot_fireball():
+func _ready() -> void:
+	add_to_group("player")
+	update_ui_hearts()
+
+
+func shoot_fireball() -> void:
+	if fireball_scene == null:
+		return
+
 	var fireball = fireball_scene.instantiate()
-
 	var mouse_pos = get_global_mouse_position()
-	var dir = (mouse_pos - global_position).normalized()
 
-	fireball.global_position = global_position + dir * 40
+	# Spawn from the player's torso
+	var origin_point = global_position + Vector2(0, -12)
+
+	# Direction from player to mouse
+	var dir = (mouse_pos - origin_point).normalized()
+
+	# How far away the mouse is
+	var mouse_distance = origin_point.distance_to(mouse_pos)
+
+	# Maximum distance the fireball can spawn from the player
+	var max_spawn_distance = 50
+
+	# If mouse is closer than the maximum distance,
+	# spawn directly at the mouse.
+	# Otherwise, spawn at the maximum distance toward the mouse.
+	var spawn_distance = min(mouse_distance, max_spawn_distance)
+
+	fireball.global_position = origin_point + dir * spawn_distance
 	fireball.direction = dir
 
 	get_tree().current_scene.add_child(fireball)
 
+
+func take_damage(amount: int = 1) -> void:
+	if is_invulnerable or is_dead:
+		return
+
+	current_health = clampi(current_health - amount, 0, MAX_HEALTH)
+	update_ui_hearts()
+
+	if current_health <= 0:
+		die()
+		return
+
+	# Temporary hit invulnerability (0.8s) + flash
+	is_invulnerable = true
+
+	var tween = create_tween()
+	tween.tween_property(
+		animated_sprite,
+		"modulate",
+		Color(1, 0.3, 0.3, 0.6),
+		0.1
+	)
+	tween.tween_property(
+		animated_sprite,
+		"modulate",
+		Color.WHITE,
+		0.1
+	)
+	tween.set_loops(4)
+
+	await tween.finished
+
+	animated_sprite.modulate = Color.WHITE
+	is_invulnerable = false
+
+
+func update_ui_hearts() -> void:
+	var hud = get_tree().get_first_node_in_group("hud")
+
+	if hud and hud.has_method("set_hearts"):
+		hud.set_hearts(current_health)
+
+
+func die() -> void:
+	is_dead = true
+	set_physics_process(false)
+
+	var hud = get_tree().get_first_node_in_group("hud")
+
+	if hud and hud.has_method("show_death_screen"):
+		hud.show_death_screen()
+
+
 func _physics_process(delta: float) -> void:
+
+	# -------------------------
+	# SHOOTING
+	# -------------------------
+
 	if Input.is_action_just_pressed("shoot"):
 		shoot_fireball()
-	# Jump buffer
+
+
+	# -------------------------
+	# JUMP BUFFER
+	# -------------------------
+
 	if Input.is_action_just_pressed("jump"):
 		jump_buffer_time = JUMP_BUFFER_DURATION
 
 	if jump_buffer_time > 0:
 		jump_buffer_time -= delta
 
-	# Gravity
+
+	# -------------------------
+	# GRAVITY
+	# -------------------------
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 		air_time += delta
@@ -52,26 +147,36 @@ func _physics_process(delta: float) -> void:
 		air_time = 0.0
 		jumped = false
 
-	# Start charging from buffered jump
+
+	# -------------------------
+	# START CHARGING
+	# -------------------------
+
 	if jump_buffer_time > 0 and is_on_floor() and not charging_jump:
 		charging_jump = true
 		charge_time = 0.0
 		jump_buffer_time = 0.0
 
-	# Charge timer
+
 	if charging_jump:
 		charge_time += delta
 
-	# Release jump
+
+	# -------------------------
+	# RELEASE JUMP
+	# -------------------------
+
 	if Input.is_action_just_released("jump") and charging_jump and is_on_floor():
+
 		charging_jump = false
 
 		var jump_velocity = BASE_JUMP_VELOCITY
 
 		if charge_time > CHARGE_START_TIME:
+
 			var charge_percent = min(
-				(charge_time - CHARGE_START_TIME) /
-				(MAX_CHARGE_TIME - CHARGE_START_TIME),
+				(charge_time - CHARGE_START_TIME)
+				/ (MAX_CHARGE_TIME - CHARGE_START_TIME),
 				1.0
 			)
 
@@ -84,8 +189,19 @@ func _physics_process(delta: float) -> void:
 		velocity.y = jump_velocity
 		jumped = true
 
-	# Movement input
+
+	# -------------------------
+	# MOVEMENT
+	# -------------------------
+
 	var direction := Input.get_axis("move_left", "move_right")
+
+	# Sprint while holding SHIFT
+	var current_speed = SPEED
+
+	if Input.is_action_pressed("sprint"):
+		current_speed = SPRINT_SPEED
+
 
 	# Flip sprite
 	if direction > 0:
@@ -93,31 +209,62 @@ func _physics_process(delta: float) -> void:
 	elif direction < 0:
 		animated_sprite.flip_h = true
 
-	# Horizontal movement
+
+	# -------------------------
+	# MOVEMENT / FRICTION
+	# -------------------------
+
 	if charging_jump and charge_time >= CHARGE_START_TIME:
-		velocity.x = move_toward(velocity.x, 0, FRICTION * delta)
+
+		velocity.x = move_toward(
+			velocity.x,
+			0,
+			FRICTION * delta
+		)
+
 	else:
+
 		if direction:
-			velocity.x = direction * SPEED
+			velocity.x = direction * current_speed
 		else:
-			velocity.x = move_toward(velocity.x, 0, FRICTION * delta)
+			velocity.x = move_toward(
+				velocity.x,
+				0,
+				FRICTION * delta
+			)
+
 
 	move_and_slide()
 
-	# Animations
+
+	# -------------------------
+	# ANIMATIONS
+	# -------------------------
+
 	if is_on_floor():
+
 		if charging_jump and charge_time >= CHARGE_START_TIME:
+
 			animated_sprite.speed_scale = 1.0
 			animated_sprite.play("JumpCharge")
 
 		elif abs(velocity.x) < 5:
+
 			animated_sprite.speed_scale = 1.0
 			animated_sprite.play("idle")
 
 		else:
-			animated_sprite.speed_scale = max(abs(velocity.x) / SPEED * 1.2, 0.8)
+
 			animated_sprite.play("run")
 
+			# Normal = 1.0
+			# Sprint = faster animation
+			if Input.is_action_pressed("sprint"):
+				animated_sprite.speed_scale = 1.7
+			else:
+				animated_sprite.speed_scale = 1.0
+
 	else:
+
 		animated_sprite.speed_scale = 1.0
 		animated_sprite.play("jump")

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://wpjrw02mbhji"]
 
-[ext_resource type="Script" uid="uid://boph78vo4cdpk" path="res://scenes/area_2d.gd" id="1_jo5r4"]
+[ext_resource type="Script" uid="uid://boph78vo4cdpk" path="res://scripts/FireBall.gd" id="1_jo5r4"]
 [ext_resource type="Texture2D" uid="uid://cewqixivw8vtl" path="res://assets/Magic/FireBall.png" id="2_qp0ep"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dtcai"]
@@ -63,7 +63,7 @@ script = ExtResource("1_jo5r4")
 sprite_frames = SubResource("SpriteFrames_dmxia")
 animation = &"FireBall"
 autoplay = "FireBall"
-frame_progress = 0.9960059
+frame_progress = 0.8900864
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=516783859]
 position = Vector2(-1, -3)

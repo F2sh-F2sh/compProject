@@ -290,10 +290,10 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_os5e7"]
-radius = 9.0
-height = 44.0
+radius = 5.0
+height = 32.0
 
-[node name="Player" type="CharacterBody2D" unique_id=973951145]
+[node name="Player" type="CharacterBody2D" unique_id=973951145 groups=["player"]]
 script = ExtResource("1_qu4a1")
 fireball_scene = ExtResource("2_70d11")
 
@@ -304,5 +304,5 @@ animation = &"idle"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1308239373]
-position = Vector2(-2, -22)
+position = Vector2(-1, -18)
 shape = SubResource("CapsuleShape2D_os5e7")
