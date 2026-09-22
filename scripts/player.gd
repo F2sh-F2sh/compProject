@@ -3,6 +3,12 @@ extends CharacterBody2D
 @export var fireball_scene: PackedScene
 @export var hurtbox: Hurtbox
 
+const MAX_AMMO := 6
+const RELOAD_TIME := 2.0
+var current_ammo := MAX_AMMO
+var is_reloading := false
+var reload_progress := 0.0
+
 const SPEED = 130.0
 const SPRINT_SPEED = 220.0
 const FRICTION = 1200.0
@@ -38,6 +44,10 @@ func _ready() -> void:
 	update_ui_hearts.call_deferred()
 
 func shoot_fireball() -> void:
+	if current_ammo <= 0:
+		return
+	if is_reloading:
+		return
 	if fireball_scene == null:
 		return
 
@@ -65,6 +75,10 @@ func shoot_fireball() -> void:
 	fireball.direction = dir
 
 	get_tree().current_scene.add_child(fireball)
+	current_ammo -= 1
+	update_ammo_ui()
+	if current_ammo <= 0:
+		start_reload()
 
 
 func take_damage(amount: int = 1) -> void:
@@ -124,6 +138,21 @@ func die() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	
+	if is_reloading:
+		reload_progress += delta
+
+		update_ammo_ui()
+
+	if reload_progress >= RELOAD_TIME:
+		current_ammo = MAX_AMMO
+		is_reloading = false
+		reload_progress = 0.0
+
+		update_ammo_ui()
+	
+	if Input.is_action_just_pressed("reload"):
+		start_reload()
 
 	# -------------------------
 	# SHOOTING
@@ -279,3 +308,31 @@ func _physics_process(delta: float) -> void:
 
 		animated_sprite.speed_scale = 1.0
 		animated_sprite.play("jump")
+
+func start_reload():
+	if is_reloading:
+		return
+
+	if current_ammo == MAX_AMMO:
+		return
+
+	is_reloading = true
+	reload_progress = 0.0
+
+	update_ammo_ui()
+
+func update_ammo_ui():
+	var ammo_ui = get_tree().get_first_node_in_group("ammo_ui")
+
+	if ammo_ui:
+		var percent := 0.0
+
+		if is_reloading:
+			percent = reload_progress / RELOAD_TIME
+
+		ammo_ui.update_display(
+			current_ammo,
+			MAX_AMMO,
+			is_reloading,
+			percent
+		)

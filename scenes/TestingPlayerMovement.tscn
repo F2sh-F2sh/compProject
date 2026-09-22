@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://j5iekpv0n2v4" path="res://scenes/slime.tscn" id="2_wr0bk"]
 [ext_resource type="PackedScene" uid="uid://bdrl0xcn0b4aa" path="res://scenes/death_screen.tscn" id="4_akt5k"]
 [ext_resource type="PackedScene" uid="uid://br3pry1hhjl3j" path="res://scenes/hud.tscn" id="5_pjsr6"]
+[ext_resource type="PackedScene" uid="uid://ba7s5y6fc2bel" path="res://scenes/ammo_ui.tscn" id="6_e3os6"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pjsr6"]
 texture = ExtResource("2_700nr")
@@ -68,3 +69,5 @@ layer = 2
 [node name="DeathScreen" parent="DeathUI" unique_id=905570687 instance=ExtResource("4_akt5k")]
 
 [node name="HUD" parent="." unique_id=1164875932 instance=ExtResource("5_pjsr6")]
+
+[node name="AmmoUI" parent="." unique_id=1170242058 instance=ExtResource("6_e3os6")]

@@ -1,0 +1,101 @@
+[gd_scene format=3 uid="uid://ba7s5y6fc2bel"]
+
+[ext_resource type="Script" uid="uid://wtrotedg5y3h" path="res://ammo_ui.gd" id="1_mn4om"]
+[ext_resource type="Texture2D" uid="uid://cewqixivw8vtl" path="res://assets/Magic/FireBall.png" id="2_2rc0n"]
+[ext_resource type="FontFile" uid="uid://d4dwis51yqpwv" path="res://assets/Text/Orbitron-Black.ttf" id="2_w66j0"]
+[ext_resource type="FontFile" uid="uid://bs43cjrckvydm" path="res://assets/Text/Orbitron-ExtraBold.ttf" id="4_w66j0"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qhfg7"]
+atlas = ExtResource("2_2rc0n")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w66j0"]
+atlas = ExtResource("2_2rc0n")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lng6j"]
+atlas = ExtResource("2_2rc0n")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m66v7"]
+atlas = ExtResource("2_2rc0n")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l6kos"]
+atlas = ExtResource("2_2rc0n")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2lej"]
+atlas = ExtResource("2_2rc0n")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_os5e7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qhfg7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w66j0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lng6j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m66v7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l6kos")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i2lej")
+}],
+"loop": 1,
+"name": &"FireBall",
+"speed": 20.0
+}]
+
+[node name="AmmoUI" type="CanvasLayer" unique_id=1170242058]
+script = ExtResource("1_mn4om")
+
+[node name="Control" type="Control" parent="." unique_id=972067805]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AmmoCounter" type="Label" parent="Control" unique_id=1663137311]
+layout_mode = 0
+offset_left = 1045.0
+offset_top = 519.0
+offset_right = 1085.0
+offset_bottom = 545.0
+theme_override_fonts/font = ExtResource("2_w66j0")
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="ReloadCircle" type="TextureProgressBar" parent="Control" unique_id=1355494804]
+layout_mode = 0
+offset_left = 1101.0
+offset_top = 572.0
+offset_right = 1141.0
+offset_bottom = 612.0
+
+[node name="FireballIcon" type="AnimatedSprite2D" parent="Control" unique_id=1916549948]
+position = Vector2(1082, 622)
+scale = Vector2(2.99, 2.99)
+sprite_frames = SubResource("SpriteFrames_os5e7")
+animation = &"FireBall"
+autoplay = "FireBall"
+
+[node name="ReloadLabel" type="Label" parent="Control" unique_id=154734360]
+visible = false
+layout_mode = 0
+offset_left = 1019.0
+offset_top = 558.0
+offset_right = 1121.0
+offset_bottom = 581.0
+theme_override_fonts/font = ExtResource("4_w66j0")
+text = "Recharging"
