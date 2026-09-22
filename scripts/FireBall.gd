@@ -57,7 +57,7 @@ func _on_body_entered(body: Node2D) -> void:
 		var is_critical: bool = randf() < critical_chance
 
 		if is_critical:
-			damage *= 3
+			damage = 15
 
 			print("CRITICAL HIT!")
 

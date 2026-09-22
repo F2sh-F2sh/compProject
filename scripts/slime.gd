@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 @export var damage_number_scene: PackedScene
-@export var max_health := 30
+@export var max_health := 20
 @export var detection_range := 200.0
 @export var hop_force := -250.0
 @export var hop_speed := 80.0
