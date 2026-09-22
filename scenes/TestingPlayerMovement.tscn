@@ -3,8 +3,10 @@
 [ext_resource type="PackedScene" uid="uid://wcfvv5ncrkrn" path="res://scenes/Player.tscn" id="1_6jo8d"]
 [ext_resource type="Texture2D" uid="uid://8o6mnbtr6b5d" path="res://assets/TileSet/Dungeon.png" id="2_700nr"]
 [ext_resource type="PackedScene" uid="uid://j5iekpv0n2v4" path="res://scenes/slime.tscn" id="2_wr0bk"]
+[ext_resource type="PackedScene" uid="uid://bdrl0xcn0b4aa" path="res://scenes/death_screen.tscn" id="4_akt5k"]
+[ext_resource type="PackedScene" uid="uid://br3pry1hhjl3j" path="res://scenes/hud.tscn" id="5_pjsr6"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_akt5k"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pjsr6"]
 texture = ExtResource("2_700nr")
 0:0/size_in_atlas = Vector2i(2, 2)
 0:0/0 = 0
@@ -34,9 +36,9 @@ texture = ExtResource("2_700nr")
 [sub_resource type="TileSet" id="TileSet_67mp2"]
 tile_size = Vector2i(32, 32)
 physics_layer_0/collision_layer = 3
-sources/1 = SubResource("TileSetAtlasSource_akt5k")
+sources/1 = SubResource("TileSetAtlasSource_pjsr6")
 
-[node name="TestingPlayerMovement" type="Node2D" unique_id=339701465]
+[node name="TutLevel" type="Node2D" unique_id=339701465]
 
 [node name="Player" parent="." unique_id=973951145 instance=ExtResource("1_6jo8d")]
 collision_mask = 2
@@ -59,3 +61,10 @@ position = Vector2(-297, 9)
 
 [node name="Slime4" parent="." unique_id=675090212 instance=ExtResource("2_wr0bk")]
 position = Vector2(-353, 10)
+
+[node name="DeathUI" type="CanvasLayer" parent="." unique_id=628514592]
+layer = 2
+
+[node name="DeathScreen" parent="DeathUI" unique_id=905570687 instance=ExtResource("4_akt5k")]
+
+[node name="HUD" parent="." unique_id=1164875932 instance=ExtResource("5_pjsr6")]

@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://bjc6x1vqbaosq" path="res://assets/sprites/Echidna/EchidnaJump.png" id="3_70d11"]
 [ext_resource type="Texture2D" uid="uid://dvqqbfecyeb6f" path="res://assets/sprites/Echidna/EchidnaIdle.png" id="3_qu4a1"]
 [ext_resource type="Texture2D" uid="uid://brw2gdpk4u7x5" path="res://assets/sprites/Echidna/EchidnaWalk.png" id="4_cw2d6"]
+[ext_resource type="Script" uid="uid://ck4adbt7dulae" path="res://scripts/hurtbox.gd" id="7_cw2d6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_khinc"]
 atlas = ExtResource("1_mdl7e")
@@ -293,9 +294,14 @@ animations = [{
 radius = 5.0
 height = 32.0
 
-[node name="Player" type="CharacterBody2D" unique_id=973951145 groups=["player"]]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3gc6t"]
+radius = 5.0
+height = 32.0
+
+[node name="Player" type="CharacterBody2D" unique_id=973951145 node_paths=PackedStringArray("hurtbox") groups=["player"]]
 script = ExtResource("1_qu4a1")
 fireball_scene = ExtResource("2_70d11")
+hurtbox = NodePath("Hurtbox")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1579001299]
 position = Vector2(1, -25)
@@ -307,3 +313,12 @@ frame_progress = 0.4097823
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1308239373]
 position = Vector2(-1, -18)
 shape = SubResource("CapsuleShape2D_os5e7")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1424411538]
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("7_cw2d6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=2022173750]
+position = Vector2(-1, -18)
+shape = SubResource("CapsuleShape2D_3gc6t")

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bdrl0xcn0b4aa"]
 
-[ext_resource type="Script" uid="uid://bulevur7g10fx" path="res://scenes/death_screen.gd" id="1_dwo6e"]
+[ext_resource type="Script" uid="uid://bulevur7g10fx" path="res://scripts/death_screen.gd" id="1_dwo6e"]
 [ext_resource type="Texture2D" uid="uid://ch1uokfr24m7u" path="res://assets/TempDT.png" id="2_mqh5l"]
 
 [node name="DeathScreen" type="Control" unique_id=905570687]

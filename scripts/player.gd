@@ -1,6 +1,7 @@
 extends CharacterBody2D
 
 @export var fireball_scene: PackedScene
+@export var hurtbox: Hurtbox
 
 const SPEED = 130.0
 const SPRINT_SPEED = 220.0
@@ -16,7 +17,7 @@ const JUMP_BUFFER_DURATION = 0.15
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 # --- Health & Invincibility ---
-const MAX_HEALTH: int = 5
+const MAX_HEALTH: int = 10
 var current_health: int = MAX_HEALTH
 var is_invulnerable: bool = false
 var is_dead: bool = false
@@ -30,8 +31,11 @@ var jump_buffer_time := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
-	update_ui_hearts()
 
+	if hurtbox:
+		hurtbox.damage_received.connect(take_damage)
+
+	update_ui_hearts.call_deferred()
 
 func shoot_fireball() -> void:
 	if fireball_scene == null:
@@ -102,17 +106,21 @@ func update_ui_hearts() -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
 
 	if hud and hud.has_method("set_hearts"):
-		hud.set_hearts(current_health)
+		hud.set_hearts(current_health, MAX_HEALTH)
 
 
 func die() -> void:
+	if is_dead:
+		return
+
 	is_dead = true
+	velocity = Vector2.ZERO
 	set_physics_process(false)
 
-	var hud = get_tree().get_first_node_in_group("hud")
+	var death_screen = get_tree().current_scene.get_node_or_null("DeathUI/DeathScreen")
 
-	if hud and hud.has_method("show_death_screen"):
-		hud.show_death_screen()
+	if death_screen:
+		death_screen.show_death_screen()
 
 
 func _physics_process(delta: float) -> void:
@@ -208,6 +216,9 @@ func _physics_process(delta: float) -> void:
 		animated_sprite.flip_h = false
 	elif direction < 0:
 		animated_sprite.flip_h = true
+# Face mouse while idle
+	elif abs(velocity.x) < 5:
+		animated_sprite.flip_h = get_global_mouse_position().x < global_position.x
 
 
 	# -------------------------
