@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://br3pry1hhjl3j"]
+
+[ext_resource type="Script" uid="uid://dg15xbxf5rypu" path="res://scripts/hud.gd" id="1_ahhtf"]
+[ext_resource type="PackedScene" uid="uid://7lxrf6svym7q" path="res://scenes/heart.tscn" id="2_oo0fn"]
+
+[node name="HUD" type="CanvasLayer" unique_id=1164875932 groups=["hud"]]
+script = ExtResource("1_ahhtf")
+heart_scene = ExtResource("2_oo0fn")
+
+[node name="HUDRoot" type="Control" parent="." unique_id=649332209]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Hearts" type="HBoxContainer" parent="HUDRoot" unique_id=889152888]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -57.099976
+offset_right = 40.0
+offset_bottom = -17.099976
+grow_vertical = 0
+scale = Vector2(1.5, 1.5)

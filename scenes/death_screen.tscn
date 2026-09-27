@@ -1,25 +1,44 @@
 [gd_scene format=3 uid="uid://bdrl0xcn0b4aa"]
 
-[ext_resource type="Texture2D" uid="uid://clj0m5q14csq0" path="res://assets/temp-bg.jpg" id="1_uyutr"]
+[ext_resource type="Script" uid="uid://bulevur7g10fx" path="res://scripts/death_screen.gd" id="1_dwo6e"]
+[ext_resource type="Texture2D" uid="uid://ch1uokfr24m7u" path="res://assets/TempDT.png" id="2_mqh5l"]
 
-[node name="DeathScreen-unfinished" type="CanvasLayer" unique_id=2060420482]
-
-[node name="DeathUI|" type="Control" parent="." unique_id=1519810511]
+[node name="DeathScreen" type="Control" unique_id=905570687]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_dwo6e")
 
-[node name="Background" type="TextureRect" parent="DeathUI|" unique_id=1921870404]
-layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 1080.0
-scale = Vector2(0.6001143, 0.6001143)
-texture = ExtResource("1_uyutr")
+[node name="FadeToBlack" type="ColorRect" parent="." unique_id=533084413]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
 
-[node name="Menu" type="VBoxContainer" parent="DeathUI|" unique_id=953468944]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="Center" type="CenterContainer" parent="." unique_id=14928908]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MessageBox" type="VBoxContainer" parent="Center" unique_id=945413334]
+layout_mode = 2
+
+[node name="YouDiedImage" type="TextureRect" parent="Center/MessageBox" unique_id=1495670216]
+layout_mode = 2
+texture = ExtResource("2_mqh5l")
+stretch_mode = 5
+
+[node name="RestartPrompt" type="Label" parent="Center/MessageBox" unique_id=379900316]
+layout_mode = 2
+text = "Press [Spacebar] to do it over"
+horizontal_alignment = 1
