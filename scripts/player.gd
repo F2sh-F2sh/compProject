@@ -208,9 +208,6 @@ func _physics_process(delta: float) -> void:
 		animated_sprite.flip_h = false
 	elif direction < 0:
 		animated_sprite.flip_h = true
-# Face mouse while idle
-	elif abs(velocity.x) < 5:
-		animated_sprite.flip_h = get_global_mouse_position().x < global_position.x
 
 
 	# -------------------------
