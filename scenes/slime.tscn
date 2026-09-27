@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://c03jjrxyypv0e" path="res://scripts/slime.gd" id="1_371uh"]
 [ext_resource type="PackedScene" uid="uid://djxv4yea01s2d" path="res://scenes/damage_number.tscn" id="2_n6pvg"]
 [ext_resource type="Texture2D" uid="uid://diy5h4c313am6" path="res://assets/sprites/Enemies/Slime.png" id="2_p2gj0"]
+[ext_resource type="Script" uid="uid://c1e0usf2e45xr" path="res://scripts/damage_area.gd" id="4_pjw23"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_n6pvg"]
 atlas = ExtResource("2_p2gj0")
@@ -23,7 +24,7 @@ animations = [{
 size = Vector2(16, 8)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pjw23"]
-size = Vector2(16, 8)
+size = Vector2(18, 10)
 
 [node name="Slime" type="CharacterBody2D" unique_id=461529815 groups=["enemy"]]
 script = ExtResource("1_371uh")
@@ -38,9 +39,12 @@ animation = &"idle"
 position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_o4126")
 
-[node name="Area2D" type="Area2D" parent="." unique_id=1414085872]
+[node name="DamageArea" type="Area2D" parent="." unique_id=1414085872]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("4_pjw23")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1400174752]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=1400174752]
 position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_pjw23")
 

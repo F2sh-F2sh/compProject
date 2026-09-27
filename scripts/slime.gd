@@ -20,11 +20,9 @@ var is_aggro := false
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-
 func _ready():
 	health = max_health
 	player = get_tree().get_first_node_in_group("player")
-
 
 func _physics_process(delta):
 	# Gravity
@@ -156,7 +154,6 @@ func take_damage(amount, critical := false):
 
 	if health <= 0:
 		die()
-
 
 func die():
 	queue_free()

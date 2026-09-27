@@ -1,6 +1,16 @@
 extends CharacterBody2D
 
 @export var fireball_scene: PackedScene
+@export var hurtbox: Hurtbox
+
+
+const MAX_MANA := 100
+const FIREBALL_COST := 5
+const HEAL_COST := 20
+var current_mana := MAX_MANA
+const RELOAD_TIME := 2.0
+var is_reloading := false
+var reload_progress := 0.0
 
 const SPEED = 130.0
 const SPRINT_SPEED = 220.0
@@ -16,7 +26,7 @@ const JUMP_BUFFER_DURATION = 0.15
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 # --- Health & Invincibility ---
-const MAX_HEALTH: int = 5
+const MAX_HEALTH: int = 10
 var current_health: int = MAX_HEALTH
 var is_invulnerable: bool = false
 var is_dead: bool = false
@@ -30,10 +40,18 @@ var jump_buffer_time := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
-	update_ui_hearts()
 
+	if hurtbox:
+		hurtbox.damage_received.connect(take_damage)
+
+	update_ui_hearts.call_deferred()
+	update_mana_ui.call_deferred()
 
 func shoot_fireball() -> void:
+	if current_mana < FIREBALL_COST:
+		return
+	if is_reloading:
+		return
 	if fireball_scene == null:
 		return
 
@@ -61,6 +79,10 @@ func shoot_fireball() -> void:
 	fireball.direction = dir
 
 	get_tree().current_scene.add_child(fireball)
+	current_mana -= FIREBALL_COST
+	update_mana_ui()
+	if current_mana <= 0:
+		start_reload()
 
 
 func take_damage(amount: int = 1) -> void:
@@ -102,20 +124,58 @@ func update_ui_hearts() -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
 
 	if hud and hud.has_method("set_hearts"):
-		hud.set_hearts(current_health)
+		hud.set_hearts(current_health, MAX_HEALTH)
 
 
 func die() -> void:
+	if is_dead:
+		return
+
 	is_dead = true
+	velocity = Vector2.ZERO
 	set_physics_process(false)
 
-	var hud = get_tree().get_first_node_in_group("hud")
+	var death_screen = get_tree().current_scene.get_node_or_null("DeathUI/DeathScreen")
 
-	if hud and hud.has_method("show_death_screen"):
-		hud.show_death_screen()
+	if death_screen:
+		death_screen.show_death_screen()
 
 
 func _physics_process(delta: float) -> void:
+	
+	if Input.is_action_just_pressed("heal"):
+		heal_player()
+		
+	if is_reloading:
+		reload_progress += delta
+		update_mana_ui()
+
+		if reload_progress >= RELOAD_TIME:
+
+			current_mana = MAX_MANA
+			is_reloading = false
+			reload_progress = 0.0
+
+			var tween = create_tween()
+
+			tween.tween_property(
+				animated_sprite,
+				"modulate",
+				Color(0.7, 0.7, 0.7, 0.8),
+				0.15
+			)
+
+			tween.tween_property(
+				animated_sprite,
+				"modulate",
+				Color.WHITE,
+				0.15
+			)
+
+			update_mana_ui()
+	
+	if Input.is_action_just_pressed("reload"):
+		start_reload()
 
 	# -------------------------
 	# SHOOTING
@@ -268,3 +328,72 @@ func _physics_process(delta: float) -> void:
 
 		animated_sprite.speed_scale = 1.0
 		animated_sprite.play("jump")
+
+func start_reload():
+	if is_reloading:
+		return
+
+	if current_mana == MAX_MANA:
+		return
+
+	is_reloading = true
+	reload_progress = 0.0
+
+	update_mana_ui()
+
+func update_mana_ui():
+	var mana_ui = get_tree().get_first_node_in_group("ammo_ui")
+
+	if mana_ui:
+		var percent := 0.0
+
+		if is_reloading:
+			percent = reload_progress / RELOAD_TIME
+
+		mana_ui.update_display(
+			current_mana,
+			MAX_MANA,
+			is_reloading,
+			percent
+		)
+
+func heal_player():
+
+	if is_reloading:
+		return
+
+	if current_health >= MAX_HEALTH:
+		return
+
+	if current_mana < HEAL_COST:
+		return
+
+	current_mana -= HEAL_COST
+
+	current_health = clampi(
+		current_health + 2,
+		0,
+		MAX_HEALTH
+	)
+
+	update_ui_hearts()
+	update_mana_ui()
+
+	var tween = create_tween()
+
+	tween.tween_property(
+		animated_sprite,
+		"modulate",
+		Color(0.4, 0.8, 1.0, 0.8),
+		0.15
+	)
+
+	tween.tween_property(
+		animated_sprite,
+		"modulate",
+		Color.WHITE,
+		0.15
+	)
+
+	if current_mana <= 0:
+		start_reload()
