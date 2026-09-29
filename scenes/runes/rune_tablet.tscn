@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/runes/rune_tablet.gd" id="1_mb5of"]
+
+[node name="RuneTablet" type="Node2D" unique_id=2110769433]
+script = ExtResource("1_mb5of")

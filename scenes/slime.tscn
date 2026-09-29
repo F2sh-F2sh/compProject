@@ -43,6 +43,10 @@ shape = SubResource("RectangleShape2D_o4126")
 collision_layer = 0
 collision_mask = 2
 script = ExtResource("4_pjw23")
+<<<<<<< HEAD
+knockback = Vector2(150, -130)
+=======
+>>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=1400174752]
 position = Vector2(0, -5)

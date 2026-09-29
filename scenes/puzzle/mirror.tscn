@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/mirror.gd" id="1_n6pui"]
+
+[node name="Mirror" type="Node2D" unique_id=2117298499]
+script = ExtResource("1_n6pui")

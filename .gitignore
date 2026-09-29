@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Exported builds and editor temp files
+builds/
+*.tmp

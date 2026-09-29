@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/runes/rune_manager.gd" id="1_qdh1t"]
+
+[node name="RuneManager" type="Node2D" unique_id=971217658]
+script = ExtResource("1_qdh1t")
+starting_fragments = PackedStringArray("wind", "push", "left", "normal")

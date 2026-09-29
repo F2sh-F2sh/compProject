@@ -1,12 +1,14 @@
 extends Area2D
 
-@onready var timer: Timer = $Timer
+## A bottomless drop (scenes/killzone.tscn, not used by the current levels):
+## the player falling in is lost. Its scene wires both signals below.
 
-func _on_body_entered(body: Node2D):
-	print("you ded")
-	Engine.time_scale = 0.5
-	timer.start()
 
-func _on_timer_timeout():
-	Engine.time_scale = 1
-	get_tree().reload_current_scene()
+func _on_body_entered(body: Node) -> void:
+	if body.is_in_group("player") and body.has_method("take_damage"):
+		body.invulnerable_time = 0.0
+		body.take_damage(body.MAX_HEALTH)
+
+
+func _on_timer_timeout() -> void:
+	pass

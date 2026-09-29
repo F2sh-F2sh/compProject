@@ -1,52 +1,87 @@
-[gd_scene format=3 uid="uid://wcfvv5ncrkrn"]
+[gd_scene format=3]
 
-[ext_resource type="Texture2D" uid="uid://cxd65x7fou06v" path="res://assets/sprites/Echidna/EchidnaHoldJump.png" id="1_mdl7e"]
+<<<<<<< HEAD
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_qu4a1"]
+[ext_resource type="PackedScene" path="res://scenes/FireBall.tscn" id="2_70d11"]
+[ext_resource type="Shader" path="res://assets/shaders/character_lit.gdshader" id="4_6eyey"]
+[ext_resource type="SpriteFrames" path="res://assets/sprites/Echidna/echidna_frames.tres" id="5_d3wef"]
+[ext_resource type="Shader" path="res://assets/shaders/charge_wisps.gdshader" id="6_o4126"]
+[ext_resource type="Script" path="res://scripts/hurtbox.gd" id="7_cw2d6"]
+[ext_resource type="Script" path="res://scripts/charge_wind.gd" id="8_wind"]
+[ext_resource type="Script" path="res://scripts/hazard_recovery.gd" id="9_recovery"]
+[ext_resource type="Script" path="res://scripts/echo_recorder.gd" id="10_echo"]
+[ext_resource type="PackedScene" path="res://scenes/echo.tscn" id="11_echo_scene"]
+
+[sub_resource type="Gradient" id="Gradient_lkdrv"]
+colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_p7iby"]
+gradient = SubResource("Gradient_lkdrv")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0rnld"]
+shader = ExtResource("4_6eyey")
+shader_parameter/edge_normal_strength = null
+shader_parameter/edge_width = null
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_srp4u"]
+shader = ExtResource("6_o4126")
+shader_parameter/charge = null
+shader_parameter/flicker_speed = null
+shader_parameter/hot_color = null
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+colors = PackedColorArray(0.78, 0.74, 0.9, 0.7, 0.55, 0.5, 0.7, 0)
+=======
 [ext_resource type="Script" uid="uid://b4h2t8ynywyks" path="res://scripts/player.gd" id="1_qu4a1"]
 [ext_resource type="PackedScene" uid="uid://wpjrw02mbhji" path="res://scenes/FireBall.tscn" id="2_70d11"]
-[ext_resource type="Texture2D" uid="uid://bjc6x1vqbaosq" path="res://assets/sprites/Echidna/EchidnaJump.png" id="3_70d11"]
+[ext_resource type="Texture2D" uid="uid://1vcpie2emxb4" path="res://assets/cahrgeagin.png" id="3_cw2d6"]
 [ext_resource type="Texture2D" uid="uid://dvqqbfecyeb6f" path="res://assets/sprites/Echidna/EchidnaIdle.png" id="3_qu4a1"]
 [ext_resource type="Texture2D" uid="uid://brw2gdpk4u7x5" path="res://assets/sprites/Echidna/EchidnaWalk.png" id="4_cw2d6"]
+[ext_resource type="Texture2D" uid="uid://dvwkrow7lpctx" path="res://assets/c8844726-0210-4457-9136-ded5dc82c427.png" id="6_cw2d6"]
 [ext_resource type="Script" uid="uid://ck4adbt7dulae" path="res://scripts/hurtbox.gd" id="7_cw2d6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_khinc"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(0, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(0, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bruh7"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(64, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(217, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6eyey"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(128, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(434, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_d3wef"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(192, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(651, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o4126"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(256, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(868, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_lkdrv"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(320, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(1085, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_p7iby"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(384, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(1302, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_0rnld"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(448, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(1519, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_srp4u"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(512, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(1736, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jfpux"]
-atlas = ExtResource("1_mdl7e")
-region = Rect2(576, 0, 64, 64)
+atlas = ExtResource("3_cw2d6")
+region = Rect2(1953, 0, 217, 724)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_61ith"]
 atlas = ExtResource("3_qu4a1")
@@ -120,10 +155,6 @@ region = Rect2(64, 192, 64, 64)
 atlas = ExtResource("3_qu4a1")
 region = Rect2(128, 192, 64, 64)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_m4as6"]
-atlas = ExtResource("3_70d11")
-region = Rect2(0, 0, 64, 64)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_qu4a1"]
 atlas = ExtResource("4_cw2d6")
 region = Rect2(0, 0, 64, 64)
@@ -191,7 +222,7 @@ animations = [{
 }],
 "loop": 1,
 "name": &"JumpCharge",
-"speed": 10.0
+"speed": 4.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -254,14 +285,6 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_m4as6")
-}],
-"loop": 1,
-"name": &"jump",
-"speed": 5.0
-}, {
-"frames": [{
-"duration": 1.0,
 "texture": SubResource("AtlasTexture_qu4a1")
 }, {
 "duration": 1.0,
@@ -289,6 +312,64 @@ animations = [{
 "name": &"run",
 "speed": 12.0
 }]
+>>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m4as6"]
+atlas = ExtResource("6_cw2d6")
+region = Rect2(0, 0, 310, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yrxk4"]
+atlas = ExtResource("6_cw2d6")
+region = Rect2(310, 0, 310, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eg1p0"]
+atlas = ExtResource("6_cw2d6")
+region = Rect2(620, 0, 310, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x2u8p"]
+atlas = ExtResource("6_cw2d6")
+region = Rect2(930, 0, 310, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qv10x"]
+atlas = ExtResource("6_cw2d6")
+region = Rect2(1240, 0, 310, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qdxpi"]
+atlas = ExtResource("6_cw2d6")
+region = Rect2(1550, 0, 310, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7b437"]
+atlas = ExtResource("6_cw2d6")
+region = Rect2(1860, 0, 310, 724)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3gc6t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m4as6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yrxk4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eg1p0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x2u8p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qv10x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qdxpi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7b437")
+}],
+"loop": 1,
+"name": &"jump",
+"speed": 12.0
+}]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_os5e7"]
 radius = 5.0
@@ -298,17 +379,123 @@ height = 32.0
 radius = 5.0
 height = 32.0
 
+<<<<<<< HEAD
+[sub_resource type="Gradient" id="Gradient_jfpux"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_61ith"]
+gradient = SubResource("Gradient_jfpux")
+width = 128
+height = 128
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ebwui"]
+light_mode = 1
+
+=======
+>>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 [node name="Player" type="CharacterBody2D" unique_id=973951145 node_paths=PackedStringArray("hurtbox") groups=["player"]]
 script = ExtResource("1_qu4a1")
 fireball_scene = ExtResource("2_70d11")
 hurtbox = NodePath("Hurtbox")
+<<<<<<< HEAD
+
+[node name="ContactShadow" type="Sprite2D" parent="." unique_id=1971325504]
+modulate = Color(1, 1, 1, 0.5)
+z_index = -1
+position = Vector2(-1, 0)
+scale = Vector2(0.42, 0.1)
+texture = SubResource("GradientTexture2D_p7iby")
+
+[node name="ChargeWindBack" type="Node2D" parent="." unique_id=647895477]
+z_index = -1
+position = Vector2(-1, 0)
+script = ExtResource("8_wind")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1579001299]
-position = Vector2(1, -25)
-sprite_frames = SubResource("SpriteFrames_os5e7")
+material = SubResource("ShaderMaterial_0rnld")
+position = Vector2(-1, 0)
+scale = Vector2(0.812, 0.812)
+sprite_frames = ExtResource("5_d3wef")
 animation = &"idle"
 autoplay = "idle"
-frame_progress = 0.4097823
+offset = Vector2(0, -32)
+
+[node name="ChargeWisps" type="AnimatedSprite2D" parent="." unique_id=1035115173]
+visible = false
+z_index = 1
+material = SubResource("ShaderMaterial_srp4u")
+position = Vector2(-1, 0)
+scale = Vector2(0.812, 0.812)
+sprite_frames = ExtResource("5_d3wef")
+animation = &"JumpChargeWisps"
+offset = Vector2(0, -32)
+
+[node name="ChargeWindFront" type="Node2D" parent="." unique_id=65446378]
+z_index = 1
+position = Vector2(-1, 0)
+script = ExtResource("8_wind")
+front = true
+
+[node name="SprintDust" type="CPUParticles2D" parent="." unique_id=673233903]
+position = Vector2(-1, -1)
+emitting = false
+amount = 18
+lifetime = 0.45
+direction = Vector2(-1, -0.35)
+spread = 20.0
+gravity = Vector2(0, -25)
+initial_velocity_min = 25.0
+initial_velocity_max = 55.0
+damping_min = 40.0
+damping_max = 60.0
+scale_amount_min = 2.0
+scale_amount_max = 3.5
+color_ramp = SubResource("Gradient_dust")
+
+[node name="LandDust" type="CPUParticles2D" parent="." unique_id=1261503969]
+position = Vector2(-1, -1)
+emitting = false
+amount = 12
+lifetime = 0.35
+one_shot = true
+explosiveness = 1.0
+direction = Vector2(1, -0.15)
+spread = 180.0
+gravity = Vector2(0, -10)
+initial_velocity_min = 30.0
+initial_velocity_max = 60.0
+damping_min = 100.0
+damping_max = 140.0
+scale_amount_min = 2.0
+scale_amount_max = 3.0
+color_ramp = SubResource("Gradient_dust")
+
+[node name="HazardRecovery" type="Node" parent="." unique_id=979984544]
+script = ExtResource("9_recovery")
+
+[node name="EchoRecorder" type="Node" parent="." unique_id=1972743901]
+script = ExtResource("10_echo")
+echo_scene = ExtResource("11_echo_scene")
+=======
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1579001299]
+position = Vector2(0, -25)
+scale = Vector2(0.28225815, 0.2822581)
+sprite_frames = SubResource("SpriteFrames_os5e7")
+animation = &"JumpCharge"
+autoplay = "idle"
+frame = 7
+frame_progress = 0.7799878
+
+[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="." unique_id=1321300557]
+position = Vector2(-3.999999, -39)
+scale = Vector2(0.19516133, 0.19516131)
+sprite_frames = SubResource("SpriteFrames_3gc6t")
+animation = &"jump"
+>>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1308239373]
 position = Vector2(-1, -18)
@@ -322,3 +509,47 @@ script = ExtResource("7_cw2d6")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=2022173750]
 position = Vector2(-1, -18)
 shape = SubResource("CapsuleShape2D_3gc6t")
+<<<<<<< HEAD
+
+[node name="WispLight" type="PointLight2D" parent="." unique_id=999187086]
+position = Vector2(-1, -20)
+color = Color(0.45, 0.66, 1, 1)
+energy = 0.0
+texture = SubResource("GradientTexture2D_61ith")
+texture_scale = 1.6
+
+[node name="WispSparks" type="CPUParticles2D" parent="." unique_id=1938303239]
+z_index = 2
+material = SubResource("CanvasItemMaterial_ebwui")
+position = Vector2(-1, -18)
+emitting = false
+amount = 10
+lifetime = 0.22
+emission_shape = 1
+emission_sphere_radius = 15.0
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 25.0
+initial_velocity_max = 60.0
+scale_amount_max = 1.5
+color = Color(0.72, 0.88, 1, 1)
+
+[node name="WalkDust" type="CPUParticles2D" parent="." unique_id=1895458775]
+position = Vector2(-1, -1)
+emitting = false
+amount = 5
+lifetime = 0.35
+one_shot = true
+explosiveness = 1.0
+direction = Vector2(-1, -0.35)
+spread = 35.0
+gravity = Vector2(0, -12)
+initial_velocity_min = 12.0
+initial_velocity_max = 30.0
+damping_min = 40.0
+damping_max = 60.0
+scale_amount_min = 1.5
+scale_amount_max = 2.5
+color_ramp = SubResource("Gradient_dust")
+=======
+>>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12

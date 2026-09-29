@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/hazard_checkpoint.gd" id="1_ybssk"]
+[ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/candle.png" id="2_7t73m"]
+
+[sub_resource type="Gradient" id="Gradient_fpcko"]
+offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.15, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fvexa"]
+gradient = SubResource("Gradient_fpcko")
+width = 128
+height = 128
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[node name="HazardCheckpoint" type="Area2D" unique_id=1850101906]
+script = ExtResource("1_ybssk")
+
+[node name="Glow" type="PointLight2D" parent="." unique_id=603887225]
+position = Vector2(0, -24)
+color = Color(0.4, 0.62, 1, 1)
+texture = SubResource("GradientTexture2D_fvexa")
+texture_scale = 1.4
+height = 40.0
+
+[node name="Candle" type="Sprite2D" parent="." unique_id=678473188]
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("2_7t73m")
+centered = false
+offset = Vector2(-32, -34)
+region_enabled = true
+region_rect = Rect2(0, 30, 64, 34)
+
+[node name="Flame" type="Sprite2D" parent="." unique_id=484242484]
+position = Vector2(0, -20)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("2_7t73m")
+centered = false
+offset = Vector2(-32, -26)
+region_enabled = true
+region_rect = Rect2(0, 6, 64, 26)
+
+[node name="Sparks" type="CPUParticles2D" parent="." unique_id=419593872]
+position = Vector2(0, -24)
+emitting = false
+amount = 14
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.85
+direction = Vector2(0, -1)
+spread = 50.0
+gravity = Vector2(0, -20)
+initial_velocity_min = 20.0
+initial_velocity_max = 55.0
+damping_min = 20.0
+damping_max = 40.0
+scale_amount_max = 2.0
+color = Color(0.6, 0.8, 1, 0.9)
