@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/spike_hazard.gd" id="1_sjvdi"]
+
+[node name="SpikeTrap" type="Area2D" unique_id=1598355386]
+script = ExtResource("1_sjvdi")

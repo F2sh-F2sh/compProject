@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/spectral_platform.gd" id="1_cfrjc"]
+
+[node name="SpectralPlatform" type="Node2D" unique_id=1269944320]
+script = ExtResource("1_cfrjc")

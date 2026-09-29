@@ -1,0 +1,786 @@
+extends Node
+
+## Gameplay tests for the tutorial level. Run through tests/run_tests.gd.
+
+const LEVEL := "res://scenes/tutorial_level.tscn"
+const DT := 1.0 / 60.0
+const SHOTS := "user://test_shots/"
+# PistonTrap.Phase values (kept numeric so this file doesn't depend on class load order)
+const PHASE_RAISED := 0
+const PHASE_WARNING := 1
+const PHASE_SLAM := 2
+const PHASE_LOWERED := 3
+
+var lvl: Node
+var player: CharacterBody2D
+var passed := 0
+var failed := 0
+var monitor_camera := false
+var camera_worst := 0.0
+var camera_worst_at := ""
+var recoveries := 0
+var only := ""
+
+
+func run_suite(filter: String) -> void:
+	only = filter
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(SHOTS))
+	await get_tree().process_frame
+	if only == "" or only == "play":
+		await scenario_playthrough()
+	if only == "" or only == "spike":
+		await scenario_nonlethal_spike()
+	if only == "" or only == "lethal":
+		await scenario_lethal_spike_and_restart()
+	if only == "" or only == "piston":
+		await scenario_piston()
+	if only == "" or only == "fallback":
+		await scenario_unreached_checkpoint()
+	if only == "" or only == "retract":
+		await scenario_retracting()
+	if only == "" or only == "camera":
+		await scenario_camera_aspects()
+	if only == "" or only == "design":
+		await scenario_mechanics_required()
+	if only == "" or only == "gauntlet":
+		await scenario_gauntlet()
+	if only == "" or only == "slime":
+		await scenario_slimes()
+	if only == "" or only == "echo":
+		await scenario_echo()
+	if only == "" or only == "legacy":
+		await scenario_legacy_level()
+	print("tutorial suite: passed=%d failed=%d" % [passed, failed])
+
+
+# ------------------------------------------------------------ helpers
+
+func check(label: String, ok: bool, detail := "") -> void:
+	if ok:
+		passed += 1
+		print("  PASS ", label, "  ", detail)
+	else:
+		failed += 1
+		print("  FAIL ", label, "  ", detail)
+
+
+func release_all() -> void:
+	for a in ["move_left", "move_right", "jump", "sprint", "shoot", "heal", "reload"]:
+		Input.action_release(a)
+
+
+func load_level() -> void:
+	release_all()
+	get_tree().paused = false
+	if is_instance_valid(get_tree().current_scene):
+		get_tree().current_scene.queue_free()
+	await get_tree().process_frame
+	lvl = load(LEVEL).instantiate()
+	get_tree().root.add_child(lvl)
+	get_tree().current_scene = lvl
+	await get_tree().process_frame
+	await get_tree().physics_frame
+	player = lvl.get_node("Player")
+	recoveries = 0
+	player.hazard_recovery.recovery_started.connect(func(): recoveries += 1)
+	await frames(10)
+
+
+func frames(n: int) -> void:
+	for i in n:
+		await get_tree().physics_frame
+
+
+func seconds(s: float) -> void:
+	await frames(int(s * 60.0))
+
+
+func wait_until(cond: Callable, timeout_s: float) -> bool:
+	var t := 0.0
+	while not cond.call():
+		await get_tree().physics_frame
+		t += DT
+		if t > timeout_s:
+			return false
+	return true
+
+
+func place(x: float) -> void:
+	player.teleport_to(Vector2(x, 530))
+	await frames(8)
+
+
+func move_until_x(x: float, sprint := false, timeout := 12.0) -> bool:
+	Input.action_press("move_right")
+	if sprint:
+		Input.action_press("sprint")
+	var ok := await wait_until(func(): return player.global_position.x >= x, timeout)
+	return ok
+
+
+func approach_and_jump(x: float, sprint := false) -> bool:
+	var reached := await move_until_x(x, sprint)
+	var jumped := await tap_jump()
+	return reached and jumped
+
+
+func tap_action(action: String) -> void:
+	Input.action_press(action)
+	await frames(2)
+	Input.action_release(action)
+	await frames(1)
+
+
+## Points the real mouse at a world position and presses the shoot action.
+func aim_and_shoot(world_pos: Vector2) -> void:
+	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
+	get_tree().root.warp_mouse(screen_pos)
+	await frames(2)
+	await tap_action("shoot")
+
+
+func fight_slimes(slimes: Array, timeout: float) -> bool:
+	var t := 0.0
+	while t < timeout:
+		var alive := slimes.filter(func(s): return is_instance_valid(s) and not s.is_dead)
+		if alive.is_empty():
+			return true
+		var target: Node2D = alive[0]
+		for s in alive:
+			if s.global_position.distance_to(player.global_position) < target.global_position.distance_to(player.global_position):
+				target = s
+		# Back away if a slime gets too close, otherwise stand and shoot
+		if target.global_position.distance_to(player.global_position) < 50.0:
+			Input.action_press("move_left")
+			await frames(8)
+			Input.action_release("move_left")
+		await aim_and_shoot(target.global_position + Vector2(0, -6))
+		await frames(16)
+		t += 0.35
+	return false
+
+
+func wait_phase_start(piston, target) -> void:
+	await wait_until(func(): return piston.phase != target, 6.0)
+	await wait_until(func(): return piston.phase == target, 6.0)
+
+
+func tap_jump() -> bool:
+	Input.action_press("jump")
+	await frames(2)
+	Input.action_release("jump")
+	var left_ground := await wait_until(func(): return not player.is_on_floor(), 0.3)
+	var landed := await wait_until(func(): return player.is_on_floor(), 2.0)
+	return left_ground and landed
+
+
+func shot(file_name: String) -> void:
+	await get_tree().process_frame
+	get_tree().root.get_texture().get_image().save_png(ProjectSettings.globalize_path(SHOTS + file_name + ".png"))
+
+
+func cam_rect() -> Rect2:
+	var cam: Camera2D = player.get_node("Camera2D")
+	var size := get_tree().root.get_visible_rect().size / cam.zoom
+	var center := cam.get_screen_center_position()
+	return Rect2(center - size / 2.0, size)
+
+
+func _physics_process(_delta: float) -> void:
+	if monitor_camera and is_instance_valid(player) and player.is_inside_tree():
+		var cam = player.get_node("Camera2D")
+		var r := cam_rect()
+		var b: Rect2 = cam.bounds
+		var over := maxf(maxf(b.position.x - r.position.x, r.end.x - b.end.x),
+			maxf(b.position.y - r.position.y, r.end.y - b.end.y))
+		if over > camera_worst:
+			camera_worst = over
+			camera_worst_at = "player=%s view=%s" % [player.global_position.round(), r]
+
+
+# ------------------------------------------------------------ scenarios
+
+func scenario_playthrough() -> void:
+	print("SCENARIO full playthrough")
+	await load_level()
+	monitor_camera = true
+	camera_worst = 0.0
+	var start_health: int = player.current_health
+	var hazards := lvl.get_node("Hazards")
+
+	await shot("play_00_start")
+	check("hop onto first ledge", await approach_and_jump(1300))
+	check("jump up to walkway", await approach_and_jump(1490),
+		"y=%.0f" % player.global_position.y)
+	await shot("play_01_walkway")
+	check("walking gap jump", await approach_and_jump(1718),
+		"landed y=%.0f x=%.0f" % [player.global_position.y, player.global_position.x])
+	check("landed on walkway 2", player.global_position.y < 520.0, "y=%.0f" % player.global_position.y)
+	check("sprint gap jump", await approach_and_jump(2030, true),
+		"landed x=%.0f y=%.0f" % [player.global_position.x, player.global_position.y])
+	check("landed on walkway 3", player.global_position.y < 520.0 and player.global_position.x > 2140.0,
+		"x=%.0f y=%.0f" % [player.global_position.x, player.global_position.y])
+	Input.action_release("sprint")
+
+	# Charged jump up the plateau wall
+	await move_until_x(2470)
+	await frames(30)
+	Input.action_release("move_right")
+	await frames(10)
+	Input.action_press("jump")
+	await seconds(1.4)
+	await shot("play_02_charging")
+	await seconds(1.2)
+	Input.action_press("move_right")
+	Input.action_release("jump")
+	await wait_until(func(): return not player.is_on_floor(), 0.3)
+	await wait_until(func(): return player.is_on_floor(), 2.5)
+	check("charged jump reaches plateau", player.global_position.y < 450.0,
+		"x=%.0f y=%.0f" % [player.global_position.x, player.global_position.y])
+
+	# A tapped jump must NOT reach the plateau (so the charge is really needed)
+	# is covered by the geometry: wall is 96 px, base jump apex is ~62 px.
+
+	check("walk-jump over single spike", await approach_and_jump(2935))
+	check("checkpoint A lit on the way", lvl.get_node("Checkpoints/CheckpointA").is_active)
+	check("sprint-jump over wide spikes", await approach_and_jump(3160, true),
+		"x=%.0f" % player.global_position.x)
+	Input.action_release("sprint")
+
+	# Retracting spikes: wait at checkpoint C for them to drop, then sprint across
+	await move_until_x(3500)
+	Input.action_release("move_right")
+	var r1 = hazards.get_node("RetractingSpikes1")
+	await wait_until(func():
+		var t := fposmod(r1._elapsed + r1.start_phase * r1.get_cycle_length(), r1.get_cycle_length())
+		return r1.is_lowered() and t < 0.2, 6.0)
+	await shot("play_03_retract_lowered")
+	check("crossed retracting spikes", await move_until_x(3720, true))
+	Input.action_release("sprint")
+
+	# Pistons: wait for each to finish retracting, then sprint beneath it
+	var p1 = hazards.get_node("Piston1")
+	var p2 = hazards.get_node("Piston2")
+	var p3 = hazards.get_node("Piston3")
+	await move_until_x(3900)
+	Input.action_release("move_right")
+	await wait_until(func(): return p1.phase == PHASE_SLAM, 6.0)
+	await wait_until(func(): return p1.phase == PHASE_LOWERED, 2.0)
+	await shot("play_04_piston_slam")
+	await wait_until(func(): return p1.phase == PHASE_RAISED, 6.0)
+	check("passed under piston 1", await move_until_x(4096, true))
+	Input.action_release("move_right")
+	Input.action_release("sprint")
+	await wait_phase_start(p2, PHASE_RAISED)
+	check("passed under piston 2", await move_until_x(4300, true))
+	Input.action_release("sprint")
+
+	# Combined section
+	check("walk-jump combined spikes", await approach_and_jump(4535))
+	await move_until_x(4660)
+	Input.action_release("move_right")
+	await wait_phase_start(p3, PHASE_RAISED)
+	check("passed under piston 3", await move_until_x(4900, true))
+	Input.action_release("sprint")
+	check("sprint-jump final spikes", await approach_and_jump(5010, true),
+		"x=%.0f" % player.global_position.x)
+	Input.action_release("sprint")
+
+	check("no damage taken through the hazard course", player.current_health == start_health,
+		"health=%d" % player.current_health)
+	check("no hazard resets on the intended path", recoveries == 0, "resets=%d" % recoveries)
+
+	# Fireball gauntlet: stop short of the pistons, shoot the rune switch
+	var switch = lvl.get_node("Gauntlet/RuneSwitch")
+	await move_until_x(5480)
+	Input.action_release("move_right")
+	await frames(20)
+	await shot("play_06_gauntlet")
+	await aim_and_shoot(switch.global_position)
+	var hit := await wait_until(func(): return switch.is_active, 2.0)
+	check("fireball hits the rune switch", hit)
+	await frames(10)
+	await shot("play_07_switch_hit")
+	var gauntlet := lvl.get_node("Gauntlet").get_children().filter(func(n): return n.has_method("get_head_bottom"))
+	var all_raised := await wait_until(func():
+		return gauntlet.all(func(p): return p.progress <= 0.0 and not p.is_dangerous()), 3.0)
+	check("switch stops every gauntlet piston", all_raised)
+	var before_gauntlet: int = player.current_health
+	check("crossed the stopped gauntlet", await move_until_x(5800, true))
+	Input.action_release("sprint")
+	check("no damage in the stopped gauntlet", player.current_health == before_gauntlet)
+
+	# Slime arena: burn both slimes
+	await move_until_x(6060)
+	Input.action_release("move_right")
+	var slimes := lvl.get_node("Enemies").get_children()
+	var killed := await fight_slimes(slimes, 25.0)
+	check("both slimes defeated with fireballs", killed)
+	await shot("play_08_arena")
+
+	# Echo lab: record on the plate so the Echo holds the gate open
+	var plate = lvl.get_node("EchoLab/Plate")
+	var gate = lvl.get_node("EchoLab/Gate")
+	var recorder = player.get_node("EchoRecorder")
+	await move_until_x(plate.global_position.x - 2)
+	Input.action_release("move_right")
+	await frames(20)
+	check("standing on the plate opens the gate", plate.is_pressed)
+	await tap_action("echo")
+	check("recording started", recorder.is_recording)
+	await seconds(0.8)
+	await shot("play_09_recording")
+	await tap_action("echo")
+	await frames(40)
+	check("an Echo was created", recorder.echoes.size() == 1)
+	check("temporal debt lowers max mana", player.get_mana_cap() == player.MAX_MANA - recorder.mana_debt_per_echo,
+		"cap=%d" % player.get_mana_cap())
+	await shot("play_10_echo")
+	check("gate open behind the Echo", await move_until_x(gate.global_position.x + 60, true),
+		"x=%.0f gate open=%.2f" % [player.global_position.x, gate.open_amount])
+	Input.action_release("sprint")
+	check("plate still held by the Echo", plate.is_pressed)
+
+	# Exit door
+	var exit_x: float = lvl.get_node("LevelExit").global_position.x
+	await move_until_x(exit_x - 40)
+	var exit = lvl.get_node("LevelExit")
+	await wait_until(func(): return exit._triggered, 3.0)
+	check("exit door triggers", exit._triggered)
+	check("controls locked at exit", player.controls_locked)
+	Input.action_release("move_right")
+	await seconds(1.2)
+	await shot("play_05_exit")
+	monitor_camera = false
+	check("camera never showed outside the level", camera_worst <= 0.5,
+		"worst overshoot=%.2f %s" % [camera_worst, camera_worst_at])
+	var changed := await wait_until(func(): return get_tree().current_scene != lvl and get_tree().current_scene != null, 4.0)
+	check("exit leads into chapter 1", changed and get_tree().current_scene.scene_file_path.ends_with("chapter/chapter_1.tscn"),
+		str(get_tree().current_scene.scene_file_path if get_tree().current_scene else "none"))
+
+
+func scenario_nonlethal_spike() -> void:
+	print("SCENARIO non-lethal spike hit")
+	await load_level()
+	var spikes = lvl.get_node("Hazards/Spikes1")
+	var cp_a = lvl.get_node("Checkpoints/CheckpointA")
+	await place(2780)
+	await move_until_x(2900)
+	check("checkpoint A activated by walking through it", cp_a.is_active)
+	# Hold jump so a charge is in progress when the hit lands
+	Input.action_press("jump")
+	var hit := await wait_until(func(): return player.current_health < 10, 3.0)
+	check("spike hit applies damage", hit and player.current_health == 8, "health=%d" % player.current_health)
+	check("controls locked during recovery", player.controls_locked)
+	check("no death screen for a non-lethal hit", not lvl.get_node("DeathUI/DeathScreen").visible and not get_tree().paused)
+	await frames(8)
+	await shot("spike_01_fading")
+	var done := await wait_until(func(): return not player.hazard_recovery.is_active(), 2.0)
+	Input.action_release("move_right")
+	await frames(10)
+	var respawn: Vector2 = cp_a.get_respawn_position()
+	check("recovery finished and control restored", done and not player.controls_locked)
+	check("returned to checkpoint A", player.global_position.distance_to(respawn) < 6.0,
+		"pos=%s expected=%s" % [player.global_position.round(), respawn])
+	check("respawn is outside the spike hitbox", not spikes.get_hazard_rect().has_point(player.global_position))
+	check("health kept, not healed", player.current_health == 8)
+	check("exactly one reset for one contact", recoveries == 1, "resets=%d" % recoveries)
+	check("stale jump charge cleared", not player.charging_jump)
+	check("invulnerable right after recovery", player.is_invulnerable(),
+		"remaining=%.2f" % player.invulnerable_time)
+	check("HUD still visible", lvl.get_node("HUD").visible)
+	await shot("spike_02_back_at_checkpoint")
+	Input.action_release("jump")
+	await seconds(1.5)
+	check("no further damage while standing at the checkpoint", player.current_health == 8)
+	check("invulnerability wears off", not player.is_invulnerable())
+
+
+func scenario_lethal_spike_and_restart() -> void:
+	print("SCENARIO lethal spike hit and restart")
+	await load_level()
+	var death = lvl.get_node("DeathUI/DeathScreen")
+	await place(2780)
+	player.current_health = 2
+	player.update_health_ui()
+	await move_until_x(2900)
+	var died := await wait_until(func(): return player.is_dead, 3.0)
+	check("lethal spike hit kills instead of resetting", died and recoveries == 0, "resets=%d" % recoveries)
+	check("death screen shown, game paused", death.visible and get_tree().paused)
+	check("gameplay HUD hidden", not lvl.get_node("HUD").visible and not lvl.get_node("AmmoUI").visible)
+	Input.action_release("move_right")
+	await seconds(0.8)
+	await shot("death_01_fading")
+
+	# A jump press held from before the prompt appears must not skip the screen
+	var press := InputEventKey.new()
+	press.physical_keycode = KEY_SPACE
+	press.keycode = KEY_SPACE
+	press.pressed = true
+	Input.parse_input_event(press)
+	await seconds(2.8)
+	check("prompt active", death.can_restart)
+	await shot("death_02_full")
+	var echo := press.duplicate()
+	echo.echo = true
+	for i in 5:
+		Input.parse_input_event(echo)
+		await frames(3)
+	check("held key does not restart", get_tree().current_scene == lvl and get_tree().paused)
+	var release := press.duplicate()
+	release.pressed = false
+	Input.parse_input_event(release)
+	await frames(3)
+	Input.parse_input_event(press.duplicate())
+	var restarted := await wait_until(func(): return get_tree().current_scene != lvl and get_tree().current_scene != null, 2.0)
+	await frames(10)
+	Input.parse_input_event(release.duplicate())
+	check("fresh press restarts the level", restarted)
+	if restarted:
+		lvl = get_tree().current_scene
+		player = lvl.get_node("Player")
+		check("restart restores full health", player.current_health == player.MAX_HEALTH)
+		check("restart unpauses and revives", not get_tree().paused and not player.is_dead and not player.controls_locked)
+		check("restart restores HUD", lvl.get_node("HUD").visible and lvl.get_node("AmmoUI").visible)
+		check("restart uses level start, not a checkpoint", player.global_position.x < 300.0,
+			"x=%.0f" % player.global_position.x)
+		check("camera active after restart", get_tree().root.get_camera_2d() == player.get_node("Camera2D"))
+
+
+func scenario_piston() -> void:
+	print("SCENARIO piston hit")
+	await load_level()
+	var p1 = lvl.get_node("Hazards/Piston1")
+	await place(3930)
+	await wait_until(func(): return p1.phase == PHASE_WARNING, 6.0)
+	# Walk right under the head as it slams
+	Input.action_press("move_right")
+	await wait_until(func(): return player.global_position.x >= 3985, 2.0)
+	Input.action_release("move_right")
+	var start_x := player.global_position.x
+	var hit := await wait_until(func(): return player.current_health < 10, 2.0)
+	check("piston hit applies damage", hit and player.current_health == 8, "health=%d" % player.current_health)
+	check("piston does not use spike recovery", recoveries == 0 and not player.controls_locked)
+	await frames(20)
+	check("piston knocks the player clear", absf(player.global_position.x - p1.global_position.x) > 30.0,
+		"x=%.0f (piston %.0f, was %.0f)" % [player.global_position.x, p1.global_position.x, start_x])
+	await seconds(2.0)
+	check("one piston hit per contact", player.current_health == 8, "health=%d" % player.current_health)
+
+	# Hitbox and art always agree
+	var ok := true
+	var shape_rect: Rect2
+	for i in 240:
+		await get_tree().physics_frame
+		var cs: CollisionShape2D = p1._hitbox.get_child(0)
+		var r: RectangleShape2D = cs.shape
+		var bottom: float = p1._hitbox.global_position.y + r.size.y / 2.0
+		var drawn: float = p1.global_position.y + p1.get_head_bottom()
+		if absf(bottom - drawn) > 0.5:
+			ok = false
+			shape_rect = Rect2(bottom, drawn, 0, 0)
+	check("piston hitbox matches drawn head over a full cycle", ok, str(shape_rect))
+
+	# Lethal piston hit goes to the full death screen
+	await load_level()
+	p1 = lvl.get_node("Hazards/Piston1")
+	player.current_health = 2
+	await place(4000)
+	var died := await wait_until(func(): return player.is_dead, 5.0)
+	check("lethal piston hit shows the death screen", died and lvl.get_node("DeathUI/DeathScreen").visible)
+	get_tree().paused = false
+
+
+func scenario_unreached_checkpoint() -> void:
+	print("SCENARIO spike hit before its checkpoint was reached")
+	await load_level()
+	var cp_a = lvl.get_node("Checkpoints/CheckpointA")
+	await place(3050)
+	await frames(20)
+	Input.action_press("move_left")
+	var hit := await wait_until(func(): return player.current_health < 10, 3.0)
+	Input.action_release("move_left")
+	await wait_until(func(): return not player.hazard_recovery.is_active(), 2.0)
+	await frames(10)
+	check("hit registered", hit)
+	check("unreached checkpoint A stays unlit", not cp_a.is_active)
+	check("fell back to last safe ground, not checkpoint A",
+		player.global_position.x > 3010.0 and player.global_position.distance_to(cp_a.get_respawn_position()) > 100.0,
+		"pos=%s" % player.global_position.round())
+	var spikes = lvl.get_node("Hazards/Spikes1")
+	check("fallback spot is outside the spikes", not spikes.get_hazard_rect().grow(4).has_point(player.global_position))
+
+
+func scenario_retracting() -> void:
+	print("SCENARIO retracting spikes")
+	await load_level()
+	var r1 = lvl.get_node("Hazards/RetractingSpikes1")
+	var cp_c = lvl.get_node("Checkpoints/CheckpointC")
+	var mismatch := 0
+	for i in 300:
+		await get_tree().physics_frame
+		var should_hurt: bool = r1.extension >= r1.danger_extension
+		var collider: CollisionShape2D = r1._collider
+		if not should_hurt and not collider.disabled and i > 2:
+			mismatch += 1
+	check("retracted spikes have no active hitbox", mismatch == 0, "mismatched frames=%d" % mismatch)
+
+	await place(3380)
+	await move_until_x(3440)
+	Input.action_release("move_right")
+	check("checkpoint C lit", cp_c.is_active)
+	await wait_until(func():
+		var t := fposmod(r1._elapsed + r1.start_phase * r1.get_cycle_length(), r1.get_cycle_length())
+		return r1.is_lowered() and t < 0.2, 6.0)
+	await move_until_x(r1.global_position.x - 4)
+	Input.action_release("move_right")
+	check("standing on lowered spikes is safe", player.current_health == 10)
+	var hit := await wait_until(func(): return player.current_health < 10, 4.0)
+	await shot("retract_01_hit")
+	check("rising spikes hurt", hit)
+	await wait_until(func(): return not player.hazard_recovery.is_active(), 2.0)
+	await frames(10)
+	check("rising spikes return player to checkpoint C",
+		player.global_position.distance_to(cp_c.get_respawn_position()) < 6.0, "pos=%s" % player.global_position.round())
+
+
+func scenario_mechanics_required() -> void:
+	print("SCENARIO each obstacle needs the mechanic it teaches")
+	await load_level()
+	await place(1950)
+	await approach_and_jump(2030)
+	check("walking jump falls short of the sprint gap", player.global_position.y > 520.0,
+		"x=%.0f y=%.0f" % [player.global_position.x, player.global_position.y])
+	release_all()
+
+	await place(2440)
+	await move_until_x(2470)
+	await frames(20)
+	await tap_jump()
+	await frames(30)
+	check("a tapped jump cannot reach the plateau", player.global_position.y > 520.0,
+		"y=%.0f" % player.global_position.y)
+	release_all()
+
+	await place(3110)
+	await frames(10)
+	var before: int = player.current_health
+	await approach_and_jump(3160)
+	await frames(30)
+	check("walking jump cannot clear the wide spikes", player.current_health < before)
+
+
+func scenario_gauntlet() -> void:
+	print("SCENARIO fireball gauntlet")
+	await load_level()
+	var pistons := lvl.get_node("Gauntlet").get_children().filter(func(n): return n.has_method("get_head_bottom"))
+	var cycle: float = pistons[0].get_cycle_length()
+	var runs := 16
+	var survived := 0
+	var detail := ""
+	for i in runs:
+		var jump := i % 2 == 1
+		player.current_health = 10
+		player.invulnerable_time = 0.0
+		release_all()
+		await place(5470)
+		# Stagger the start across one full cycle
+		await seconds(cycle * i / runs + 0.02)
+		player.invulnerable_time = 0.0
+		var hp: int = player.current_health
+		Input.action_press("move_right")
+		Input.action_press("sprint")
+		var t := 0.0
+		var jumped := false
+		while player.global_position.x < 5720 and player.current_health == hp and t < 3.0:
+			if jump and not jumped and player.global_position.x > 5495:
+				Input.action_press("jump")
+				await frames(2)
+				Input.action_release("jump")
+				jumped = true
+			await get_tree().physics_frame
+			t += DT
+		release_all()
+		if player.current_health == hp and player.global_position.x >= 5720:
+			survived += 1
+			detail += " run%d(jump=%s)" % [i, jump]
+	check("running pistons cannot be crossed (%d attempts, walking/jumping)" % runs, survived == 0,
+		"got through:%s" % detail)
+
+	# Now shoot the switch and cross safely
+	player.current_health = 10
+	player.invulnerable_time = 0.0
+	await place(5470)
+	var switch = lvl.get_node("Gauntlet/RuneSwitch")
+	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * switch.global_position
+	check("rune switch is on screen from the shooting spot",
+		Rect2(Vector2.ZERO, get_tree().root.get_visible_rect().size).has_point(screen_pos), str(screen_pos))
+	check("rune switch is within fireball range",
+		player.global_position.distance_to(switch.global_position) < 380.0,
+		"%.0f px" % player.global_position.distance_to(switch.global_position))
+	await aim_and_shoot(switch.global_position)
+	check("switch activated by fireball", await wait_until(func(): return switch.is_active, 2.0))
+	await wait_until(func(): return pistons.all(func(p): return p.progress <= 0.0), 3.0)
+	check("pistons retract and stay stopped", pistons.all(func(p): return not p.running and not p.is_dangerous()))
+	var hp_before: int = player.current_health
+	await move_until_x(5800, true)
+	release_all()
+	check("gauntlet crossable once stopped", player.current_health == hp_before)
+	await seconds(3.0)
+	check("pistons stay stopped", pistons.all(func(p): return p.phase == PHASE_RAISED))
+
+
+func scenario_slimes() -> void:
+	print("SCENARIO slimes")
+	await load_level()
+	var slime = lvl.get_node("Enemies/Slime1")
+	await place(slime.global_position.x - 70)
+	var hp: int = player.current_health
+	var hurt := await wait_until(func(): return player.current_health < hp, 8.0)
+	check("slime contact hurts the player", hurt, "health=%d" % player.current_health)
+	check("slime knocks the player back", absf(player.velocity.x) > 50.0 or player.knockback_time > 0.0 or not player.is_on_floor(),
+		"vx=%.0f" % player.velocity.x)
+	check("slime hit does not use spike recovery", recoveries == 0)
+	await seconds(1.0)
+	var home: float = slime.home_x
+	await place(slime.global_position.x - 150)
+	var killed := await fight_slimes([slime], 15.0)
+	check("fireballs kill a slime", killed)
+	await seconds(1.0)
+	check("dead slime is removed", not is_instance_valid(slime))
+
+	# Leash: an idle slime stays near home
+	await load_level()
+	var other = lvl.get_node("Enemies/Slime2")
+	await place(1000)
+	var max_away := 0.0
+	for i in 480:
+		await get_tree().physics_frame
+		max_away = maxf(max_away, absf(other.global_position.x - other.home_x))
+	check("wandering slime stays in its arena", max_away < other.home_radius + 90.0, "max %.0f px from home" % max_away)
+
+
+func scenario_echo() -> void:
+	print("SCENARIO echo system")
+	await load_level()
+	var plate = lvl.get_node("EchoLab/Plate")
+	var gate = lvl.get_node("EchoLab/Gate")
+	var recorder = player.get_node("EchoRecorder")
+
+	# Alone: the gate shuts before you can reach it
+	await place(plate.global_position.x - 30)
+	await move_until_x(plate.global_position.x)
+	Input.action_release("move_right")
+	await seconds(1.2)
+	check("gate opens while the player stands on the plate", gate.open_amount > 0.95)
+	await move_until_x(gate.global_position.x + 60, true, 3.0)
+	release_all()
+	await seconds(0.3)
+	check("gate closes before the player can reach it alone", player.global_position.x < gate.global_position.x,
+		"x=%.0f gate=%.0f" % [player.global_position.x, gate.global_position.x])
+	check("gate never closed on the player", player.current_health == 10)
+
+	# With an Echo holding the plate
+	await place(plate.global_position.x - 60)
+	await tap_action("echo")
+	check("HUD shows recording", lvl.get_node("HUD/HUDRoot/StatusBar").echo_recording)
+	await move_until_x(plate.global_position.x)
+	Input.action_release("move_right")
+	await seconds(1.0)
+	await tap_action("echo")
+	await frames(5)
+	check("recording stops and spawns an Echo", not recorder.is_recording and recorder.echoes.size() == 1)
+	var echo = recorder.echoes[0]
+	check("Echo starts where the recording began", echo.global_position.x < plate.global_position.x - 40.0,
+		"echo x=%.0f" % echo.global_position.x)
+	await seconds(1.6)
+	check("Echo replays the walk onto the plate and holds it", plate.is_pressed and echo.is_finished(),
+		"echo x=%.0f" % echo.global_position.x)
+	await move_until_x(gate.global_position.x + 60, true, 4.0)
+	release_all()
+	check("player passes the gate thanks to the Echo", player.global_position.x > gate.global_position.x + 20)
+	check("mana cap reduced by one Echo", player.get_mana_cap() == 90, "cap=%d" % player.get_mana_cap())
+	check("HUD shows the debt", lvl.get_node("HUD/HUDRoot/StatusBar").mp_debt == 10)
+	await shot("echo_01_passed")
+
+	# More Echoes: capped at max_echoes; the oldest fades and its debt is returned
+	for i in 2:
+		await tap_action("echo")
+		await seconds(0.5)
+		await tap_action("echo")
+		await frames(5)
+	await seconds(0.7)
+	check("Echo count is capped", recorder.echoes.size() == recorder.max_echoes, "count=%d" % recorder.echoes.size())
+	check("debt tracks living Echoes", player.get_mana_cap() == 100 - recorder.max_echoes * 10, "cap=%d" % player.get_mana_cap())
+	check("the replaced Echo faded away", not is_instance_valid(echo))
+
+	# Recorded spells are recast by the Echo
+	recorder.clear_echoes()
+	await seconds(0.7)
+	check("clearing Echoes restores max mana", player.get_mana_cap() == 100)
+	await place(6200)
+	await tap_action("echo")
+	await frames(10)
+	await aim_and_shoot(player.global_position + Vector2(200, -12))
+	await frames(10)
+	await tap_action("echo")
+	var existing := get_tree().get_nodes_in_group("fireball")
+	var recast := await wait_until(func():
+		return get_tree().get_nodes_in_group("fireball").any(func(f): return not existing.has(f)), 1.5)
+	check("Echo recasts the recorded fireball", recast)
+
+	# A hazard reset while recording cancels the recording
+	recorder.clear_echoes()
+	await place(2780)
+	await tap_action("echo")
+	await move_until_x(2995)
+	await wait_until(func(): return player.hazard_recovery.is_active(), 3.0)
+	release_all()
+	await frames(5)
+	check("spike reset cancels an unfinished recording", not recorder.is_recording and recorder.echoes.is_empty())
+
+
+func scenario_legacy_level() -> void:
+	print("SCENARIO existing TestingPlayerMovement level still works")
+	release_all()
+	get_tree().paused = false
+	if is_instance_valid(get_tree().current_scene):
+		get_tree().current_scene.queue_free()
+	await get_tree().process_frame
+	lvl = load("res://scenes/TestingPlayerMovement.tscn").instantiate()
+	get_tree().root.add_child(lvl)
+	get_tree().current_scene = lvl
+	await seconds(1.0)
+	player = lvl.get_node("Player")
+	check("legacy level loads with player", player != null and not player.is_dead)
+	player.take_damage(3)
+	check("legacy damage without a source still works", player.current_health == 7)
+	player.invulnerable_time = 0.0
+	player.take_damage(99)
+	await seconds(0.5)
+	check("legacy death screen shows", lvl.get_node("DeathUI/DeathScreen").visible and get_tree().paused)
+	get_tree().paused = false
+
+
+func scenario_camera_aspects() -> void:
+	print("SCENARIO camera bounds at other window shapes")
+	var original := DisplayServer.window_get_size()
+	for size in [Vector2i(1024, 768), Vector2i(1680, 640), Vector2i(800, 800)]:
+		DisplayServer.window_set_size(size)
+		await load_level()
+		await frames(5)
+		var worst := 0.0
+		var where := ""
+		for spot in [Vector2(96, 530), Vector2(2600, 430), Vector2(8120, 530), Vector2(3000, 300)]:
+			player.teleport_to(spot)
+			await frames(20)
+			var cam = player.get_node("Camera2D")
+			var r := cam_rect()
+			var b: Rect2 = cam.bounds
+			var over := maxf(maxf(b.position.x - r.position.x, r.end.x - b.end.x),
+				maxf(b.position.y - r.position.y, r.end.y - b.end.y))
+			if over > worst:
+				worst = over
+				where = "spot=%s view=%s zoom=%s" % [spot, r, cam.zoom]
+		check("camera inside level at window %s" % size, worst <= 0.5, "%.2f %s" % [worst, where])
+	DisplayServer.window_set_size(original)

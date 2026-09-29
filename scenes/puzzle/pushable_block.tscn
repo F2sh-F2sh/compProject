@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/pushable_block.gd" id="1_srr10"]
+
+[node name="PushableBlock" type="CharacterBody2D" unique_id=835951581]
+script = ExtResource("1_srr10")

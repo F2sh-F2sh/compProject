@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/traps/arcane_bolt_statue.gd" id="1_sby4m"]
+
+[node name="ArcaneBoltStatue" type="Node2D" unique_id=1193967440]
+script = ExtResource("1_sby4m")

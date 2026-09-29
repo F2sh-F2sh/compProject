@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/wisp_perch.gd" id="1_3p4sm"]
+
+[node name="WispPerch" type="Node2D" unique_id=1169686103]
+script = ExtResource("1_3p4sm")
+extra_call_offsets = PackedVector2Array()

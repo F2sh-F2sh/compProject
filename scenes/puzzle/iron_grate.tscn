@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/iron_grate.gd" id="1_i0q35"]
+
+[node name="IronGrate" type="Node2D" unique_id=769375416]
+script = ExtResource("1_i0q35")

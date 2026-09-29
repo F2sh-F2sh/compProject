@@ -4,6 +4,8 @@ extends Area2D
 @export var damage_amount: int = 1
 @export var repeat_damage: bool = true
 @export_range(0.1, 10.0, 0.1) var damage_interval: float = 1.0
+## Push applied to whoever gets hit, away from this area. Zero means no push.
+@export var knockback := Vector2.ZERO
 
 var targets: Dictionary = {}
 
@@ -11,6 +13,15 @@ var targets: Dictionary = {}
 func _ready() -> void:
 	area_entered.connect(_on_area_entered)
 	area_exited.connect(_on_area_exited)
+
+
+func get_knockback_velocity(target: Node2D) -> Vector2:
+	if knockback == Vector2.ZERO:
+		return Vector2.ZERO
+	var side := signf(target.global_position.x - global_position.x)
+	if side == 0.0:
+		side = 1.0
+	return Vector2(side * knockback.x, knockback.y)
 
 
 func _physics_process(delta: float) -> void:
@@ -43,4 +54,4 @@ func _on_area_exited(area: Area2D) -> void:
 
 
 func _damage(hurtbox: Hurtbox) -> void:
-	hurtbox.receive_damage(damage_amount)
+	hurtbox.receive_damage(damage_amount, self)

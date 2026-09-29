@@ -15,7 +15,24 @@ const MAX_CRITICAL_CHANCE: float = 1.0 # Maximum 100%
 
 
 func _ready() -> void:
+	add_to_group("fireball")
 	start_position = global_position
+
+	# The fireball lights its surroundings (and casts shadows) as it flies
+	var light := PointLight2D.new()
+	light.texture = LightTextures.radial(256)
+	light.color = Color(1.0, 0.58, 0.25)
+	light.energy = 1.2
+	light.shadow_enabled = true
+	light.shadow_filter = Light2D.SHADOW_FILTER_PCF5
+	add_child(light)
+
+	# A fast-pulsing halo and a trail of embers left hanging in the air
+	add_child(GlowFX.halo(Color(1.0, 0.55, 0.25), 20.0, 0.6, 9.0, 0.18, 0.25))
+	var trail := GlowFX.embers(Color(1.0, 0.62, 0.3), 14, 8.0, 3.0, 0.45)
+	trail.preprocess = 0.0
+	trail.local_coords = false
+	add_child(trail)
 
 	if animated_sprite.sprite_frames.has_animation("FireBall"):
 		animated_sprite.play("FireBall")
