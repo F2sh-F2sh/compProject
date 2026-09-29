@@ -58,7 +58,9 @@ func _on_body_entered(body: Node) -> void:
 	GameState.set_flag(page_id)
 	Sfx.play("collect", global_position)
 	var root := get_tree().get_first_node_in_group("chapter_root")
-	if root:
+	if root and PageReader.enabled:
+		PageReader.open(root, title, text, root.pages_found(), root.total_pages)
+	elif root:
 		root.show_toast("%s\n\n%s" % [title, text], 7.0)
 	var tween := create_tween().set_parallel()
 	tween.tween_property(_glow, "position:y", -30.0, 0.5)

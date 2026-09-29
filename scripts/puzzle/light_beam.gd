@@ -12,6 +12,8 @@ extends Node2D
 @export var emitting := true
 @export var max_length := 1600.0
 @export var max_bounces := 8
+## False: mirrors stop the beam instead of turning it (a rune beam without Bounce).
+@export var reflects := true
 @export var color := Color(0.55, 0.8, 1.0)
 
 var path := PackedVector2Array()
@@ -109,7 +111,7 @@ func _trace() -> void:
 			return
 		var point: Vector2 = hit["position"]
 		var handler := MagicLight.handler_for(hit["collider"])
-		if handler and handler.has_method("reflect_beam"):
+		if handler and handler.has_method("reflect_beam") and reflects:
 			# Bounce from the mirror's centre so the path stays on the grid
 			var centre: Vector2 = handler.global_position
 			path.append(centre)

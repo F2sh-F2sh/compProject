@@ -3,7 +3,8 @@ class_name IronGrate
 extends Node2D
 
 ## An iron floor grating over a sunken cell. The player walks across it and
-## can see (and shoot) through it; creatures below cannot climb out.
+## can see through it; creatures below cannot climb out, and fireballs
+## splash on the bars, so nothing in the cell is ever hit by accident.
 ## The node marks the grate's top-left corner, level with the floor.
 
 @export var width := 256.0:
@@ -16,9 +17,11 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	var body := StaticBody2D.new()
-	# Solid like the floor, but not "world": fireballs fly through the bars
+	body.name = "Bars"
 	body.collision_layer = 3
 	body.collision_mask = 0
+	body.add_to_group("world")
+	body.add_to_group("iron_grate")
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
 	rect.size = Vector2(width, 6)

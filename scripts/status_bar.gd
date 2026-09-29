@@ -47,6 +47,8 @@ var echo_recording := false
 var echo_remaining := 1.0
 var echo_count := 0
 var echo_max := 2
+## Seconds of recording left (negative when unknown).
+var echo_seconds := -1.0
 
 const COLOR_DEBT := Color(0.24, 0.12, 0.34)
 const COLOR_DEBT_HATCH := Color(0.55, 0.32, 0.8, 0.8)
@@ -93,11 +95,12 @@ func set_mana_debt(debt: int) -> void:
 	mp_debt = debt
 
 
-func set_echo_state(recording: bool, remaining: float, count: int, max_count: int) -> void:
+func set_echo_state(recording: bool, remaining: float, count: int, max_count: int, seconds_left := -1.0) -> void:
 	echo_recording = recording
 	echo_remaining = remaining
 	echo_count = count
 	echo_max = max_count
+	echo_seconds = seconds_left
 
 
 func _process(delta: float) -> void:
@@ -123,7 +126,7 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var jitter := Vector2(sin(time * 90.0), cos(time * 70.0)) * 3.0 * shake
+	var jitter := Vector2(sin(time * 90.0), cos(time * 70.0)) * 3.0 * shake * (0.0 if Settings.reduce_motion else 1.0)
 	draw_set_transform(jitter.round())
 
 	var border := COLOR_BORDER.lerp(COLOR_HIT, hit_flash)
@@ -243,9 +246,15 @@ func _draw_echo_indicator(top: float, border: Color) -> void:
 		var pulse := 0.5 + 0.5 * sin(time * 8.0)
 		draw_circle(Vector2(10, top + h / 2.0), 3.5, COLOR_REC.lerp(Color.WHITE, 0.3 * pulse))
 		draw_string(body_font, Vector2(18, baseline), "REC", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, COLOR_REC)
-		var bar := Rect2(48, top + 6.0, 70, 4)
+		var bar := Rect2(46, top + 6.0, 48, 4)
 		draw_rect(bar, COLOR_TRACK)
-		draw_rect(Rect2(bar.position, Vector2(bar.size.x * echo_remaining, bar.size.y)), COLOR_REC)
+		# The last seconds flash white so running out is never a surprise
+		var urgent := echo_seconds >= 0.0 and echo_seconds < 3.0 and sin(time * 12.0) > 0.0
+		draw_rect(Rect2(bar.position, Vector2(bar.size.x * echo_remaining, bar.size.y)),
+			COLOR_REC.lerp(Color.WHITE, 0.6) if urgent else COLOR_REC)
+		if echo_seconds >= 0.0:
+			draw_string(body_font, Vector2(98, baseline), "%.1fs" % echo_seconds, HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
+				Color.WHITE if urgent else COLOR_REC)
 	else:
 		draw_string(body_font, Vector2(8, baseline), "ECHO", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, COLOR_ECHO)
 		for i in echo_max:

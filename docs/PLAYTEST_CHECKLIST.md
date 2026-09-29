@@ -4,11 +4,57 @@ For a human playtester. The automated suite already proves every room *can* be s
 that the rules hold (see "What the tests already cover" at the end); these checks are about
 what a script can't judge: clarity, feel, sound, fairness and comfort.
 
-Before starting: Pause → **Restart Chapter** (press twice) for a clean run, or delete
-`%APPDATA%\Godot\app_userdata\compProject\savegame.cfg`.
+Before starting: Title → **New Game** (press twice if there is progress), or delete
+`%APPDATA%\Godot\app_userdata\The Sealed Belfry\savegame.cfg`. (The game was renamed from
+"compProject"; an old save is copied across automatically the first time it starts.)
 
-Record for each room: time taken, deaths, resets used, hints used (1/2/3), and anything
-that confused you.
+The game now records time, deaths, resets and hints for you: each cleared room and each
+finished run adds a line to `%APPDATA%\Godot\app_userdata\The Sealed Belfry\playtest_log.csv`.
+Only note what confused you, and where.
+
+## Beta-tester fixes (please re-check these first)
+
+- [ ] The jump happens the instant you press it; nothing feels delayed. Jumping just after
+      running off a ledge still works.
+- [ ] Holding S / Down to crouch, then jumping, is a natural way to get the high jump. The
+      tutorial sign and the chapter's page ledges make it clear enough.
+- [ ] Footsteps are soft and occasional, with no echo trail; the iron grate sounds metallic.
+- [ ] In Rooms 2 and 7 you can't hurt the caged slime, even shooting straight down from
+      the grate.
+- [ ] Spikes are easy to see in the dark (red-lit tips, faint floor glow); rising spikes
+      flare before they rise; piston teeth glow.
+- [ ] No pillar or arcade floats on a wall: they all stand on the floor.
+- [ ] The tutorial's sprint gap now needs a sprint jump; falling in fades you back without
+      damage and never traps you.
+- [ ] Pistons can't be walked through and healed off: a crush fades you back. Healing takes
+      a moment of standing still and can't start right after a hit. Is 1.2 s right?
+
+## Structure and guidance
+
+- [ ] The act cards and the goal card at the top right make it clear what each room is
+      for, without giving the solution away.
+- [ ] Step pips and their "✓ ..." lines feel rewarding and show real progress.
+- [ ] Standing by a plate or lever lights its groove toward what it controls: helpful, not
+      noisy. The faint [W] cue near usable things helps you notice them.
+- [ ] When stuck, the hint stone calling out (after 90 s or two deaths) is welcome, not
+      pushy. Try Guidance: Light and Off too.
+- [ ] The Chapter Map in the pause menu is easy to read.
+- [ ] Tutorial lesson cards pace the tutorial well; dying restarts only the current lesson.
+
+## The Echo in Chapter 1
+
+- [ ] Room 8's spring levers make you think of an Echo without a hint; the ring on each
+      handle reads as "time left".
+- [ ] Room 9's plate and stairs are an easy, satisfying last use of the Echo.
+- [ ] The recording countdown (seconds and ticks), "hold E to let Echoes fade", and the
+      different Echo colours are clear.
+
+## Front door and ending
+
+- [ ] The title screen, intro text and menu set the mood; Continue goes where you expect.
+- [ ] Reading a found page on its parchment, and re-reading it in the Ledger, is pleasant.
+- [ ] Ringing the great bell feels like an ending (three tolls, the light returning, the
+      last line); the Chapter Complete card's numbers look right.
 
 ## Every room
 
@@ -50,7 +96,7 @@ that confused you.
       slime alert/hurt, piston warn/slam, vent warn/burst, bolt charge/fire, crumble,
       checkpoint, page collect, hint, room reset, UI.
 - [ ] No sound is painfully loud, harsh or repetitive (pistons and vents repeat often).
-- [ ] Master and Effects sliders in the pause menu change volume immediately and are
+- [ ] The volume sliders (Pause or Title → Settings & Controls) change volume immediately and are
       remembered after restarting the game.
 
 ## Look, feel and music (presentation pass)
@@ -109,3 +155,77 @@ that confused you.
 - Reset: idempotent; clears Echoes and restores the mana cap; keeps saved solutions.
 - Hazards: vent hits are paced; unshielded bolts hurt; pistons hurt and push the player
   out from under the head.
+
+---
+
+# Chapter 2 (The Sealed Observatory) and the rune cubes
+
+Start it from the title screen ("Chapter 2") or by opening `scenes/chapter/chapter_2.tscn`
+and pressing F6. Solutions are in `docs/CHAPTER2_SOLUTIONS.md` (read them only after trying).
+Nothing in this chapter has been played by a human yet; everything below is unchecked.
+
+## The rune screens
+- [ ] The first cube (Room 1): is it clear that W opens it, and that the red "(broken)"
+      quadrant needs a fragment? Is the tablet's link to the broken quadrant obvious?
+- [ ] The inscribe screen is readable at the default window size: quadrant glyphs, fragment
+      buttons, the description and the cost line. It works with mouse, keyboard and pad.
+- [ ] Refusals make sense (try Push + Up in Room 3, or a Strong rune on 10 mana in Room 7).
+- [ ] Tab overview: easy to find, and "Deactivate All Runes" does what you expect.
+- [ ] The rune journal (pause menu) is worth opening: fragments, notes, runes cast.
+
+## Carrying (F)
+- [ ] Picking up and setting down feels predictable; the ghost shows where the cube will land.
+- [ ] Red ghosts say why a spot is refused, and the reasons are fair.
+- [ ] Carrying a cube out of its room (it drifts back) is clear rather than confusing.
+
+## Wind
+- [ ] You can see where a wind blows (streaks and the dashed region) in every room.
+- [ ] A crate sliding, a stone straining (shiver + grinding) and a stone moving under two
+      winds all read clearly. Two winds adding up is understandable without the sign.
+- [ ] Standing in a wind (drift, about a third of walking speed) is noticeable but not annoying;
+      walking back against it is not frustrating.
+- [ ] Room 3's updraft: jumping into it is discoverable; walking off the edge (spikes) feels fair.
+
+## Mana
+- [ ] The first player-powered cube (Room 4) makes it clear it uses your mana. The HUD strip
+      under the mana bar (upkeep per second, pips per running cube) is noticed.
+- [ ] Running dry (all your runes go out at once) is understandable, not a surprise.
+- [ ] Room 7: the warding (mana held to 10) and the pedestal idea click. Time to solve it: ____
+
+## Other magic
+- [ ] Room 4: the stone breaking the cracked wall is satisfying (dust, shake, sound); a stone that
+      stops short can be blown back and retried.
+- [ ] Room 5: the ice bridge's ten seconds are enough, and the last-two-seconds flicker warns you.
+- [ ] Room 6: the beam and the watcher freezing on plate A read well; the watcher isn't unfair
+      while you use the lectern.
+- [ ] Room 8: the portal doorway (off the cube's upper-right corner) is findable; coming out
+      above the balcony feels good. The ending sequence works.
+- [ ] Optional: burning the brambles with the fire cube is discoverable.
+
+## Sound (checked only numerically so far)
+- [ ] New sounds: rune on / off / refused, placing a cube, the pedestal socket, a fragment learned,
+      mana running dry, gusts, the shared wind loop (it should sit under everything), the wall
+      breaking, portal open / warp, ice forming / cracking, the beam, fire blast, brambles.
+
+## What the tests already cover for Chapter 2 (automated)
+
+`godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- rune`
+
+- Every supported recipe (197 combinations) is valid, described and costed; unsupported ones are
+  refused with a reason (missing quadrant, wrong form, direction, modifier).
+- Each room solved with simulated input and real movement, and one continuous run through all
+  eight rooms to the Chapter Complete card.
+- Wind: one wind can't move the stone (it strains); two add up to exactly 2400 (not normalised);
+  editing one cube never changes another.
+- Carrying: fixed and running cubes can't be picked up; walls refuse placement with a reason and
+  keep the cube in hand; the ghost snaps into pedestals; Reset Room returns cubes.
+- Mana: upkeep drains ~3/s; dungeon cubes cost nothing; refilling is refused while runes draw;
+  running dry shuts player-powered runes (not dungeon ones) with no restart; regeneration only
+  while none of hers runs; too little mana refuses a start and charges nothing; Reset Room
+  restores the room's starting mana.
+- Effects: gust shoves once, Delay waits 2 s, Repeat charges each shot; Split fires three;
+  a portal into rock is refused for free; Freeze holds a slime (heavy while frozen) and thaws;
+  an updraft lifts a crate but not a stone; Normal beams stop at mirrors, Bounce reflects;
+  a Persist bridge outlasts ten seconds; rune fire and Explode blasts burn brambles;
+  Glow and Beam freeze a watcher; the cracked wall needs momentum 800 (a fast crate can't).
+- Layout: every room has a goal, steps and a hint stone; no wall tile floats.

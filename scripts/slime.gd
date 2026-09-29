@@ -39,6 +39,10 @@ enum State { PATROL, ALERTED, INVESTIGATE, WINDUP, LUNGE, DEFEATED }
 @export_group("Puzzle")
 ## Puzzle slimes come back when their room is reset instead of being removed.
 @export var respawn_on_room_reset := false
+## A slime the puzzle needs alive: hits only make its ward shimmer.
+@export var warded := false
+## Health the slime leaves behind when defeated.
+@export var drops_health := 1
 
 var health: int
 var player
@@ -301,6 +305,9 @@ func _play_land_squash():
 func take_damage(amount, critical := false):
 	if is_dead:
 		return
+	if warded:
+		_shimmer_ward()
+		return
 	# Become aggressive when hit, even while listening at a bell
 	is_aggro = true
 	if state == State.INVESTIGATE or state == State.ALERTED:
@@ -319,15 +326,44 @@ func take_damage(amount, critical := false):
 
 		damage_number.setup(amount, critical)
 
-	# Flash red
-	modulate = Color.RED
+	# A white flash and a shove away from Echidna, so every hit is felt
+	modulate = Color(2.6, 2.4, 2.4)
+	var hitter := get_tree().get_first_node_in_group("player") as Node2D
+	if hitter and health > 0:
+		var away := signf(global_position.x - hitter.global_position.x)
+		velocity = Vector2((away if away != 0.0 else 1.0) * (190.0 if critical else 130.0), -90.0)
+	_play_hop_squash()
 
-	await get_tree().create_timer(0.15).timeout
+	await get_tree().create_timer(0.12).timeout
 
 	modulate = Color.WHITE
 
 	if health <= 0:
 		die()
+
+
+func _shimmer_ward() -> void:
+	Sfx.play("ward_clink", global_position)
+	var ring := CPUParticles2D.new()
+	ring.one_shot = true
+	ring.explosiveness = 1.0
+	ring.amount = 14
+	ring.lifetime = 0.4
+	ring.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE_SURFACE
+	ring.emission_sphere_radius = 14.0
+	ring.spread = 180.0
+	ring.gravity = Vector2.ZERO
+	ring.initial_velocity_min = 10.0
+	ring.initial_velocity_max = 25.0
+	ring.color = Color(0.6, 0.85, 1.0, 0.9)
+	ring.material = MagicLight.unshaded()
+	ring.position = Vector2(0, -8)
+	add_child(ring)
+	ring.emitting = true
+	ring.finished.connect(ring.queue_free)
+	var tween := create_tween()
+	tween.tween_property(sprite, "modulate", Color(0.7, 0.9, 1.6), 0.06)
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.2)
 
 
 func die():
@@ -342,6 +378,10 @@ func die():
 	remove_from_group("enemy")
 	Sfx.play("slime_die", global_position)
 	defeated.emit()
+	# A defeated slime leaves a little health behind (puzzle slimes don't:
+	# a room reset brings them back)
+	if not respawn_on_room_reset and drops_health > 0:
+		Pickup.drop(get_parent(), global_position + Vector2(0, -10), drops_health)
 
 	var puff := CPUParticles2D.new()
 	puff.one_shot = true

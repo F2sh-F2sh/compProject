@@ -31,6 +31,7 @@ func run_suite(filter: String) -> void:
 		"post": scenario_post,
 		"glow": scenario_glow,
 		"audio": scenario_audio,
+		"hazards": scenario_hazards,
 		"look": scenario_look,
 	}
 	for key in scenarios:
@@ -53,7 +54,7 @@ func check(label: String, ok: bool, detail := "") -> void:
 
 
 func _release_all() -> void:
-	for a in ["move_left", "move_right", "jump", "sprint", "shoot", "interact"]:
+	for a in ["move_left", "move_right", "jump", "crouch", "sprint", "shoot", "interact"]:
 		Input.action_release(a)
 
 
@@ -286,7 +287,7 @@ func scenario_charge() -> void:
 	var light: PointLight2D = player.get_node("WispLight")
 	var sparks: CPUParticles2D = player.get_node("WispSparks")
 	check("no wisps while idle", not wisps.visible)
-	Input.action_press("jump")
+	Input.action_press("crouch")
 	await seconds(0.6)
 	check("no wisps before the charge pose", not wisps.visible)
 	await seconds(0.8)
@@ -298,9 +299,12 @@ func scenario_charge() -> void:
 	check("wisps brighten as the charge builds", full > early + 0.3 and full >= 0.99, "%.2f -> %.2f" % [early, full])
 	check("wisps light their surroundings at full charge", light.energy > 0.8, "%.2f" % light.energy)
 	check("sparks crackle at full charge", sparks.emitting)
+	Input.action_press("jump")
+	await frames(2)
 	Input.action_release("jump")
+	Input.action_release("crouch")
 	await frames(3)
-	check("wisps vanish on release", not wisps.visible and not sparks.emitting)
+	check("wisps vanish as she leaps", not wisps.visible and not sparks.emitting)
 	await wait_until(func(): return player.is_on_floor(), 2.0)
 
 
@@ -603,6 +607,57 @@ func scenario_audio() -> void:
 	check("pause menu has music and ambience volumes", labels.has("Music volume") and labels.has("Ambience volume"))
 
 
+# ================================================================ hazards and walls
+
+func scenario_hazards() -> void:
+	print("SCENARIO readable hazards and wall tiles")
+	# Floor-standing wall tiles (pillars, arcades, doors) rest on the ground
+	for path in [TUTORIAL, CHAPTER]:
+		await load_level(path)
+		var bad := WallTileAudit.find_misplaced(lvl.get_node("BackDecor"))
+		check("no floating pillars or arcades in %s" % path.get_file(), bad.is_empty(), str(bad))
+	# Spike tips glow through the dark, even well outside Echidna's lantern
+	await load_level(TUTORIAL)
+	var spikes = lvl.get_node("Hazards/Spikes2")
+	check("spikes carry a danger glint", spikes._glint != null and spikes._glint.material is ShaderMaterial)
+	# (to its right: 250 px to its left stands on the first spike)
+	await place(Vector2(spikes.global_position.x + 250.0, FLOOR))
+	await seconds(1.0)
+	check("measuring from safe ground", not player.hazard_recovery.is_active() and player.current_health == 10)
+	var lit: float = await _tip_luminance(spikes)
+	await shot("hazard_spikes")
+	spikes._glint.visible = false
+	spikes._floor_glow.visible = false
+	await frames(3)
+	var bare: float = await _tip_luminance(spikes)
+	spikes._glint.visible = true
+	spikes._floor_glow.visible = true
+	check("spike tips stand out 250 px from the lantern", lit >= 0.3 and lit > bare * 1.8,
+		"tips %.2f with glint, %.2f without" % [lit, bare])
+	# Retracting spikes flare while they rattle, before they rise
+	var rising = lvl.get_node("Hazards/RetractingSpikes1")
+	var flare := await wait_until(func():
+		return rising._glint.material == SpikeHazard.glint_material(SpikeHazard.GLINT_WARNING), 6.0)
+	check("rising spikes flare their glint during the warning", flare and rising.extension < 0.5)
+
+
+## Brightest pixel luminance around a spike strip's tips in the rendered frame.
+func _tip_luminance(spikes: Node2D) -> float:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var image := get_tree().root.get_texture().get_image()
+	var xform: Transform2D = lvl.get_viewport().get_canvas_transform()
+	var w: float = spikes.get_width()
+	# Every pixel of the band where the tips are (the glint is a thin outline)
+	var a := Vector2i((xform * (spikes.global_position + Vector2(-w / 2.0, -33.0))).round())
+	var b := Vector2i((xform * (spikes.global_position + Vector2(w / 2.0, -18.0))).round())
+	var best := 0.0
+	for y in range(maxi(a.y, 0), mini(b.y, image.get_height())):
+		for x in range(maxi(a.x, 0), mini(b.x, image.get_width())):
+			best = maxf(best, image.get_pixel(x, y).get_luminance())
+	return best
+
+
 # ================================================================ screenshots
 
 func scenario_look() -> void:
@@ -615,9 +670,9 @@ func scenario_look() -> void:
 		await seconds(1.0)
 		await shot(spot[0])
 	await place(Vector2(700, FLOOR))
-	Input.action_press("jump")
+	Input.action_press("crouch")
 	await seconds(2.6)
 	await shot("pres_charge")
-	Input.action_release("jump")
+	Input.action_release("crouch")
 	await seconds(1.0)
 	check("screenshots taken", true)

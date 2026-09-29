@@ -43,6 +43,8 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	add_to_group("resettable")
+	# Something to shoot: a controller's aim leans toward it
+	add_to_group("aim_target")
 	var catcher := Area2D.new()
 	catcher.collision_layer = 0
 	catcher.collision_mask = 1
@@ -55,7 +57,8 @@ func _ready() -> void:
 	add_child(catcher)
 	catcher.area_entered.connect(func(a):
 		if a.is_in_group("fireball"):
-			a.queue_free()
+			if a.has_method("explode"): a.explode()
+			else: a.queue_free()
 			ring())
 	if pull_offset != Vector2.ZERO:
 		_interact = Interactable.new()

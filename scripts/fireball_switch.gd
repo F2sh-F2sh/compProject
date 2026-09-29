@@ -66,6 +66,8 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	add_to_group("resettable")
+	# Something to shoot: a controller's aim leans toward it
+	add_to_group("aim_target")
 	area_entered.connect(_on_area_entered)
 	if persist_id != "" and GameState.has_flag(persist_id):
 		_set_active(true, true)
@@ -113,7 +115,8 @@ func _set_active(on: bool, silent := false) -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("fireball") and not is_active and not disabled:
-		area.queue_free()
+		if area.has_method("explode"): area.explode()
+		else: area.queue_free()
 		activate()
 
 

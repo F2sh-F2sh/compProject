@@ -4,6 +4,9 @@ extends CharacterBody2D
 signal fireball_cast(spawn_position: Vector2, direction: Vector2)
 ## Emitted when a foot plants during a walk or sprint (sound and dust follow).
 signal footstep(at: Vector2)
+signal died
+## Emitted when she uses something (a lever, a rope), so an Echo can repeat it.
+signal interaction_performed(target: Node)
 
 @export var fireball_scene: PackedScene
 @export var hurtbox: Hurtbox
@@ -19,6 +22,8 @@ var current_mana := MAX_MANA
 const RELOAD_TIME := 2.0
 var is_reloading := false
 var reload_progress := 0.0
+## Set by the RuneManager while runes she powers are drawing upkeep.
+var reload_locked := false
 
 const SPEED = 115.0
 const SPRINT_SPEED = 220.0
@@ -30,6 +35,8 @@ const MAX_JUMP_VELOCITY = -500.0
 const CHARGE_START_TIME = 1.0
 const MAX_CHARGE_TIME = 2.5
 const JUMP_BUFFER_DURATION = 0.15
+## A jump pressed just after running off a ledge still counts.
+const COYOTE_DURATION = 0.1
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var wind_layers: Array[Node] = [$ChargeWindBack, $ChargeWindFront]
@@ -42,6 +49,9 @@ const JUMP_BUFFER_DURATION = 0.15
 @onready var wisp_sparks: CPUParticles2D = get_node_or_null("WispSparks")
 @onready var walk_dust: CPUParticles2D = get_node_or_null("WalkDust")
 @onready var contact_shadow: Sprite2D = get_node_or_null("ContactShadow")
+var heal_channel: HealChannel
+var _aim_marker: Node2D
+var _crouch_toggled := false
 
 const HIT_INVULNERABILITY := 0.8
 ## How long a knockback overrides movement input.
@@ -82,6 +92,7 @@ var charging_jump := false
 var charge_time := 0.0
 var jumped := false
 var jump_buffer_time := 0.0
+var coyote_time := 0.0
 var was_on_floor := true
 var sprite_base_scale := Vector2.ONE
 var sprite_base_pos := Vector2.ZERO
@@ -93,6 +104,10 @@ var step_commit_time := 0.0
 var sprite_offset := DEFAULT_SPRITE_OFFSET
 # Clip frames where a foot plants, from the sprite pipeline
 var footstep_frames := {}
+const STEP_SOUND_MIN_SPEED := 40.0
+var _plants_heard := 0
+var _last_step_variant := 0
+var _moving_time := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -103,6 +118,18 @@ func _ready() -> void:
 	footstep_frames = frames.get_meta(&"footsteps", {})
 	animated_sprite.offset = sprite_offset
 	animated_sprite.frame_changed.connect(_on_sprite_frame_changed)
+	heal_channel = HealChannel.new()
+	add_child(heal_channel)
+	Crosshair.aim(true)
+	# With a controller, a small chevron shows where a fireball would go
+	_aim_marker = Node2D.new()
+	_aim_marker.material = MagicLight.unshaded()
+	_aim_marker.z_index = 5
+	_aim_marker.visible = false
+	_aim_marker.draw.connect(func():
+		var c := Color(1.0, 0.7, 0.4, 0.85)
+		_aim_marker.draw_polyline(PackedVector2Array([Vector2(-4, -5), Vector2(3, 0), Vector2(-4, 5)]), c, 1.5))
+	add_child(_aim_marker)
 
 	if hurtbox:
 		hurtbox.damage_received.connect(take_damage)
@@ -111,42 +138,84 @@ func _ready() -> void:
 	update_mana_ui.call_deferred()
 
 func shoot_fireball() -> void:
-	if current_mana < FIREBALL_COST:
-		return
-	if is_reloading:
-		return
 	if fireball_scene == null:
 		return
-
-	var mouse_pos = get_global_mouse_position()
+	if current_mana < FIREBALL_COST or is_reloading:
+		# A spell with nothing behind it: a sputter, not silence
+		Sfx.play("fizzle", global_position, -4.0)
+		ImpactFX.burst(get_parent(), global_position + Vector2(0, -14), Color(0.55, 0.5, 0.7), false, 4)
+		return
 
 	# Spawn from the player's torso
 	var origin_point = global_position + Vector2(0, -12)
+	var dir := aim_direction(origin_point)
 
-	# Direction from player to mouse
-	var dir = (mouse_pos - origin_point).normalized()
+	# With the mouse it spawns at the cursor if that is close, otherwise up to
+	# 50 px toward it; with a controller, just in front of her
+	var spawn_distance := 24.0
+	if not InputLabels.use_pad:
+		spawn_distance = minf(origin_point.distance_to(get_global_mouse_position()), 50.0)
 
-	# How far away the mouse is
-	var mouse_distance = origin_point.distance_to(mouse_pos)
-
-	# Maximum distance the fireball can spawn from the player
-	var max_spawn_distance = 50
-
-	# If mouse is closer than the maximum distance,
-	# spawn directly at the mouse.
-	# Otherwise, spawn at the maximum distance toward the mouse.
-	var spawn_distance = min(mouse_distance, max_spawn_distance)
-
-	var spawn_position: Vector2 = origin_point + dir * spawn_distance
+	var spawn_position: Vector2 = _clear_spawn_point(origin_point, origin_point + dir * spawn_distance)
 	spawn_fireball(spawn_position, dir)
 	fireball_cast.emit(spawn_position, dir)
 	Sfx.play("spell_cast", origin_point, -3.0, 0.08)
+	# She turns to face the shot, with a small recoil and a flash at her hand
+	if absf(dir.x) > 0.1:
+		animated_sprite.flip_h = dir.x < 0.0
+	squash(Vector2(1.08, 0.94))
+	ImpactFX.burst(get_parent(), spawn_position, Color(1.0, 0.6, 0.3), false, 5)
 
 	current_mana -= FIREBALL_COST
 	update_mana_ui()
 	flash_spell("fireball")
 	if current_mana <= 0:
 		start_reload()
+
+
+## Which way a fireball from `origin` would fly: toward the mouse, or with a
+## controller along the right stick (straight ahead if it's at rest), gently
+## pulled toward a creature or target close to that line.
+func aim_direction(origin: Vector2) -> Vector2:
+	if not InputLabels.use_pad:
+		return (get_global_mouse_position() - origin).normalized()
+	var stick := Vector2.ZERO
+	var pads := Input.get_connected_joypads()
+	if not pads.is_empty():
+		stick = Vector2(Input.get_joy_axis(pads[0], JOY_AXIS_RIGHT_X), Input.get_joy_axis(pads[0], JOY_AXIS_RIGHT_Y))
+	var dir := stick.normalized() if stick.length() > 0.3 else Vector2(-1.0 if animated_sprite.flip_h else 1.0, 0.0)
+	return _aim_assist(origin, dir)
+
+
+const AIM_ASSIST_ANGLE := 0.35
+const AIM_ASSIST_RANGE := 380.0
+
+
+func _aim_assist(origin: Vector2, dir: Vector2) -> Vector2:
+	var best := dir
+	var best_angle := AIM_ASSIST_ANGLE
+	for target in get_tree().get_nodes_in_group("enemy") + get_tree().get_nodes_in_group("aim_target"):
+		if not target is Node2D or not target.is_visible_in_tree():
+			continue
+		var point: Vector2 = target.global_position + (Vector2(0, -8) if target.is_in_group("enemy") else Vector2.ZERO)
+		var to := point - origin
+		if to.length() > AIM_ASSIST_RANGE or to.length() < 1.0:
+			continue
+		var angle := absf(dir.angle_to(to))
+		if angle < best_angle and MagicLight.line_is_clear(get_world_2d(), origin, point, [get_rid()]):
+			best_angle = angle
+			best = to.normalized()
+	return best
+
+
+# A fireball never starts on the far side of a floor, grate or wall (aiming
+# down from a grate must not drop it into the cell below)
+func _clear_spawn_point(from: Vector2, to: Vector2) -> Vector2:
+	var query := PhysicsRayQueryParameters2D.create(from, to, 2, [get_rid()])
+	var hit := get_world_2d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return to
+	return hit["position"] - (to - from).normalized() * 6.0
 
 
 ## Launches a fireball without any mana cost; also used by Echo replays.
@@ -156,6 +225,10 @@ func spawn_fireball(spawn_position: Vector2, direction: Vector2) -> Node2D:
 	fireball.direction = direction
 	get_tree().current_scene.add_child(fireball)
 	return fireball
+
+
+func record_interaction(target: Node) -> void:
+	interaction_performed.emit(target)
 
 
 func get_mana_cap() -> int:
@@ -173,11 +246,17 @@ func take_damage(amount: int = 1, source: Node = null) -> void:
 	if is_dead or controls_locked or is_invulnerable():
 		return
 
+	# The damage assist softens every hit (never below 1)
+	if Settings.assist_damage < 1.0:
+		amount = maxi(ceili(amount * Settings.assist_damage), 1)
 	current_health = clampi(current_health - amount, 0, MAX_HEALTH)
 	update_health_ui()
+	if heal_channel:
+		heal_channel.on_hurt()
 
 	# Lethal damage always wins over any hazard reset or knockback
 	if current_health <= 0:
+		Sfx.play("player_hurt", global_position)
 		die()
 		return
 
@@ -245,6 +324,7 @@ func _clear_motion_state() -> void:
 	charging_jump = false
 	charge_time = 0.0
 	jump_buffer_time = 0.0
+	coyote_time = 0.0
 	jumped = false
 	knockback_time = 0.0
 	is_sprinting = false
@@ -291,6 +371,7 @@ func die() -> void:
 		return
 
 	is_dead = true
+	died.emit()
 	velocity = Vector2.ZERO
 	charging_jump = false
 	for wind in wind_layers:
@@ -304,6 +385,8 @@ func die() -> void:
 	if hazard_recovery:
 		hazard_recovery.abort()
 	set_physics_process(false)
+	Sfx.play("player_death", global_position)
+	_dissolve()
 
 	var death_screen = get_tree().get_first_node_in_group("death_screen")
 	if death_screen == null:
@@ -311,6 +394,34 @@ func die() -> void:
 
 	if death_screen:
 		death_screen.show_death_screen()
+
+
+# She sinks and comes apart into violet motes (it plays on while the death
+# screen holds the rest of the world still)
+func _dissolve() -> void:
+	var motes := CPUParticles2D.new()
+	motes.process_mode = Node.PROCESS_MODE_ALWAYS
+	motes.one_shot = true
+	motes.explosiveness = 0.35
+	motes.amount = 28
+	motes.lifetime = 1.3
+	motes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	motes.emission_rect_extents = Vector2(9, 16)
+	motes.position = Vector2(0, -18)
+	motes.direction = Vector2.UP
+	motes.spread = 35.0
+	motes.gravity = Vector2(0, -40)
+	motes.initial_velocity_min = 10.0
+	motes.initial_velocity_max = 35.0
+	motes.scale_amount_min = 1.0
+	motes.scale_amount_max = 2.5
+	motes.color = Color(0.75, 0.55, 1.0, 0.9)
+	motes.material = MagicLight.unshaded()
+	add_child(motes)
+	motes.emitting = true
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel()
+	tween.tween_property(animated_sprite, "self_modulate:a", 0.0, 1.1).set_delay(0.15)
+	tween.tween_property(animated_sprite, "scale", sprite_base_scale * Vector2(1.15, 0.55), 1.1).set_delay(0.15)
 
 
 func _physics_process(delta: float) -> void:
@@ -321,6 +432,11 @@ func _physics_process(delta: float) -> void:
 	if controls_locked:
 		_locked_physics(delta)
 		return
+
+	if Settings.assist_infinite_mana and current_mana < get_mana_cap() and not is_reloading:
+		current_mana = get_mana_cap()
+		update_mana_ui()
+	Crosshair.aim(current_mana >= FIREBALL_COST and not is_reloading)
 
 	if Input.is_action_just_pressed("heal"):
 		heal_player()
@@ -334,6 +450,7 @@ func _physics_process(delta: float) -> void:
 			current_mana = get_mana_cap()
 			is_reloading = false
 			reload_progress = 0.0
+			Sfx.play("reload_done", global_position, -5.0)
 
 			var tween = create_tween()
 
@@ -370,8 +487,7 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("jump"):
 		jump_buffer_time = JUMP_BUFFER_DURATION
-
-	if jump_buffer_time > 0:
+	elif jump_buffer_time > 0:
 		jump_buffer_time -= delta
 
 
@@ -382,60 +498,20 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 		air_time += delta
+		coyote_time = maxf(coyote_time - delta, 0.0)
 	else:
 		air_time = 0.0
 		jumped = false
+		coyote_time = COYOTE_DURATION
 
 
 	# -------------------------
-	# START CHARGING
+	# JUMP: instant on press; holding crouch first charges a higher one
 	# -------------------------
 
-	if jump_buffer_time > 0 and is_on_floor() and not charging_jump:
-		charging_jump = true
-		charge_time = 0.0
-		jump_buffer_time = 0.0
-
-
-	# Walking off a ledge mid-charge would otherwise leave the charge stuck on
-	if charging_jump and not is_on_floor():
-		charging_jump = false
-
-	if charging_jump:
-		charge_time += delta
-
-
-	# -------------------------
-	# RELEASE JUMP
-	# -------------------------
-
-	if Input.is_action_just_released("jump") and charging_jump and is_on_floor():
-
-		charging_jump = false
-
-		var jump_velocity = BASE_JUMP_VELOCITY
-
-		if charge_time > CHARGE_START_TIME:
-
-			var charge_percent = min(
-				(charge_time - CHARGE_START_TIME)
-				/ (MAX_CHARGE_TIME - CHARGE_START_TIME),
-				1.0
-			)
-
-			jump_velocity = lerp(
-				BASE_JUMP_VELOCITY,
-				MAX_JUMP_VELOCITY,
-				charge_percent
-			)
-
-		velocity.y = jump_velocity
-		jumped = true
-		play_anim(&"jump", true)
-		squash(Vector2(0.85, 1.18))
-		Sfx.play("jump", global_position, -6.0, 0.06)
-		for wind in wind_layers:
-			wind.release()
+	_update_charge(delta)
+	if jump_buffer_time > 0.0 and not jumped and (is_on_floor() or coyote_time > 0.0):
+		_launch_jump()
 
 
 	# -------------------------
@@ -444,13 +520,14 @@ func _physics_process(delta: float) -> void:
 
 	var direction := Input.get_axis("move_left", "move_right")
 
-	# Sprint while holding SHIFT
+	# Sprint while holding SHIFT (or the reverse, with the always-sprint assist)
 	var current_speed = SPEED
+	var sprint_held := Input.is_action_pressed("sprint") != Settings.assist_auto_sprint
 
-	if Input.is_action_pressed("sprint"):
+	if sprint_held:
 		current_speed = SPRINT_SPEED
 
-	is_sprinting = Input.is_action_pressed("sprint") and direction != 0.0
+	is_sprinting = sprint_held and direction != 0.0 and not charging_jump
 
 
 	# Flip sprite
@@ -468,7 +545,7 @@ func _physics_process(delta: float) -> void:
 		knockback_time -= delta
 		velocity.x = move_toward(velocity.x, 0, FRICTION * 0.4 * delta)
 
-	elif charging_jump and charge_time >= CHARGE_START_TIME:
+	elif charging_jump:
 
 		velocity.x = move_toward(
 			velocity.x,
@@ -500,6 +577,52 @@ func _physics_process(delta: float) -> void:
 	update_effects(delta)
 
 
+# Crouching (holding crouch on the ground) gathers the charged jump; letting
+# go of crouch or leaving the ground drops it.
+func _update_charge(delta: float) -> void:
+	var crouch_held := Input.is_action_pressed("crouch")
+	# With the toggle assist, one press crouches and the next (or a jump) stands
+	if Settings.assist_toggle_crouch:
+		if Input.is_action_just_pressed("crouch"):
+			_crouch_toggled = not _crouch_toggled
+		if not is_on_floor():
+			_crouch_toggled = false
+		crouch_held = _crouch_toggled
+	if charging_jump:
+		if not is_on_floor() or not crouch_held:
+			_cancel_charge()
+			return
+		charge_time += delta
+	elif crouch_held and is_on_floor():
+		charging_jump = true
+		charge_time = 0.0
+
+
+func _cancel_charge() -> void:
+	charging_jump = false
+	charge_time = 0.0
+	for wind in wind_layers:
+		wind.cancel()
+
+
+func _launch_jump() -> void:
+	var jump_velocity := BASE_JUMP_VELOCITY
+	if charging_jump and charge_time > CHARGE_START_TIME:
+		var charge_percent := minf(
+			(charge_time - CHARGE_START_TIME) / (MAX_CHARGE_TIME - CHARGE_START_TIME), 1.0)
+		jump_velocity = lerpf(BASE_JUMP_VELOCITY, MAX_JUMP_VELOCITY, charge_percent)
+	charging_jump = false
+	jump_buffer_time = 0.0
+	coyote_time = 0.0
+	velocity.y = jump_velocity
+	jumped = true
+	play_anim(&"jump", true)
+	squash(Vector2(0.85, 1.18))
+	Sfx.play("jump", global_position, -6.0, 0.06)
+	for wind in wind_layers:
+		wind.release()
+
+
 func _locked_physics(delta: float) -> void:
 	velocity.x = 0.0
 	if physics_frozen:
@@ -528,16 +651,46 @@ func on_landed() -> void:
 		play_anim(&"land", true)
 
 
-# Footfalls: a scuff of sound and dust on the frames where a foot plants
+# Footfalls happen on the frames where a foot plants. Only every second plant
+# is heard (a natural walking and running cadence), never on a tap or while
+# slowing, from a pool of soft variants that never repeats back to back,
+# on the dry Foley bus so steps don't trail the room's echo.
 func _on_sprite_frame_changed() -> void:
+	# The wisps follow the body frame for frame, even between physics ticks
+	if charge_wisps and charge_wisps.visible:
+		charge_wisps.frame = animated_sprite.frame
 	var planted: Array = footstep_frames.get(animated_sprite.animation, [])
 	if not planted.has(animated_sprite.frame) or not is_on_floor() or absf(velocity.x) < 5.0:
 		return
-	Sfx.play("footstep", global_position, -9.0 if animated_sprite.animation == &"run" else -6.0, 0.12)
 	footstep.emit(global_position)
-	if walk_dust:
+	var sprinting := animated_sprite.animation == &"sprint"
+	if walk_dust and sprinting:
 		walk_dust.direction.x = 1.0 if animated_sprite.flip_h else -1.0
 		walk_dust.restart()
+	# (A stride clip restarting counts as a plant; that isn't a real step yet)
+	if absf(velocity.x) < STEP_SOUND_MIN_SPEED or _moving_time < 0.1:
+		return
+	_plants_heard += 1
+	if _plants_heard % 2 == 0:
+		return
+	var on_grate := _standing_on_group(&"iron_grate")
+	var count := 2 if on_grate else 4
+	var variant := randi_range(1, count)
+	if variant == _last_step_variant:
+		variant = variant % count + 1
+	_last_step_variant = variant
+	var sound := ("step_grate_%d" if on_grate else "step_stone_%d") % variant
+	var volume := (-12.0 if sprinting else -15.0) + randf_range(-2.0, 2.0)
+	Sfx.play(sound, global_position, volume, 0.06, true)
+
+
+func _standing_on_group(group_name: StringName) -> bool:
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider() as Node
+		if collision.get_normal().y < -0.7 and collider and collider.is_in_group(group_name):
+			return true
+	return false
 
 
 func update_animation(delta: float) -> void:
@@ -563,7 +716,8 @@ func update_animation(delta: float) -> void:
 	elif step_commit_time > 0.0:
 		step_commit_time = maxf(step_commit_time - delta, 0.0)
 
-	if charging_jump and charge_time >= CHARGE_START_TIME:
+	if charging_jump:
+		# The charge sheet is her crouch; the wisps only join once it counts
 		desired = &"JumpCharge"
 	elif not moving and step_commit_time <= 0.0:
 		# Out of a stride, a quick recovery pose settles her before idling
@@ -639,6 +793,19 @@ func update_effects(delta: float) -> void:
 			wind.release()
 	_update_charge_wisps()
 	_update_contact_shadow()
+	if _aim_marker:
+		_aim_marker.visible = InputLabels.use_pad and not is_dead and not controls_locked
+		if _aim_marker.visible:
+			var dir := aim_direction(global_position + Vector2(0, -12))
+			_aim_marker.position = Vector2(0, -12) + dir * 30.0
+			_aim_marker.rotation = dir.angle()
+
+	# The first real step after starting to move is always heard
+	if absf(velocity.x) < 5.0 or not is_on_floor():
+		_plants_heard = 0
+		_moving_time = 0.0
+	else:
+		_moving_time += delta
 
 	var sprinting_on_ground := is_sprinting and is_on_floor()
 	sprint_dust.emitting = sprinting_on_ground
@@ -665,7 +832,8 @@ func charge_amount() -> float:
 func _update_charge_wisps() -> void:
 	if charge_wisps == null:
 		return
-	var active := animated_sprite.animation == &"JumpCharge" and charging_jump and not is_dead
+	var active := animated_sprite.animation == &"JumpCharge" and charging_jump \
+		and charge_time >= CHARGE_START_TIME and not is_dead
 	charge_wisps.visible = active
 	if active:
 		charge_wisps.frame = animated_sprite.frame
@@ -723,12 +891,18 @@ func _apply_squash(amount: Vector2) -> void:
 func start_reload():
 	if is_reloading:
 		return
+	# Runes she is powering draw on this same mana; no refilling under them
+	if reload_locked:
+		Sfx.play("fizzle", global_position, -8.0)
+		FloatText.spawn(get_parent(), global_position + Vector2(0, -52), "Runes are drawing your mana", Color(0.72, 0.9, 1.0))
+		return
 
 	if current_mana >= get_mana_cap():
 		return
 
 	is_reloading = true
 	reload_progress = 0.0
+	Sfx.play("reload_start", global_position, -6.0)
 
 	update_mana_ui()
 
@@ -753,7 +927,16 @@ func flash_spell(spell: String) -> void:
 		mana_ui.flash_spell(spell)
 
 
+## Healing is channelled (see scripts/player/heal_channel.gd); the mana and
+## health change only when the channel completes, in complete_heal().
 func heal_player():
+	if heal_channel:
+		heal_channel.try_start()
+	else:
+		complete_heal()
+
+
+func complete_heal():
 
 	if is_reloading:
 		return
@@ -764,6 +947,7 @@ func heal_player():
 	if current_mana < HEAL_COST:
 		return
 
+	Sfx.play("heal_done", global_position, -3.0)
 	current_mana -= HEAL_COST
 
 	current_health = clampi(

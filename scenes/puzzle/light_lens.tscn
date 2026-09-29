@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/light_lens.gd" id="1_ap2yg"]
 
-[node name="LightLens" type="Node2D" unique_id=1626164922]
+[node name="LightLens" type="Node2D" unique_id=547593752]
 script = ExtResource("1_ap2yg")

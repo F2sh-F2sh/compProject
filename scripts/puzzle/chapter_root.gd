@@ -5,9 +5,22 @@ extends Node2D
 ## camera between rooms), respawns the player at the last full checkpoint
 ## after a death, runs "Reset Room", and shows room titles and short messages.
 
+## The player moved into another room.
+signal room_entered(room: Room)
+## Reset Room is about to put `room` back (spells should stop first).
+signal room_resetting(room: Room)
+## Reset Room has finished putting `room` back.
+signal room_reset_done(room: Room)
+
 ## Prefix for this chapter's saved flags, e.g. "ch1".
 @export var chapter_id := "ch1"
+@export var chapter_title := "The Sealed Belfry"
 @export var total_pages := 0
+## The scene the Chapter Complete card offers to continue to ("" = none yet).
+@export_file("*.tscn") var next_chapter := ""
+## Every lore page in order ({id, numeral, title, text, room}), for the
+## Ledger in the pause menu. Written by the chapter builder.
+@export var ledger: Array[Dictionary] = []
 
 const TITLE_FONT_NAMES := ["Cinzel", "Trajan Pro", "Times New Roman", "Georgia", "Liberation Serif", "serif"]
 const BODY_FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
@@ -18,12 +31,21 @@ var rooms: Array[Node] = []
 var current_room: Room
 var is_resetting := false
 
+## Seconds in a room without progress (or deaths there) before its hint
+## stone starts calling out, when guidance is on.
+const NUDGE_AFTER := 90.0
+const NUDGE_DEATHS := 2
+
 var _fade: ColorRect
 var _title: Label
 var _toast_panel: PanelContainer
 var _toast_label: Label
 var _toast_tween: Tween
 var _title_tween: Tween
+var _objective: ObjectivePanel
+var _since_progress := 0.0
+var _nudged := false
+var _mood_tween: Tween
 
 
 func _ready() -> void:
@@ -32,6 +54,12 @@ func _ready() -> void:
 	camera = player.get_node("Camera2D")
 	rooms = get_tree().get_nodes_in_group("room")
 	_build_ui()
+	player.died.connect(func():
+		GameState.add_stat(_stat("deaths"), 1)
+		if current_room:
+			GameState.bump(_room_key("deaths"))
+		GameState.save_game())
+	Settings.changed.connect(_on_settings_changed)
 
 	var checkpoint_id := GameState.get_checkpoint_for(scene_file_path)
 	if checkpoint_id != "":
@@ -42,8 +70,119 @@ func _ready() -> void:
 	_update_room(true)
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_update_room(false)
+	if current_room == null:
+		return
+	_update_steps(false)
+	_since_progress += delta
+	GameState.add_stat(_stat("time"), delta)
+	GameState.add_stat(_stat("time." + _room_short()), delta)
+	if not _nudged and Settings.guidance >= Settings.GUIDANCE_FULL and not current_room.is_cleared() \
+			and (_since_progress > NUDGE_AFTER or int(GameState.session.get(_room_key("deaths"), 0)) >= NUDGE_DEATHS):
+		_nudged = true
+		for stone in current_room.find_children("*", "", true, false):
+			if stone is HintStone:
+				stone.nudge()
+
+
+## Eases the post pass's colour grade toward the room's mood.
+func _set_mood(room: Room, instant: bool) -> void:
+	var screen := get_node_or_null("PostFX/Screen") as CanvasItem
+	if screen == null or not screen.material is ShaderMaterial:
+		return
+	var mat := screen.material as ShaderMaterial
+	if _mood_tween:
+		_mood_tween.kill()
+	if instant:
+		mat.set_shader_parameter("highlight_tint", room.mood_highlight)
+		mat.set_shader_parameter("fog_color", room.mood_fog)
+		return
+	var from_high: Color = mat.get_shader_parameter("highlight_tint")
+	var from_fog: Color = mat.get_shader_parameter("fog_color")
+	_mood_tween = create_tween()
+	_mood_tween.tween_method(func(k: float):
+		mat.set_shader_parameter("highlight_tint", from_high.lerp(room.mood_highlight, k))
+		mat.set_shader_parameter("fog_color", from_fog.lerp(room.mood_fog, k)), 0.0, 1.0, 1.6)
+
+
+func _on_settings_changed() -> void:
+	if _objective == null or current_room == null:
+		return
+	var want := Settings.guidance >= Settings.GUIDANCE_LIGHT and current_room.objective != ""
+	if want and not _objective.visible:
+		_objective.show_room(current_room.objective, current_room.get_steps())
+	_objective.visible = want
+
+
+func _room_key(what: String) -> String:
+	return "%s.%s" % [what, current_room.room_id]
+
+
+func _room_short() -> String:
+	return current_room.room_id.get_slice(".", 1)
+
+
+func _stat(what: String) -> String:
+	return "%s.stat.%s" % [chapter_id, what]
+
+
+## The chapter's ending (the great bell has rung): saves it as complete,
+## logs the run, and shows the Chapter Complete card.
+func finish_chapter() -> void:
+	GameState.set_flag(chapter_id + ".complete")
+	var stats := {
+		"time": GameState.get_stat(_stat("time")),
+		"deaths": GameState.get_stat(_stat("deaths")),
+		"resets": GameState.get_stat(_stat("resets")),
+		"hints": GameState.get_stat(_stat("hints")),
+		"pages": pages_found(),
+		"total_pages": total_pages,
+		"next": next_chapter,
+	}
+	GameState.log_playtest(["chapter complete", "", snappedf(stats["time"], 0.1), stats["deaths"], stats["resets"],
+		stats["hints"], "%d/%d" % [stats["pages"], total_pages]])
+	# Continuing later starts the chapter from its beginning
+	GameState.clear_checkpoint(scene_file_path)
+	GameState.save_game()
+	for node in get_tree().get_nodes_in_group("gameplay_ui"):
+		node.visible = false
+	ChapterComplete.open(self, chapter_title, stats)
+
+
+## A hint stone gave a hint (counted for the run's statistics).
+func note_hint() -> void:
+	GameState.add_stat(_stat("hints"), 1)
+	if current_room:
+		GameState.bump(_room_key("hints"))
+
+
+func _log_room_clear() -> void:
+	GameState.log_playtest(["room cleared", current_room.title,
+		snappedf(GameState.get_stat(_stat("time." + _room_short())), 0.1),
+		GameState.session.get(_room_key("deaths"), 0), GameState.session.get(_room_key("resets"), 0),
+		GameState.session.get(_room_key("hints"), 0), ""])
+
+
+## Checks the current room's steps; announces each one as it is done.
+func _update_steps(silent: bool) -> void:
+	for step in current_room.get_steps():
+		if step.update(player):
+			_since_progress = 0.0
+			if silent:
+				continue
+			if _objective:
+				_objective.step_done(step)
+			if current_room.is_cleared() and not GameState.has_flag("%s.clear.%s" % [chapter_id, _room_short()]):
+				GameState.set_flag("%s.clear.%s" % [chapter_id, _room_short()])
+				_log_room_clear()
+				# A short chord and a nudge of the camera: the room is done
+				Sfx.play("room_clear", null, -5.0, 0.0)
+				ImpactFX.kick(get_tree(), 1.0, 0.2)
+			else:
+				Sfx.play("receiver_on", null, -12.0)
+	if _objective:
+		_objective.refresh()
 
 
 func _update_room(instant: bool) -> void:
@@ -63,10 +202,27 @@ func _enter(room: Room, instant: bool) -> void:
 		camera.bounds = room.bounds
 	else:
 		camera.set_bounds_smooth(room.bounds)
-	if not room.visited:
-		room.visited = true
-		if room.title != "":
-			show_room_title(room.title)
+	_since_progress = 0.0
+	_nudged = false
+	_set_mood(room, instant)
+	# Run statistics are written out as each room is entered
+	GameState.save_game()
+	# Steps already done (saved puzzles) count at once, without fanfare
+	_update_steps(true)
+	GameState.set_flag("%s.seen.%s" % [chapter_id, room.room_id.get_slice(".", 1)])
+	var first_visit := not room.visited
+	room.visited = true
+	var title_delay := 0.0
+	if first_visit and room.act != "":
+		TitleCard.show_card(self, "ACT %s" % room.act, room.act_title, room.act_subtitle, 2.2)
+		title_delay = 3.4
+	if first_visit and room.title != "":
+		show_room_title(room.title, title_delay)
+	if _objective:
+		_objective.visible = Settings.guidance >= Settings.GUIDANCE_LIGHT
+		if _objective.visible:
+			_objective.show_room(room.objective, room.get_steps())
+	room_entered.emit(room)
 
 
 ## Puts the current room back to a known solvable arrangement. Health is kept.
@@ -74,8 +230,11 @@ func reset_current_room() -> void:
 	if current_room == null or is_resetting or player.is_dead:
 		return
 	is_resetting = true
+	GameState.add_stat(_stat("resets"), 1)
+	GameState.bump(_room_key("resets"))
 	player.lock_controls(true)
 	var recorder := player.get_node_or_null("EchoRecorder")
+	room_resetting.emit(current_room)
 	Sfx.play("room_reset")
 	var tween := create_tween()
 	tween.tween_property(_fade, "color:a", 1.0, 0.25)
@@ -86,7 +245,8 @@ func reset_current_room() -> void:
 		current_room.reset()
 		player.teleport_to(current_room.entry_spawn)
 		camera.cancel_focus()
-		camera.bounds = current_room.bounds)
+		camera.bounds = current_room.bounds
+		room_reset_done.emit(current_room))
 	tween.tween_interval(0.15)
 	tween.tween_property(_fade, "color:a", 0.0, 0.3)
 	tween.tween_callback(func():
@@ -121,11 +281,14 @@ func pages_found() -> int:
 	return GameState.count_flags(chapter_id + ".page.")
 
 
-func show_room_title(text: String) -> void:
+func show_room_title(text: String, delay := 0.0) -> void:
 	_title.text = text
 	if _title_tween:
 		_title_tween.kill()
 	_title_tween = create_tween()
+	if delay > 0.0:
+		_title.modulate.a = 0.0
+		_title_tween.tween_interval(delay)
 	_title_tween.tween_property(_title, "modulate:a", 1.0, 0.8)
 	_title_tween.tween_interval(2.2)
 	_title_tween.tween_property(_title, "modulate:a", 0.0, 1.0)
@@ -203,3 +366,7 @@ func _build_ui() -> void:
 	_toast_label.add_theme_font_size_override("font_size", 16)
 	_toast_label.add_theme_color_override("font_color", Color("e4ddf2"))
 	_toast_panel.add_child(_toast_label)
+
+	_objective = ObjectivePanel.new()
+	_objective.add_to_group("gameplay_ui")
+	ui.add_child(_objective)

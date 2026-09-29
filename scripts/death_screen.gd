@@ -5,15 +5,15 @@ extends Control
 ## the level from its normal start.
 
 @export var restart_action := "jump"
-@export var dim_time := 1.2
+@export var dim_time := 0.9
 @export var band_delay := 0.3
 @export var band_fade_time := 1.0
 @export var title_delay := 0.5
-@export var title_fade_time := 1.4
+@export var title_fade_time := 1.0
 ## The title creeps toward this scale while it is on screen.
 @export var title_zoom := 1.06
-@export var prompt_delay := 2.6
-@export var prompt_fade_time := 0.6
+@export var prompt_delay := 1.1
+@export var prompt_fade_time := 0.4
 
 var can_restart := false
 var _pulse: Tween
@@ -33,6 +33,7 @@ func _ready() -> void:
 func show_death_screen() -> void:
 	can_restart = false
 	show()
+	Crosshair.arrow()
 
 	for node in get_tree().get_nodes_in_group("gameplay_ui"):
 		node.visible = false

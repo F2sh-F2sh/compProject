@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/traps/magic_vent.gd" id="1_e2nxv"]
 
-[node name="MagicVent" type="Node2D" unique_id=552486827]
+[node name="MagicVent" type="Node2D" unique_id=1438318893]
 script = ExtResource("1_e2nxv")

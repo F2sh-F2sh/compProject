@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/traps/moving_platform.gd" id="1_y3ewd"]
 
-[node name="MovingPlatform" type="AnimatableBody2D" unique_id=2013324418]
+[node name="MovingPlatform" type="AnimatableBody2D" unique_id=898601450]
 script = ExtResource("1_y3ewd")

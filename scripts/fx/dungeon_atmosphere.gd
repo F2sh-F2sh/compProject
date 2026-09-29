@@ -168,9 +168,13 @@ func _open_breaches() -> void:
 
 ## The average colour of the brick art, so crumbled edges match the wall.
 func _sample_wall_color() -> Color:
-	var img := Image.load_from_file(ProjectSettings.globalize_path(WALL_ATLAS))
-	if img == null:
+	# (Through the imported texture: the source PNG isn't there in an export)
+	var tex := load(WALL_ATLAS) as Texture2D
+	var img := tex.get_image() if tex else null
+	if img == null or img.is_empty():
 		return _wall_color
+	if img.is_compressed():
+		img.decompress()
 	var sum := Color(0, 0, 0, 0)
 	var count := 0
 	for y in range(0, 64, 2):

@@ -26,6 +26,12 @@ const ECHO_LAYER := 4
 	set(value):
 		stone_only = value
 		queue_redraw()
+## Only loose objects (crates, stone blocks) and creatures press it; the
+## player and her Echoes are too light. Marked with a small crate at each end.
+@export var objects_only := false:
+	set(value):
+		objects_only = value
+		queue_redraw()
 @export var light_color := Color(0.62, 0.45, 1.0)
 
 var is_pressed := false
@@ -112,7 +118,9 @@ func _still_counts(node: Node) -> bool:
 # Occupants are tracked either way; a heavy plate only sinks under stone
 func _any_pressing() -> bool:
 	for node in _occupants:
-		if not stone_only or node is PushableBlock or node.get("is_frozen") == true:
+		if objects_only and (node is Area2D or node.is_in_group("player")):
+			continue
+		if not stone_only or node is PushableBlock or node.is_in_group("stone_weight") or node.get("is_frozen") == true:
 			return true
 	return false
 
@@ -159,6 +167,12 @@ func _draw() -> void:
 	if latched:
 		draw_rect(Rect2(-w / 2.0 + 2.0, cy + 1.0, 4, 1), rune)
 		draw_rect(Rect2(w / 2.0 - 6.0, cy + 1.0, 4, 1), rune)
+	if objects_only and not stone_only:
+		# A little carved crate on both ends: "a crate goes here"
+		for sx in [-w / 2.0 - 3.0, w / 2.0 - 3.0]:
+			draw_rect(Rect2(sx, -12, 6, 7), Color("3a2a24"))
+			draw_rect(Rect2(sx + 1, -11, 4, 5), Color("5a3f33"))
+			draw_line(Vector2(sx + 1, -11), Vector2(sx + 5, -6), rune, 1.0)
 	if stone_only:
 		# Carved stone-block marks on both ends of the socket
 		for sx in [-w / 2.0 - 3.0, w / 2.0 - 3.0]:

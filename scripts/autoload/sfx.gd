@@ -11,6 +11,10 @@ const MAX_VOICES_PER_SOUND := 3
 var _streams := {}
 var _last_played := {}
 var _voices := {}
+## How often each sound has actually played, and the bus it last used (for
+## the tests; cheap enough to keep always on).
+var played := {}
+var last_bus := {}
 
 
 func _ready() -> void:
@@ -18,7 +22,8 @@ func _ready() -> void:
 
 
 ## at: a world position for positional sound, or null for UI/global sound.
-func play(sound: String, at: Variant = null, volume_db := 0.0, pitch_variation := 0.05) -> void:
+## dry: skip the room's reverb and use the quiet Foley bus (footsteps).
+func play(sound: String, at: Variant = null, volume_db := 0.0, pitch_variation := 0.05, dry := false) -> void:
 	var stream := _stream(sound)
 	if stream == null:
 		return
@@ -37,10 +42,14 @@ func play(sound: String, at: Variant = null, volume_db := 0.0, pitch_variation :
 		positional.max_distance = 1100.0
 		positional.attenuation = 1.4
 		positional.stream = stream
-		positional.bus = Settings.SFX_BUS
-		# A ReverbZone around the sound's origin reroutes it through that
-		# space's reverb bus (Area2D audio bus override)
-		positional.area_mask = ReverbZone.AUDIO_LAYER
+		if dry:
+			positional.bus = Settings.FOLEY_BUS
+			positional.area_mask = 0
+		else:
+			positional.bus = Settings.SFX_BUS
+			# A ReverbZone around the sound's origin reroutes it through that
+			# space's reverb bus (Area2D audio bus override)
+			positional.area_mask = ReverbZone.AUDIO_LAYER
 		positional.volume_db = volume_db
 		positional.pitch_scale = randf_range(1.0 - pitch_variation, 1.0 + pitch_variation)
 		player = positional
@@ -54,6 +63,8 @@ func play(sound: String, at: Variant = null, volume_db := 0.0, pitch_variation :
 	add_child(player)
 	player.finished.connect(_on_finished.bind(player, sound))
 	player.play()
+	played[sound] = int(played.get(sound, 0)) + 1
+	last_bus[sound] = player.bus
 
 
 func _on_finished(player: Node, sound: String) -> void:

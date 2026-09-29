@@ -24,6 +24,26 @@ extends Node2D
 ## while the player is here.
 @export var combat := false
 
+## A warding circle: while here, the player's mana can't rise above this
+## (0 = no limit). Used by rune-cube rooms that are about budgeting.
+@export var mana_limit := 0
+
+@export_group("Guidance")
+## Set on the first room of an act: "I", "II"... with its name.
+@export var act := ""
+@export var act_title := ""
+@export var act_subtitle := ""
+## What the player is here to do, stated as a goal, never as the solution.
+@export var objective := ""
+## Lore page ids found in this room (for the map).
+@export var page_ids: PackedStringArray = []
+
+@export_group("Mood")
+## The room's colour: the post pass's highlight tint and mist colour ease to
+## these while the player is here (cold for the cells, amber for the works...).
+@export var mood_highlight := Color(1.02, 1.04, 1.06)
+@export var mood_fog := Color(0.27, 0.36, 0.48)
+
 var visited := false
 
 
@@ -36,7 +56,20 @@ func contains(point: Vector2) -> bool:
 	return bounds.has_point(point)
 
 
+## The room's objective steps (ObjectiveStep children), in order.
+func get_steps() -> Array:
+	return get_children().filter(func(n): return n is ObjectiveStep)
+
+
+## True once every required step has been done.
+func is_cleared() -> bool:
+	var required := get_steps().filter(func(s): return not s.optional)
+	return not required.is_empty() and required.all(func(s): return s.done)
+
+
 func reset() -> void:
+	for step in get_steps():
+		step.reset()
 	for node in _resettables():
 		node.reset_state()
 	# Spells and bolts in flight would otherwise re-trigger things after a reset

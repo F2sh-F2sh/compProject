@@ -8,6 +8,38 @@ extends CanvasLayer
 
 @onready var rect: ColorRect = $Screen
 
+var _full := {}
+
+
+func _ready() -> void:
+	Settings.changed.connect(_apply_quality)
+	_apply_quality.call_deferred()
+
+
+## Low effects quality (for weaker graphics cards) turns off the bloom and
+## film grain and stops lights casting shadows; High restores them.
+func _apply_quality() -> void:
+	var mat := rect.material as ShaderMaterial
+	if mat == null:
+		return
+	var low := Settings.effects_low
+	for param in ["bloom_strength", "grain"]:
+		if not _full.has(param):
+			var value = mat.get_shader_parameter(param)
+			if value == null:
+				# Not set on the material: the shader's own default
+				value = RenderingServer.shader_get_parameter_default(mat.shader.get_rid(), param)
+			_full[param] = value
+		mat.set_shader_parameter(param, 0.0 if low else _full[param])
+	var level := get_parent()
+	if level:
+		for light in level.find_children("*", "Light2D", true, false):
+			if low and light.shadow_enabled:
+				light.set_meta(&"had_shadow", true)
+				light.shadow_enabled = false
+			elif not low and light.get_meta(&"had_shadow", false):
+				light.shadow_enabled = true
+
 
 func _process(_delta: float) -> void:
 	var camera := get_viewport().get_camera_2d()

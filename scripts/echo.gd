@@ -22,6 +22,7 @@ var caster: Node
 
 var _material: ShaderMaterial
 var _dissolving := false
+var tint := Color(0.66, 0.42, 1.0)
 
 
 func _ready() -> void:
@@ -49,6 +50,16 @@ func setup(recorded_frames: Array[Dictionary], recorded_events: Dictionary, spri
 	tween.tween_method(func(v): _material.set_shader_parameter("materialize", v), 0.0, 1.0, materialize_time)
 	tween.tween_property(glow, "energy", energy, materialize_time)
 	motes.emitting = true
+
+
+## Colours the ghost, its glow and its motes (each living Echo has its own).
+func set_tint(color: Color) -> void:
+	tint = color
+	if _material:
+		_material.set_shader_parameter("tint", color)
+		_material.set_shader_parameter("rim_color", color.lerp(Color.WHITE, 0.45))
+	glow.color = color
+	motes.color = Color(color.lerp(Color.WHITE, 0.25), 0.75)
 
 
 func is_finished() -> bool:
@@ -94,4 +105,28 @@ func _fire_events(i: int) -> void:
 	if not events.has(i) or not is_instance_valid(caster):
 		return
 	for event in events[i]:
-		caster.spawn_fireball(event["spawn"], event["direction"])
+		if event.has("interact"):
+			var target = event["interact"]
+			if is_instance_valid(target) and target.has_method("trigger") and target.trigger(self):
+				_flash_use()
+		else:
+			caster.spawn_fireball(event["spawn"], event["direction"])
+
+
+# A little burst of the Echo's colour where it reaches out to use something
+func _flash_use() -> void:
+	var burst := CPUParticles2D.new()
+	burst.one_shot = true
+	burst.explosiveness = 1.0
+	burst.amount = 10
+	burst.lifetime = 0.45
+	burst.spread = 180.0
+	burst.gravity = Vector2.ZERO
+	burst.initial_velocity_min = 18.0
+	burst.initial_velocity_max = 36.0
+	burst.color = Color(tint, 0.9)
+	burst.material = MagicLight.unshaded()
+	burst.position = Vector2(0, -20)
+	add_child(burst)
+	burst.emitting = true
+	burst.finished.connect(burst.queue_free)

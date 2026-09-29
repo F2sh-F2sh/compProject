@@ -7,6 +7,8 @@ extends Area2D
 @export_file("*.tscn") var next_scene_path := ""
 @export var completion_text := "Tutorial Complete"
 @export var trigger_size := Vector2(40, 64)
+## Saved when the level is finished (e.g. "tutorial.done").
+@export var completion_flag := ""
 @export var fade_time := 0.8
 @export var message_hold_time := 1.6
 
@@ -33,6 +35,12 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_triggered = true
 	body.lock_controls()
+	if completion_flag != "":
+		GameState.set_flag(completion_flag)
+	# A finished level starts from the beginning if it is played again
+	var scene := get_tree().current_scene
+	if scene and not scene.is_in_group("chapter_root"):
+		GameState.clear_checkpoint(scene.scene_file_path)
 
 	var layer := CanvasLayer.new()
 	layer.layer = 3

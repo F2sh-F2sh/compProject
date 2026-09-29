@@ -17,10 +17,18 @@ const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
 @export var enabled := true
 @export var size := Vector2(44, 64)
 @export var prompt_offset := Vector2(0, -70)
+## Whether an Echo replaying a recorded use can use it too.
+@export var echo_can_use := true
 
 static var _focused: Interactable = null
 
+const CUE_RANGE := 170.0
+const CUE_ALPHA := 0.45
+
 var _player: Node2D = null
+var _nearby: Node2D = null
+var _compact := false
+var _pad_mode := false
 var _prompt: Node2D
 var _label: Label
 
@@ -55,11 +63,42 @@ func _physics_process(_delta: float) -> void:
 		_focused = null
 
 	var show: bool = usable and _focused == self
-	_prompt.modulate.a = move_toward(_prompt.modulate.a, 1.0 if show else 0.0, 0.2)
+	# From a little further away a faint key cue says "you can use this"
+	var cue := not show and _in_cue_range()
+	var compact := not show
+	if compact != _compact or InputLabels.use_pad != _pad_mode:
+		_compact = compact
+		_pad_mode = InputLabels.use_pad
+		_refresh_text()
+	_prompt.modulate.a = move_toward(_prompt.modulate.a, 1.0 if show else (CUE_ALPHA if cue else 0.0), 0.2)
 	_prompt.visible = _prompt.modulate.a > 0.01
 
 	if show and Input.is_action_just_pressed(action):
 		interacted.emit(_player)
+		# So an Echo being recorded can repeat it
+		if _player.has_method("record_interaction"):
+			_player.record_interaction(self)
+
+
+## Uses it on someone else's behalf (an Echo replaying a recorded use).
+## Returns false if it can't be used right now.
+func trigger(actor: Node) -> bool:
+	if not enabled or not echo_can_use:
+		return false
+	interacted.emit(actor)
+	return true
+
+
+func _in_cue_range() -> bool:
+	if not enabled or Settings.guidance < Settings.GUIDANCE_FULL:
+		return false
+	if not is_instance_valid(_nearby):
+		_nearby = get_tree().get_first_node_in_group("player") as Node2D
+		if _nearby == null:
+			return false
+	if _nearby.get("is_dead") or _nearby.get("controls_locked"):
+		return false
+	return _nearby.global_position.distance_to(global_position) < CUE_RANGE
 
 
 func _is_usable() -> bool:
@@ -112,4 +151,5 @@ func _build_prompt() -> void:
 
 func _refresh_text() -> void:
 	if _label:
-		_label.text = "[%s] %s" % [InputLabels.primary(action), verb]
+		var key := InputLabels.primary(action)
+		_label.text = "[%s]" % key if _compact else "[%s] %s" % [key, verb]

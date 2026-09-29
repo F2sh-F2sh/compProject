@@ -43,9 +43,12 @@ func run_suite(filter: String) -> void:
 		"r5": scenario_room5,
 		"r6": scenario_room6,
 		"r7": scenario_room7,
+		"r8": scenario_room8,
+		"r9": scenario_room9,
 		"save": scenario_save_and_checkpoints,
 		"reset": scenario_reset_rules,
 		"hazards": scenario_hazard_rules,
+		"guide": scenario_guidance,
 		"full": scenario_full_run,
 	}
 	for key in scenarios:
@@ -68,12 +71,24 @@ func check(label: String, ok: bool, detail := "") -> void:
 
 
 func release_all() -> void:
-	for a in ["move_left", "move_right", "jump", "sprint", "shoot", "heal", "reload", "interact", "echo"]:
+	for a in ["move_left", "move_right", "jump", "crouch", "sprint", "shoot", "heal", "reload", "interact", "echo"]:
 		Input.action_release(a)
 
 
 func game_state() -> Node:
 	return get_tree().root.get_node("GameState")
+
+
+func sfx() -> Node:
+	return get_tree().root.get_node("Sfx")
+
+
+func _count_sounds(prefix: String) -> int:
+	var n := 0
+	for key in sfx().played:
+		if String(key).begins_with(prefix):
+			n += int(sfx().played[key])
+	return n
 
 
 ## Loads the chapter. Progress is wiped unless keep_progress is set.
@@ -187,14 +202,15 @@ func run_across(takeoffs: Array, sprint := false) -> bool:
 	return ok
 
 
-## Holds jump to charge the big jump, drifting in `dir` once airborne.
+## Crouches to charge the big jump, then jumps, drifting in `dir` once airborne.
 func charged_jump(dir := "", hold := 2.6) -> float:
 	var start_y := player.global_position.y
-	Input.action_press("jump")
+	Input.action_press("crouch")
 	await seconds(hold)
-	Input.action_release("jump")
 	if dir != "":
 		Input.action_press(dir)
+	await tap_action("jump")
+	Input.action_release("crouch")
 	var best := start_y
 	var t := 0.0
 	await wait_until(func(): return not player.is_on_floor(), 0.3)
@@ -481,17 +497,72 @@ func solve_r7() -> void:
 		"watcher x=%.0f" % gargoyle.global_position.x)
 	check("R7 the seal wakes rune by rune", await wait_until(func(): return seal.lit_runes > 0 and not seal.is_open, 2.0))
 	check("R7 the seal opens the great door", await wait_until(func(): return seal.is_open and door.open_amount >= 1.0, 6.0))
-	check("R7 finale saved", game_state().has_flag("ch1.r7.solved"))
+	check("R7 seal saved", game_state().has_flag("ch1.r7.solved"))
 	await shot("r7_solved")
 	await seconds(12.0)
 	check("R7 the window stays open after the slime leaves", bars.open_amount >= 1.0 and gargoyle.is_frozen)
 	await walk_to(gargoyle.global_position.x - 40.0)
 	await run_across([gargoyle.global_position.x - 34.0])
-	var exit = node("R7/ChapterExit")
-	Input.action_press("move_right")
-	check("R7 chapter exit reached", await wait_until(func(): return exit._triggered, 12.0),
-		"x=%.0f" % player.global_position.x)
-	Input.action_release("move_right")
+	check("R7 through the great door into the choir loft", await walk_to(11180.0), "x=%.0f" % player.global_position.x)
+
+
+func solve_r8() -> void:
+	var lever_a = node("R8/LeverA")
+	var lever_b = node("R8/LeverB")
+	var loft_gate = node("R8/LoftGate")
+	var recorder = player.get_node("EchoRecorder")
+	await walk_to(lever_a.global_position.x)
+	# Record: wait a moment, pull lever A, stop. The Echo replays from here.
+	await tap_action("echo")
+	await seconds(2.4)
+	await interact()
+	await frames(6)
+	await tap_action("echo")
+	check("R8 an Echo is recorded at the first lever", recorder.echoes.size() >= 1)
+	await walk_to(lever_b.global_position.x, true)
+	check("R8 the Echo pulls the first lever", await wait_until(func(): return lever_a.is_on, 3.0))
+	await interact()
+	check("R8 both levers down at once open the loft gate", await wait_until(func(): return loft_gate.open_amount >= 1.0, 4.0))
+	check("R8 solution saved", game_state().has_flag("ch1.r8.solved"))
+	await shot("r8_solved")
+	check("R8 walked out into the great bell tower", await walk_to(12560.0, true), "x=%.0f" % player.global_position.x)
+
+
+func solve_r9() -> void:
+	var plate = node("R9/Plate")
+	var recorder = player.get_node("EchoRecorder")
+	recorder.clear_echoes()
+	await frames(10)
+	await walk_to(plate.global_position.x - 70.0)
+	# Record walking onto the plate; the finished Echo keeps standing on it
+	await tap_action("echo")
+	await walk_to(plate.global_position.x)
+	await seconds(0.3)
+	await tap_action("echo")
+	check("R9 the Echo holds the plate and the stairs rise",
+		await wait_until(func(): return plate.is_pressed and node("R9/Stair6").is_solid, 4.0))
+	await walk_to(12780.0)
+	var climbed := await run_across([12826.0, 12904.0, 12968.0, 13032.0, 13096.0, 13160.0, 13224.0])
+	check("R9 the stairs carry you up to the balcony", climbed and player.global_position.y < 220.0,
+		"pos=%s" % player.global_position.round())
+	await shot("r9_balcony")
+	var bell = node("R9/GreatBell")
+	await walk_to(bell.global_position.x + bell.rope_offset.x)
+	await interact()
+	check("R9 pulling the rope rings the great bell", bell.is_rung() and player.controls_locked)
+	await seconds(3.0)
+	await shot("r9_bell")
+	var card := await wait_until(func(): return _complete_card() != null, 16.0)
+	check("R9 the chapter ends with its Chapter Complete card", card and game_state().has_flag("ch1.complete"))
+	await seconds(1.6)
+	await shot("chapter_complete")
+
+
+func _complete_card() -> Node:
+	for child in lvl.get_children():
+		if child is ChapterComplete:
+			return child
+	return null
 
 
 # ================================================================ scenarios
@@ -572,7 +643,8 @@ func scenario_room2() -> void:
 	var bell = node("R2/Bell")
 	exit_gate = node("R2/ExitGate")
 	await place(Vector2(node("R2/PlateB").global_position.x, FLOOR))
-	await seconds(0.4)
+	# (Let the camera finish sliding into the room, or the aim drifts)
+	await seconds(1.2)
 	await aim_and_shoot(bell.global_position + Vector2(0, -2))
 	check("a fireball from plate B rings the bell", await wait_until(func(): return not bell.is_ready(), 2.0))
 	check("fireball ring also opens the gate", await wait_until(func(): return exit_gate.open_amount >= 1.0, 8.0))
@@ -584,11 +656,33 @@ func scenario_room2() -> void:
 	check("room 2 page reachable with a charged jump", game_state().has_flag("ch1.page.2"),
 		"pos=%s" % player.global_position.round())
 
+	# The caged slime can't be killed by accident: fireballs splash on the
+	# grate, even aimed straight down from on top of it, and it is warded
+	await load_level()
+	var caged = node("R2/BellSlime")
+	await enter_room("R2")
+	await place(Vector2(caged.global_position.x, FLOOR))
+	var steps_before: int = _count_sounds("step_grate_")
+	await walk_to(caged.global_position.x + 70.0)
+	check("walking the grate sounds like iron, not stone", _count_sounds("step_grate_") > steps_before)
+	await place(Vector2(caged.global_position.x + 30.0, FLOOR))
+	for i in 3:
+		await aim_and_shoot(caged.global_position + Vector2(0, -6))
+		await seconds(0.5)
+	check("fireballs aimed through the grate never reach the caged slime",
+		caged.health == caged.max_health and not caged.is_dead, "hp=%d" % caged.health)
+	check("fireballs never start below the grate",
+		get_tree().get_nodes_in_group("fireball").all(func(f): return f.global_position.y < FLOOR))
+	var clinks: int = int(sfx().played.get("ward_clink", 0))
+	caged.take_damage(50)
+	check("a stray hit only makes the ward shimmer", caged.health == caged.max_health
+		and int(sfx().played.get("ward_clink", 0)) == clinks + 1)
+
 	# A killed slime comes back when the room is reset; health is kept
 	await load_level()
 	var slime = node("R2/BellSlime")
 	await enter_room("R2")
-	slime.take_damage(100)
+	slime.die()
 	await seconds(1.2)
 	check("killed slime is gone", slime.is_dead and not slime.visible)
 	var hp: int = player.current_health - 3
@@ -698,9 +792,48 @@ func scenario_room7() -> void:
 	await load_level()
 	await enter_room("R7")
 	await solve_r7()
+
+
+func scenario_room8() -> void:
+	print("SCENARIO room 8: the choir loft (Echo pulls a lever)")
+	await load_level()
+	await enter_room("R8")
+	var lever_a = node("R8/LeverA")
+	var lever_b = node("R8/LeverB")
+	# Alone it can't be done: the first lever springs back before you arrive
+	await walk_to(lever_a.global_position.x)
+	await interact()
+	check("R8 a spring lever goes down when pulled", lever_a.is_on)
+	await walk_to(lever_b.global_position.x, true)
+	await interact()
+	await frames(10)
+	check("R8 alone, the first lever has sprung back before you reach the second", not lever_a.is_on
+		and node("R8/LoftGate").open_amount < 0.1)
+	await wait_until(func(): return not lever_b.is_on, 3.0)
+	await enter_room("R8")
+	await solve_r8()
+
+
+func scenario_room9() -> void:
+	print("SCENARIO room 9: the great bell (Echo holds the plate)")
+	await load_level()
+	await enter_room("R9")
+	var plate = node("R9/Plate")
+	# Standing on the plate yourself raises the stairs, but only while you stay
+	await walk_to(plate.global_position.x)
+	await frames(10)
+	check("R9 the plate raises the stairs", node("R9/Stair1").is_solid)
+	await walk_to(plate.global_position.x + 120.0)
+	check("R9 stepping off lowers them again", await wait_until(func(): return not node("R9/Stair1").is_solid, 2.0))
+	await enter_room("R9")
+	await solve_r9()
+	var card = _complete_card()
+	if card:
+		card.title_button.pressed.emit()
 	var changed := await wait_until(func(): return get_tree().current_scene != lvl and get_tree().current_scene != null, 5.0)
-	check("chapter exit loads the next level", changed and get_tree().current_scene.scene_file_path.ends_with("TestingPlayerMovement.tscn"),
+	check("the chapter returns to the title screen", changed and get_tree().current_scene.scene_file_path.ends_with("title_screen.tscn"),
 		str(get_tree().current_scene.scene_file_path if get_tree().current_scene else "none"))
+	check("the game is not left paused", not get_tree().paused)
 
 
 func scenario_save_and_checkpoints() -> void:
@@ -842,6 +975,89 @@ func scenario_hazard_rules() -> void:
 	var inside: bool = absf(player.global_position.x - piston.global_position.x) < 30.0 and player.global_position.y > head_bottom - 40.0 and piston.progress > 0.5
 	check("a falling piston hurts", player.current_health < hp, "hp=%d" % player.current_health)
 	check("the player is pushed out from under the head", not inside, "player=%s" % player.global_position.round())
+	check("a crush fades the player back to safety, like a spike", recoveries >= 1, "recoveries=%d" % recoveries)
+	# Walking the course lights the piston candle; a crush then returns there
+	await load_level()
+	await enter_room("R5")
+	var candle = node("R5/CandlePistons")
+	await place(Vector2(candle.global_position.x - 40.0, 274))
+	await walk_to(candle.global_position.x + 20.0)
+	check("the piston candle lights as you pass", candle.is_active)
+	var p1 = node("R5/Piston1")
+	await wait_phase_start(p1, 1)
+	await place(Vector2(p1.global_position.x, 274))
+	await wait_until(func(): return player.hazard_recovery.is_active(), 2.0)
+	await wait_until(func(): return not player.hazard_recovery.is_active(), 2.0)
+	await frames(6)
+	check("a crushed player restarts the pistons from their candle",
+		player.global_position.distance_to(candle.get_respawn_position()) < 8.0, "pos=%s" % player.global_position.round())
+
+
+func scenario_guidance() -> void:
+	print("SCENARIO guidance: acts, objectives, links, cues, nudges, map")
+	var settings := get_tree().root.get_node("Settings")
+	settings.guidance = settings.GUIDANCE_FULL
+	await load_level()
+	var rooms: Array = lvl.rooms
+	check("every room states a goal and has steps", rooms.all(func(r): return r.objective != "" \
+		and r.get_steps().any(func(s): return not s.optional)))
+	check("the chapter is split into four acts", rooms.filter(func(r): return r.act != "").size() == 4)
+	check("each room's lore page shows as an optional step", rooms.filter(func(r): return not r.page_ids.is_empty()) \
+		.all(func(r): return r.get_steps().any(func(s): return s.optional)))
+	var cards := get_tree().current_scene.get_children().filter(func(n): return n is TitleCard)
+	check("the chapter opens with its act card", cards.size() == 1)
+	var panel: ObjectivePanel = lvl._objective
+	await seconds(1.0)
+	check("the objective card shows the room's goal", panel.visible and panel._goal.text == node("R1").objective)
+	# Link preview: near a plate, its groove lights toward the gate
+	var circuit = node("R1/PlateToGate")
+	check("links are quiet from afar", circuit.preview == 0.0)
+	await place(Vector2(node("R1/Plate").global_position.x - 40.0, FLOOR))
+	await seconds(0.5)
+	check("standing near a plate lights the groove to its gate", circuit.preview > 0.9, "%.2f" % circuit.preview)
+	# Solving the room ticks its step and marks it cleared
+	await enter_room("R1")
+	await solve_r1()
+	check("solving room 1 completes its step and clears it", node("R1").is_cleared()
+		and game_state().has_flag("ch1.clear.r1"))
+	# Room 2's steps follow the puzzle in order
+	await enter_room("R2")
+	var steps: Array = node("R2").get_steps()
+	check("a fresh room starts with no steps done", not steps.any(func(s): return s.done and not s.optional))
+	await solve_r2()
+	check("room 2's steps complete as the puzzle is solved", steps.filter(func(s): return not s.optional).all(func(s): return s.done))
+	# Far cue: a lever you can use shows its key from a few steps away
+	await load_level()
+	await enter_room("R4")
+	var lever = node("R4/Lever")
+	var cue: Interactable = lever.get_children().filter(func(n): return n is Interactable)[0]
+	await place(Vector2(lever.global_position.x + 110.0, FLOOR))
+	await seconds(0.4)
+	check("a usable thing shows a faint key cue from nearby", cue._prompt.visible and cue._prompt.modulate.a < 0.6
+		and cue._label.text.begins_with("["), "alpha %.2f '%s'" % [cue._prompt.modulate.a, cue._label.text])
+	# Nudge: after two deaths in a room its hint stone calls out
+	var stone = node("R4/HintStone")
+	game_state().bump("deaths.ch1.r4", 2)
+	await frames(3)
+	check("two deaths in a room make its hint stone call out", stone.nudging)
+	# The map lists the acts and rooms, with the current one marked
+	var menu = node("PauseMenu")
+	menu._set_open(true)
+	menu._show_map(true)
+	await frames(3)
+	var lines: Array = menu._map_list.get_children().map(func(l): return l.text)
+	menu._set_open(false)
+	check("the map marks the current room", lines.any(func(t): return t.contains("▶") and t.contains("The Silent Watcher")), str(lines))
+	check("the map hides rooms not yet seen", lines.any(func(t): return t.contains("? ? ?")))
+	# Guidance off: no card, no links, no cues
+	settings.guidance = settings.GUIDANCE_OFF
+	await load_level()
+	await seconds(0.5)
+	await place(Vector2(node("R1/Plate").global_position.x - 40.0, FLOOR))
+	await seconds(0.5)
+	check("with guidance off there is no objective card or link glow",
+		not lvl._objective.visible and node("R1/PlateToGate").preview == 0.0)
+	settings.guidance = settings.GUIDANCE_FULL
 
 
 func scenario_full_run() -> void:
@@ -856,13 +1072,23 @@ func scenario_full_run() -> void:
 	check("room 3 shrine saved on the way", game_state().get_checkpoint_for(LEVEL) == "ch1.cp.r3")
 	await solve_r4()
 	await solve_r5()
-	check("room 5 shrine saved on the way", game_state().get_checkpoint_for(LEVEL) == "ch1.cp.r5")
+	# (Walking out of room 5 passes room 6's shrine at its door)
+	check("room 5 and 6 shrines saved on the way", game_state().get_checkpoint_for(LEVEL) in ["ch1.cp.r5", "ch1.cp.r6"],
+		game_state().get_checkpoint_for(LEVEL))
 	await solve_r6()
 	await solve_r7()
 	check("finale shrine saved on the way", game_state().get_checkpoint_for(LEVEL) == "ch1.cp.finale")
+	await solve_r8()
+	await solve_r9()
 	monitor_camera = false
 	check("camera never showed outside the current room", camera_worst <= 0.5, "worst=%.2f %s" % [camera_worst, camera_worst_at])
 	check("full run finished alive", not player.is_dead, "hp=%d" % player.current_health)
 	print("  full run took %.0f s of real time" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	var changed := await wait_until(func(): return get_tree().current_scene != lvl and get_tree().current_scene != null, 5.0)
-	check("chapter ends in the next level", changed)
+	var card = _complete_card()
+	check("the full run ends with the Chapter Complete card", card != null)
+	if card:
+		var labels: Array = card.find_children("*", "Label", true, false).map(func(l): return l.text)
+		check("the card shows the run's statistics", labels.has("Time") and labels.has("Deaths") and labels.has("Ledger pages"),
+			str(labels))
+		card._close()
+	get_tree().paused = false

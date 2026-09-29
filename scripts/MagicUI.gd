@@ -20,6 +20,11 @@ func update_display(current_mana: int, reloading: bool) -> void:
 	fire_slot.modulate = Color.WHITE if usable >= fireball_cost else Color(0.5, 0.5, 0.6, 0.7)
 
 
+## Brightens the heal slot as a heal is channelled (0 when idle).
+func set_heal_progress(p: float) -> void:
+	heal_slot.self_modulate = Color.WHITE.lerp(Color(1.4, 1.7, 2.1), p)
+
+
 func flash_spell(spell: String) -> void:
 	var slot := fire_slot if spell == "fireball" else heal_slot
 	slot.scale = Vector2.ONE * 1.12

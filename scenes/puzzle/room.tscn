@@ -2,5 +2,6 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/room.gd" id="1_uwevy"]
 
-[node name="Room" type="Node2D" unique_id=327964782]
+[node name="Room" type="Node2D" unique_id=354619519]
 script = ExtResource("1_uwevy")
+page_ids = PackedStringArray()

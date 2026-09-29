@@ -5,10 +5,13 @@ extends Node2D
 ## A crushing piston. The node sits at the mount point; the head travels along
 ## the node's local +Y (straight down when unrotated — rotate the node 90
 ## degrees for a wall ram). It rattles and its rune turns red before each
-## slam. The head is solid (it blocks the player, beams and bolts), its
-## crushing face deals damage with a sideways push, and if anything ever ends
-## up inside the head it is pushed out to the nearest side, so the player can
-## never be left embedded. Power can switch it on and off (running).
+## slam. The head is solid (it blocks the player, beams and bolts). Being
+## crushed hurts and, like spikes, sends the player back to a safe point
+## (recovery_checkpoint once lit, otherwise the last safe ground before the
+## piston), so a running piston can't simply be walked through and healed off.
+## If anything ever ends up inside the head it is pushed out to the nearest
+## side, so the player can never be left embedded. Power can switch it on and
+## off (running).
 
 enum Phase { RAISED, WARNING, SLAM, LOWERED, RETRACT }
 
@@ -42,6 +45,8 @@ enum Phase { RAISED, WARNING, SLAM, LOWERED, RETRACT }
 ## A stopped piston retracts and stays raised (e.g. after a switch is hit).
 @export var running := true
 @export var solid_head := true
+## Where a crushed player returns (if lit); otherwise the last safe ground.
+@export var recovery_checkpoint: HazardCheckpoint
 
 const TEETH_HEIGHT := 6.0
 const COLOR_IRON := Color("25222f")
@@ -169,6 +174,16 @@ func reset_state() -> void:
 
 func get_head_bottom() -> float:
 	return raised_head_bottom + travel_distance * progress
+
+
+## Called by the player after a non-lethal crush.
+func get_recovery_position(player: Node2D) -> Vector2:
+	if recovery_checkpoint and recovery_checkpoint.is_active:
+		return recovery_checkpoint.get_respawn_position()
+	var recovery := player.get_node_or_null("HazardRecovery")
+	if recovery:
+		return recovery.get_fallback_position()
+	return player.global_position
 
 
 func get_knockback_velocity(player: Node2D) -> Vector2:
@@ -373,3 +388,19 @@ func _draw_rune() -> void:
 		elif phase == Phase.WARNING or phase == Phase.SLAM or phase == Phase.LOWERED:
 			c = Color(1.0, 0.3, 0.25, 0.95)
 	_rune.draw_rect(Rect2(-3, 2, 6, 3), c)
+	# A glint along the crushing teeth so the danger edge reads in the dark;
+	# it flares while the piston is about to slam or is down
+	if Engine.is_editor_hint() or not running:
+		return
+	var bottom := roundf(get_head_bottom())
+	var w := roundf(head_size.x)
+	var x := -w / 2.0 + _shake
+	var danger := phase == Phase.WARNING or phase == Phase.SLAM or phase == Phase.LOWERED
+	var glint := Color(1.0, 0.34, 0.28, 0.95 if danger else 0.45)
+	var tooth_w := 8.0
+	var tx := x + 2.0
+	while tx + tooth_w <= x + w - 1.0:
+		var tip := Vector2(tx + tooth_w / 2.0, bottom)
+		_rune.draw_line(Vector2(tx, bottom - TEETH_HEIGHT), tip, glint, 1.0)
+		_rune.draw_line(tip, Vector2(tx + tooth_w, bottom - TEETH_HEIGHT), glint, 1.0)
+		tx += tooth_w

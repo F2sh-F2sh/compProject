@@ -49,6 +49,8 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	add_to_group("resettable")
+	# Something to shoot: a controller's aim leans toward it
+	add_to_group("aim_target")
 	var catcher := Area2D.new()
 	catcher.collision_layer = 0
 	catcher.collision_mask = 1
@@ -113,7 +115,8 @@ func reset_state() -> void:
 
 func _on_area_entered(area: Area2D) -> void:
 	if area.is_in_group("fireball"):
-		area.queue_free()
+		if area.has_method("explode"): area.explode()
+		else: area.queue_free()
 		_set_lit(true)
 
 

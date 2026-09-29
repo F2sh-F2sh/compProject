@@ -52,6 +52,12 @@ var _held := 0.0
 var _revealed := false
 var _glow: Node2D
 var _time := 0.0
+## 0..1: the player is near one of this circuit's pieces, so its grooves
+## light up and pulse toward what it controls (with full guidance).
+var preview := 0.0
+var _player: Node2D
+
+const PREVIEW_RANGE := 96.0
 
 
 func _ready() -> void:
@@ -136,8 +142,23 @@ func _physics_process(delta: float) -> void:
 			var root := get_tree().get_first_node_in_group("chapter_root")
 			if root:
 				root.show_mechanism(targets[0].global_position + Vector2(0, -40), 1.2)
-	if powered or _any_source_powered():
+	var near := Settings.guidance >= Settings.GUIDANCE_FULL and _player_near()
+	var was := preview
+	preview = move_toward(preview, 1.0 if near else 0.0, delta * 4.0)
+	if powered or _any_source_powered() or preview > 0.0 or was > 0.0:
 		_glow.queue_redraw()
+
+
+func _player_near() -> bool:
+	if not is_instance_valid(_player):
+		_player = get_tree().get_first_node_in_group("player") as Node2D
+		if _player == null:
+			return false
+	for piece in sources + targets:
+		if is_instance_valid(piece) and piece is Node2D \
+				and piece.global_position.distance_to(_player.global_position) < PREVIEW_RANGE:
+			return true
+	return false
 
 
 func _apply(on: bool, force := false) -> void:
@@ -201,10 +222,16 @@ func _draw_glow() -> void:
 		var points: PackedVector2Array = path["points"]
 		var source_on: bool = not Engine.is_editor_hint() and source.is_powered()
 		if not (source_on or powered):
-			# A faint trace keeps every connection readable in the dark
-			_glow.draw_polyline(points, Color(channel_color, 0.12), 1.0)
-			_draw_symbol(_glow, points[0], Color(channel_color, 0.35))
-			_draw_symbol(_glow, points[points.size() - 1], Color(channel_color, 0.35))
+			# A faint trace keeps every connection readable in the dark; near
+			# one of its pieces it brightens and pulses toward the target
+			var p := preview
+			_glow.draw_polyline(points, Color(channel_color, lerpf(0.12, 0.5, p)), 1.0)
+			_draw_symbol(_glow, points[0], Color(channel_color, lerpf(0.35, 0.9, p)))
+			_draw_symbol(_glow, points[points.size() - 1], Color(channel_color, lerpf(0.35, 0.9, p)))
+			if p > 0.0:
+				_draw_pulses(points, Color(channel_color, 0.55 * p))
+				var end := points[points.size() - 1]
+				_glow.draw_arc(end, 9.0 + 2.0 * sin(_time * 5.0), 0.0, TAU, 20, Color(channel_color, 0.6 * p), 1.0)
 			continue
 		var color := channel_color if powered else Color(channel_color, 0.55)
 		_glow.draw_polyline(points, Color(color, color.a * 0.35), 3.0)

@@ -85,6 +85,11 @@ func _update_extension() -> void:
 		var k := (t - lowered_time - warning_time - rise_time - raised_time) / lower_time
 		extension = lerpf(1.0, 0.0, clampf(k, 0.0, 1.0))
 	_apply_extension(jitter)
+	# The glint flares while they rattle, so the rise is never a surprise
+	if _glint:
+		_glint.material = glint_material(GLINT_WARNING if warning and active else GLINT_NORMAL)
+	if _floor_glow:
+		_floor_glow.modulate.a = 0.6 if warning and active else (0.15 + 0.25 * extension)
 
 
 func _rebuild() -> void:
@@ -102,6 +107,7 @@ func _apply_extension(jitter: float) -> void:
 	# Only the tips show while the spikes are rising out of the floor
 	_sprite.region_rect = Rect2(0, 0, w, maxf(visible_height, 1.0))
 	_sprite.position = Vector2(-w / 2.0 + jitter, -visible_height)
+	sync_glint()
 	if extension >= danger_extension:
 		_set_hitbox_height(visible_height - hitbox_inset.y)
 	else:

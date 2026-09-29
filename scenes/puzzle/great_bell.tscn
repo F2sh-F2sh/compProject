@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/great_bell.gd" id="1_y8g5a"]
+
+[node name="GreatBell" type="Node2D" unique_id=953493858]
+script = ExtResource("1_y8g5a")

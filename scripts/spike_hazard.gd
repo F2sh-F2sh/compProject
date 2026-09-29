@@ -8,6 +8,13 @@ extends Area2D
 
 const SPIKE_TEXTURE := preload("res://assets/Spikes.png")
 const SPIKE_SIZE := 32.0
+const GLINT_SHADER := preload("res://assets/shaders/hazard_glint.gdshader")
+const GLOW_TEXTURE := preload("res://assets/fx/soft_glow.png")
+const GLINT_NORMAL := 1.5
+const GLINT_WARNING := 2.6
+
+# Shared by every strip: one material per glint strength
+static var _glint_materials := {}
 
 @export_range(1, 32) var spike_count := 2:
 	set(value):
@@ -25,6 +32,9 @@ const SPIKE_SIZE := 32.0
 @export var rehit_delay := 0.25
 
 var _sprite: Sprite2D
+## Danger read in the dark: a glint on the tips and a faint red floor glow.
+var _glint: Sprite2D
+var _floor_glow: Sprite2D
 var _collider: CollisionShape2D
 var _cooldowns := {}
 
@@ -90,6 +100,24 @@ func _rebuild() -> void:
 		_sprite.region_enabled = true
 		_sprite.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 		add_child(_sprite)
+	if _glint == null:
+		_glint = Sprite2D.new()
+		_glint.texture = SPIKE_TEXTURE
+		_glint.centered = false
+		_glint.region_enabled = true
+		_glint.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		_glint.material = glint_material(GLINT_NORMAL)
+		_sprite.add_child(_glint)
+	if _floor_glow == null:
+		_floor_glow = Sprite2D.new()
+		_floor_glow.texture = GLOW_TEXTURE
+		var additive := CanvasItemMaterial.new()
+		additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		additive.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+		_floor_glow.material = additive
+		_floor_glow.modulate = Color(0.9, 0.2, 0.18, 0.4)
+		add_child(_floor_glow)
+		move_child(_floor_glow, 0)
 	if _collider == null:
 		_collider = CollisionShape2D.new()
 		_collider.shape = RectangleShape2D.new()
@@ -98,7 +126,25 @@ func _rebuild() -> void:
 	var w := get_width()
 	_sprite.region_rect = Rect2(0, 0, w, SPIKE_SIZE)
 	_sprite.position = Vector2(-w / 2.0, -SPIKE_SIZE)
+	_floor_glow.position = Vector2(0, -4)
+	_floor_glow.scale = Vector2((w + 24.0) / 128.0, 0.3)
+	sync_glint()
 	_set_hitbox_height(SPIKE_SIZE - hitbox_inset.y)
+
+
+## Keeps the glint overlay on exactly the part of the art that is showing.
+func sync_glint() -> void:
+	if _glint:
+		_glint.region_rect = _sprite.region_rect
+
+
+static func glint_material(strength: float) -> ShaderMaterial:
+	if not _glint_materials.has(strength):
+		var mat := ShaderMaterial.new()
+		mat.shader = GLINT_SHADER
+		mat.set_shader_parameter("intensity", strength)
+		_glint_materials[strength] = mat
+	return _glint_materials[strength]
 
 
 func _set_hitbox_height(height: float) -> void:

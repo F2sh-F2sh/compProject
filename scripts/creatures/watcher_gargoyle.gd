@@ -267,6 +267,9 @@ func _freeze() -> void:
 	is_frozen = true
 	velocity.x = 0.0
 	Sfx.play("gargoyle_freeze", global_position)
+	# A puff of stone dust and a jolt as the light turns it to stone
+	ImpactFX.burst(get_parent(), global_position + Vector2(0, -16), Color(0.7, 0.8, 1.0), true, 10)
+	ImpactFX.kick(get_tree(), 1.4, 0.15)
 	# Become solid only once nobody is standing inside it
 	if _player_inside():
 		_solid_pending = true
@@ -281,6 +284,7 @@ func _wake() -> void:
 	_grace = wake_grace
 	_set_state(State.WAKING)
 	Sfx.play("gargoyle_wake", global_position)
+	ImpactFX.burst(get_parent(), global_position + Vector2(0, -20), Color(0.55, 0.5, 0.7), true, 6)
 
 
 func _player_inside() -> bool:

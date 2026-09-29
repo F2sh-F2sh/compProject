@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/circuit.gd" id="1_ydq2r"]
 
-[node name="Circuit" type="Node2D" unique_id=65620932]
+[node name="Circuit" type="Node2D" unique_id=1892285264]
 script = ExtResource("1_ydq2r")

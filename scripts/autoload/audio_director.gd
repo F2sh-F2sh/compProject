@@ -36,6 +36,9 @@ var players := {}
 var ambience: AudioStreamPlayer
 var _combat_sources := {}
 var _fade_in := 0.0
+## Extra music attenuation (see duck()).
+var duck_db := 0.0
+var _duck_tween: Tween
 
 
 func _ready() -> void:
@@ -84,6 +87,15 @@ func is_combat() -> bool:
 	return not _combat_sources.is_empty()
 
 
+## Lowers the music by `db` (0 = normal) over `seconds`, e.g. so a great
+## moment can ring out on its own.
+func duck(db: float, seconds := 1.0) -> void:
+	if _duck_tween:
+		_duck_tween.kill()
+	_duck_tween = create_tween()
+	_duck_tween.tween_property(self, "duck_db", db, seconds)
+
+
 ## Clears every combat request (e.g. when a new level loads).
 func reset_combat() -> void:
 	_combat_sources.clear()
@@ -107,7 +119,7 @@ func _apply_mix() -> void:
 	for layer in players:
 		var spec: Array = LAYERS[layer]
 		var db: float = lerpf(spec[1], spec[2], k)
-		players[layer].volume_db = maxf(db + start, -80.0)
+		players[layer].volume_db = maxf(db + start + duck_db, -80.0)
 	if ambience:
 		ambience.volume_db = maxf(AMBIENCE_DB + start, -80.0)
 	var music := AudioServer.get_bus_index(Settings.MUSIC_BUS)

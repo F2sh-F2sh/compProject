@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/brazier.gd" id="1_vg7jh"]
 
-[node name="Brazier" type="Node2D" unique_id=1814384254]
+[node name="Brazier" type="Node2D" unique_id=214730559]
 script = ExtResource("1_vg7jh")

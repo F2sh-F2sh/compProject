@@ -9,14 +9,35 @@ signal flag_changed(id: String, value: Variant)
 const SAVE_PATH := "user://savegame.cfg"
 
 var flags := {}
+## The most recent checkpoint anywhere (where "Continue" goes).
 var checkpoint_scene := ""
 var checkpoint_id := ""
+## The last checkpoint reached in each scene, so the tutorial's lessons and
+## the chapter's shrines never overwrite each other.
+var checkpoints := {}
+## Counters for this play session only (never saved): deaths per room, etc.
+var session := {}
 ## Tests turn this off so they never touch a real save file.
 var persist_to_disk := true
 
 
 func _ready() -> void:
+	_migrate_old_user_dir()
 	load_game()
+
+
+## The game was renamed from "compProject", which moved its user folder:
+## bring the old save and settings across once, so nobody loses progress.
+func _migrate_old_user_dir() -> void:
+	var here := OS.get_user_data_dir()
+	var old := here.get_base_dir().path_join("compProject")
+	if old == here or not DirAccess.dir_exists_absolute(old):
+		return
+	for file_name in ["savegame.cfg", "settings.cfg"]:
+		var from := old.path_join(file_name)
+		var to := here.path_join(file_name)
+		if FileAccess.file_exists(from) and not FileAccess.file_exists(to):
+			DirAccess.copy_absolute(from, to)
 
 
 func has_flag(id: String) -> bool:
@@ -44,16 +65,26 @@ func count_flags(prefix: String) -> int:
 
 
 func set_checkpoint(scene_path: String, id: String) -> void:
-	if checkpoint_scene == scene_path and checkpoint_id == id:
+	if checkpoint_scene == scene_path and checkpoint_id == id and checkpoints.get(scene_path) == id:
 		return
 	checkpoint_scene = scene_path
 	checkpoint_id = id
+	checkpoints[scene_path] = id
 	save_game()
 
 
 ## The checkpoint id to respawn at in this scene, or "" to use the level start.
 func get_checkpoint_for(scene_path: String) -> String:
-	return checkpoint_id if checkpoint_scene == scene_path else ""
+	return checkpoints.get(scene_path, "")
+
+
+## Forgets a scene's checkpoint (e.g. once the tutorial is finished).
+func clear_checkpoint(scene_path: String) -> void:
+	checkpoints.erase(scene_path)
+	if checkpoint_scene == scene_path:
+		checkpoint_scene = ""
+		checkpoint_id = ""
+	save_game()
 
 
 ## Forgets all progress made in one scene (flags are prefixed with a scene key).
@@ -61,6 +92,9 @@ func clear_progress(prefix: String) -> void:
 	for id in flags.keys():
 		if String(id).begins_with(prefix):
 			flags.erase(id)
+	for scene_path in checkpoints.keys():
+		if String(checkpoints[scene_path]).begins_with(prefix):
+			checkpoints.erase(scene_path)
 	if checkpoint_id.begins_with(prefix):
 		checkpoint_scene = ""
 		checkpoint_id = ""
@@ -69,9 +103,50 @@ func clear_progress(prefix: String) -> void:
 
 func clear_all() -> void:
 	flags.clear()
+	checkpoints.clear()
+	session.clear()
 	checkpoint_scene = ""
 	checkpoint_id = ""
 	save_game()
+
+
+## Adds to a session counter (not saved), e.g. deaths in a room.
+func bump(key: String, amount := 1) -> int:
+	session[key] = int(session.get(key, 0)) + amount
+	return session[key]
+
+
+## Run statistics (time, deaths, resets, hints), kept with the progress
+## under the chapter's prefix, e.g. "ch1.stat.deaths". Not written to disk
+## on every change; the next save_game() stores them.
+func add_stat(key: String, amount: float) -> void:
+	flags[key] = float(flags.get(key, 0.0)) + amount
+
+
+func get_stat(key: String) -> float:
+	var v = flags.get(key, 0.0)
+	return float(v) if (v is float or v is int) else 0.0
+
+
+## Appends one line to user://playtest_log.csv (for playtesting: time,
+## deaths, resets and hints per room and per run, without writing them down
+## by hand). Skipped while the tests run.
+func log_playtest(fields: Array) -> void:
+	if not persist_to_disk:
+		return
+	var path := "user://playtest_log.csv"
+	var is_new := not FileAccess.file_exists(path)
+	var file := FileAccess.open(path, FileAccess.READ_WRITE if not is_new else FileAccess.WRITE)
+	if file == null:
+		return
+	file.seek_end()
+	if is_new:
+		file.store_line("when,what,room,seconds,deaths,resets,hints,pages")
+	var row := PackedStringArray([Time.get_datetime_string_from_system(false, true)])
+	for f in fields:
+		row.append(str(f).replace(",", ";"))
+	file.store_line(",".join(row))
+	file.close()
 
 
 func save_game() -> void:
@@ -81,15 +156,27 @@ func save_game() -> void:
 	file.set_value("progress", "flags", flags)
 	file.set_value("progress", "checkpoint_scene", checkpoint_scene)
 	file.set_value("progress", "checkpoint_id", checkpoint_id)
+	file.set_value("progress", "checkpoints", checkpoints)
 	file.save(SAVE_PATH)
 
 
-func load_game() -> void:
-	if not persist_to_disk:
+## Loads the save (or another file, for the tests' corrupted-save check).
+func load_game(path := SAVE_PATH) -> void:
+	if not persist_to_disk and path == SAVE_PATH:
 		return
 	var file := ConfigFile.new()
-	if file.load(SAVE_PATH) != OK:
+	if file.load(path) != OK:
 		return
-	flags = file.get_value("progress", "flags", {})
-	checkpoint_scene = file.get_value("progress", "checkpoint_scene", "")
-	checkpoint_id = file.get_value("progress", "checkpoint_id", "")
+	# A damaged or hand-edited save must never crash the game: anything of
+	# the wrong type falls back to empty progress
+	var loaded_flags = file.get_value("progress", "flags", {})
+	flags = loaded_flags if loaded_flags is Dictionary else {}
+	var scene = file.get_value("progress", "checkpoint_scene", "")
+	var id = file.get_value("progress", "checkpoint_id", "")
+	checkpoint_scene = scene if scene is String else ""
+	checkpoint_id = id if id is String else ""
+	var loaded_checkpoints = file.get_value("progress", "checkpoints", {})
+	checkpoints = loaded_checkpoints if loaded_checkpoints is Dictionary else {}
+	# Saves from before per-scene checkpoints
+	if checkpoints.is_empty() and checkpoint_scene != "":
+		checkpoints[checkpoint_scene] = checkpoint_id

@@ -11,9 +11,12 @@ extends Node2D
 @export var focus_nodes: Array[Node] = []
 
 var stage := 0
+## Set when the player seems stuck: the skull's eyes flare and it calls out.
+var nudging := false
 var _interact: Interactable
 var _eyes: Node2D
 var _time := 0.0
+var _call_timer := 0.0
 
 
 func _ready() -> void:
@@ -27,19 +30,34 @@ func _ready() -> void:
 		return
 	_interact = Interactable.new()
 	_interact.verb = "Listen"
+	_interact.echo_can_use = false
 	_interact.size = Vector2(40, 48)
 	_interact.prompt_offset = Vector2(0, -44)
 	add_child(_interact)
 	_interact.interacted.connect(func(_p): next_hint())
 
 
+## Draws attention to the stone once, when the player seems stuck.
+func nudge() -> void:
+	if nudging or stage >= hints.size():
+		return
+	nudging = true
+	_call_timer = 0.0
+	var root := get_tree().get_first_node_in_group("chapter_root")
+	if root:
+		root.show_toast(InputLabels.format("Stuck? The whispering skull in this room can help. Stand by it and press {interact}.",
+			"%s"), 6.0)
+
+
 func next_hint() -> void:
+	nudging = false
 	stage = mini(stage + 1, hints.size())
 	Sfx.play("hint", global_position)
 	var root := get_tree().get_first_node_in_group("chapter_root")
 	var prefix: String = ["Hint 1 of 3", "Hint 2 of 3", "Hint 3 of 3 (solution)"][clampi(stage - 1, 0, 2)]
 	if root:
-		root.show_toast("%s\n%s" % [prefix, hints[stage - 1]], 6.0)
+		root.show_toast("%s\n%s" % [prefix, InputLabels.format(hints[stage - 1])], 6.0)
+		root.note_hint()
 	if stage == 1:
 		for node in focus_nodes:
 			if is_instance_valid(node) and node is Node2D:
@@ -54,6 +72,11 @@ func _mark(node: Node2D) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	if nudging:
+		_call_timer -= delta
+		if _call_timer <= 0.0:
+			_call_timer = 5.0
+			Sfx.play("hint", global_position, -12.0)
 	_eyes.queue_redraw()
 
 
@@ -77,6 +100,13 @@ func _draw_eyes() -> void:
 	var color := Color(0.5, 0.75, 1.0, glow)
 	_eyes.draw_rect(Rect2(-3, -19, 1, 1), color)
 	_eyes.draw_rect(Rect2(2, -19, 1, 1), color)
+	if nudging:
+		# Brighter eyes and slow rings of whispering light
+		_eyes.draw_rect(Rect2(-4, -20, 3, 3), Color(0.6, 0.85, 1.0, 0.5 * glow))
+		_eyes.draw_rect(Rect2(1, -20, 3, 3), Color(0.6, 0.85, 1.0, 0.5 * glow))
+		for i in 2:
+			var k := fposmod(_time * 0.6 + i * 0.5, 1.0)
+			_eyes.draw_arc(Vector2(0, -18), 8.0 + k * 34.0, 0.0, TAU, 32, Color(0.55, 0.8, 1.0, (1.0 - k) * 0.45), 1.0)
 
 
 ## A bobbing arrow that fades after a few seconds.

@@ -19,8 +19,9 @@ states) and [PLAYTEST_CHECKLIST.md](PLAYTEST_CHECKLIST.md) (what a human still n
 
 ## Status: all milestones implemented and passing automated tests
 
-Last full run: `tutorial suite: passed=111 failed=0`, `chapter suite: passed=216 failed=0`,
-`presentation suite: passed=82 failed=0` (`RESULT passed=409 failed=0`). All 73 scripts compile.
+Last full run (2026-09-29, after the enjoyment pass): `tutorial suite: passed=140 failed=0`,
+`chapter suite: passed=274 failed=0`, `presentation suite: passed=88 failed=0`,
+`experience suite: passed=59 failed=0` (`RESULT passed=561 failed=0`).
 
 | Milestone | Status |
 |---|---|
@@ -33,16 +34,15 @@ Last full run: `tutorial suite: passed=111 failed=0`, `chapter suite: passed=216
 | 6 Regression tests and docs | Done |
 
 ## How to run
-
-- Play: run the project (main scene is still the tutorial; its exit door leads to the
-  chapter) or open `res://scenes/chapter/chapter_1.tscn` and press F6.
+- Play: run the project (F5): the title screen, then the tutorial and the chapter. To jump
+  straight in, open `res://scenes/chapter/chapter_1.tscn` and press F6.
 - Rebuild the chapter after changing the builder:
   `godot --headless --path . --script res://tools/build_chapter.gd`
   (this **overwrites** `scenes/chapter/chapter_1.tscn` and the component scenes in
   `scenes/puzzle`, `scenes/creatures`, `scenes/traps`).
 - Tests (need a window, not `--headless`, because they take screenshots and aim the mouse):
-  `godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- [tutorial|chapter] [scenario]`
-  Chapter scenarios: `r1`…`r7`, `save`, `reset`, `hazards`, `full`, and `look`
+  `godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- [tutorial|chapter|presentation|experience|all] [scenario]`
+  Chapter scenarios: `r1`…`r9`, `save`, `reset`, `hazards`, `guide`, `full`, and `look`
   (screenshots of every room into `user://test_shots/`, not run by default).
 - Regenerate the sound effects: `godot --headless --path . --script res://tools/generate_sfx.gd`
   then let the editor import them.
@@ -141,17 +141,100 @@ Details, timing tables and the full verification record are in
   `run_tests.gd`'s default run. The tutorial (111) and chapter (216) suites
   still pass.
 
+## Enjoyment pass (2026-09-28/29)
+
+Driven by beta-tester feedback and an audit of what made the game less fun. Plan:
+`C:\Users\Ishaan\.claude\plans\vectorized-greeting-fern.md`. Local checkpoint commit
+`87278ca` was made first (not pushed); everything since is uncommitted.
+
+**Phase 1: beta-tester fixes**
+- Jump fires on the frame the press registers, with 0.1 s coyote time; the high jump is
+  now crouch (S / Down) then jump. Heights unchanged (tested: 65.5 px tapped, 131.8 px full).
+- Footsteps: four soft variants plus an iron-grate tick on a dry "Foley" bus; every second
+  plant only, none for taps or below 40 px/s.
+- Caged slimes (R2, R7): fireballs can't spawn past a floor, grate or wall; the grate stops
+  them; the slimes are warded.
+- Visible hazards: an additive glint on spike tips (`assets/shaders/hazard_glint.gdshader`),
+  a red floor glow, a warning flare on rising spikes, glowing piston teeth.
+- Floating wall tiles: `tools/wall_tile_audit.gd` + `tools/audit_wall_tiles.gd` found 7
+  (3 chapter, 4 tutorial) and fixed them; the audit is now a test.
+- Tutorial sprint gap: 128 px over a shallow pit (`FallCatcher`) that fades you back
+  without damage (`tools/patch_tutorial.gd`).
+- Pistons send you back like spikes (R5 has its own candle); healing is a 1.2 s channel
+  (`scripts/player/heal_channel.gd`) that moving, jumping, casting or a hit breaks, with
+  no heal for 3 s after a hit.
+
+**Phase 2: a clearer Chapter 1**
+- Four acts with title cards; per-room goal card with step pips (`ObjectiveStep`,
+  `ObjectivePanel`), optional page pips; groove previews near switches; faint key cues
+  near usable things; hint stones call out after 90 s or two deaths; Guidance setting
+  (Full / Light / Off); chapter map in the pause menu.
+- Tutorial split into nine lessons (`LessonZone`) with cards and per-lesson respawn;
+  `tutorial.done` flag. Per-scene checkpoints in `GameState`.
+
+**Phase 3: the Echo in Chapter 1**
+- Echoes replay lever/rope/mirror use (`Interactable.trigger`); HUD seconds countdown,
+  last-3-seconds ticks, hold E to let Echoes fade, notices, one colour per Echo.
+- New rooms: R8 The Choir Loft (spring levers, needs an Echo) and R9 The Great Bell
+  (an Echo holds the plate for the stairs). R6 shrine added. Slimes drop health orbs.
+
+**Phase 4: front door and ending**
+- Title screen (the main scene), story intro, Continue / New Game / Tutorial / Settings,
+  project renamed "The Sealed Belfry" with its own icon (old save and settings are
+  migrated from the "compProject" user folder).
+- The great bell ending (`GreatBell`) and a Chapter Complete card with run statistics;
+  page reader on parchment; the Bellkeeper's Ledger in the pause menu; run statistics
+  and `user://playtest_log.csv`.
+
+**Phase 5: feel**
+- Fireball impact bursts, hit-stop and camera kick (`ImpactFX`); crits (10%, x2) show
+  their number; muzzle flash, aim-facing, fizzle, reload sounds; death sound and
+  dissolve, retry prompt in ~1.5 s; low-health vignette and heartbeat; slime knockback
+  and white flash; gargoyle stone-dust; room-clear chord; per-room colour moods.
+
+**Phase 6: controls, comfort, shipping**
+- Gamepad on every action, right-stick aim with light aim assist, pad button prompts;
+  key rebinding with swap-on-conflict and reset; assists (damage 100/75/50/25%,
+  unlimited mana, always sprint, crouch toggle); fullscreen (F11); lighter effects.
+- README, CREDITS, `.gitignore` (builds, *.tmp), killzone script, export-safe atmosphere
+  colour, a "Windows release" export preset (builds/windows/TheSealedBelfry.exe; the
+  existing "Oou" preset is untouched). The exported build boots with a clean log.
+
+**Verification**
+- Automated: tutorial, chapter, presentation and new experience suites (see the last
+  full-run line below). Every new room is solved with real simulated input.
+- Frame rate: 163–165 fps (vsync cap) in all nine rooms, the tutorial and the title on
+  the RTX 3060; worst frame 10.4 ms. Not measured on other GPUs.
+- Visually inspected: title, intro, page reader, Ledger, objective card, R8/R9, the
+  bell ending, spike glint (see `user://test_shots/`, now under "The Sealed Belfry").
+- Needs a human: how it all feels and sounds (see PLAYTEST_CHECKLIST.md's new sections).
+
+**Not done (backlog):** the optional three-room Echo wing (Undercroft); gargoyle decoys;
+wisp comet trail; painted per-room props; title and ending music themes and per-room music
+layers; new enemies and a boss; OFL licence text and tileset credits (need the team);
+removing the 7 tracked `.tmp` files and bundling a serif font (need approval).
+
+## Rune cubes and Chapter 2 (2026-09-29)
+
+The rune-cube magic system and an eight-room Chapter 2, "The Sealed Observatory", are
+implemented and pass automated tests; nobody has playtested them. Everything about them
+(design decisions, tuning, files, test record, gaps) is in `docs/RUNE_SYSTEM_PROGRESS.md`;
+room solutions and the full list of accepted runes are in `docs/CHAPTER2_SOLUTIONS.md`.
+Chapter 1's ending now offers "Continue to the next chapter", and the title screen has a
+Chapter 2 entry.
+
 ## Known limitations and decisions
 
-- There is no title menu. The chapter continues from the last shrine whenever it is
-  entered; Pause → Restart Chapter starts it fresh.
+- The title screen is the main scene. Continue goes to the latest shrine or lesson;
+  New Game (press twice if there is progress) starts over but keeps a finished tutorial.
 - `chapter_1.tscn` is generated. Tune rooms in `tools/build_chapter.gd`, or stop using the
   builder before editing the scene by hand.
-- `tutorial_level.tscn` was hand-edited this session (exit now leads to the chapter; pause
-  menu added). Its original builder is not in the repository.
+- `tutorial_level.tscn` is hand-edited; its original builder is not in the repository.
+  Structural edits go through `tools/patch_tutorial.gd` (idempotent patches that change
+  only the affected tile-data lines and append nodes).
 - Piston heads are solid but fireballs pass through them (so the tutorial's "shoot the
   switch through the running pistons" still works); beams and bolts are stopped.
-- The main scene is unchanged (tutorial).
+- The main scene is now the title screen (`scenes/ui/title_screen.tscn`).
 
 ## Handoff notes
 
