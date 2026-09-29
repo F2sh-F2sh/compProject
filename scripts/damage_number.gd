@@ -8,7 +8,7 @@ extends Node2D
 
 
 func setup(damage: int, critical: bool) -> void:
-	z_index = 30
+	z_index = 50
 	material = MagicLight.unshaded()
 	label.use_parent_material = true
 	label.add_theme_color_override("font_outline_color", Color(0.05, 0.02, 0.08, 0.95))

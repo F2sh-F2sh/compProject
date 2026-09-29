@@ -37,6 +37,9 @@ var _light: PointLight2D
 
 
 func _ready() -> void:
+	# Above light shafts (25) and the foreground vines (40): nothing in the
+	# world covers the words
+	z_index = 45
 	_rebuild()
 
 

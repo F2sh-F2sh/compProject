@@ -280,31 +280,29 @@ func scenario_motion() -> void:
 
 
 func scenario_charge() -> void:
-	print("SCENARIO charge wisps")
+	print("SCENARIO charge glow (no lines)")
 	await load_level(TUTORIAL)
 	await place(Vector2(400, FLOOR))
-	var wisps: AnimatedSprite2D = player.get_node("ChargeWisps")
+	check("no wind streaks or wisp lines on her", player.get_node_or_null("ChargeWisps") == null
+		and player.get_node_or_null("ChargeWindBack") == null and player.get_node_or_null("ChargeWindFront") == null)
 	var light: PointLight2D = player.get_node("WispLight")
 	var sparks: CPUParticles2D = player.get_node("WispSparks")
-	check("no wisps while idle", not wisps.visible)
+	check("no glow while idle", light.energy < 0.05, "%.2f" % light.energy)
 	Input.action_press("crouch")
 	await seconds(0.6)
-	check("no wisps before the charge pose", not wisps.visible)
+	check("no glow before the charge pose", light.energy < 0.05, "%.2f" % light.energy)
 	await seconds(0.8)
-	check("wisps appear with the charge pose", wisps.visible and player.animated_sprite.animation == &"JumpCharge")
-	var early: float = (wisps.material as ShaderMaterial).get_shader_parameter("charge")
-	check("wisps ride the body frame for frame", wisps.frame == player.animated_sprite.frame and wisps.flip_h == player.animated_sprite.flip_h)
+	check("the charge pose plays", player.animated_sprite.animation == &"JumpCharge")
+	var early := light.energy
 	await seconds(1.4)
-	var full: float = (wisps.material as ShaderMaterial).get_shader_parameter("charge")
-	check("wisps brighten as the charge builds", full > early + 0.3 and full >= 0.99, "%.2f -> %.2f" % [early, full])
-	check("wisps light their surroundings at full charge", light.energy > 0.8, "%.2f" % light.energy)
-	check("sparks crackle at full charge", sparks.emitting)
+	check("the glow builds with the charge", light.energy > early + 0.3 and light.energy > 0.8, "%.2f -> %.2f" % [early, light.energy])
+	check("sparks show the charge is full", sparks.emitting)
 	Input.action_press("jump")
 	await frames(2)
 	Input.action_release("jump")
 	Input.action_release("crouch")
 	await frames(3)
-	check("wisps vanish as she leaps", not wisps.visible and not sparks.emitting)
+	check("the sparks stop as she leaps", not sparks.emitting)
 	await wait_until(func(): return player.is_on_floor(), 2.0)
 
 

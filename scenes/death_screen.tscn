@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://bdrl0xcn0b4aa"]
 
 [ext_resource type="Script" uid="uid://bulevur7g10fx" path="res://scripts/death_screen.gd" id="1_dwo6e"]
-<<<<<<< HEAD
 
 [sub_resource type="Shader" id="Shader_dim"]
 code = "shader_type canvas_item;
@@ -55,11 +54,6 @@ base_font = SubResource("SystemFont_serif")
 spacing_glyph = 5
 
 [node name="DeathScreen" type="Control" unique_id=905570687 groups=["death_screen"]]
-=======
-[ext_resource type="Texture2D" uid="uid://ch1uokfr24m7u" path="res://assets/TempDT.png" id="2_mqh5l"]
-
-[node name="DeathScreen" type="Control" unique_id=905570687]
->>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -69,19 +63,14 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_dwo6e")
 
-<<<<<<< HEAD
 [node name="Dim" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_dim")
-=======
-[node name="FadeToBlack" type="ColorRect" parent="." unique_id=533084413]
->>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-<<<<<<< HEAD
 
 [node name="Band" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_band")
@@ -135,27 +124,3 @@ theme_override_font_sizes/font_size = 24
 text = "Press Space to Continue"
 horizontal_alignment = 1
 vertical_alignment = 1
-=======
-color = Color(0, 0, 0, 1)
-
-[node name="Center" type="CenterContainer" parent="." unique_id=14928908]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="MessageBox" type="VBoxContainer" parent="Center" unique_id=945413334]
-layout_mode = 2
-
-[node name="YouDiedImage" type="TextureRect" parent="Center/MessageBox" unique_id=1495670216]
-layout_mode = 2
-texture = ExtResource("2_mqh5l")
-stretch_mode = 5
-
-[node name="RestartPrompt" type="Label" parent="Center/MessageBox" unique_id=379900316]
-layout_mode = 2
-text = "Press [Spacebar] to do it over"
-horizontal_alignment = 1
->>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12

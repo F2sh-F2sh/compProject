@@ -62,7 +62,11 @@ var _time := 0.0
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
+
 func _ready():
+	# A slime is short: drawn above props, grates and the thorns framing the
+	# bottom of the view (40) so it is never hidden behind them
+	z_index = 42
 	health = max_health
 	home_x = global_position.x
 	_start_position = global_position
@@ -119,6 +123,7 @@ func hear_bell(point: Vector2) -> void:
 func _set_state(new_state: State) -> void:
 	state = new_state
 	_state_time = 0.0
+
 
 func _physics_process(delta):
 	_time += delta
@@ -339,7 +344,6 @@ func take_damage(amount, critical := false):
 	if health <= 0:
 		die()
 
-<<<<<<< HEAD
 
 func _shimmer_ward() -> void:
 	Sfx.play("ward_clink", global_position)
@@ -365,8 +369,6 @@ func _shimmer_ward() -> void:
 	tween.tween_property(sprite, "modulate", Color.WHITE, 0.2)
 
 
-=======
->>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 func die():
 	if is_dead:
 		return

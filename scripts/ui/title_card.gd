@@ -34,20 +34,20 @@ func _build(overline: String, title: String, subtitle: String) -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
-	# A soft dark band so the words read over any scene
+	# A soft dark band so the words read over any scene. It sits high, under
+	# the HUD, clear of the middle of the view where signs hang.
 	var band := ColorRect.new()
-	band.set_anchors_preset(Control.PRESET_HCENTER_WIDE)
-	band.offset_top = -96
-	band.offset_bottom = 70
+	band.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	band.offset_top = 84
+	band.offset_bottom = 236
 	band.color = Color(0.02, 0.01, 0.05, 0.55)
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(band)
 	_box = VBoxContainer.new()
-	_box.set_anchors_preset(Control.PRESET_CENTER)
+	_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_box.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_box.offset_top = -120
-	_box.offset_bottom = 40
+	_box.offset_top = 92
+	_box.offset_bottom = 228
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_box.add_theme_constant_override("separation", 6)
 	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE

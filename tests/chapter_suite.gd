@@ -292,27 +292,48 @@ func solve_r1() -> void:
 	check("R1 the kerb stops the block on the plate", plate.is_pressed and absf(block.global_position.x - 876.0) < 6.0,
 		"block x=%.0f" % block.global_position.x)
 	check("R1 plate opens the gate", await wait_until(func(): return exit_gate.open_amount >= 1.0, 3.0))
-	check("R1 solution saved", game_state().has_flag("ch1.r1.solved"))
+	check("R1 not saved while she is still in the room", not game_state().has_flag("ch1.r1.solved"))
 	await run_across([0.0])
 	check("R1 walked out into room 2", await walk_to(1450.0), "x=%.0f" % player.global_position.x)
+	check("R1 solution saved once she has gone through", game_state().has_flag("ch1.r1.solved"))
 
 
-func solve_r2() -> void:
+## Pushes the block onto plate B and rings the bell by its rope.
+func r2_block_and_bell() -> void:
 	var slime = node("R2/BellSlime")
-	var plate_a = node("R2/PlateA")
 	var plate_b = node("R2/PlateB")
+	var block: Node2D = node("R2/Block")
 	var bell = node("R2/Bell")
 	var exit_gate = node("R2/ExitGate")
-	check("R2 the grate carries the player over the cell", await walk_to(2096.0) and player.global_position.y < 540.0,
+	check("R2 the grate carries the player over the cell", await walk_to(2030.0) and player.global_position.y < 540.0,
 		"y=%.0f" % player.global_position.y)
+	Input.action_press("move_right")
+	await wait_until(func(): return plate_b.is_pressed, 8.0)
+	await seconds(0.8)
+	Input.action_release("move_right")
+	await frames(20)
+	check("R2 the kerb stops the block on plate B", plate_b.is_pressed and absf(block.global_position.x - 2220.0) < 6.0,
+		"block x=%.0f" % block.global_position.x)
+	await walk_to(2096.0)
+	await seconds(1.0)
+	check("R2 one plate alone keeps the gate shut", exit_gate.is_fully_closed())
 	await interact()
 	check("R2 rope rings the bell", not bell.is_ready())
 	check("R2 slime heard the bell", slime.state == 1 or slime.state == 2, "state=%d" % slime.state)
-	await walk_to(plate_b.global_position.x - 12.0, true)
+
+
+func solve_r2() -> void:
+	var plate_a = node("R2/PlateA")
+	var block: Node2D = node("R2/Block")
+	var exit_gate = node("R2/ExitGate")
+	await r2_block_and_bell()
 	check("R2 slime hops onto plate A and holds it", await wait_until(func(): return plate_a.is_pressed, 8.0),
-		"slime x=%.0f" % slime.global_position.x)
+		"slime x=%.0f" % node("R2/BellSlime").global_position.x)
 	check("R2 both plates open the gate", await wait_until(func(): return exit_gate.open_amount >= 1.0, 4.0))
-	check("R2 walked out into room 3", await walk_to(2950.0, true))
+	# Over the block (resting against the kerb) and out while the slime listens
+	await run_across([block.global_position.x - 44.0], true)
+	check("R2 walked out into room 3", await walk_to(2950.0, true), "x=%.0f" % player.global_position.x)
+	check("R2 solution saved once she has gone through", game_state().has_flag("ch1.r2.solved"))
 
 
 func solve_r3() -> void:
@@ -348,6 +369,17 @@ func solve_r3() -> void:
 	check("R3 high mirror turned from the gallery wheel", m2.facing == MIRROR_SE, "facing=%d" % m2.facing)
 	check("R3 right crystal lit", await wait_until(func(): return r2.is_powered(), 1.0))
 	check("R3 exit gate opens", await wait_until(func(): return exit_gate.open_amount >= 1.0, 3.0))
+	# The light has to stay on the crystal: turned away, the gate shuts again
+	await interact()
+	await frames(6)
+	check("R3 turning the beam off the crystal closes the gate", not r2.is_powered()
+		and await wait_until(func(): return exit_gate.is_fully_closed(), 4.0), "facing=%d" % m2.facing)
+	turns = 0
+	while m2.facing != MIRROR_SE and turns < 4:
+		await interact()
+		await frames(6)
+		turns += 1
+	check("R3 turned back onto it, the gate opens again", await wait_until(func(): return exit_gate.open_amount >= 1.0, 3.0))
 	check("R3 stairs stay after the beam moves on", node("R3/Stair1").is_solid)
 	await shot("r3_solved")
 	# Down the stairs and out under the gallery
@@ -497,13 +529,13 @@ func solve_r7() -> void:
 		"watcher x=%.0f" % gargoyle.global_position.x)
 	check("R7 the seal wakes rune by rune", await wait_until(func(): return seal.lit_runes > 0 and not seal.is_open, 2.0))
 	check("R7 the seal opens the great door", await wait_until(func(): return seal.is_open and door.open_amount >= 1.0, 6.0))
-	check("R7 seal saved", game_state().has_flag("ch1.r7.solved"))
 	await shot("r7_solved")
 	await seconds(12.0)
 	check("R7 the window stays open after the slime leaves", bars.open_amount >= 1.0 and gargoyle.is_frozen)
 	await walk_to(gargoyle.global_position.x - 40.0)
 	await run_across([gargoyle.global_position.x - 34.0])
 	check("R7 through the great door into the choir loft", await walk_to(11180.0), "x=%.0f" % player.global_position.x)
+	check("R7 seal saved once she has gone through", game_state().has_flag("ch1.r7.solved"))
 
 
 func solve_r8() -> void:
@@ -632,11 +664,23 @@ func scenario_room2() -> void:
 	await seconds(1.5)
 	check("one plate alone does not open the gate", exit_gate.is_fully_closed())
 	check("slime stays off plate A on its own", not plate_a.is_pressed)
+	# The gate is open only while both plates are held: when the slime is done
+	# listening it closes again (she hasn't gone through yet)
+	await enter_room("R2")
+	await r2_block_and_bell()
+	check("the gate opens while the slime sits", await wait_until(func(): return exit_gate.open_amount >= 1.0, 10.0))
+	check("slime leaves plate A after listening", await wait_until(func(): return not plate_a.is_pressed, 16.0))
+	check("then the gate closes again", await wait_until(func(): return exit_gate.is_fully_closed(), 5.0))
+	check("and the room isn't saved as solved", not game_state().has_flag("ch1.r2.solved"))
+
+	await load_level()
+	plate_a = node("R2/PlateA")
+	exit_gate = node("R2/ExitGate")
 	await enter_room("R2")
 	await solve_r2()
-	await seconds(9.0)
-	check("slime leaves plate A after listening", not plate_a.is_pressed)
-	check("the gate stays latched open", exit_gate.open_amount >= 1.0)
+	await seconds(12.0)
+	check("slime leaves plate A after she has gone through", not plate_a.is_pressed)
+	check("a gate she has come through stays open", exit_gate.open_amount >= 1.0)
 
 	# Alternative: a fireball from plate B rings the bell
 	await load_level()

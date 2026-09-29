@@ -215,7 +215,8 @@ func _enter(room: Room, instant: bool) -> void:
 	var title_delay := 0.0
 	if first_visit and room.act != "":
 		TitleCard.show_card(self, "ACT %s" % room.act, room.act_title, room.act_subtitle, 2.2)
-		title_delay = 3.4
+		# The room's name takes the same spot once the act card has gone
+		title_delay = 3.8
 	if first_visit and room.title != "":
 		show_room_title(room.title, title_delay)
 	if _objective:

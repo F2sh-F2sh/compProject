@@ -196,7 +196,7 @@ func room_1_broken_inscription() -> void:
 	var p := plate(room, "CratePlate", 790.0, {"objects_only": true})
 	var exit_gate := gate(room, "ExitGate", 18)
 	circuit(room, "PlateToGate", [p], [exit_gate],
-		{"latch": true, "reveal_target": true, "persist_id": "ch2.r1.solved", "channel_y": 440.0, "symbol": 0})
+		{"reveal_target": true, "persist_id": "ch2.r1.solved", "channel_y": 440.0, "symbol": 0})
 	guide(room, "Open the gate at the far end.", "I", "The Wind", "Chapter 2  ·  The Sealed Observatory")
 	step(room, "A new fragment learned", Cond.FLAG, null, {"flag": "rune.frag.right"})
 	step(room, "The mended rune blows", Cond.POWERED, c)
@@ -241,7 +241,7 @@ func room_2_too_heavy() -> void:
 	var loose := cube(room, "Loose Cube", cx(35), "wind/push/left/normal", {"dungeon_powered": true})
 	var exit_gate := gate(room, "ExitGate", 40)
 	circuit(room, "PlateToGate", [p], [exit_gate],
-		{"latch": true, "reveal_target": true, "persist_id": "ch2.r2.solved", "channel_y": 440.0, "symbol": 1})
+		{"reveal_target": true, "persist_id": "ch2.r2.solved", "channel_y": 440.0, "symbol": 1})
 	guide(room, "Move the stone block onto the heavy plate.")
 	step(room, "One wind strains against the stone", Cond.POWERED, fixed)
 	step(room, "The stone on the plate: the gate opens", Cond.OPEN, exit_gate)
@@ -410,7 +410,7 @@ func room_5_frozen_crossing() -> void:
 # from the ceiling over plate A, carved "light / beam / ? / normal"; learn
 # Down and its beam turns the patrolling watcher to stone the moment it
 # walks under it, onto the plate. Plate B wants the stone block, which needs
-# a Strong wind (or two). Both held for half a second latches the gate.
+# a Strong wind (or two). The gate is open while both are held (after 0.5 s).
 
 func room_6_watchers_lock() -> void:
 	shell(100, 122, LOW_CEIL)
@@ -431,7 +431,7 @@ func room_6_watchers_lock() -> void:
 	var plate_b := plate(room, "PlateB", 7536.0, {"stone_only": true, "width": 48.0})
 	var exit_gate := gate(room, "ExitGate", 122)
 	circuit(room, "PlatesToGate", [plate_a, plate_b], [exit_gate],
-		{"latch": true, "hold_time": 0.5, "reveal_target": true, "persist_id": "ch2.r6.solved", "channel_y": 440.0, "symbol": 2})
+		{"hold_time": 0.5, "reveal_target": true, "persist_id": "ch2.r6.solved", "channel_y": 440.0, "symbol": 2})
 	guide(room, "Hold both heavy plates at once.", "III", "Light and Space", "Chapter 2  ·  The Sealed Observatory")
 	step(room, "Down learned", Cond.FLAG, null, {"flag": "rune.frag.down"})
 	step(room, "The watcher turns to stone on the plate", Cond.POWERED, plate_a)
@@ -475,7 +475,7 @@ func room_7_limited_circuit() -> void:
 	var p := plate(room, "StatuePlate", 8724.0, {"stone_only": true, "width": 60.0})
 	var exit_gate := gate(room, "ExitGate", 144)
 	circuit(room, "PlateToGate", [p], [exit_gate],
-		{"latch": true, "reveal_target": true, "persist_id": "ch2.r7.solved", "channel_y": 440.0, "symbol": 3})
+		{"reveal_target": true, "persist_id": "ch2.r7.solved", "channel_y": 440.0, "symbol": 3})
 	guide(room, "Move the statue onto the heavy plate.")
 	step(room, "A cube stands in the pedestal", Cond.PROPERTY, pedestal, {"property": "occupied", "value": 1})
 	step(room, "The statue on the plate: the gate opens", Cond.OPEN, exit_gate)

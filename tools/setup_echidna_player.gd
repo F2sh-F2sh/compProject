@@ -1,9 +1,9 @@
 extends SceneTree
 
 ## Wires Echidna's sprite pipeline into scenes/Player.tscn: the sliced clips
-## (tools/build_echidna_frames.gd), her lighting material, the charge-wisp
-## layer with its light and sparks, footfall dust and a contact shadow.
-## Safe to run again; it replaces the nodes it owns.
+## (tools/build_echidna_frames.gd), her lighting material, the charge glow
+## and sparks, footfall dust and a contact shadow. Safe to run again; it
+## replaces the nodes it owns (and removes the old ChargeWisps layer).
 ##
 ##   godot --headless --path . --script res://tools/setup_echidna_player.gd
 
@@ -53,21 +53,7 @@ func _run() -> void:
 	shadow.z_index = -1
 	_add(root, shadow, 0)
 
-	var wisps := AnimatedSprite2D.new()
-	wisps.name = "ChargeWisps"
-	wisps.sprite_frames = frames
-	wisps.animation = &"JumpChargeWisps"
-	wisps.centered = true
-	wisps.position = sprite.position
-	wisps.scale = sprite.scale
-	wisps.offset = offset
-	wisps.visible = false
-	wisps.z_index = 1
-	var wisp_mat := ShaderMaterial.new()
-	wisp_mat.shader = load("res://assets/shaders/charge_wisps.gdshader")
-	wisps.material = wisp_mat
-	_add(root, wisps, sprite.get_index() + 1)
-
+	# (The charge shows as a glow and sparks; the wisp lines were removed)
 	var wisp_light := PointLight2D.new()
 	wisp_light.name = "WispLight"
 	wisp_light.texture = _radial(Color.WHITE, Color(1, 1, 1, 0), 128)
