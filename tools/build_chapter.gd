@@ -523,7 +523,7 @@ func room_1_entrance() -> void:
 	var plate := inst("res://scenes/pressure_plate.tscn", room, "Plate", Vector2(874, FLOOR_Y))
 	var exit_gate := gate(room, "ExitGate", 20)
 	circuit(room, "PlateToGate", [plate], [exit_gate],
-		{"latch": true, "reveal_target": true, "persist_id": "ch1.r1.solved", "channel_y": 440.0, "symbol": 0})
+		{"reveal_target": true, "persist_id": "ch1.r1.solved", "channel_y": 440.0, "symbol": 0})
 	guide(room, "Open the gate at the far end.", "I", "The Toll", "Chapter 1  ·  The Sealed Belfry")
 	step(room, "Stone on the plate: the gate opens", Cond.OPEN, exit_gate)
 	page_step(room, 1)
@@ -549,36 +549,40 @@ func room_1_entrance() -> void:
 
 
 # ---------------------------------------------------------------- Room 2
-# Bellbound Slime. The gate needs BOTH plates held at once (hold 0.5 s, then
-# it latches). Plate A lies in a sunken cell under an iron grate (the player
-# walks over it; the slime cannot climb out), beneath a bell. Ringing the
-# bell (rope, or a fireball from plate B) makes the slime sit on plate A for
-# 9 s while the player stands on plate B. Optional page on a +100 ledge.
+# Bellbound Slime. The gate is open only while BOTH plates are held (after
+# 0.5 s). Plate A lies in a sunken cell under an iron grate (the player walks
+# over it; the slime cannot climb out), beneath a bell. A stone block pushed
+# right stops on plate B against a +32 kerb and stays there. Ringing the bell
+# (rope, or a fireball) makes the slime sit on plate A for 12 s: long enough
+# to walk out through the open gate. Optional page on a +100 ledge.
 
 func room_2_bellkeeper() -> void:
 	shell(20, 44, LOW_CEIL)
 	floating_ledge(38, 39, 6, true)
+	curb(35)
 	var room := make_room("R2", "The Bellkeeper's Cell", 20, 44, LOW_CEIL, Vector2(1400, 530), true)
 	grated_cell(room, 27, 31)
 
-	slime(room, "BellSlime", Vector2(cx(28), 596), {"warded": true})
+	slime(room, "BellSlime", Vector2(cx(28), 596), {"warded": true, "investigate_time": 12.0})
 	var plate_a := inst("res://scenes/pressure_plate.tscn", room, "PlateA", Vector2(2016, 598))
 	var bell := inst(PUZZLE + "puzzle_bell.tscn", room, "Bell", Vector2(2016, 400),
 		{"chain_length": 106.0, "pull_offset": Vector2(80, 74), "cooldown": 2.0})
-	var plate_b := inst("res://scenes/pressure_plate.tscn", room, "PlateB", Vector2(cx(36), FLOOR_Y))
+	inst(PUZZLE + "pushable_block.tscn", room, "Block", Vector2(cx(32), FLOOR_Y))
+	var plate_b := inst("res://scenes/pressure_plate.tscn", room, "PlateB", Vector2(2218, FLOOR_Y))
 	var exit_gate := gate(room, "ExitGate", 44)
 	circuit(room, "BothPlates", [plate_a, plate_b], [exit_gate],
-		{"latch": true, "reveal_target": true, "hold_time": 0.5, "persist_id": "ch1.r2.solved", "channel_y": 430.0, "symbol": 1})
+		{"reveal_target": true, "hold_time": 0.5, "persist_id": "ch1.r2.solved", "channel_y": 430.0, "symbol": 1})
 	guide(room, "Open the gate beyond the slime's cell.")
+	step(room, "A block rests on the far plate", Cond.POWERED, plate_b)
 	step(room, "The bell tolls", Cond.RUNG, bell)
 	step(room, "The slime settles on its plate", Cond.POWERED, plate_a)
 	step(room, "Both plates held: the gate opens", Cond.OPEN, exit_gate)
 	page_step(room, 2)
 
 	hint(room, Vector2(cx(23), FLOOR_Y), [
-		"Look at the bell, the plate beneath it, and the plate by the gate.",
-		"The gate opens only while both plates are held at the same moment. A slime is heavy enough to hold one.",
-		"Ring the bell (pull its rope, or hit it with a fireball) and the slime sits on the plate below it. Then stand on the other plate.",
+		"Look at the bell, the plate beneath it, the plate by the gate, and the stone block.",
+		"The gate is open only while both plates are held at the same moment. A slime is heavy enough to hold one; the block can hold the other.",
+		"Push the block onto the plate by the gate. Then ring the bell (pull its rope, or hit it with a fireball): the slime sits on the plate below it, and the gate stays open while it does.",
 	], [bell, plate_a, plate_b])
 	page(room, 2, Vector2(39 * T, 410), "The Bellkeeper's Ledger, ii",
 		"The slimes of the lower cells come to the bell like hounds. We ring it at feeding time. Some say they think the bell is their mother.")
@@ -605,7 +609,7 @@ func room_2_bellkeeper() -> void:
 # ---------------------------------------------------------------- Room 3
 # Split Flame (tall). The brazier's beam runs right at y 500 to mirror M1.
 # Stage 1: turn M1 to send it up to hanging mirror M2, which starts facing
-# the left crystal R1 -> spectral stairs appear (latched). Stage 2: on the
+# the left crystal R1 -> spectral stairs appear (while R1 or R2 is lit). Stage 2: on the
 # gallery, turn M2 until the beam reaches R2 -> the exit gate opens.
 # The stairs start right of the beam column so they can never block it.
 
@@ -630,10 +634,12 @@ func room_3_split_flame() -> void:
 		stairs.append(inst(PUZZLE + "spectral_platform.tscn", room, "Stair%d" % (i + 1),
 			Vector2(3328 + i * 64, 486 - i * 48), {"size": Vector2(64, 12)}))
 	var exit_gate := gate(room, "ExitGate", 64)
-	circuit(room, "StairsCircuit", [r1], stairs,
-		{"latch": true, "persist_id": "ch1.r3.stairs", "symbol": 2, "channel_y": 380.0})
+	# The stairs stand while either crystal is lit, so once the beam moves on to
+	# the gate crystal the way back up to the gallery stays
+	circuit(room, "StairsCircuit", [r1, r2], stairs,
+		{"mode": 1, "persist_id": "ch1.r3.stairs", "symbol": 2, "channel_y": 380.0})
 	circuit(room, "GateCircuit", [r2], [exit_gate],
-		{"latch": true, "reveal_target": true, "persist_id": "ch1.r3.solved", "symbol": 3})
+		{"reveal_target": true, "persist_id": "ch1.r3.solved", "symbol": 3})
 	guide(room, "Wake both crystals to open the way on.", "II", "The Flame")
 	step(room, "The brazier burns", Cond.POWERED, brazier)
 	step(room, "The first crystal wakes: stairs rise", Cond.POWERED, r1)
@@ -694,7 +700,7 @@ func room_4_watcher() -> void:
 	var exit_gate := gate(room, "ExitGate", 84)
 	circuit(room, "LeverToLens", [lever], [lens], {"channel_y": 300.0, "symbol": 1})
 	circuit(room, "PlateToGate", [plate], [exit_gate],
-		{"latch": true, "reveal_target": true, "hold_time": 0.3, "persist_id": "ch1.r4.solved", "channel_y": 440.0, "symbol": 0})
+		{"reveal_target": true, "hold_time": 0.3, "persist_id": "ch1.r4.solved", "channel_y": 440.0, "symbol": 0})
 	guide(room, "Open the gate past the watcher.")
 	step(room, "The lens opens", Cond.POWERED, lever)
 	step(room, "The watcher turns to stone", Cond.FROZEN, watcher)
@@ -952,7 +958,7 @@ func room_7_belfry() -> void:
 	seal.set("targets", nodes([great_door]))
 	circuit(room, "WindowCircuit", [plate_a, seal], [bars], {"mode": 1, "channel_y": 330.0, "symbol": 1, "solved_sound": ""})
 	circuit(room, "SealCircuit", [plate], [seal],
-		{"latch": true, "hold_time": 0.5, "persist_id": "ch1.r7.solved", "channel_y": 460.0, "symbol": 0, "solved_sound": ""})
+		{"hold_time": 0.5, "persist_id": "ch1.r7.solved", "channel_y": 460.0, "symbol": 0, "solved_sound": ""})
 	guide(room, "Break the seal on the great door.", "IV", "The Belfry")
 	step(room, "The belfry flame burns", Cond.POWERED, brazier)
 	step(room, "The mirror looks down on the heavy plate", Cond.PROPERTY, mirror, {"property": "facing", "value": 2})

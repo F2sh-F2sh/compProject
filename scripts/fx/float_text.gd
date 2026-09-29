@@ -17,7 +17,7 @@ static func spawn(parent: Node, at: Vector2, text: String, color := Color(0.85, 
 
 
 func _start(text: String, color: Color, rise: float, life: float) -> void:
-	z_index = 40
+	z_index = 50
 	material = MagicLight.unshaded()
 	var label := Label.new()
 	label.text = text

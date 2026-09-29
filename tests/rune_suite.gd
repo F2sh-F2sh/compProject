@@ -275,10 +275,10 @@ func solve_r1() -> void:
 	check("R1 the kerb stops the crate on the plate", absf(crate.global_position.x - 812.0) < 8.0 and plate.is_pressed, "x=%.0f" % crate.global_position.x)
 	check("R1 plate opens the gate", await wait_until(func(): return exit_gate.open_amount >= 1.0, 3.0))
 	check("R1 a dungeon-powered cube cost no mana", player.current_mana >= mana_before)
-	check("R1 solution saved", game_state().has_flag("ch2.r1.solved"))
 	check("R1 room cleared", node("R1").is_cleared())
 	await run_to(cx(20), [cube.global_position.x - 30.0, 760.0])
 	check("R1 walked out into room 2", lvl.current_room == node("R2"), "x=%.0f" % player.global_position.x)
+	check("R1 solution saved once she has gone through", game_state().has_flag("ch2.r1.solved"))
 
 
 func scenario_room1() -> void:
@@ -339,10 +339,10 @@ func solve_r2() -> void:
 	check("R2 the stone slides onto the heavy plate", await wait_until(func(): return plate.is_pressed, 8.0),
 		"x=%.0f" % stone_block.global_position.x)
 	check("R2 plate opens the gate", await wait_until(func(): return exit_gate.open_amount >= 1.0, 3.0))
-	check("R2 solution saved", game_state().has_flag("ch2.r2.solved"))
 	await frames(30)
 	await run_to(cx(41) + 20.0, [loose.global_position.x - 30.0, 1826.0], 14.0)
 	check("R2 walked out into room 3", lvl.current_room == node("R3"), "x=%.0f" % player.global_position.x)
+	check("R2 solution saved once she has gone through", game_state().has_flag("ch2.r2.solved"))
 
 
 func scenario_room2() -> void:
@@ -528,7 +528,6 @@ func solve_r6() -> void:
 	check("R6 the stone slides onto plate B", await wait_until(func(): return plate_b.is_pressed, 6.0),
 		"stone x=%.0f" % node("R6/Stone").global_position.x)
 	check("R6 both plates held: the gate opens", await wait_until(func(): return exit_gate.open_amount >= 1.0, 4.0))
-	check("R6 solution saved", game_state().has_flag("ch2.r6.solved"))
 
 
 func scenario_room6() -> void:
@@ -1052,9 +1051,11 @@ func scenario_full_run() -> void:
 	await solve_r6()
 	check("R6 -> R7 walked through", await run_to(cx(123) + 10.0, [node("R6/LooseCube").global_position.x - 30.0, 7440.0], 12.0) and lvl.current_room == node("R7"),
 		"x=%.0f" % player.global_position.x)
+	check("R6 solution saved once she has gone through (her runes there stop)", game_state().has_flag("ch2.r6.solved"))
 	await solve_r7()
 	check("R7 -> R8 walked through", await run_to(cx(145) + 10.0, [node("R7/NormalCube").global_position.x - 30.0, node("R7/Statue").global_position.x - 60.0], 14.0)
 		and lvl.current_room == node("R8"), "x=%.0f" % player.global_position.x)
+	check("R7 solution saved once she has gone through", game_state().has_flag("ch2.r7.solved"))
 	await solve_r8()
 	get_tree().paused = false
 

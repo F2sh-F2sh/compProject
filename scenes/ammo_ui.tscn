@@ -107,7 +107,6 @@ animations = [{
 "speed": 20.0
 }]
 
-<<<<<<< HEAD
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 content_margin_left = 12.0
 content_margin_top = 8.0
@@ -146,9 +145,6 @@ Label/constants/outline_size = 5
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="UI" type="CanvasLayer" unique_id=1170242058 groups=["gameplay_ui"]]
-=======
-[node name="UI" type="CanvasLayer" unique_id=1170242058]
->>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 script = ExtResource("1_mn4om")
 
 [node name="Control" type="Control" parent="." unique_id=972067805]
@@ -158,7 +154,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-<<<<<<< HEAD
 mouse_filter = 2
 theme = SubResource("Theme_hud")
 
@@ -259,70 +254,4 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.7, 0.4, 1)
 theme_override_font_sizes/font_size = 10
 text = "FIRE  5"
-=======
-
-[node name="mana_label" type="Label" parent="Control" unique_id=1663137311]
-layout_mode = 0
-offset_left = 70.0
-offset_top = 507.0
-offset_right = 110.0
-offset_bottom = 533.0
-theme_override_fonts/font = ExtResource("2_w66j0")
-theme_override_font_sizes/font_size = 20
-horizontal_alignment = 1
-
-[node name="ReloadLabel" type="Label" parent="Control" unique_id=154734360]
-layout_mode = 0
-offset_left = 19.0
-offset_top = 570.0
-offset_right = 249.0
-offset_bottom = 599.0
-theme_override_fonts/font = ExtResource("4_w66j0")
-theme_override_font_sizes/font_size = 22
-text = "RESTORING MANA"
-
-[node name="ManaBar" type="ProgressBar" parent="Control" unique_id=79035030]
-layout_mode = 0
-offset_left = 6.0
-offset_top = 571.0
-offset_right = 206.0
-offset_bottom = 598.0
-
-[node name="FireballIcon" type="AnimatedSprite2D" parent="Control" unique_id=1916549948]
-position = Vector2(1082, 598)
-scale = Vector2(2.99, 2.99)
-sprite_frames = SubResource("SpriteFrames_os5e7")
-animation = &"FireBall"
-autoplay = "FireBall"
-frame = 1
-frame_progress = 0.9577264
-
-[node name="HealIcon" type="AnimatedSprite2D" parent="Control" unique_id=1504712866]
-position = Vector2(977.99994, 598.25006)
-scale = Vector2(3.000001, 2.921875)
-sprite_frames = SubResource("SpriteFrames_62dda")
-animation = &"Heal"
-frame_progress = 0.22813778
-
-[node name="WaterHeal Q" type="Label" parent="Control" unique_id=477243169]
-layout_mode = 0
-offset_left = 927.0
-offset_top = 503.0
-offset_right = 1029.0
-offset_bottom = 552.0
-theme_override_fonts/font = ExtResource("6_m66v7")
-text = "Q
-Water Heal"
-horizontal_alignment = 1
-
-[node name="Fireball M1" type="Label" parent="Control" unique_id=168039595]
-layout_mode = 0
-offset_left = 1038.0
-offset_top = 503.0
-offset_right = 1125.0
-offset_bottom = 552.0
-theme_override_fonts/font = ExtResource("6_m66v7")
-text = "M1
-Fireball"
->>>>>>> ca7ff5e18fa8e215148f3f169007eba690423f12
 horizontal_alignment = 1

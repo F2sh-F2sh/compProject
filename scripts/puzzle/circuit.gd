@@ -23,11 +23,14 @@ enum Mode { ALL, ANY }
 @export var mode: Mode = Mode.ALL
 ## Targets receive the opposite state (e.g. a lever that switches machinery OFF).
 @export var invert := false
-## Once satisfied, the circuit stays on until the room is reset.
+## Once satisfied, the circuit stays on until the room is reset. Plates and
+## crystals are left live instead: their gate is open only while they are held.
 @export var latch := false
 ## Sources must stay satisfied this long before the circuit switches on.
 @export var hold_time := 0.0
-## If set, a latched circuit stays solved across deaths and reloads.
+## If set, the circuit stays on across deaths and reloads: a latched one from
+## the moment it latches, a live one once the player walks on into a later
+## room while it is on (a gate she has come through stays open behind her).
 @export var persist_id := ""
 @export var solved_sound := "puzzle_solved"
 ## When the circuit first switches on during play, the camera briefly looks
@@ -48,6 +51,7 @@ enum Mode { ALL, ANY }
 
 var powered := false
 var _latched := false
+var _chimed := false
 var _held := 0.0
 var _revealed := false
 var _glow: Node2D
@@ -78,9 +82,34 @@ func _ready() -> void:
 				source.power_changed.connect(_on_source_changed)
 	if persist_id != "" and GameState.has_flag(persist_id):
 		_latched = true
+		_chimed = true
 		_revealed = true
 	# Tell every target its starting state once the whole room exists
 	_apply.call_deferred(_latched, true)
+	if persist_id != "" and not latch:
+		_watch_rooms.call_deferred()
+
+
+func _watch_rooms() -> void:
+	var root := get_tree().get_first_node_in_group("chapter_root")
+	if root and root.has_signal("room_entered"):
+		root.room_entered.connect(_on_room_entered)
+
+
+func _on_room_entered(room: Node) -> void:
+	if _latched or not powered:
+		return
+	var mine := _own_room()
+	if mine and room != mine and room.bounds.position.x > mine.bounds.position.x:
+		_latched = true
+		GameState.set_flag(persist_id)
+
+
+func _own_room() -> Node:
+	var node := get_parent()
+	while node and not node is Room:
+		node = node.get_parent()
+	return node
 
 
 func is_powered() -> bool:
@@ -97,6 +126,7 @@ func reset_state() -> void:
 		_apply.call_deferred(true, true)
 		return
 	_latched = false
+	_chimed = false
 	_held = 0.0
 	_apply(false, true)
 
@@ -133,6 +163,9 @@ func _physics_process(delta: float) -> void:
 		_latched = true
 		if persist_id != "":
 			GameState.set_flag(persist_id)
+	# A puzzle's circuit chimes the first time it comes on, not every time
+	if want and not _chimed and (latch or persist_id != ""):
+		_chimed = true
 		if solved_sound != "":
 			Sfx.play(solved_sound, global_position)
 	if want != powered:
