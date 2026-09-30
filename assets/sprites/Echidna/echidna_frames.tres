@@ -1,10 +1,10 @@
-[gd_resource type="SpriteFrames" format=3]
+[gd_resource type="SpriteFrames" format=3 uid="uid://bwcnpfbtwqf3c"]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/Echidna/EchidnaCharge.png" id="1_bux4v"]
-[ext_resource type="Texture2D" path="res://assets/sprites/Echidna/EchidnaChargeWisps.png" id="2_kuynb"]
-[ext_resource type="Texture2D" path="res://assets/sprites/Echidna/EchidnaAir.png" id="3_pp1f3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/Echidna/EchidnaIdle.png" id="4_l1v4i"]
-[ext_resource type="Texture2D" path="res://assets/sprites/Echidna/EchidnaWalk.png" id="5_kb4xc"]
+[ext_resource type="Texture2D" uid="uid://uvtvwhxas8yc" path="res://assets/sprites/Echidna/EchidnaCharge.png" id="1_bux4v"]
+[ext_resource type="Texture2D" uid="uid://gp8stoocp36r" path="res://assets/sprites/Echidna/EchidnaChargeWisps.png" id="2_kuynb"]
+[ext_resource type="Texture2D" uid="uid://tp5wuekvknw0" path="res://assets/sprites/Echidna/EchidnaAir.png" id="3_pp1f3"]
+[ext_resource type="Texture2D" uid="uid://dvqqbfecyeb6f" path="res://assets/sprites/Echidna/EchidnaIdle.png" id="4_l1v4i"]
+[ext_resource type="Texture2D" uid="uid://brw2gdpk4u7x5" path="res://assets/sprites/Echidna/EchidnaWalk.png" id="5_kb4xc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_m6fku"]
 atlas = ExtResource("1_bux4v")

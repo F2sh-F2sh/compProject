@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/runes/observatory_seal.gd" id="1_sqtxl"]
 
-[node name="ObservatorySeal" type="Node2D" unique_id=1572578979]
+[node name="ObservatorySeal" type="Node2D" unique_id=2014833654]
 script = ExtResource("1_sqtxl")

@@ -39,6 +39,9 @@ var _fade_in := 0.0
 ## Extra music attenuation (see duck()).
 var duck_db := 0.0
 var _duck_tween: Tween
+## The ambience level (see fade_ambience()).
+var ambience_db := AMBIENCE_DB
+var _ambience_tween: Tween
 
 
 func _ready() -> void:
@@ -96,6 +99,15 @@ func duck(db: float, seconds := 1.0) -> void:
 	_duck_tween.tween_property(self, "duck_db", db, seconds)
 
 
+## Fades the cave ambience to `db` (AMBIENCE_DB is normal), e.g. out under
+## the open sky, where cave drips would sound wrong.
+func fade_ambience(db: float, seconds := 1.5) -> void:
+	if _ambience_tween:
+		_ambience_tween.kill()
+	_ambience_tween = create_tween()
+	_ambience_tween.tween_property(self, "ambience_db", db, seconds)
+
+
 ## Clears every combat request (e.g. when a new level loads).
 func reset_combat() -> void:
 	_combat_sources.clear()
@@ -121,7 +133,7 @@ func _apply_mix() -> void:
 		var db: float = lerpf(spec[1], spec[2], k)
 		players[layer].volume_db = maxf(db + start + duck_db, -80.0)
 	if ambience:
-		ambience.volume_db = maxf(AMBIENCE_DB + start, -80.0)
+		ambience.volume_db = maxf(ambience_db + start, -80.0)
 	var music := AudioServer.get_bus_index(Settings.MUSIC_BUS)
 	if music >= 0 and AudioServer.get_bus_effect_count(music) > 0:
 		var lowpass := AudioServer.get_bus_effect(music, 0) as AudioEffectLowPassFilter

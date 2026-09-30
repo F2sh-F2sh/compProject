@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/creatures/watcher_gargoyle.gd" id="1_ve5mt"]
 
-[node name="WatcherGargoyle" type="CharacterBody2D" unique_id=1062842614]
+[node name="WatcherGargoyle" type="CharacterBody2D" unique_id=944996241]
 script = ExtResource("1_ve5mt")

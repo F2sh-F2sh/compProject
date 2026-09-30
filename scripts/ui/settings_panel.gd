@@ -1,7 +1,7 @@
 class_name SettingsPanel
 extends VBoxContainer
 
-## The settings shared by the title screen and the pause menu: volumes,
+## The settings on the title screen: volumes, graphics (Low to Elite), FPS,
 ## guidance, reduced motion, fullscreen, and a list of the controls (read
 ## from the real bindings, so it is always right).
 
@@ -54,7 +54,15 @@ func _ready() -> void:
 	add_child(guidance)
 	add_child(_check("Reduce camera shake and flashes", Settings.reduce_motion, Settings.set_reduce_motion))
 	add_child(_check("Fullscreen (F11)", Settings.fullscreen, Settings.set_fullscreen))
-	add_child(_check("Lighter effects (for slower graphics cards)", Settings.effects_low, Settings.set_effects_low))
+	var graphics := OptionButton.new()
+	for level_name in Settings.GRAPHICS_NAMES:
+		graphics.add_item("Graphics: %s" % level_name)
+	graphics.selected = Settings.graphics
+	graphics.add_theme_font_override("font", FONT)
+	graphics.add_theme_font_size_override("font_size", 14)
+	graphics.item_selected.connect(func(i): Sfx.play("ui_click"); Settings.set_graphics(i))
+	add_child(graphics)
+	add_child(_check("Show FPS", Settings.show_fps, Settings.set_show_fps))
 	add_child(_label("Assist", 14, Color("cbbdf2")))
 	var damage := OptionButton.new()
 	var levels := [1.0, 0.75, 0.5, 0.25]

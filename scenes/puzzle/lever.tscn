@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/lever.gd" id="1_3qbah"]
 
-[node name="Lever" type="Node2D" unique_id=200479711]
+[node name="Lever" type="Node2D" unique_id=1760122609]
 script = ExtResource("1_3qbah")

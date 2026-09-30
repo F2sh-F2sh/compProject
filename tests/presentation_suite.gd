@@ -280,30 +280,66 @@ func scenario_motion() -> void:
 
 
 func scenario_charge() -> void:
-	print("SCENARIO charge glow (no lines)")
+	print("SCENARIO charge glow, breeze and bar (no lines)")
 	await load_level(TUTORIAL)
 	await place(Vector2(400, FLOOR))
 	check("no wind streaks or wisp lines on her", player.get_node_or_null("ChargeWisps") == null
-		and player.get_node_or_null("ChargeWindBack") == null and player.get_node_or_null("ChargeWindFront") == null)
+		and player.get_node_or_null("ChargeWindBack") == null and player.get_node_or_null("ChargeWindFront") == null
+		and player.find_children("*", "Line2D", true, false).is_empty())
 	var light: PointLight2D = player.get_node("WispLight")
 	var sparks: CPUParticles2D = player.get_node("WispSparks")
-	check("no glow while idle", light.energy < 0.05, "%.2f" % light.energy)
+	var bar: ChargeBar = player.get_node_or_null("ChargeBar")
+	var breeze: ChargeBreeze = player.get_node_or_null("ChargeBreeze")
+	check("she has a charge bar and a charge breeze", bar != null and breeze != null)
+	if bar == null or breeze == null:
+		return
+	check("no glow, breeze or bar while idle", light.energy < 0.05 and breeze.strength == 0.0 and not bar.visible,
+		"%.2f %.2f %s" % [light.energy, breeze.strength, bar.visible])
+	# A quick dip never flashes the bar
+	Input.action_press("crouch")
+	await seconds(0.3)
+	Input.action_release("crouch")
+	await seconds(0.3)
+	check("a quick crouch shows no bar", not bar.visible)
+	var chimes: int = Sfx.played.get("charge_full", 0)
 	Input.action_press("crouch")
 	await seconds(0.6)
 	check("no glow before the charge pose", light.energy < 0.05, "%.2f" % light.energy)
 	await seconds(0.8)
 	check("the charge pose plays", player.animated_sprite.animation == &"JumpCharge")
+	check("the bar shows over her head as the charge builds", bar.visible and bar.fill > 0.1 and bar.fill < 0.6
+		and bar.global_position.y < player.global_position.y - 44.0, "fill %.2f" % bar.fill)
+	check("not full yet", not bar.full)
+	check("a light breeze gathers at her feet", breeze.visible and breeze.strength > 0.1, "%.2f" % breeze.strength)
 	var early := light.energy
+	var early_breeze := breeze.strength
 	await seconds(1.4)
 	check("the glow builds with the charge", light.energy > early + 0.3 and light.energy > 0.8, "%.2f -> %.2f" % [early, light.energy])
+	check("the breeze grows with the charge", breeze.strength > early_breeze + 0.3, "%.2f -> %.2f" % [early_breeze, breeze.strength])
 	check("sparks show the charge is full", sparks.emitting)
+	check("the bar is full and marked as full", bar.full and is_equal_approx(bar.fill, 1.0), "fill %.2f" % bar.fill)
+	await seconds(0.6)
+	check("full power chimes once, not over and over", bar.times_full == 1 and Sfx.played.get("charge_full", 0) == chimes + 1,
+		"%d times, %d chimes" % [bar.times_full, Sfx.played.get("charge_full", 0) - chimes])
 	Input.action_press("jump")
 	await frames(2)
 	Input.action_release("jump")
 	Input.action_release("crouch")
 	await frames(3)
 	check("the sparks stop as she leaps", not sparks.emitting)
+	check("the breeze puffs out where she stood", breeze.strength == 0.0 and breeze._scatter > 0.0)
+	await seconds(0.5)
+	check("the bar fades away after the leap", not bar.visible)
 	await wait_until(func(): return player.is_on_floor(), 2.0)
+	await seconds(0.6)
+	check("the puff has settled", not breeze.visible)
+	# Standing up part-way drops the charge: the bar goes, nothing chimes
+	Input.action_press("crouch")
+	await seconds(1.5)
+	Input.action_release("crouch")
+	await seconds(0.5)
+	check("standing up part-way clears the bar and breeze", not bar.visible and not bar.full and breeze.strength == 0.0)
+	check("no chime for a part charge", bar.times_full == 1)
 
 
 # ================================================================ camera

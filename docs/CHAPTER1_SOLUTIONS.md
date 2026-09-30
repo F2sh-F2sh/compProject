@@ -18,11 +18,16 @@ Every solution below is also played automatically by `tests/chapter_suite.gd`
   gates, lenses, bridges, traps are *consumers*. A carved violet groove on the wall joins
   each source to what it powers and glows while powered. Matching end symbols
   (◇ ○ △ ✚) mark linked pieces.
+- **Held, not latched:** a gate worked by plates or crystals is open only while they are
+  held down or lit; take the block off or turn the light away and it closes again. Once
+  you walk through it into the next room, that room is saved as solved and its gate stays
+  open behind you (also after a death). The Room 8 levers are the one exception: the loft
+  gate stays open once both are down together.
 - **Magic light:** beams (from braziers and lenses) travel straight, turn 90° off a
   mirror's silver face, are stopped by its dark back, and stop at the first solid thing
   (walls, blocks, gates, frozen gargoyles). Auras (wisps, braziers with a radius) reach
   anything within their radius that they can see. Decorative wall torches never count.
-- **Room reset** (Pause → Reset Room): puts the current room's puzzle back to its start and
+- **Room reset** (Pause → Map → Reset Room): puts the current room's puzzle back to its start and
   returns the player to the room entrance. Health is **not** restored. Echoes and
   projectiles in flight are cleared. Saved progress (solved gates, pulled shortcut levers,
   collected pages) is kept.
@@ -39,7 +44,7 @@ Every solution below is also played automatically by `tests/chapter_suite.gd`
   piston's candle (or the last safe ground before it).
 - **Echoes** repeat everything recorded, including pulling levers, ringing bell ropes and
   turning mirror wheels (not hint stones or the great bell). Holding E lets every Echo fade.
-- **Guidance** (Pause → Settings & Controls): Full shows the goal card, lights the groove
+- **Guidance** (Pause → Settings → Gameplay): Full shows the goal card, lights the groove
   when you stand near a switch, shows a faint key cue near things you can use, and makes a
   room's hint stone call out after 90 s without progress or two deaths there. Light keeps
   only the goal card; Off shows none of it.
@@ -48,23 +53,30 @@ Every solution below is also played automatically by `tests/chapter_suite.gd`
 
 - **Teaches:** pushing blocks, plates, following a groove to its gate.
 - **Solution:** walk into the stone block and keep walking. It slides right until the
-  stone kerb stops it — exactly on the plate. The gate at the far end opens and stays open.
+  stone kerb stops it — exactly on the plate. The gate at the far end is open for as long
+  as the block rests there.
 - **Why it can't soft-lock:** the kerb makes it impossible to push the block past the plate.
-- **Reset:** block returns to its start; if the gate was already opened it stays open.
+- **Reset:** block returns to its start and the gate closes, unless you have already walked
+  through it into Room 2 (then the room is saved as solved and the gate stays open).
 - **Optional page (i):** on the +96 ledge at the far left — needs a charged jump
   (hold crouch about 2 s, then jump). A tapped jump can't reach it.
 - **Start shrine:** `ch1.cp.start`.
 
 ## Room 2 — The Bellkeeper's Cell  [r2]
 
-- **Teaches:** Bellbound Slimes — they hop to a rung bell and sit there for 9 s.
+- **Teaches:** Bellbound Slimes — they hop to a rung bell and sit there for 12 s.
 - **Setup:** a slime lives in a cell under an iron grate you walk over. Plate A is in the
-  cell under a bell; plate B is on the main floor. The gate needs **both** plates held at
-  the same time for 0.5 s, then latches open for good.
-- **Solution:** pull the bell's rope (W at the rope end past the grate), then sprint to
-  plate B. The slime sits on plate A; with you on B the gate opens.
-- **Alternative (tested):** stand on plate B and hit the bell with a fireball.
-- **Alternative (not tested):** record an Echo pulling the rope; stand on B while it replays.
+  cell under a bell; plate B is on the main floor, with a stone block beside the cell and a
+  +32 kerb just past the plate. The gate is open only **while both plates are held** (after
+  0.5 s); it closes again when either is let go.
+- **Solution:** walk over the grate into the block and keep walking: the kerb stops it on
+  plate B. Pull the bell's rope (W at the rope end), then hop over the block and walk
+  through the gate while the slime sits on plate A.
+- **Once through:** walking into Room 3 saves the room as solved; the gate stays open behind
+  you from then on.
+- **Alternative (tested):** stand on plate B yourself and hit the bell with a fireball (the
+  gate opens, but closes when you step off, so the block is the way through).
+- **Alternative (not tested):** record an Echo pulling the rope, or standing on B.
 - **Failure states:** none any more. Fireballs can't start below the grate and splash on
   its bars, and the caged slime is warded (a hit only makes its ward shimmer), so it can't
   be killed by accident. (Reset Room would still revive it.)
@@ -77,13 +89,16 @@ Every solution below is also played automatically by `tests/chapter_suite.gd`
 - **Solution:**
   1. Fireball the brazier. Its beam runs right and stops on the low mirror's dark back.
   2. Turn the low mirror (W at its post) twice: the beam climbs to the hanging mirror, which
-     sends it left into the crystal on the left wall. Spectral stairs appear (permanently).
+     sends it left into the crystal on the left wall. Spectral stairs appear.
   3. Climb the stairs (tapped jumps) to the gallery. Turn the high mirror from the wheel on
      the gallery (three turns) until its beam runs right, under the gallery, into the crystal
-     on the right wall. The exit gate opens (permanently).
+     on the right wall. The exit gate opens.
   4. Walk back down; the exit is on the floor under the gallery.
+- **Light must stay on:** the gate is open only while the beam rests on the right crystal;
+  turn the mirror away and it closes. The stairs stand while either crystal is lit, so the
+  way back up to the gallery never disappears once the gate is open.
 - **Reset:** mirrors return to their start angles and the brazier goes out; stairs and gate
-  stay once earned.
+  go too, unless you have already walked on into Room 4.
 - **Optional page (iii):** on the gallery.
 
 ## Room 4 — The Silent Watcher  [r4]
@@ -94,7 +109,8 @@ Every solution below is also played automatically by `tests/chapter_suite.gd`
   with carved blocks) is pressed only by stone: pushable blocks or frozen gargoyles — never
   the player or an Echo.
 - **Solution:** wait at the lever (the watcher can't see you there) and pull it just as the
-  watcher walks onto the heavy plate. It freezes there and the gate opens for good.
+  watcher walks onto the heavy plate. It freezes there and the gate opens; it stays open
+  while the lens stays open and the watcher stays stone on the plate.
 - **Wrong moment:** it freezes wherever it is. Pull the lever again to release it (it stirs
   harmlessly for a second) and wait for its next pass.
 - **Danger:** walk into its territory while it is active and it winds up (red eyes flare)
@@ -193,4 +209,4 @@ Every solution below is also played automatically by `tests/chapter_suite.gd`
 | Run statistics | `ch1.stat.time`, `ch1.stat.time.rN`, `ch1.stat.deaths`, `ch1.stat.resets`, `ch1.stat.hints` |
 | Tutorial | `tutorial.done`; its lesson checkpoints `lesson.1` … `lesson.9` |
 
-Pause → **Restart Chapter** (press twice) erases all `ch1` progress.
+Pause → System → **Restart Chapter** (press twice) erases all `ch1` progress.

@@ -52,6 +52,7 @@ func _ready() -> void:
 	_rebuild()
 	if Engine.is_editor_hint():
 		return
+	add_to_group("light_shaft")
 	light = PointLight2D.new()
 	light.name = "ShaftLight"
 	light.texture = LIGHT_TEXTURE
@@ -67,6 +68,7 @@ func _ready() -> void:
 	if dust:
 		motes = CPUParticles2D.new()
 		motes.name = "Dust"
+		motes.add_to_group("ambient_particles")
 		motes.texture = MOTE
 		motes.amount = int(clampf(length / 12.0, 10.0, 40.0))
 		motes.lifetime = 7.0

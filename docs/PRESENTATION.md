@@ -102,15 +102,12 @@ alternate their lean. A beam is made of:
     the cape sideways. Without this her head would jump 5 px on take-off.
   - Tests confirm her head moves by no more than 3 px between idle, walk,
     charge and crouch.
-- **Charge wisps:** the electric strokes in `EchidnaHoldJump.png` are extracted
-  into `EchidnaChargeWisps.png`: exactly the pixels where the hold-jump art
-  differs from the plain charge pose. They play as an overlay only while
-  charging, frame for frame with the body. They start at 35% brightness when
-  the charge pose begins and rise to full as the charge completes, running hot
-  toward white with a flickering glow. A blue light and crackling sparks come
-  in at full charge. A test confirms body plus wisps equals the original
-  hold-jump art pixel for pixel. The circling wind from earlier still plays
-  during the build-up.
+- **Charge glow (no lines):** the charge shows as her crouch pose, a soft blue
+  glow that builds with the charge, and a few sparks once it is full. The
+  electric wisp lines and the circling wind streaks were removed from the
+  player at the team's request (the `ChargeWisps`, `ChargeWindBack` and
+  `ChargeWindFront` nodes). The art is untouched: `EchidnaChargeWisps.png`, its
+  `JumpChargeWisps` clip and `scripts/charge_wind.gd` are still on disk, unused.
 
 ### Timing (60 Hz ticks per frame)
 
@@ -222,8 +219,8 @@ Tests (need a window): `godot --path . --fixed-fps 60 --script res://tests/run_t
   head stays put across clips.
 - Motion: footfall rate for walk and sprint, stop and landing recoveries,
   taps show a stride, contact shadow.
-- Charge: wisps only in the charge pose, synced to the body, brightening with
-  the charge, light and sparks at full charge, gone on release.
+- Charge: no wisp or wind nodes on the player; the glow builds with the
+  charge, sparks at full charge, gone on release.
 - Camera: snaps on teleport, lags a sudden move and settles within a second,
   leans ahead, follows softer vertically, trails into a jump.
 - Parallax: three planes in the right order, each drifting at its scroll ratio

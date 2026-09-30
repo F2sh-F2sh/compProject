@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/creatures/lantern_wisp.gd" id="1_dtlxv"]
 
-[node name="LanternWisp" type="Node2D" unique_id=151398570]
+[node name="LanternWisp" type="Node2D" unique_id=493658317]
 script = ExtResource("1_dtlxv")

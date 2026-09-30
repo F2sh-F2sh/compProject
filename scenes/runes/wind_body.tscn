@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/runes/wind_body.gd" id="1_lbdml"]
 
-[node name="WindBody" type="CharacterBody2D" unique_id=1351584811]
+[node name="WindBody" type="CharacterBody2D" unique_id=1651148768]
 script = ExtResource("1_lbdml")

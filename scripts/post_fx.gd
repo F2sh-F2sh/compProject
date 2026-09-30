@@ -16,29 +16,45 @@ func _ready() -> void:
 	_apply_quality.call_deferred()
 
 
-## Low effects quality (for weaker graphics cards) turns off the bloom and
-## film grain and stops lights casting shadows; High restores them.
+## Applies the graphics level (Settings.GRAPHICS_TABLE): bloom and grain
+## strength, whether lights cast shadows and how smooth they are, light
+## shafts, and how many ambient motes drift about. Low suits weak graphics
+## cards; Elite turns everything up.
 func _apply_quality() -> void:
 	var mat := rect.material as ShaderMaterial
 	if mat == null:
 		return
-	var low := Settings.effects_low
-	for param in ["bloom_strength", "grain"]:
+	var params := {"bloom_strength": "bloom", "grain": "grain"}
+	for param in params:
 		if not _full.has(param):
 			var value = mat.get_shader_parameter(param)
 			if value == null:
 				# Not set on the material: the shader's own default
 				value = RenderingServer.shader_get_parameter_default(mat.shader.get_rid(), param)
 			_full[param] = value
-		mat.set_shader_parameter(param, 0.0 if low else _full[param])
+		mat.set_shader_parameter(param, _full[param] * float(Settings.quality(params[param])))
 	var level := get_parent()
-	if level:
-		for light in level.find_children("*", "Light2D", true, false):
-			if low and light.shadow_enabled:
-				light.set_meta(&"had_shadow", true)
-				light.shadow_enabled = false
-			elif not low and light.get_meta(&"had_shadow", false):
-				light.shadow_enabled = true
+	if level == null:
+		return
+	var shadows: bool = Settings.quality("shadows")
+	var filter: int = Settings.quality("filter")
+	for light in level.find_children("*", "Light2D", true, false):
+		# Remember each light as it was authored, the first time it is seen
+		if not light.has_meta(&"had_shadow"):
+			light.set_meta(&"had_shadow", light.shadow_enabled)
+			light.set_meta(&"own_filter", light.shadow_filter)
+		var authored: bool = light.get_meta(&"had_shadow")
+		light.shadow_enabled = authored and shadows
+		if authored:
+			light.shadow_filter = light.get_meta(&"own_filter") if filter < 0 else filter
+	var show_shafts: bool = Settings.quality("shafts")
+	for shaft in get_tree().get_nodes_in_group("light_shaft"):
+		shaft.visible = show_shafts
+	var k: float = Settings.quality("particles")
+	for motes in get_tree().get_nodes_in_group("ambient_particles"):
+		if not motes.has_meta(&"base_amount"):
+			motes.set_meta(&"base_amount", motes.amount)
+		motes.amount = maxi(1, roundi(motes.get_meta(&"base_amount") * k))
 
 
 func _process(_delta: float) -> void:

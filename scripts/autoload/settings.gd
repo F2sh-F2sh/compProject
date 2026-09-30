@@ -38,8 +38,29 @@ const GUIDANCE_LIGHT := 1
 const GUIDANCE_FULL := 2
 var guidance := GUIDANCE_FULL
 var fullscreen := false
-## Lighter effects for weaker graphics cards (no bloom, grain or shadows).
-var effects_low := false
+
+## Graphics quality. Low suits weak graphics cards (no bloom, grain, shadows,
+## light shafts or puddle reflections, fewer particles); Elite turns every
+## effect up (the smoothest shadows, the largest shadow map, the most motes,
+## the most detailed water).
+enum Graphics { LOW, MEDIUM, HIGH, ULTRA, ELITE }
+const GRAPHICS_NAMES := ["Low", "Medium", "High", "Ultra", "Elite"]
+## Per level: bloom and grain (x the authored strength), whether lights cast
+## shadows, their shadow filter (-1 keeps each light's own), the shadow map
+## size, ambient particles (x), puddle reflections, light shafts, and how
+## many ripple rings a puddle draws at once.
+const GRAPHICS_TABLE := [
+	{"bloom": 0.0, "grain": 0.0, "shadows": false, "filter": 0, "atlas": 1024, "particles": 0.4, "reflections": false, "shafts": false, "ripples": 4},
+	{"bloom": 0.6, "grain": 0.0, "shadows": true, "filter": 0, "atlas": 1024, "particles": 0.7, "reflections": true, "shafts": true, "ripples": 6},
+	{"bloom": 1.0, "grain": 1.0, "shadows": true, "filter": -1, "atlas": 2048, "particles": 1.0, "reflections": true, "shafts": true, "ripples": 8},
+	{"bloom": 1.15, "grain": 1.0, "shadows": true, "filter": 2, "atlas": 4096, "particles": 1.35, "reflections": true, "shafts": true, "ripples": 8},
+	{"bloom": 1.3, "grain": 1.0, "shadows": true, "filter": 2, "atlas": 8192, "particles": 1.7, "reflections": true, "shafts": true, "ripples": 8},
+]
+var graphics: int = Graphics.HIGH
+## A small frames-per-second readout in the corner of the screen.
+var show_fps := false
+var _fps_layer: CanvasLayer
+var _fps_label: Label
 
 ## Assist options, for anyone who wants the puzzles without the pressure:
 ## how much damage Echidna takes (1, 0.75, 0.5, 0.25; never less than 1 per
@@ -61,6 +82,56 @@ func _ready() -> void:
 	_apply()
 	if fullscreen:
 		_apply_window()
+	_build_fps_counter()
+	_apply_graphics_globals()
+
+
+## The value of one graphics setting at the current level (see GRAPHICS_TABLE).
+func quality(key: String) -> Variant:
+	return GRAPHICS_TABLE[graphics][key]
+
+
+func set_graphics(value: int) -> void:
+	graphics = clampi(value, Graphics.LOW, Graphics.ELITE)
+	_apply_graphics_globals()
+	changed.emit()
+	_save()
+
+
+func set_show_fps(value: bool) -> void:
+	show_fps = value
+	_fps_layer.visible = value
+	changed.emit()
+	_save()
+
+
+func _apply_graphics_globals() -> void:
+	RenderingServer.canvas_set_shadow_texture_size(int(quality("atlas")))
+
+
+func _build_fps_counter() -> void:
+	_fps_layer = CanvasLayer.new()
+	_fps_layer.layer = 90
+	_fps_layer.visible = show_fps
+	add_child(_fps_layer)
+	_fps_label = Label.new()
+	_fps_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_fps_label.offset_left = 12
+	_fps_label.offset_top = -30
+	_fps_label.offset_right = 160
+	_fps_label.offset_bottom = -8
+	_fps_label.add_theme_font_override("font", preload("res://assets/Text/Orbitron-Bold.ttf"))
+	_fps_label.add_theme_font_size_override("font_size", 14)
+	_fps_label.add_theme_color_override("font_color", Color("b8f07a"))
+	_fps_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_fps_label.add_theme_constant_override("outline_size", 4)
+	_fps_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fps_layer.add_child(_fps_label)
+
+
+func _process(_delta: float) -> void:
+	if show_fps:
+		_fps_label.text = "FPS %d" % Engine.get_frames_per_second()
 
 
 func _input(event: InputEvent) -> void:
@@ -282,12 +353,6 @@ func set_assist(key: String, value: Variant) -> void:
 	_save()
 
 
-func set_effects_low(value: bool) -> void:
-	effects_low = value
-	changed.emit()
-	_save()
-
-
 func set_guidance(value: int) -> void:
 	guidance = clampi(value, GUIDANCE_OFF, GUIDANCE_FULL)
 	_apply()
@@ -305,7 +370,8 @@ func _save() -> void:
 	file.set_value("accessibility", "reduce_motion", reduce_motion)
 	file.set_value("accessibility", "guidance", guidance)
 	file.set_value("display", "fullscreen", fullscreen)
-	file.set_value("display", "effects_low", effects_low)
+	file.set_value("display", "graphics", int(graphics))
+	file.set_value("display", "show_fps", show_fps)
 	file.set_value("controls", "bindings", bindings)
 	for key in ASSIST_KEYS:
 		file.set_value("assist", key, get(key))
@@ -326,8 +392,12 @@ func _load() -> void:
 	guidance = clampi(int(_number(file.get_value("accessibility", "guidance", guidance), guidance)), GUIDANCE_OFF, GUIDANCE_FULL)
 	var full = file.get_value("display", "fullscreen", fullscreen)
 	fullscreen = full if full is bool else false
-	var low = file.get_value("display", "effects_low", false)
-	effects_low = low if low is bool else false
+	# (Older settings files only had a "lighter effects" switch)
+	var fallback: int = Graphics.LOW if file.get_value("display", "effects_low", false) == true else Graphics.HIGH
+	var level = file.get_value("display", "graphics", fallback)
+	graphics = clampi(int(level), Graphics.LOW, Graphics.ELITE) if level is int else fallback
+	var fps = file.get_value("display", "show_fps", false)
+	show_fps = fps if fps is bool else false
 	var saved = file.get_value("controls", "bindings", {})
 	bindings = saved if saved is Dictionary else {}
 	_apply_bindings()
