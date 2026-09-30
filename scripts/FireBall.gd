@@ -25,7 +25,7 @@ func _ready() -> void:
 	light.texture = LightTextures.radial(256)
 	light.color = COLOR
 	light.energy = 1.2
-	light.shadow_enabled = true
+	light.shadow_enabled = Settings.quality("shadows")
 	light.shadow_filter = Light2D.SHADOW_FILTER_PCF5
 	add_child(light)
 

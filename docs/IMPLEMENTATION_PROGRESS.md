@@ -195,7 +195,8 @@ Driven by beta-tester feedback and an audit of what made the game less fun. Plan
 **Phase 6: controls, comfort, shipping**
 - Gamepad on every action, right-stick aim with light aim assist, pad button prompts;
   key rebinding with swap-on-conflict and reset; assists (damage 100/75/50/25%,
-  unlimited mana, always sprint, crouch toggle); fullscreen (F11); lighter effects.
+  unlimited mana, always sprint, crouch toggle); fullscreen (F11); lighter effects (since
+  replaced by the Low–Elite graphics levels).
 - README, CREDITS, `.gitignore` (builds, *.tmp), killzone script, export-safe atmosphere
   colour, a "Windows release" export preset (builds/windows/TheSealedBelfry.exe; the
   existing "Oou" preset is untouched). The exported build boots with a clean log.
@@ -222,6 +223,193 @@ implemented and pass automated tests; nobody has playtested them. Everything abo
 room solutions and the full list of accepted runes are in `docs/CHAPTER2_SOLUTIONS.md`.
 Chapter 1's ending now offers "Continue to the next chapter", and the title screen has a
 Chapter 2 entry.
+
+## Merge repair, held gates, water, graphics levels and the new menu (2026-09-29)
+
+**Why the game stopped opening.** The merge commit `92fff19` ("A LOT", merging `ca7ff5e`
+into `7992392`) was committed with unresolved conflict markers in 14 files
+(`project.godot`, `player.gd`, `Player.tscn`, `slime.gd`, `hud.gd`, `hud.tscn`, ...). It was
+also merged into `main` on GitHub (pull request 15). The two sides were two separate
+resolutions of the same earlier `main` merge. For 12 files the other side was the older
+`main` version that later work had already rebuilt, so the working tree restores them from
+`7992392` (the last build that ran). `TestingPlayerMovement.tscn` takes a clean three-way
+merge that keeps Fisch's camera zoom (1.71). Fisch's `player.gd`/`Player.tscn` rewrite in
+`960213d` adds a second sprite for a 7-frame jump sheet (`c8844726-….png`, charge sheet
+`cahrgeagin.png`). That same jump art already plays at native size through
+`EchidnaAir.png`/`echidna_frames.tres`, and his safety fixes (cancel a charge on leaving the
+floor, no actions while dead) were already in. His large sheets stay in `assets/`, unused;
+check with Fisch. Nothing is committed or pushed; the fix is in the working tree only.
+`heart.gd`/`heart.tscn` came back with the merge and are unused.
+
+**Plates and light hold gates only while held.** `Circuit.latch` is off for every plate
+and crystal circuit in both chapters (Room 8's spring levers keep theirs). A gate follows
+its sources live. When the player walks into a later room while a live circuit with a
+`persist_id` is on, it latches and saves, so a gate she has come through stays open
+(also after a death). Chapter 1 Room 2 gained a stone block and a kerb for plate B (the
+slime now listens 12 s). Room 3's stairs stand while either crystal is lit.
+
+**Draw order.** Slimes draw at z 42 (above props, grates and the 40 thorn frame); damage
+numbers and floating text moved to 50; signs to 45. Act and lesson cards moved up under the
+HUD, so they no longer cover hanging signs; the room title waits 3.8 s after an act card.
+
+**Water.** `scenes/fx/puddle.tscn` (`scripts/fx/puddle.gd`, `assets/shaders/puddle.gdshader`):
+a reflective sheet over the floor that mirrors the scene above it, shimmers, and carries
+rings of ripples from footfalls (wet footstep sound), landings (splash, droplets), things
+wading through (slimes, blocks) and drips that fall from the ceiling. Each puddle snaps
+onto the floor at play time and removes itself on uneven ground. 8 in Chapter 1, 6 in
+Chapter 2, 3 in the tutorial.
+
+**Graphics levels and FPS.** `Settings.graphics` Low / Medium / High / Ultra / Elite
+(`GRAPHICS_TABLE`): bloom and grain strength, light shadows on/off and their filter
+(PCF13 on Ultra/Elite), shadow map size (1024 to 8192), light shafts, ambient mote
+count (x0.4 to x1.7), puddle reflections and ripple count, drips. `Settings.show_fps`
+shows a live counter in the bottom-left corner. The old "lighter effects" switch is
+replaced (old settings files map to Low/High). Nothing about the renderer or project
+rendering settings changed; only per-node effects and the canvas shadow-map size at runtime.
+
+**The menu.** `scripts/ui/pause_menu.gd` is rebuilt in the style of the reference image:
+Echidna's white card (animated figure in a ring of slots, HP/MP, a description box) on
+the left; a column of round icons (Resume, Echidna, Map, Journal, Settings, System) that
+ring in orange with an arrow on hover; a dark first list that slides out; a white second
+list with fading ends; orange for the active row. Settings → Graphics (the five levels, Show
+FPS, fullscreen), Controls (rebind any key; Esc cancels; conflicts swap), Audio (volume
+bars), Gameplay (guidance and assists). The map, the Ledger and the rune journal open in the
+card. Keys, pad and mouse all work. Three `AudioStreamPlayer`s play new synthesised
+cues: `sao_hover` (crisp chime), `sao_select` (solid beep), `sao_open`/`close`/`back`. The
+title screen keeps its settings panel, with the graphics levels and Show FPS added.
+
+**Charge lines removed.** The blue wisp lines and the circling wind streaks no longer play
+when she charges a jump; a soft glow builds instead and sparks show a full charge.
+
+**Test record (automated, full `all` run, windowed).** 942 passed, 1 failed: tutorial 140,
+chapter 304, presentation 87, experience 107 + 1 failure, rune 304. The failure was the
+controller aim-assist check: it now locked onto the tutorial's second slime, which had
+wandered nearer the aim line (slime wandering shares the global random numbers that
+puddle drips now also draw on). The test hides that slime for the check; the `controls`
+scenario then passed 19/19, so the suite stands at 943/943. New checks: experience `menu`
+(31), `puddles` (9), `layers` (4), the five graphics levels and Show FPS in `controls`,
+Room 2 (the gate closes when the slime leaves; saved only once she has gone through) and
+Room 3 (turning the beam off the crystal closes the gate) in the chapter suite, and the
+"saved once through" checks in both chapters.
+**Visually inspected:** menu screenshots (open, Graphics list, Spells hover, map in the
+card) and cropped puddle shots (reflection, ripples, splash droplets).
+**Not done by a person yet:** how the menu sounds and feels, whether the puddles look
+right in every room, how each graphics level looks and runs on other hardware (FPS not
+re-measured this session), and whether held gates feel fair (see the checklist).
+
+## The story intro and Lowbell (2026-09-30)
+
+The start of the game from `docs/GAME_DESIGN.md` §1–2. New Game now plays an illustrated
+story, then Lowbell, then (as before) the tutorial, or Chapter 1 once the tutorial is done.
+
+**The story** (`scenes/story/story_intro.tscn`, `scripts/story/story_intro.gd`): nine
+pictures, each still but for a few small movements, with a slow push-in and one or two
+narrated lines (italic serif) beneath:
+1. The written sky: a constellation draws itself into the Wind rune over the monastery.
+2. The words: WIND · PUSH · RIGHT · LARGE glowing in the sky; firs sway; wind streaks.
+3. The Eye: the great lens's light falls on a cube whose four runes light up; the Choir
+   gathered round.
+4. Ilse and Wren: a candle, a sick child's bed, Ilse reaching out; the great cube behind.
+5. "Hold this moment still": ICE · FREEZE · SELF · PERSIST light up; frost creeps out;
+   falling snow stops in the air.
+6. The Hush: a grey circle spreads from the Eye, draining colour and putting out the stars
+   and the village lights.
+7. The bell: the great bell swings, its rings of sound pushing the grey back.
+8. The crack: the bell cracks, the belfry is sealed, lanterns go down the mountain.
+9. Lowbell: the village at dusk as its stars go out.
+
+Space, Enter or a click moves on; holding Esc skips. The pictures are drawn in code
+(`story_paint.gd` brushes, `story_nodes.gd` moving parts, `assets/shaders/story_hush.gdshader`),
+so Echidna's art is unchanged and no image files were added.
+
+**Lowbell** (`scenes/story/lowbell.tscn`, `scripts/story/lowbell.gd`): a playable village lane
+at dusk, drawn in code with parallax (a moon behind the monastery on the mountain, ridges,
+woods, a far row of houses). The opening: the camera comes down from the monastery to
+Echidna's door; it creaks open, she steps out, looks at the wind chimes swinging without a
+sound ("Even the chimes have gone quiet..."), and her name card comes up
+("A WITCH OF LOWBELL / Echidna"). Then the player walks the lane: four villagers
+(`villager.gd`) speak when she is close, with words the Hush has taken shown as rune glyphs
+(`speech_bubble.gd`); a stone stile needs a hop; two puddles; lamp-lit windows; Nan in her
+rocking chair by the fire. Knocking at Nan's door (W) ends the scene. **For now** two narrated
+cards stand in for Nan's scene (she can't remember Echidna's name; she gives her the lantern
+and asks her to ring the bell), then the tutorial begins. Nan's scene is the next piece to
+build and will replace those cards.
+
+Entering Lowbell sets the Continue point; the opening plays only once per save. The cave
+ambience fades out under the sky and a soft wind loop plays; new sounds `door_creak` and
+`knock` (appended to `tools/generate_sfx.gd`; the other 95 sounds are byte-identical).
+`AudioDirector.fade_ambience()` is new. The title screen's old four-line text intro is gone.
+
+**Checks:** automated: experience `title` 14/14, `story` 6/6, `lowbell` 15/15; the whole
+experience suite 131/131 and presentation 87/87 (windowed). That run logged one script error:
+`GameState.count_flags()` compared run statistics (numbers stored with the flags) to `true`,
+which New Game's "is there progress?" check hits once Chapter 1 has been played. Fixed
+(`has_flag`/`count_flags` now count only true booleans; the title screen's room count uses
+`count_flags`). Re-run after the fix: experience 131/131 with no script errors, chapter
+`save` 24/24. Visually inspected: screenshots of all nine pictures and of Lowbell's
+opening, each villager, the stile and Nan's door, fixed until they read well. Not yet done by
+a person: pacing of the narration, how the sounds and music feel, and whether the villagers'
+lines land.
+
+## A clearer story, and a charge breeze and bar (2026-09-30)
+
+**The story, told plainly.** The narration was hard to follow (too many invented names and
+poetic lines), so it was rewritten in plain words, one idea per line, and now says outright
+what the game's systems are:
+- The monks (the Choir) found that stars are words.
+- Four words make a spell, and the world obeys it.
+- They carved spells into **rune cubes**, which work when all four words light up.
+- Ilse's daughter Wren was dying, so Ilse wrote ICE · FREEZE · SELF · PERSIST ("freeze
+  this moment, and never let it end").
+- The spell never stopped, and its stillness spread: **the Hush** fades sound, colour and
+  memory.
+- Only the great bell pushed it back, rung daily for sixty years.
+- Nine years ago the bell cracked, and the monks sealed **the Belfry** and left.
+- Now the Hush has reached Lowbell. Someone must get into the Belfry and ring the bell, and
+  that someone is **Echidna**.
+
+What changed on screen:
+- A small gold label above the words says when each picture happens (LONG AGO, SIXTY YEARS
+  AGO, FOR SIXTY YEARS, NINE YEARS AGO, TODAY).
+- The pictures now act out the line being read. The constellation draws itself on "the stars
+  are words". The cube lights word by word on "when all four words light up". The frost and
+  frozen snow come on "time stopped". A picture can hold a movement back for a later line
+  (`_cues`).
+- The Eye and the High Cantor are no longer named; they come later in the game.
+
+Lowbell changes:
+- Echidna's first thought is "The Hush is here. Even the chimes have gone quiet...".
+- The goal box reads "Go to Grandma Nan's cottage, at the end of the lane. She will know what
+  to do."
+- The stand-in for Nan's scene has a third card: Echidna sets off for the sealed Belfry. The
+  first card adds that the Hush has reached Nan too.
+- Her thought bubble now gives way while a villager is speaking. Walking straight to Tam used
+  to put the two bubbles on top of each other.
+
+**Charge breeze and bar.** Charging a jump now shows two things, both created by
+`player.gd` at start-up (three lines; no scene edits):
+- **Breeze** (`scripts/fx/charge_breeze.gd`): a small breeze of soft dots only. Specks of air
+  spiral in toward her and a little dust stirs at her feet. It grows with the charge and warms
+  to gold at full. When she leaps, the dust puffs out where she stood. No lines or streaks, so
+  the earlier "remove the lines" request still holds; the test checks she has no `Line2D`.
+- **Bar** (`scripts/fx/charge_bar.gd`): a small 22×3 bar just above her hat. It appears as
+  the charge pose starts (a quick crouch never shows it) and fills as the jump gains power.
+  At full power it turns gold, flashes once and plays a new `charge_full` chime once. It fades
+  when she leaps or stands up.
+- The new sound was appended to `tools/generate_sfx.gd`; the other sounds are byte-identical.
+- The old `scripts/charge_wind.gd` (the removed streaks) is still on disk, unused, and was left
+  in place (no deletions without approval).
+
+**Checks:**
+- Automated (windowed): presentation `charge` 20/20 (new checks: no bar or breeze while idle,
+  none on a quick crouch, the bar above her head filling, full and gold at full charge, one
+  chime only, the puff on the leap, the bar gone after it, a part charge clears it with no
+  chime), chapter `save` 24/24. Full `all` run: **979/979** (tutorial 140, chapter 304,
+  presentation 100, experience 131, rune 304), with no script errors.
+- Visually inspected: close-ups at each stage of a charge (appearing, filling, the flash, full,
+  the leap), a screenshot of every story line, and Lowbell.
+- Not yet done by a person: whether the breeze is noticeable enough in motion, whether the
+  chime is too loud or quiet, and whether the new narration is clear to a first-time player.
 
 ## Known limitations and decisions
 

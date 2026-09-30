@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/spectral_platform.gd" id="1_cfrjc"]
 
-[node name="SpectralPlatform" type="Node2D" unique_id=1073614055]
+[node name="SpectralPlatform" type="Node2D" unique_id=542167568]
 script = ExtResource("1_cfrjc")

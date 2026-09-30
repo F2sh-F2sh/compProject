@@ -8,6 +8,8 @@ extends Node
 const TITLE := "res://scenes/ui/title_screen.tscn"
 const TUTORIAL := "res://scenes/tutorial_level.tscn"
 const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
+const STORY := "res://scenes/story/story_intro.tscn"
+const LOWBELL := "res://scenes/story/lowbell.tscn"
 const SHOTS := "user://test_shots/"
 const DT := 1.0 / 60.0
 
@@ -28,6 +30,11 @@ func run_suite(filter: String) -> void:
 		"feedback": scenario_feedback,
 		"controls": scenario_controls,
 		"damaged": scenario_damaged_files,
+		"menu": scenario_menu,
+		"puddles": scenario_puddles,
+		"layers": scenario_layers,
+		"story": scenario_story,
+		"lowbell": scenario_lowbell,
 	}
 	for key in scenarios:
 		if filter == key or filter == "":
@@ -137,13 +144,14 @@ func scenario_title() -> void:
 	check("the title screen is the game's first scene", ProjectSettings.get_setting("application/run/main_scene") == TITLE)
 	check("with no save, Continue is disabled", lvl.continue_button.disabled)
 	check("the game has its real name", ProjectSettings.get_setting("application/config/name") == "The Sealed Belfry")
-	# New Game plays the story intro, which any key skips, then the tutorial
+	# New Game plays the illustrated story, then Lowbell, whose lane leads to the tutorial
 	lvl.new_button.pressed.emit()
-	await seconds(1.4)
-	check("New Game begins with the story intro", lvl._intro != null and scene_is(TITLE))
+	check("New Game begins with the story", await wait_for_scene(STORY))
+	await seconds(2.0)
 	await shot("title_intro")
-	await press_key(KEY_SPACE)
-	check("a key skips the intro into the tutorial", await wait_for_scene(TUTORIAL))
+	lvl.skip()
+	check("the story leads to Lowbell", await wait_for_scene(LOWBELL))
+	check("and from Lowbell the way on is the tutorial", lvl.next_scene() == TUTORIAL)
 
 	# After the tutorial, Continue and New Game go straight to the chapter
 	state().clear_all()
@@ -160,14 +168,15 @@ func scenario_title() -> void:
 	check("the menu shows the chapter's progress", lvl._progress.text.contains("pages 1 / 7"), lvl._progress.text)
 	lvl.new_button.pressed.emit()
 	await frames(5)
-	check("New Game asks again before erasing progress", scene_is(TITLE) and lvl._intro == null
-		and state().has_flag("ch1.r1.solved"))
+	check("New Game asks again before erasing progress", scene_is(TITLE) and state().has_flag("ch1.r1.solved"))
 	lvl.new_button.pressed.emit()
 	await frames(5)
 	check("the second press starts over but keeps the finished tutorial", not state().has_flag("ch1.r1.solved")
 		and state().has_flag("tutorial.done"))
-	await press_key(KEY_SPACE)
-	check("a new game after the tutorial begins in the chapter", await wait_for_scene(CHAPTER))
+	check("the story plays again", await wait_for_scene(STORY))
+	lvl.skip()
+	check("and after the tutorial, Lowbell's lane leads to the chapter", await wait_for_scene(LOWBELL)
+		and lvl.next_scene() == CHAPTER)
 
 	# The Tutorial entry always replays it from the start
 	await open_scene(TITLE)
@@ -443,30 +452,54 @@ func scenario_controls() -> void:
 	# Controller aim: straight ahead, drawn toward a creature near that line
 	InputLabels.use_pad = true
 	var slime: Node2D = lvl.get_node("Enemies/Slime1")
+	# (The other slime wanders; out of sight it can't be the nearer target)
+	var other: Node2D = lvl.get_node("Enemies/Slime2")
+	other.visible = false
 	player.teleport_to(Vector2(slime.global_position.x - 200.0, 530))
 	await seconds(0.3)
 	player.animated_sprite.flip_h = false
 	var origin: Vector2 = player.global_position + Vector2(0, -12)
 	var dir: Vector2 = player.aim_direction(origin)
 	var to_slime := (slime.global_position + Vector2(0, -8) - origin).normalized()
+	other.visible = true
 	InputLabels.use_pad = false
 	check("controller aim leans onto a creature ahead", dir.angle_to(to_slime) < 0.05 and dir.angle_to(to_slime) > -0.05,
 		"%s vs %s" % [dir, to_slime])
 
-	# Lighter effects: no bloom or grain, and lights stop casting shadows
+	# Graphics levels, Low to Elite
 	var mat: ShaderMaterial = lvl.get_node("PostFX/Screen").material
-	var shadowed := lvl.find_children("*", "Light2D", true, false).filter(func(l): return l.shadow_enabled).size()
-	settings.effects_low = true
-	settings.changed.emit()
+	var lights := func(): return lvl.find_children("*", "Light2D", true, false).filter(func(l): return l.shadow_enabled)
+	var shadowed: int = lights.call().size()
+	var high_bloom: float = mat.get_shader_parameter("bloom_strength")
+	var shafts := get_tree().get_nodes_in_group("light_shaft")
+	var motes := get_tree().get_nodes_in_group("ambient_particles")
+	var high_motes: int = motes[0].amount if not motes.is_empty() else 0
+	settings.set_graphics(0)
 	await frames(2)
-	var still := lvl.find_children("*", "Light2D", true, false).filter(func(l): return l.shadow_enabled).size()
-	check("lighter effects turn off bloom, grain and shadows", mat.get_shader_parameter("bloom_strength") == 0.0
-		and still == 0 and shadowed > 0, "%d shadowed lights -> %d" % [shadowed, still])
-	settings.effects_low = false
-	settings.changed.emit()
+	check("Low turns off bloom, grain and shadows", mat.get_shader_parameter("bloom_strength") == 0.0
+		and mat.get_shader_parameter("grain") == 0.0 and lights.call().is_empty() and shadowed > 0,
+		"%d shadowed lights -> %d" % [shadowed, lights.call().size()])
+	check("Low hides the light shafts and thins the motes", not shafts.is_empty() and shafts.all(func(s): return not s.visible)
+		and motes[0].amount < high_motes, "%d -> %d motes" % [high_motes, motes[0].amount])
+	settings.set_graphics(1)
 	await frames(2)
-	check("and full effects bring them back", mat.get_shader_parameter("bloom_strength") > 0.0
-		and lvl.find_children("*", "Light2D", true, false).filter(func(l): return l.shadow_enabled).size() == shadowed)
+	check("Medium has softer bloom and shadows back", mat.get_shader_parameter("bloom_strength") > 0.0
+		and mat.get_shader_parameter("bloom_strength") < high_bloom and lights.call().size() == shadowed)
+	settings.set_graphics(4)
+	await frames(2)
+	check("Elite: stronger bloom, the smoothest shadows, more motes", mat.get_shader_parameter("bloom_strength") > high_bloom
+		and lights.call().all(func(l): return l.shadow_filter == Light2D.SHADOW_FILTER_PCF13) and motes[0].amount > high_motes)
+	settings.set_graphics(2)
+	await frames(2)
+	check("and High puts everything back as authored", is_equal_approx(mat.get_shader_parameter("bloom_strength"), high_bloom)
+		and lights.call().size() == shadowed and shafts.all(func(s): return s.visible) and motes[0].amount == high_motes)
+	# The frames-per-second readout
+	settings.set_show_fps(true)
+	await frames(3)
+	check("Show FPS puts a live counter on screen", settings._fps_layer.visible and settings._fps_label.text.begins_with("FPS "),
+		settings._fps_label.text)
+	settings.set_show_fps(false)
+	check("and hides it again", not settings._fps_layer.visible)
 
 
 # ================================================================ damaged files
@@ -486,3 +519,300 @@ func scenario_damaged_files() -> void:
 	var settings := get_tree().root.get_node("Settings")
 	check("a damaged setting falls back to its default", settings._number("loud", 0.7) == 0.7
 		and settings._number(5.0, 0.7) == 2.0)
+
+
+# ================================================================ the cascading menu
+
+func _settings() -> Node:
+	return get_tree().root.get_node("Settings")
+
+
+func _mouse_to(at: Vector2) -> void:
+	var ev := InputEventMouseMotion.new()
+	ev.position = at
+	ev.global_position = at
+	Input.parse_input_event(ev)
+	await frames(3)
+
+
+func _click(at: Vector2) -> void:
+	await _mouse_to(at)
+	for pressed in [true, false]:
+		var ev := InputEventMouseButton.new()
+		ev.position = at
+		ev.global_position = at
+		ev.button_index = MOUSE_BUTTON_LEFT
+		ev.pressed = pressed
+		Input.parse_input_event(ev)
+		await frames(2)
+
+
+func scenario_menu() -> void:
+	print("SCENARIO the cascading menu")
+	state().clear_all()
+	await open_scene(CHAPTER)
+	var menu = lvl.get_node("PauseMenu")
+	await press_action("pause")
+	check("Esc opens the menu and pauses", menu.is_open and get_tree().paused)
+	check("it opens with a chime", int(menu.played.get("open", 0)) >= 1)
+	check("six round icons, the first ringed in orange", menu._icons.size() == 6 and menu._icons[0].active)
+	await seconds(0.5)
+	await shot("menu_open")
+	# Down to Settings: each move rings the next icon, with a chime
+	var hovers: int = menu.played.get("hover", 0)
+	for i in 4:
+		await press_action("ui_down")
+	check("moving down rings each icon in turn", menu._icons[4].active and not menu._icons[0].active, "icon %d" % menu._icon_index)
+	check("a chime on each hover", int(menu.played.get("hover", 0)) >= hovers + 4)
+	check("its list slides out beside it", menu._list1 != null and menu._list1.visible and menu._visible_rows(menu._list1).size() == 4)
+	var selects: int = menu.played.get("select", 0)
+	await press_action("ui_right")
+	check("right goes into the list, with a beep", menu._col == 1 and menu._row1 == 0 and int(menu.played.get("select", 0)) == selects + 1)
+	check("the active row is solid orange", menu._visible_rows(menu._list1)[0].active)
+	check("Graphics cascades out its own list: five levels and two switches", menu._list2 != null and menu._list2.visible
+		and menu._visible_rows(menu._list2).size() == 7)
+	await press_action("ui_right")
+	for i in 4:
+		await press_action("ui_down")
+	check("the card describes the highlighted level", menu._info_title.text == "Graphics: Elite", menu._info_title.text)
+	await seconds(0.3)
+	await shot("menu_graphics")
+	await press_action("ui_accept")
+	check("choosing Elite sets it", _settings().graphics == 4)
+	check("and marks it in use", menu._visible_rows(menu._list2)[4].value_text.contains("In use"))
+	await press_action("ui_down")
+	await press_action("ui_accept")
+	check("Show FPS switches the counter on from the menu", _settings().show_fps and _settings()._fps_layer.visible)
+	await press_action("ui_accept")
+	check("and off again", not _settings().show_fps)
+	_settings().set_graphics(2)
+	await press_action("ui_cancel")
+	check("Esc backs out one list", menu._col == 1 and menu.is_open)
+	# Controls: rebind Jump to J from the menu, then put it back
+	await press_action("ui_down")
+	check("Controls is next", menu._visible_rows(menu._list1)[1].active)
+	await press_action("ui_right")
+	await press_action("ui_down")
+	await press_action("ui_down")
+	await press_action("ui_accept")
+	check("choosing a control waits for a key", menu._waiting_action == "jump"
+		and menu._visible_rows(menu._list2)[2].value_text == "Press a key...")
+	await press_key(KEY_J)
+	check("the next key becomes Jump", InputLabels.primary("jump") == "J", InputLabels.primary("jump"))
+	check("and the list shows it", menu._visible_rows(menu._list2)[2].value_text == "J")
+	_settings().reset_bindings()
+	await press_action("ui_cancel")
+	# Audio: left and right change a volume
+	_settings().set_music_volume(0.5)
+	await press_action("ui_down")
+	await press_action("ui_right")
+	await press_action("ui_down")
+	var music: float = _settings().music_volume
+	await press_action("ui_left")
+	check("left turns the music down", _settings().music_volume < music, "%.2f -> %.2f" % [music, _settings().music_volume])
+	await press_action("ui_right")
+	check("right turns it back up", is_equal_approx(_settings().music_volume, music))
+	await press_action("ui_cancel")
+	await press_action("ui_cancel")
+	check("back on the icons, the lists folded away", menu._col == 0 and menu._list2 == null)
+	# The map opens in the card
+	await press_action("ui_up")
+	await press_action("ui_up")
+	await press_action("ui_right")
+	await press_action("ui_accept")
+	check("Chapter Map opens in the card", menu._map_box.visible and menu._map_list.get_child_count() > 0)
+	await shot("menu_map")
+	await press_action("ui_cancel")
+	check("Esc closes the page first", menu._menu_box.visible and menu.is_open)
+	await press_action("ui_cancel")
+	await press_action("ui_cancel")
+	check("Esc on the icons closes the menu", not menu.is_open and not get_tree().paused)
+	check("with its own sound", int(menu.played.get("close", 0)) >= 1)
+
+	# With the mouse: hover opens, click chooses
+	await press_action("pause")
+	await seconds(0.4)
+	var icon = menu._icons[1]
+	await _mouse_to(icon.get_global_rect().get_center())
+	check("hovering an icon rings it and slides its list out", icon.active and menu._list1.visible)
+	await seconds(0.3)
+	var spells = menu._visible_rows(menu._list1)[0]
+	await _mouse_to(spells.get_global_rect().get_center())
+	check("hovering a row lights it and cascades the next list", spells.active and menu._list2 != null and menu._list2.visible)
+	await seconds(0.3)
+	var fireball = menu._visible_rows(menu._list2)[0]
+	await _mouse_to(fireball.get_global_rect().get_center())
+	check("hovering a spell describes it on the card", menu._info_title.text == "Fireball" and fireball.active, menu._info_title.text)
+	await shot("menu_spells")
+	await _click(menu._icons[0].get_global_rect().get_center())
+	check("clicking Resume closes the menu", not menu.is_open and not get_tree().paused)
+
+	# The tutorial has no chapter: its map and journal stay hidden
+	await open_scene(TUTORIAL)
+	menu = lvl.get_node("PauseMenu")
+	menu._set_open(true)
+	check("the tutorial menu hides the chapter-only icons", not menu._icon_by_id["map"].visible
+		and not menu._icon_by_id["journal"].visible and menu._icon_by_id["settings"].visible)
+	menu._set_open(false)
+
+
+# ================================================================ puddles
+
+func scenario_puddles() -> void:
+	print("SCENARIO puddles")
+	state().clear_all()
+	await open_scene(CHAPTER)
+	await frames(10)
+	var puddles := get_tree().get_nodes_in_group("puddle")
+	check("the chapter's puddles settle onto flat floor", puddles.size() >= 6, "%d puddles" % puddles.size())
+	var p: Node2D = null
+	for each in puddles:
+		if p == null or absf(each.global_position.x - 470.0) < absf(p.global_position.x - 470.0):
+			p = each
+	check("a puddle lies on the floor's surface", p != null and absf(p.global_position.y - 534.0) <= 1.0,
+		"y=%.1f" % p.global_position.y)
+	var player: Node2D = lvl.get_node("Player")
+	player.teleport_to(Vector2(p.global_position.x - 90.0, 530.0))
+	await frames(20)
+	var wet := _sounds("puddle_step")
+	Input.action_press("move_right")
+	await wait_until(func(): return player.global_position.x > p.global_position.x + 30.0, 4.0)
+	Input.action_release("move_right")
+	check("walking through leaves rings of ripples", p.ripple_count() > 0, "%d" % p.ripple_count())
+	check("footfalls in it sound wet", _sounds("puddle_step") > wet)
+	await seconds(2.5)
+	player.teleport_to(Vector2(p.global_position.x, 430.0))
+	var splashes := _sounds("puddle_splash")
+	await wait_until(func(): return not player.is_on_floor(), 0.5)
+	await wait_until(func(): return player.is_on_floor(), 2.0)
+	await frames(2)
+	check("landing in it splashes", _sounds("puddle_splash") > splashes and p.ripple_count() > 0)
+	await seconds(0.25)
+	await shot("puddle_splash")
+	_settings().set_graphics(0)
+	await frames(2)
+	check("Low graphics drop the reflection", p._material.get_shader_parameter("reflections") == false)
+	_settings().set_graphics(2)
+	await frames(2)
+	check("High mirrors the scene above it", p._material.get_shader_parameter("reflections") == true)
+	var drips := _sounds("drip")
+	p.drip_interval = Vector2(0.2, 0.3)
+	p._drip_in = 0.05
+	check("water drips into it from above", await wait_until(func(): return _sounds("drip") > drips, 4.0))
+	player.teleport_to(Vector2(p.global_position.x - 14.0, 530.0))
+	await seconds(1.0)
+	await shot("puddle_reflection")
+	# In the tutorial too
+	await open_scene(TUTORIAL)
+	await frames(10)
+	check("the tutorial has its puddles", get_tree().get_nodes_in_group("puddle").size() >= 2,
+		"%d" % get_tree().get_nodes_in_group("puddle").size())
+
+
+# ================================================================ the story and Lowbell
+
+func _walk_to(player: Node2D, x: float, timeout := 10.0) -> bool:
+	var dir := "move_right" if x > player.global_position.x else "move_left"
+	Input.action_press(dir)
+	var ok := await wait_until(func(): return player.global_position.x >= x if dir == "move_right" else player.global_position.x <= x, timeout)
+	Input.action_release(dir)
+	await frames(10)
+	return ok
+
+
+func scenario_story() -> void:
+	print("SCENARIO the story before the game")
+	state().clear_all()
+	await open_scene(TITLE)
+	lvl.new_button.pressed.emit()
+	check("New Game opens the illustrated story", await wait_for_scene(STORY))
+	var first_words := func(): return lvl.index == 0 and lvl._caption.modulate.a > 0.9
+	check("it opens on the first picture, with its words", await wait_until(first_words, 4.0))
+	check("each picture is drawn, not a blank page", lvl._picture != null and lvl._picture.get_child_count() > 3)
+	# Pressing on moves through every picture (a press on a line still
+	# fading in just shows it), and the last one leads to the village
+	var seen := {}
+	var guard := 0
+	while not lvl.finished and guard < 90:
+		seen[lvl.index] = true
+		await press_action("jump")
+		await seconds(0.8)
+		guard += 1
+	check("all nine pictures can be paged through", seen.size() == 9, str(seen.keys()))
+	check("and the last leads to Lowbell", await wait_for_scene(LOWBELL, 5.0))
+	# Holding Esc skips straight there
+	state().clear_all()
+	await open_scene(STORY)
+	await seconds(1.5)
+	Input.action_press("pause")
+	await seconds(1.3)
+	Input.action_release("pause")
+	check("holding Esc skips the story", await wait_for_scene(LOWBELL, 4.0))
+
+
+func scenario_lowbell() -> void:
+	print("SCENARIO Lowbell: meeting Echidna")
+	state().clear_all()
+	await open_scene(LOWBELL)
+	var player: CharacterBody2D = lvl.player
+	check("the opening starts in the sky, before Echidna appears", lvl.intro_running and not player.visible
+		and player.controls_locked)
+	check("entering Lowbell saves it for Continue", state().checkpoint_scene == LOWBELL)
+	await seconds(1.5)
+	await shot("lowbell_opening")
+	var handed_over := func(): return not lvl.intro_running and player.visible and not player.controls_locked
+	check("she steps out and is handed over", await wait_until(handed_over, 20.0))
+	check("her name comes up", lvl._named)
+	check("the goal is shown", await wait_until(func(): return lvl._objective.modulate.a > 0.9, 3.0))
+	check("the wind chimes swing, silent", get_tree().get_nodes_in_group("wind_chime").size() == 5)
+	check("the lane has its puddles", get_tree().get_nodes_in_group("puddle").size() == 2)
+	await shot("lowbell_start")
+	# The villagers have lost words to the Hush
+	var mira = lvl.get_node("People/Mira")
+	await _walk_to(player, mira.global_position.x + 16.0)
+	check("a villager speaks when she comes close", await wait_until(func(): return mira.bubble.is_showing(), 2.0))
+	check("a word the Hush has taken shows as runes", mira.bubble.gap_count() == 6, str(mira.bubble.gap_count()))
+	await shot("lowbell_villager")
+	# The stile across the lane needs a hop
+	await _walk_to(player, lvl.STILE_X - 60.0)
+	Input.action_press("move_right")
+	await seconds(1.2)
+	check("the stile stops her walking", player.global_position.x < lvl.STILE_X - 10.0, "x=%.0f" % player.global_position.x)
+	await press_action("jump")
+	await seconds(0.8)
+	Input.action_release("move_right")
+	check("a hop clears it", player.global_position.x > lvl.STILE_X + 10.0, "x=%.0f" % player.global_position.x)
+	# Knocking at Nan's door leads on
+	await _walk_to(player, lvl.NAN_DOOR_X - 6.0, 14.0)
+	check("Nan's door can be knocked on", await wait_until(func(): return lvl.nan_door.is_focused(), 2.0))
+	await press_action("interact")
+	check("knocking starts the way on", lvl.leaving)
+	check("which, before the tutorial is done, is the tutorial", await wait_for_scene(TUTORIAL, 40.0))
+	# Coming back (Continue), the opening doesn't play again
+	await open_scene(LOWBELL)
+	await frames(5)
+	check("a second visit skips the opening", not lvl.intro_running and lvl.player.visible)
+
+
+# ================================================================ draw order
+
+func scenario_layers() -> void:
+	print("SCENARIO what draws over what")
+	await open_scene(CHAPTER)
+	var slime: Node2D = lvl.get_node("R2/BellSlime")
+	var front := lvl.find_children("FrontVines", "", true, false)
+	var front_z: int = front[0].z_index if not front.is_empty() else 40
+	check("slimes draw above props, grates and the thorn frame", slime.z_index > front_z, "%d vs %d" % [slime.z_index, front_z])
+	var signs := lvl.find_children("*", "Node2D", true, false).filter(func(n): return n is TutorialSign)
+	check("signs draw above light shafts and the vines", not signs.is_empty() and signs.all(func(s): return s.z_index > front_z))
+	var number: Node2D = load("res://scenes/damage_number.tscn").instantiate()
+	lvl.add_child(number)
+	number.setup(3, false)
+	await frames(1)
+	check("damage numbers still show over a slime", number.z_index > slime.z_index)
+	number.queue_free()
+	var card := TitleCard.show_card(lvl, "ACT I", "The Toll", "Chapter 1", 0.5)
+	await frames(2)
+	var height := get_tree().root.get_visible_rect().size.y
+	check("act and lesson cards sit high, clear of the hanging signs", card._box.get_global_rect().end.y < height * 0.4,
+		"card ends at %.0f of %.0f" % [card._box.get_global_rect().end.y, height])

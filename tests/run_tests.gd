@@ -33,7 +33,8 @@ func _run() -> void:
 	# Tests press the default keys, whatever the player has rebound
 	settings.bindings.clear()
 	InputMap.load_from_project_settings()
-	settings.effects_low = false
+	settings.set_graphics(2)  # High
+	settings.show_fps = false
 	settings.assist_damage = 1.0
 	settings.assist_infinite_mana = false
 	settings.assist_auto_sprint = false

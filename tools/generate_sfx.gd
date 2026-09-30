@@ -144,6 +144,27 @@ func _init() -> void:
 	write("fire_blast", mix([noise(0.6, 0.15, 0.5, 0.0, 0.2), thud(80.0, 0.5, 0.12), crackle(0.6, 12)]), 0.55)
 	write("brambles_burn", mix([whoosh(0.8), crackle(1.2, 24)]), 0.45)
 	write("ui_hover", blip(2000.0, 0.03), 0.12)
+	# The cascading menu: crisp digital chimes on hover, solid beeps on select
+	write("sao_hover", mix([partials(2093.0, [1.0, 2.0, 3.0], [1.0, 0.3, 0.12], [0.03, 0.015, 0.01], 0.09, 0.001),
+		offset(scaled(partials(3136.0, [1.0, 2.0], [1.0, 0.2], [0.025, 0.01], 0.07, 0.001), 0.5), 0.018)]), 0.16)
+	write("sao_select", mix([digital(1046.5, 0.13, 0.06), offset(digital(1568.0, 0.11, 0.05), 0.045)]), 0.26)
+	write("sao_open", mix([chime(1046.5, 0.25, 0.002), offset(chime(1318.5, 0.25, 0.002), 0.045),
+		offset(chime(1568.0, 0.25, 0.002), 0.09), offset(chime(2093.0, 0.35, 0.002), 0.135)]), 0.28)
+	write("sao_close", mix([chime(1568.0, 0.22, 0.002), offset(chime(1174.7, 0.22, 0.002), 0.05),
+		offset(chime(784.0, 0.3, 0.002), 0.1)]), 0.24)
+	write("sao_back", digital(740.0, 0.08, 0.035), 0.2)
+	# Water: a step in a puddle, a landing in one, and a drip from the ceiling
+	write("puddle_step", mix([noise(0.16, 0.05, 0.5, 0.002, 0.35), offset(sweep(900.0, 1600.0, 0.05, false), 0.02),
+		offset(scaled(sweep(1200.0, 2100.0, 0.04, false), 0.6), 0.06)]), 0.24)
+	write("puddle_splash", mix([noise(0.4, 0.12, 0.55, 0.003, 0.3), offset(sweep(700.0, 1400.0, 0.07, false), 0.03),
+		offset(scaled(sweep(1100.0, 2000.0, 0.05, false), 0.7), 0.1), offset(scaled(sweep(1500.0, 2600.0, 0.04, false), 0.5), 0.17)]), 0.36)
+	write("drip", mix([sweep(1200.0, 2300.0, 0.045, false), scaled(noise(0.05, 0.01, 0.6, 0.0, 0.5), 0.3)]), 0.16)
+	# Lowbell: a cottage door on old hinges, and a knock on wood
+	write("door_creak", mix([scaled(sweep(170.0, 250.0, 0.55, true), 0.6), scaled(crackle(0.55, 28), 0.55),
+		scaled(noise(0.5, 0.2, 0.2, 0.05, 0.3), 0.5)]), 0.28)
+	write("knock", mix([thud(150.0, 0.14, 0.035), scaled(click(0.012, 0.45), 0.6), scaled(noise(0.06, 0.015, 0.35, 0.0, 0.2), 0.4)]), 0.5)
+	# The charged jump reaching full power: a small bright two-note ting
+	write("charge_full", mix([chime(1174.7, 0.3, 0.002), offset(chime(1760.0, 0.45, 0.002), 0.07)]), 0.3)
 	print("SFX DONE")
 	quit()
 
@@ -202,6 +223,11 @@ func chime(base: float, seconds: float, attack := 0.004) -> PackedFloat32Array:
 
 func pad(base: float, seconds: float) -> PackedFloat32Array:
 	return partials(base, [1.0, 2.0], [1.0, 0.25], [seconds * 0.6, seconds * 0.3], seconds, 0.08)
+
+
+## A square-ish digital tone (odd harmonics) with a quick decay: menu beeps.
+func digital(freq: float, seconds: float, decay: float) -> PackedFloat32Array:
+	return partials(freq, [1.0, 3.0, 5.0, 7.0], [1.0, 0.33, 0.2, 0.14], [decay, decay * 0.8, decay * 0.6, decay * 0.5], seconds, 0.001)
 
 
 func blip(freq: float, seconds: float) -> PackedFloat32Array:

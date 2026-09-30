@@ -491,6 +491,12 @@ func slime(parent: Node, slime_name: String, pos: Vector2, props := {}) -> Node:
 	return s
 
 
+## A puddle on the floor centred on world x (it settles onto the floor, and
+## removes itself if the ground there isn't flat).
+func puddle(parent: Node, x: float, width := 80.0) -> void:
+	inst("res://scenes/fx/puddle.tscn", parent, "Puddle%d" % parent.get_child_count(), Vector2(x, FLOOR_Y), {"width": width})
+
+
 func prop(parent: Node, file: String, x: float, y: float, anchor_top := false, flip := false) -> Sprite2D:
 	var tex: Texture2D = load("res://assets/TileSet/props/sprites/%s.png" % file)
 	var s := Sprite2D.new()
@@ -545,6 +551,8 @@ func room_1_entrance() -> void:
 	prop(deco, "vine_long", cx(11), 266, true)
 	prop(deco, "skull_pile", cx(4) - 20, FLOOR_Y)
 	prop(deco, "rocks_a", cx(16), FLOOR_Y)
+	puddle(deco, 470.0, 72.0)
+	puddle(deco, cx(18), 80.0)
 	prop(deco, "bat", cx(13), 266, true)
 
 
@@ -604,6 +612,8 @@ func room_2_bellkeeper() -> void:
 	prop(deco, "moss_drip_top", cx(30), 264, true)
 	prop(deco, "skeleton", cx(42), FLOOR_Y)
 	prop(deco, "rat", cx(26), FLOOR_Y)
+	puddle(deco, 1584.0, 64.0)
+	puddle(deco, cx(40) + 16, 80.0)
 
 
 # ---------------------------------------------------------------- Room 3
@@ -671,6 +681,7 @@ func room_3_split_flame() -> void:
 	prop(deco, "vine_long", cx(56), 10, true)
 	prop(deco, "cobweb_corner", cx(63) + 8, 12, true, true)
 	prop(deco, "rocks_b", cx(62), FLOOR_Y)
+	puddle(deco, cx(59), 96.0)
 
 
 # ---------------------------------------------------------------- Room 4
@@ -729,6 +740,7 @@ func room_4_watcher() -> void:
 	prop(deco, "moss_drip_top", cx(75), 264, true)
 	prop(deco, "gargoyle", cx(83) - 8, FLOOR_Y)
 	prop(deco, "tombstone_rubble", cx(81), FLOOR_Y)
+	puddle(deco, 4520.0, 64.0)
 	return
 
 
@@ -991,6 +1003,7 @@ func room_7_belfry() -> void:
 	prop(deco, "cobweb_corner", cx(172) + 8, 12, true, true)
 	prop(deco, "skull_pile", cx(166), FLOOR_Y)
 	prop(deco, "candelabra", cx(172), FLOOR_Y)
+	puddle(deco, cx(169), 80.0)
 	return
 
 
@@ -1033,6 +1046,7 @@ func room_8_choir() -> void:
 	prop(deco, "chain_short", cx(179), 272, true)
 	prop(deco, "cobweb_corner", cx(194) + 8, 268, true, true)
 	prop(deco, "candelabra", cx(191), FLOOR_Y)
+	puddle(deco, cx(182), 128.0)
 
 
 # ---------------------------------------------------------------- Room 9

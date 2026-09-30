@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/pushable_block.gd" id="1_srr10"]
 
-[node name="PushableBlock" type="CharacterBody2D" unique_id=61656955]
+[node name="PushableBlock" type="CharacterBody2D" unique_id=1636777187]
 script = ExtResource("1_srr10")

@@ -2,7 +2,7 @@ extends Node2D
 
 ## The front door. A slow, moody view of the ruined belfry with Echidna by a
 ## candle under a shaft of light; the title; and the menu: Continue (where
-## you left off), New Game (with a short story intro), the Tutorial,
+## you left off), New Game (the illustrated story, then Lowbell), the Tutorial,
 ## Settings & Controls, and Quit. A line under the menu shows progress.
 
 const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
@@ -10,13 +10,8 @@ const TITLE_FONT_NAMES := ["Cinzel", "Trajan Pro", "Times New Roman", "Georgia",
 const TUTORIAL := "res://scenes/tutorial_level.tscn"
 const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
 const CHAPTER_2 := "res://scenes/chapter/chapter_2.tscn"
+const STORY := "res://scenes/story/story_intro.tscn"
 const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
-const INTRO := [
-	"Nine years ago the monks sealed the belfry and fled.",
-	"Its great bell has not rung since.",
-	"The halls below belong to watchers, slimes and wisps now.",
-	"A young witch named Echidna goes down into the dark,\nwith a lantern, a little fire, and her own echo.",
-]
 
 var continue_button: Button
 var new_button: Button
@@ -29,7 +24,6 @@ var _new_armed := false
 var _far: Sprite2D
 var _mid: Sprite2D
 var _time := 0.0
-var _intro: Control
 var _starting := false
 
 
@@ -211,10 +205,7 @@ func _show_settings(show: bool) -> void:
 func _refresh() -> void:
 	var has_save := _continue_target() != ""
 	continue_button.disabled = not has_save
-	var rooms := 0
-	for key in GameState.flags:
-		if String(key).begins_with("ch1.clear.") and GameState.flags[key] == true:
-			rooms += 1
+	var rooms := GameState.count_flags("ch1.clear.")
 	var pages := GameState.count_flags("ch1.page.")
 	if GameState.has_flag("ch2.complete"):
 		_progress.text = "Chapters 1 and 2 complete  ·  ledger pages %d / 7" % pages
@@ -261,7 +252,9 @@ func _on_new_game() -> void:
 	GameState.clear_all()
 	if tutorial_done:
 		GameState.set_flag("tutorial.done")
-	_play_intro(CHAPTER if tutorial_done else TUTORIAL)
+	# The story, then Lowbell; the village leads on to the tutorial (or the
+	# chapter, once the tutorial is done)
+	_start(STORY)
 
 
 func _on_tutorial() -> void:
@@ -274,44 +267,3 @@ func _start(path: String) -> void:
 		return
 	_starting = true
 	get_tree().change_scene_to_file(path)
-
-
-# ------------------------------------------------------------------ intro
-
-## The story so far, a line at a time over black. Any key skips it.
-func _play_intro(then: String) -> void:
-	var layer := CanvasLayer.new()
-	layer.layer = 10
-	add_child(layer)
-	_intro = ColorRect.new()
-	(_intro as ColorRect).color = Color(0.01, 0.005, 0.02, 0.0)
-	_intro.set_anchors_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(_intro)
-	var text := _label("", FONT, 20, Color("e4ddf2"))
-	text.set_anchors_preset(Control.PRESET_FULL_RECT)
-	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	text.modulate.a = 0.0
-	_intro.add_child(text)
-	var skip := _label("any key to skip", FONT, 11, Color("6d6488"))
-	skip.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	skip.offset_left = -150
-	skip.offset_top = -30
-	_intro.add_child(skip)
-	var tween := create_tween()
-	tween.tween_property(_intro, "color:a", 1.0, 0.8)
-	for line in INTRO:
-		tween.tween_callback(func(): text.text = line)
-		tween.tween_property(text, "modulate:a", 1.0, 0.7)
-		tween.tween_interval(2.2)
-		tween.tween_property(text, "modulate:a", 0.0, 0.6)
-	tween.tween_callback(_start.bind(then))
-	_intro.set_meta("then", then)
-
-
-func _input(event: InputEvent) -> void:
-	if _intro == null or _starting:
-		return
-	if (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton) and event.is_pressed():
-		get_viewport().set_input_as_handled()
-		_start(_intro.get_meta("then"))

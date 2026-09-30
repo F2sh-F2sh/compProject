@@ -66,6 +66,7 @@ After a fresh clone, or after adding scripts with a `class_name`, run
 
 ## More
 
+- `docs/GAME_DESIGN.md`: the full game plan: story, world, chapters, NPCs, bosses, and the contest build.
 - `docs/CHAPTER1_SOLUTIONS.md`: every room's solution, reset and saved ids.
 - `docs/CHAPTER2_SOLUTIONS.md`: Chapter 2 room by room, and every rune the cubes accept.
 - `docs/RUNE_SYSTEM_PROGRESS.md`: how the rune system works, its tuning, and its test record.

@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/runes/rune_pedestal.gd" id="1_0ro30"]
 
-[node name="RunePedestal" type="Node2D" unique_id=1038678158]
+[node name="RunePedestal" type="Node2D" unique_id=512246599]
 script = ExtResource("1_0ro30")

@@ -221,6 +221,7 @@ func room_1_broken_inscription() -> void:
 	prop(deco, "cobweb_corner", 64 + 32, 268, true)
 	prop(deco, "chain_short", cx(9), 272, true)
 	prop(deco, "rocks_a", cx(15), FLOOR_Y)
+	puddle(deco, cx(16) + 16, 72.0)
 
 
 # ---------------------------------------------------------------- Room 2
@@ -263,6 +264,7 @@ func room_2_too_heavy() -> void:
 	decor(36, 5, W_BANNER_CROSS)
 	decor_standing(29, W_PILLAR)
 	prop(deco, "skull_pile", cx(37), FLOOR_Y)
+	puddle(deco, cx(32) + 16, 80.0)
 	prop(deco, "chain_hook_ball", cx(24), 272, true)
 
 
@@ -362,6 +364,7 @@ func room_4_fractured_seal() -> void:
 	decor(66, 5, W_WINDOW_BARRED)
 	decor(76, 5, W_BANNER_FLEUR)
 	prop(deco, "rocks_a", cx(72), FLOOR_Y)
+	puddle(deco, cx(68) + 16, 64.0)
 	prop(deco, "chain_short", cx(65), 272, true)
 
 
@@ -403,6 +406,7 @@ func room_5_frozen_crossing() -> void:
 	decor(96, 5, W_BANNER_CROSS)
 	prop(deco, "moss_drip_top", cx(88), 264, true)
 	prop(deco, "skull_pile", cx(98), FLOOR_Y)
+	puddle(deco, cx(96), 80.0)
 
 
 # ---------------------------------------------------------------- Room 6
@@ -496,6 +500,7 @@ func room_7_limited_circuit() -> void:
 	decor(128, 5, W_PLAQUE_CROSS)
 	decor(140, 5, W_WINDOW_BARRED)
 	prop(deco, "tombstone_rubble", cx(141), FLOOR_Y)
+	puddle(deco, cx(139) + 16, 64.0)
 
 
 # ---------------------------------------------------------------- Room 8
@@ -548,3 +553,4 @@ func room_8_sealed_observatory() -> void:
 	decor(161, 1, W_WINDOW_MOON)
 	prop(deco, "cobweb_corner", cx(165) + 8, 12, true, true)
 	prop(deco, "chain_short", cx(158), 16, true)
+	puddle(deco, cx(151), 64.0)

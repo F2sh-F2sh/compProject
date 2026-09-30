@@ -61,6 +61,7 @@
 [ext_resource type="Script" path="res://scripts/audio/combat_zone.gd" id="59_combat"]
 [ext_resource type="Script" path="res://scripts/fall_catcher.gd" id="60_fallc"]
 [ext_resource type="Script" path="res://scripts/lesson_zone.gd" id="61_lesson"]
+[ext_resource type="PackedScene" path="res://scenes/fx/puddle.tscn" id="99_puddle"]
 
 [sub_resource type="Gradient" id="Gradient_fpcko"]
 offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
@@ -1211,3 +1212,17 @@ title = "Echoes"
 subtitle = "Your Echo repeats what you did"
 width = 1492.0
 spawn = Vector2(20, 0)
+
+[node name="Puddles" type="Node2D" parent="." unique_id=1718250990]
+
+[node name="PuddleStart" parent="Puddles" unique_id=1718250991 instance=ExtResource("99_puddle")]
+position = Vector2(560, 534)
+width = 80.0
+
+[node name="PuddleArena" parent="Puddles" unique_id=1718250992 instance=ExtResource("99_puddle")]
+position = Vector2(6400, 534)
+width = 96.0
+
+[node name="PuddleLab" parent="Puddles" unique_id=1718250993 instance=ExtResource("99_puddle")]
+position = Vector2(7250, 534)
+width = 80.0

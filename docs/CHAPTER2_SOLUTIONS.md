@@ -30,6 +30,10 @@ changes. Open `scenes/chapter/chapter_2.tscn` and press F6 to play it directly, 
   grates let it through.
 - Reset Room switches the room's runes off, puts every cube, crate and stone back, and gives
   back the mana she had when she came in.
+- Gates worked by plates are open only while the plates are held. Once she walks through
+  into the next room, the room is saved as solved and the gate stays open behind her. (In
+  Room 6 that matters: leaving the room switches her runes there off, the watcher thaws and
+  plate A lifts, but the gate she came through stays open.)
 
 ## Room 1 — The Broken Inscription  [r1]
 Goal: open the far gate. The cube is dungeon-powered, carved Wind / Push / ? / Normal (its
@@ -37,7 +41,7 @@ Direction is broken). The crate must reach a plate marked with a crate (only loo
 press it).
 1. Read the tablet: learn **Right**.
 2. Use the cube, put Right in the broken quadrant, Switch on.
-3. The wind slides the crate onto the plate; the kerb stops it there. The gate latches open.
+3. The wind slides the crate onto the plate; the kerb stops it there, and the gate is open while it rests there.
 
 ## Room 2 — Too Heavy for One  [r2]
 Goal: stone block onto the heavy plate. The fixed cube (Wind / Push / Right / Normal) makes
@@ -47,7 +51,7 @@ the stone strain and grind but not move (1200 < 1470).
 3. Pick it up (F), carry it back and set it down just behind the stone, between the fixed
    cube and the stone.
 4. Inscribe **Right** (it starts as Left) and switch it on: 2400 > 1470, the stone slides onto
-   the plate, the gate latches.
+   the plate and stays there against the kerb, so the gate stays open.
 
 ## Room 3 — Across the Teeth  [r3]
 Goal: onto the high wall past the spiked pit. The cube on a pillar in the pit is out of reach;
@@ -76,13 +80,13 @@ carved Ice / ? / Right / Long.
 3. Walk across. A slime keeps the far side.
 
 ## Room 6 — The Watcher's Lock  [r6]
-Goal: both heavy plates held at once (0.5 s latches the gate). A cube hangs from the ceiling
+Goal: both heavy plates held at once (for 0.5 s, the gate opens). A cube hangs from the ceiling
 over plate A, carved Light / Beam / ? / Normal, reached from the lectern.
 1. Read the tablet: learn **Down**.
 2. At the lectern inscribe Down and switch it on. Step back out of the watcher's sight so it
    goes back to its rounds; it turns to stone the moment it walks under the beam, on plate A.
 3. Hop over the frozen watcher to the loose cube behind the stone, inscribe **Strong**, switch
-   it on: the stone slides onto plate B against the kerb. The gate latches.
+   it on: the stone slides onto plate B against the kerb. The gate opens while both are held.
 
 ## Room 7 — The Limited Circuit  [r7]
 Goal: statue onto the heavy plate. A warding circle holds her mana to 10 here. The statue
@@ -92,7 +96,7 @@ start, so from her own mana it never can.
    then fed by the dungeon).
 2. Carry the Normal cube to just behind the statue.
 3. Switch on the Strong cube (free), then the Normal one (3 a second from her 10). The statue
-   slides onto the plate; the gate latches.
+   slides onto the plate and rests there; the gate opens while it does.
 Known alternative: the Normal cube in the pedestal and the Strong one on her own mana can't
 start (needs 16), so the only working split is the intended one.
 

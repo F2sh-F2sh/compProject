@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="1_5axw4"]
 
-[node name="ChapterCheckpoint" type="Area2D" unique_id=1382788495]
+[node name="ChapterCheckpoint" type="Area2D" unique_id=1987904416]
 script = ExtResource("1_5axw4")

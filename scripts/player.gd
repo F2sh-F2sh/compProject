@@ -128,6 +128,10 @@ func _ready() -> void:
 		var c := Color(1.0, 0.7, 0.4, 0.85)
 		_aim_marker.draw_polyline(PackedVector2Array([Vector2(-4, -5), Vector2(3, 0), Vector2(-4, 5)]), c, 1.5))
 	add_child(_aim_marker)
+	# While she charges a jump: a light breeze at her feet, and a small bar
+	# over her head that fills and turns gold when the jump is at full power
+	add_child(preload("res://scripts/fx/charge_breeze.gd").new())
+	add_child(preload("res://scripts/fx/charge_bar.gd").new())
 
 	if hurtbox:
 		hurtbox.damage_received.connect(take_damage)

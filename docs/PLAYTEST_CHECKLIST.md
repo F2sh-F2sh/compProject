@@ -105,7 +105,12 @@ Only note what confused you, and where.
       ahead while running helps rather than distracts; jumps don't feel floaty.
 - [ ] The new walk cadence, the quick stop and the landing recovery feel
       responsive; tapping left and right still shows steps.
-- [ ] The charge-jump wisps read as "building power" and aren't too bright.
+- [ ] With the wisp lines gone, the charge glow and the full-charge sparks still make it
+      clear when a charged jump is ready.
+- [ ] The charge bar over her head is easy to read, and its gold flash and chime make "full"
+      obvious without looking at her. The chime isn't annoying after many charges.
+- [ ] The small breeze at her feet while charging is noticeable in motion but subtle, and
+      doesn't read as "lines"; the dust puff on take-off looks right.
 - [ ] Light shafts and the parallax behind the broken walls add depth without
       pulling focus from puzzles.
 - [ ] The lantern gloom is moody but never hides a hazard, lever or plate you
@@ -132,6 +137,41 @@ Only note what confused you, and where.
 - [ ] Quit mid-chapter, relaunch, walk through the tutorial exit: I continue from my last
       shrine with solved rooms still solved and pages still collected.
 - [ ] Dying respawns me at the last shrine I walked past, with full health.
+
+## The story intro and Lowbell (2026-09-30)
+
+- [ ] The story: each picture is on screen long enough to read and to watch its movement,
+      but never drags; the narration reads well aloud; nothing important is hidden under the
+      words. Time how long you watched before pressing on: ____
+- [ ] It is clear what the Hush is and why the bell matters by the end of the story.
+- [ ] Ask a first-time player afterwards, without prompting: what are rune cubes, what is the
+      Hush, why did the bell stop, and what does Echidna need to do? (All four should come back
+      right after the rewrite; note any that don't.) ____
+- [ ] The time labels (LONG AGO … TODAY) make the order of events clear.
+- [ ] Lowbell: the opening (camera down from the monastery, the door, the chimes, the name
+      card) feels like meeting Echidna, not a delay. Skipping with Space works.
+- [ ] The villagers' missing words (rune glyphs) read as "they've forgotten a word", and the
+      lines are touching or funny rather than confusing.
+- [ ] The lane is easy to follow to Nan's door; the stile hint is enough; nothing looks broken
+      at the edges of the screen on a wide monitor.
+
+## Held gates, water, graphics levels and the menu (2026-09-29)
+
+- [ ] Plates and crystals: it's clear that a gate is open only while its plate is held or
+      its crystal lit (Room 1 sign, Room 2 hints), and it never feels unfair that a gate
+      shuts. Room 2 with the block and 12 s of slime feels right, not rushed or trivial.
+- [ ] Slimes are never hidden by the thorns along the bottom of the screen or by props;
+      signs are never covered by light shafts or vines; act/lesson cards don't cover signs.
+- [ ] Puddles look like water in every room they're in (reflection of Echidna and the
+      walls, rim highlight, ripples) and not like a glitchy strip; the wet steps, the
+      splash and the drips sound right and aren't too loud or too frequent.
+- [ ] Graphics: Low looks acceptable on a weak machine; each step up (Medium, High, Ultra,
+      Elite) looks at least as good as the one before; Elite keeps a smooth frame rate on
+      the target PC (turn on Show FPS). Note the FPS per level here: ____
+- [ ] The menu: hovering and arrow-key navigation feel snappy; the chime on hover and the
+      beep on select sound like a "system menu" and aren't annoying after a minute;
+      rebinding from Settings → Controls works for keys and mouse buttons; the map, Ledger
+      and rune journal are readable in the card.
 
 ## What the tests already cover (automated, not needed by hand)
 

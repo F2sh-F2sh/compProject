@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/runes/rune_cube.gd" id="1_vb62t"]
 
-[node name="RuneCube" type="Node2D" unique_id=1116164039]
+[node name="RuneCube" type="Node2D" unique_id=2113817353]
 script = ExtResource("1_vb62t")

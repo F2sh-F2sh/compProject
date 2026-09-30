@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/puzzle/lore_page.gd" id="1_5nvyx"]
 
-[node name="LorePage" type="Area2D" unique_id=865772981]
+[node name="LorePage" type="Area2D" unique_id=1394574268]
 script = ExtResource("1_5nvyx")

@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/traps/crumbling_platform.gd" id="1_0cxkh"]
 
-[node name="CrumblingPlatform" type="Node2D" unique_id=508028770]
+[node name="CrumblingPlatform" type="Node2D" unique_id=922753850]
 script = ExtResource("1_0cxkh")

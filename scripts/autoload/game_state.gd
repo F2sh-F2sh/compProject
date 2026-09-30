@@ -40,8 +40,11 @@ func _migrate_old_user_dir() -> void:
 			DirAccess.copy_absolute(from, to)
 
 
+## Flags share the store with run statistics (numbers, see add_stat), so only
+## a true boolean counts as set.
 func has_flag(id: String) -> bool:
-	return id != "" and flags.get(id, false) == true
+	var value = flags.get(id, false)
+	return id != "" and value is bool and value
 
 
 func get_flag(id: String, default: Variant = null) -> Variant:
@@ -49,7 +52,8 @@ func get_flag(id: String, default: Variant = null) -> Variant:
 
 
 func set_flag(id: String, value: Variant = true) -> void:
-	if id == "" or flags.get(id) == value:
+	var old = flags.get(id)
+	if id == "" or (typeof(old) == typeof(value) and old == value):
 		return
 	flags[id] = value
 	flag_changed.emit(id, value)
@@ -59,7 +63,8 @@ func set_flag(id: String, value: Variant = true) -> void:
 func count_flags(prefix: String) -> int:
 	var count := 0
 	for id in flags:
-		if String(id).begins_with(prefix) and flags[id] == true:
+		var value = flags[id]
+		if String(id).begins_with(prefix) and value is bool and value:
 			count += 1
 	return count
 
