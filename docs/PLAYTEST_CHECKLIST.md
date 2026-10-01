@@ -148,6 +148,11 @@ Only note what confused you, and where.
       Hush, why did the bell stop, and what does Echidna need to do? (All four should come back
       right after the rewrite; note any that don't.) ____
 - [ ] The time labels (LONG AGO … TODAY) make the order of events clear.
+- [ ] Pixel art (2026-09-30): the hand-made people, monks, bells and cubes sit well beside
+      the surface and town packs; nothing looks like a flat drawn shape; pixels look crisp
+      (no shimmering) during the slow push-ins, in a window and fullscreen.
+- [ ] Lowbell: the crow on the well, the bats, the blowing leaves and the swaying grass feel
+      alive but don't distract; Nan appearing in her doorway reads as her answering the knock.
 - [ ] Lowbell: the opening (camera down from the monastery, the door, the chimes, the name
       card) feels like meeting Echidna, not a delay. Skipping with Space works.
 - [ ] The villagers' missing words (rune glyphs) read as "they've forgotten a word", and the

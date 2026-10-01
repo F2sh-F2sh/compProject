@@ -728,7 +728,14 @@ func scenario_story() -> void:
 	check("New Game opens the illustrated story", await wait_for_scene(STORY))
 	var first_words := func(): return lvl.index == 0 and lvl._caption.modulate.a > 0.9
 	check("it opens on the first picture, with its words", await wait_until(first_words, 4.0))
-	check("each picture is drawn, not a blank page", lvl._picture != null and lvl._picture.get_child_count() > 3)
+	check("each picture is drawn, not a blank page", lvl._picture != null
+		and lvl._picture.find_children("*", "", true, false).size() > 10)
+	# Its people and things are pixel art from the packs, not drawn shapes
+	var shapes: Array = lvl._picture.find_children("*", "Polygon2D", true, false)
+	var sprites: Array = lvl._picture.find_children("*", "Sprite2D", true, false) \
+		+ lvl._picture.find_children("*", "AnimatedSprite2D", true, false)
+	check("the picture is made of pixel-art sprites, with no drawn shapes", shapes.is_empty() and sprites.size() > 5,
+		"%d shapes, %d sprites" % [shapes.size(), sprites.size()])
 	# Pressing on moves through every picture (a press on a line still
 	# fading in just shows it), and the last one leads to the village
 	var seen := {}
@@ -766,6 +773,19 @@ func scenario_lowbell() -> void:
 	check("the goal is shown", await wait_until(func(): return lvl._objective.modulate.a > 0.9, 3.0))
 	check("the wind chimes swing, silent", get_tree().get_nodes_in_group("wind_chime").size() == 5)
 	check("the lane has its puddles", get_tree().get_nodes_in_group("puddle").size() == 2)
+	# The village is the surface and town packs' pixel art, not drawn shapes
+	var shapes: Array = []
+	var puddles := get_tree().get_nodes_in_group("puddle")
+	for s in lvl.find_children("*", "Polygon2D", true, false):
+		var in_puddle := false
+		for p in puddles:
+			if p.is_ancestor_of(s):
+				in_puddle = true
+		if not in_puddle:
+			shapes.append(s)
+	check("Lowbell is built from pixel-art sprites, with no drawn shapes", shapes.is_empty()
+		and lvl.find_children("*", "Sprite2D", true, false).size() > 20, "%d shapes" % shapes.size())
+	check("the villagers are pixel sprites", lvl.get_node("People/Mira").figure is AnimatedSprite2D)
 	await shot("lowbell_start")
 	# The villagers have lost words to the Hush
 	var mira = lvl.get_node("People/Mira")
@@ -782,11 +802,15 @@ func scenario_lowbell() -> void:
 	await seconds(0.8)
 	Input.action_release("move_right")
 	check("a hop clears it", player.global_position.x > lvl.STILE_X + 10.0, "x=%.0f" % player.global_position.x)
+	await _walk_to(player, 1200.0)
+	check("the crow on the well flies off as she passes", lvl._crow_flown)
 	# Knocking at Nan's door leads on
 	await _walk_to(player, lvl.NAN_DOOR_X - 6.0, 14.0)
 	check("Nan's door can be knocked on", await wait_until(func(): return lvl.nan_door.is_focused(), 2.0))
 	await press_action("interact")
 	check("knocking starts the way on", lvl.leaving)
+	var nan_answers := func(): return lvl._nan.visible and lvl._nan_door_anim.visible
+	check("Nan opens her door, lantern in hand", await wait_until(nan_answers, 4.0))
 	check("which, before the tutorial is done, is the tutorial", await wait_for_scene(TUTORIAL, 40.0))
 	# Coming back (Continue), the opening doesn't play again
 	await open_scene(LOWBELL)

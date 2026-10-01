@@ -103,19 +103,16 @@ class Glyph extends Node2D:
 			draw_string(font, Vector2(-80, size * 0.62 + 16), label, HORIZONTAL_ALIGNMENT_CENTER, 160, 13, Color(color, 0.8 * alpha))
 
 
-## A rune cube seen head-on: the carved stone (a pixel sprite, `sprite_name`,
-## drawn `art_scale` times over) with four sockets (essence, action,
+## A rune cube seen head-on: the carved stone (a pixel sprite from the story
+## sprites, drawn `art_scale` times over) with four sockets (essence, action,
 ## direction, modifier) whose runes light up one by one as `lit` rises from
-## 0 to 4. The runes are the game's own glyphs. Without a sprite it falls
-## back to a plain block of `size`.
+## 0 to 4. The runes are the game's own glyphs.
 class Cube extends Node2D:
-	var size := 120.0
+	var sprite_name := "rune_cube"
+	var art_scale := 3.0
 	var words: Array = [&"wind", &"push", &"up", &"strong"]
 	var color := Color(0.62, 0.48, 1.0)
-	var stone := Color(0.15, 0.13, 0.23)
 	var show_names := false
-	var sprite_name := ""
-	var art_scale := 3.0
 	var lit := 0.0:
 		set(value):
 			lit = value
@@ -125,58 +122,36 @@ class Cube extends Node2D:
 	var _texture: Texture2D
 
 	func _ready() -> void:
-		if sprite_name != "":
-			_texture = SurfaceArt.tex(sprite_name)
-			size = _texture.get_width() * art_scale
+		_texture = SurfaceArt.tex(sprite_name)
 		for i in 4:
-			var g := StoryPaint.glow(self, _center(i), size * 0.42, color, 0.8)
+			var g := StoryPaint.glow(self, _center(i), _texture.get_width() * art_scale * 0.42, color, 0.8)
 			g.modulate.a = 0.0
 			_glows.append(g)
 		_update_glows()
 
+	## The size of a socket, in art pixels (as tools/generate_story_sprites.gd
+	## _cube() carves them).
+	func _cell() -> int:
+		var w := _texture.get_width()
+		return (w - 2 - 3 * _gap()) / 2
+
+	func _gap() -> int:
+		return 2 if _texture.get_width() < 30 else 3
+
 	func _center(i: int) -> Vector2:
-		if _texture:
-			# The sprite's sockets, from tools/generate_story_sprites.gd _cube()
-			var w := _texture.get_width()
-			var gap := 2 if w < 30 else 3
-			var cell := (w - 2 - 3 * gap) / 2
-			var offset := (1 + gap + cell / 2.0) - w / 2.0
-			var step := float(cell + gap)
-			return Vector2(offset + (i % 2) * step, offset + (i / 2) * step) * art_scale
-		return Vector2(-size / 4.0 if i % 2 == 0 else size / 4.0, -size / 4.0 if i < 2 else size / 4.0)
+		var w := _texture.get_width()
+		var offset := (1 + _gap() + _cell() / 2.0) - w / 2.0
+		var step := float(_cell() + _gap())
+		return Vector2(offset + (i % 2) * step, offset + (i / 2) * step) * art_scale
 
 	func _update_glows() -> void:
 		for i in _glows.size():
 			_glows[i].modulate.a = clampf(lit - i, 0.0, 1.0) * 0.55
 
 	func _draw() -> void:
-		if _texture:
-			_draw_sprite()
-			return
-		var h := size / 2.0
-		var bevel := maxf(size * 0.05, 4.0)
-		draw_rect(Rect2(-h - bevel, -h - bevel, size + bevel * 2.0, size + bevel * 2.0), stone.darkened(0.45))
-		draw_rect(Rect2(-h, -h, size, size), stone)
-		var gap := maxf(size * 0.03, 2.0)
-		var q := size / 2.0 - gap * 1.5
-		for i in 4:
-			var c := _center(i)
-			var on := clampf(lit - i, 0.0, 1.0)
-			draw_rect(Rect2(c - Vector2(q, q) / 2.0, Vector2(q, q)), stone.lerp(color.darkened(0.6), on * 0.85))
-			var glyph_color := Color(0.42, 0.4, 0.52).lerp(color.lightened(0.4), on)
-			RuneFragments.draw_glyph(self, words[i], c - Vector2(0, q * 0.06), q * 0.58, glyph_color, maxf(size / 70.0, 1.5))
-			if show_names and on > 0.0:
-				var font: Font = StoryPaint.label_font()
-				var fs := int(maxf(q * 0.1, 11.0))
-				draw_string(font, c + Vector2(-q / 2.0, q * 0.42), RuneFragments.name_of(words[i]).to_upper(),
-					HORIZONTAL_ALIGNMENT_CENTER, q, fs, Color(1, 1, 1, 0.85 * on))
-
-	func _draw_sprite() -> void:
 		var tsize := _texture.get_size() * art_scale
 		draw_texture_rect(_texture, Rect2(-tsize / 2.0, tsize), false)
-		var w := _texture.get_width()
-		var gap := 2 if w < 30 else 3
-		var cell := float((w - 2 - 3 * gap) / 2) * art_scale
+		var cell := _cell() * art_scale
 		for i in 4:
 			var c := _center(i)
 			var on := clampf(lit - i, 0.0, 1.0)
@@ -258,68 +233,6 @@ class Rings extends Node2D:
 				var r: float = age * speed - k * 18.0
 				if r > 4.0:
 					draw_arc(Vector2.ZERO, r, 0.0, TAU, 96, Color(color, 0.35 * a * (1.0 - k * 0.3)), 2.0, true)
-
-
-## Streaks of wind blowing across an area, left to right.
-class Wind extends Node2D:
-	var area := Rect2(-420, 200, 1992, 380)
-	var count := 26
-	var color := Color(0.8, 0.85, 1.0)
-	var _streaks: Array = []
-
-	func _ready() -> void:
-		var rng := RandomNumberGenerator.new()
-		rng.seed = 9
-		for i in count:
-			_streaks.append({"x": rng.randf_range(area.position.x, area.end.x), "y": rng.randf_range(area.position.y, area.end.y),
-				"l": rng.randf_range(40.0, 120.0), "v": rng.randf_range(180.0, 320.0), "ph": rng.randf() * TAU})
-
-	func _process(delta: float) -> void:
-		for s in _streaks:
-			s["x"] += s["v"] * delta
-			if s["x"] - s["l"] > area.end.x:
-				s["x"] = area.position.x
-		queue_redraw()
-
-	func _draw() -> void:
-		for s in _streaks:
-			var pts := PackedVector2Array()
-			var cols := PackedColorArray()
-			for k in 6:
-				var t := k / 5.0
-				var x: float = s["x"] - s["l"] * (1.0 - t)
-				pts.append(Vector2(x, s["y"] + sin(x * 0.02 + s["ph"]) * 4.0))
-				cols.append(Color(color, 0.32 * sin(t * PI)))
-			draw_polyline_colors(pts, cols, 1.5, true)
-
-
-## Grass along a line, swaying.
-class Grass extends Node2D:
-	var x0 := -420.0
-	var x1 := 1572.0
-	var y := 600.0
-	var color := Color(0.1, 0.1, 0.18)
-	var height := 14.0
-	var sway := 3.0
-	var _blades: Array = []
-	var _time := 0.0
-
-	func _ready() -> void:
-		var rng := RandomNumberGenerator.new()
-		rng.seed = 5
-		var x := x0
-		while x < x1:
-			_blades.append(Vector3(x, rng.randf_range(0.5, 1.0) * height, rng.randf() * TAU))
-			x += rng.randf_range(3.0, 7.0)
-
-	func _process(delta: float) -> void:
-		_time += delta
-		queue_redraw()
-
-	func _draw() -> void:
-		for b in _blades:
-			var bend := sin(_time * 1.7 + b.x * 0.013 + b.z * 0.3) * sway
-			draw_line(Vector2(b.x, y), Vector2(b.x + bend, y - b.y), color, 1.5)
 
 
 ## A bat or a crow crossing the sky: it flaps (the pack's wing frames) along
