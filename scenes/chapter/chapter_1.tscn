@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://bi3p7lylknhyi"]
 
 [ext_resource type="Script" uid="uid://bh0xopw0bhtyq" path="res://scripts/puzzle/chapter_root.gd" id="1_7hqri"]
-[ext_resource type="TileSet" path="res://assets/TileSet/dungeon_tileset.tres" id="2_hbtw2"]
+[ext_resource type="TileSet" uid="uid://biqt50kbculv7" path="res://assets/TileSet/dungeon_tileset.tres" id="2_hbtw2"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/room.tscn" id="3_o11e0"]
 [ext_resource type="Script" uid="uid://ctj7qul5q133w" path="res://scripts/audio/reverb_zone.gd" id="5_wlkgt"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="6_dlarw"]

@@ -16,6 +16,13 @@
   here* (please add where they came from and their licence).
 - Parallax fog, ruins, vines, light shafts and the game icon: drawn by scripts in
   `tools/` (no third-party art).
+- The surface (Lowbell) and the story pictures: two pixel-art packs, the surface tileset
+  (`assets/surface/`: ground tiles, structures and props, nature, parallax sky/hills/woods)
+  and the town buildings (`assets/town/`: houses, modular parts, silhouettes, town strip).
+  *Source to be recorded here* (please add where they came from and their licence).
+- The story's people, rune cubes, bells, chimes and candle (`assets/sprites/story/`):
+  pixel sprites drawn for this game in the packs' palette by `tools/generate_story_sprites.gd`
+  (no third-party art), plus open-door frames cut from the town pack's own houses.
 
 ## Audio
 - Every sound effect and all the music are synthesised by `tools/generate_sfx.gd` and

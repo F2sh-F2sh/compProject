@@ -753,15 +753,20 @@ func _the_crack(p: Node2D) -> void:
 			monk.position = pos.round()
 			monk.modulate.a = clampf(d * 14.0, 0.0, 1.0) * clampf((1.0 - d) * 5.0, 0.0, 1.0)
 	walk.call(0.0)
-	var t := p.create_tween()
-	t.tween_interval(0.9)
-	t.tween_callback(Sfx.play.bind("crumble_crack", null, -3.0, 0.0))
-	t.tween_callback(func(): bell.frame = 1)
-	t.tween_property(bell_hang, "modulate", Color(0.8, 0.78, 0.78), 0.6)
-	t.tween_interval(0.9)
-	t.tween_callback(Sfx.play.bind("gate_slam", null, -10.0, 0.0))
-	t.tween_property(seal, "alpha", 1.0, 0.6)
-	t.tween_method(walk, 0.0, 1.3, 9.0)
+	# "...the bell cracked."
+	_cues[0] = func() -> void:
+		var t := p.create_tween()
+		t.tween_interval(0.4)
+		t.tween_callback(Sfx.play.bind("crumble_crack", null, -3.0, 0.0))
+		t.tween_callback(func(): bell.frame = 1)
+		t.tween_property(bell_hang, "modulate", Color(0.8, 0.78, 0.78), 0.6)
+	# "...sealed the bell tower... and left the mountain": the seal, then the
+	# monks going
+	_cues[1] = func() -> void:
+		var t := p.create_tween()
+		t.tween_callback(Sfx.play.bind("gate_slam", null, -10.0, 0.0))
+		t.tween_property(seal, "alpha", 1.0, 0.6)
+		t.tween_method(walk, 0.0, 1.3, 8.0)
 
 
 func _lowbell(p: Node2D) -> void:

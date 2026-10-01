@@ -411,6 +411,86 @@ Lowbell changes:
 - Not yet done by a person: whether the breeze is noticeable enough in motion, whether the
   chime is too loud or quiet, and whether the new narration is clear to a first-time player.
 
+## The story and Lowbell in pixel art (2026-09-30)
+
+At the user's request ("no more shapes for characters and objects"), the story pictures and
+Lowbell are now built from two pixel-art packs they supplied, copied into the project as
+**`assets/surface/`** (ground tiles, structures and props, nature and creatures, parallax sky,
+hills and woods) and **`assets/town/`** (houses, modular parts, silhouettes, a town strip).
+Only the 1x sheets and the two mock-ups were copied; nothing was deleted.
+
+**`SurfaceArt`** (`scripts/story/surface_art.gd`) names every sprite on the sheets (measured by
+a scan of the sheets, e.g. `house_big`, `lamp_post`, `well`, `crow_fly_a`, `grass_4`). It has
+helpers to:
+- place a sprite by its feet;
+- animate frames;
+- lay ground and walls from the 16 px tiles (a `TileMapLayer`);
+- repeat the parallax paintings sideways.
+
+**Hand-made pixel sprites for what the packs lack.** `tools/generate_story_sprites.gd` draws
+them from pixel maps in the packs' own 57-colour palette, with dark faces and pale eyes like
+Echidna, and writes PNG strips to `assets/sprites/story/`:
+- Tam, Mira, Pip, Edda and Nan (with her lantern), the Choir's monks, Ilse, and Wren in her
+  bed. People get standing, breathing and blinking frames.
+- The great bell (whole and cracked), the shrine bell, two rune cubes, a wind-chime post and
+  tube, and a blue candle.
+- Open-door frames cut from the town pack's own houses, so Echidna's and Nan's doors really
+  swing open.
+
+**Lowbell.** The pack is drawn at 1.5x, which is 3 screen pixels per art pixel under the 2x
+camera. The view shows 384 × 216 art pixels, the same framing as the packs' mock-ups.
+
+The distance, far to near:
+- the sky and moon (fixed to the screen) with sparkle stars that go out one by one;
+- drifting clouds and bats;
+- the hills with the monastery (at 1x, far away);
+- the woods;
+- the town's rooftops.
+
+On the lane:
+- Pack houses: Echidna's home, the bakery, a house gone quiet, a tall house, and Nan's
+  cottage. Lit windows glow blue.
+- Lamp posts, the chimes, barrels and a crate, a signpost, the well with a crow that flies off
+  as she passes, a shrine bell under a ruined arch, a cart, trees and fences.
+- Grass tufts and flowers that sway, and leaves blowing along the lane.
+- The fallen log she hops is the old "stile" (same place, 19 px tall).
+- Knocking now opens Nan's door, and Nan stands in it with her lantern before the bridge
+  cards.
+
+**The story.** The pictures use a 384 × 216 art-pixel canvas at 3x, 5x for the close-ups (the
+bedroom, the bell) and 2x for the wide views (the Hush, Lowbell today):
+1. Three monks on a grassy rise watch the sky over the monastery.
+2. Trees bend, grass and leaves blow, and a crow crosses under the four words.
+3. The Choir stands round a rune cube in a brick hall under a round window.
+4. Ilse watches over Wren's bed by candlelight and moonlight.
+5. The great cube.
+6. The Hush drains the colour from the monastery and the village.
+7. The great bell swings in a frame of old pillars and planks.
+8. The bell cracks, the hall is sealed, and the monks walk away with lanterns. The crack now
+   comes on "the bell cracked" and the monks leave on "left the mountain".
+9. Lowbell today; on the last line, Echidna appears in the street.
+
+Effects stay code-drawn: soft glows, light shafts, frost, sound rings, the constellation and
+the rune glyphs (the game's own script, shared with the rune UI). The drawing code for
+shapes (mountains, houses, robed figures, bells, firs, wind streaks, grass lines) was removed
+from `story_paint.gd` and `story_nodes.gd`.
+
+**Checks:**
+- Automated (windowed): experience `story` 7/7 (new: the first picture has sprites and no
+  drawn shapes) and `lowbell` 19/19 (new: no drawn shapes in the village apart from the
+  puddles' water, the villagers are sprites, the crow flies off, Nan answers the door).
+- Full `all` run: 980 passed and 4 failed. The 4 were tutorial fireball checks, a suite
+  nothing here touches. The tutorial suite then passed **140/140** on its own straight
+  after. Those checks aim by moving the real mouse (`warp_mouse`), so real mouse movement
+  during a run can spoil them; that is the likely cause, not confirmed.
+- Visually inspected: a screenshot of every story line, and Lowbell from the opening to Nan's
+  door, fixed until they read well.
+
+**Not yet done by a person:** whether the hand-made people and objects sit well beside the
+packs' art, how the lane feels to walk, and whether the story pictures read at a glance.
+**To record:** where the two packs came from and their licence (`CREDITS.md` has a
+placeholder).
+
 ## Known limitations and decisions
 
 - The title screen is the main scene. Continue goes to the latest shrine or lesson;
