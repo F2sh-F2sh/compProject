@@ -10,6 +10,7 @@ const TUTORIAL := "res://scenes/tutorial_level.tscn"
 const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
 const STORY := "res://scenes/story/story_intro.tscn"
 const LOWBELL := "res://scenes/story/lowbell.tscn"
+const COTTAGE := "res://scenes/story/nan_cottage.tscn"
 const SHOTS := "user://test_shots/"
 const DT := 1.0 / 60.0
 
@@ -35,6 +36,12 @@ func run_suite(filter: String) -> void:
 		"layers": scenario_layers,
 		"story": scenario_story,
 		"lowbell": scenario_lowbell,
+		"cottage": scenario_cottage,
+		"interludes": scenario_interludes,
+		"tours": scenario_tours,
+		"kindle": scenario_kindle,
+		"waymarks": scenario_waymarks,
+		"longstair": scenario_longstair,
 	}
 	for key in scenarios:
 		if filter == key or filter == "":
@@ -150,8 +157,7 @@ func scenario_title() -> void:
 	await seconds(2.0)
 	await shot("title_intro")
 	lvl.skip()
-	check("the story leads to Lowbell", await wait_for_scene(LOWBELL))
-	check("and from Lowbell the way on is the tutorial", lvl.next_scene() == TUTORIAL)
+	check("the story leads straight to the Passage", await wait_for_scene(TUTORIAL))
 
 	# After the tutorial, Continue and New Game go straight to the chapter
 	state().clear_all()
@@ -175,13 +181,22 @@ func scenario_title() -> void:
 		and state().has_flag("tutorial.done"))
 	check("the story plays again", await wait_for_scene(STORY))
 	lvl.skip()
-	check("and after the tutorial, Lowbell's lane leads to the chapter", await wait_for_scene(LOWBELL)
-		and lvl.next_scene() == CHAPTER)
+	check("and after the tutorial, the story leads on to the Belfry", await wait_for_scene(CHAPTER))
 
-	# The Tutorial entry always replays it from the start
+	# The Tutorial entry opens its three parts; Part 1 always replays from the start
 	await open_scene(TITLE)
 	lvl.tutorial_button.pressed.emit()
-	check("the Tutorial entry opens the tutorial", await wait_for_scene(TUTORIAL))
+	await frames(3)
+	check("the Tutorial entry lists its three parts", lvl._parts.visible and not lvl._menu.visible
+		and lvl.part_1_button.text.contains("Passage") and lvl.part_2_button.text.contains("Belfry")
+		and lvl.part_3_button.text.contains("Observatory"))
+	lvl.part_1_button.pressed.emit()
+	check("Part 1 opens the tutorial", await wait_for_scene(TUTORIAL))
+	await open_scene(TITLE)
+	lvl.tutorial_button.pressed.emit()
+	await frames(3)
+	lvl.part_3_button.pressed.emit()
+	check("Part 3 opens the Observatory", await wait_for_scene("res://scenes/chapter/chapter_2.tscn"))
 
 
 func scenario_continue() -> void:
@@ -290,8 +305,12 @@ func _sounds(name: String) -> int:
 
 func aim_and_shoot(world_pos: Vector2) -> void:
 	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	get_tree().root.warp_mouse(screen_pos)
-	await frames(2)
+	# (The real mouse can be nudged between frames: aim again until it is where it should be)
+	for attempt in 8:
+		get_tree().root.warp_mouse(screen_pos)
+		await frames(2)
+		if lvl.get_global_mouse_position().distance_to(world_pos) < 10.0:
+			break
 	Input.action_press("shoot")
 	await frames(2)
 	Input.action_release("shoot")
@@ -569,8 +588,8 @@ func scenario_menu() -> void:
 	await press_action("ui_right")
 	check("right goes into the list, with a beep", menu._col == 1 and menu._row1 == 0 and int(menu.played.get("select", 0)) == selects + 1)
 	check("the active row is solid orange", menu._visible_rows(menu._list1)[0].active)
-	check("Graphics cascades out its own list: five levels and two switches", menu._list2 != null and menu._list2.visible
-		and menu._visible_rows(menu._list2).size() == 7)
+	check("Graphics cascades out its own list: five levels, two switches and Brightness", menu._list2 != null and menu._list2.visible
+		and menu._visible_rows(menu._list2).size() == 8)
 	await press_action("ui_right")
 	for i in 4:
 		await press_action("ui_down")
@@ -746,7 +765,7 @@ func scenario_story() -> void:
 		await seconds(0.8)
 		guard += 1
 	check("all nine pictures can be paged through", seen.size() == 9, str(seen.keys()))
-	check("and the last leads to Lowbell", await wait_for_scene(LOWBELL, 5.0))
+	check("and the last leads to the Passage", await wait_for_scene(TUTORIAL, 5.0))
 	# Holding Esc skips straight there
 	state().clear_all()
 	await open_scene(STORY)
@@ -754,7 +773,7 @@ func scenario_story() -> void:
 	Input.action_press("pause")
 	await seconds(1.3)
 	Input.action_release("pause")
-	check("holding Esc skips the story", await wait_for_scene(LOWBELL, 4.0))
+	check("holding Esc skips the story", await wait_for_scene(TUTORIAL, 4.0))
 
 
 func scenario_lowbell() -> void:
@@ -785,6 +804,10 @@ func scenario_lowbell() -> void:
 			shapes.append(s)
 	check("Lowbell is built from pixel-art sprites, with no drawn shapes", shapes.is_empty()
 		and lvl.find_children("*", "Sprite2D", true, false).size() > 20, "%d shapes" % shapes.size())
+	var look: ShaderMaterial = lvl.get_node("PostFX/Screen").material
+	var lift = look.get_shader_parameter("shadow_lift")
+	check("Lowbell keeps its own look: the Brightness setting does not touch it",
+		is_equal_approx(float(look.get_shader_parameter("lantern_darkness")), 0.14) and (lift == null or is_equal_approx(float(lift), 1.0)))
 	check("the villagers are pixel sprites", lvl.get_node("People/Mira").figure is AnimatedSprite2D)
 	await shot("lowbell_start")
 	# The villagers have lost words to the Hush
@@ -811,12 +834,377 @@ func scenario_lowbell() -> void:
 	check("knocking starts the way on", lvl.leaving)
 	var nan_answers := func(): return lvl._nan.visible and lvl._nan_door_anim.visible
 	check("Nan opens her door, lantern in hand", await wait_until(nan_answers, 4.0))
-	check("which, before the tutorial is done, is the tutorial", await wait_for_scene(TUTORIAL, 40.0))
+	check("which leads into her cottage", await wait_for_scene(COTTAGE, 40.0))
 	# Coming back (Continue), the opening doesn't play again
 	await open_scene(LOWBELL)
 	await frames(5)
 	check("a second visit skips the opening", not lvl.intro_running and lvl.player.visible)
 
+
+# ================================================================ Nan's cottage
+
+## Taps interact once a line is showing (the story waits for a press).
+func _cottage_next(timeout := 15.0) -> bool:
+	var ok := await wait_until(func(): return lvl._waiting, timeout)
+	await frames(24)
+	Input.action_press("interact")
+	await frames(2)
+	Input.action_release("interact")
+	await frames(2)
+	return ok
+
+
+func scenario_cottage() -> void:
+	print("SCENARIO Nan's cottage: the grandma scene")
+	state().clear_all()
+	state().all_abilities = false
+	await open_scene(COTTAGE)
+	var player: CharacterBody2D = lvl.player
+	check("the cottage is built from sprites, with no drawn shapes", lvl.find_children("*", "Polygon2D", true, false).is_empty())
+	check("it saves itself for Continue", state().checkpoint_scene == COTTAGE)
+	check("she has not got her fire spell yet", not state().has_ability("fire"))
+	check("Nan greets her", await wait_until(func(): return lvl.stage == "greeting", 10.0))
+	check("and Nan is in her chair by the fire", lvl.nan.position.x > 700.0 and lvl.nan.flip_h)
+	await _cottage_next()
+	check("Echidna thinks: she does not know me", lvl._thought.text.contains("know me"))
+	await _cottage_next()
+	check("then she is free to walk to Nan", await wait_until(func(): return lvl.stage == "talk", 5.0)
+		and lvl.nan_talk.enabled and not player.controls_locked)
+	# Walk to Nan and talk
+	Input.action_press("move_right")
+	await wait_until(func(): return player.global_position.x > 710.0, 8.0)
+	Input.action_release("move_right")
+	await frames(20)
+	check("Nan can be talked to", await wait_until(func(): return lvl.nan_talk.is_focused(), 2.0))
+	await press_action("interact")
+	check("talking starts the conversation", await wait_until(func(): return lvl.stage == "conversation", 2.0))
+	await _cottage_next()
+	check("Nan cannot say her name: the words are glyph gaps", lvl._speech.gap_count() > 0, "%d gaps" % lvl._speech.gap_count())
+	await _cottage_next()
+	await _cottage_next()
+	# The fire spell will not come
+	check("Nan asks for her fire", await wait_until(func(): return lvl.stage == "spell", 5.0))
+	await _cottage_next()
+	check("she is asked to try it", await wait_until(func(): return lvl._hint.text.contains("fire spell"), 3.0))
+	var denied := []
+	player.ability_denied.connect(func(id): denied.append(id))
+	var fireballs := get_tree().get_nodes_in_group("fireball").size()
+	Input.action_press("shoot")
+	await frames(3)
+	Input.action_release("shoot")
+	await frames(10)
+	check("trying it only sputters: no fireball, the game is told", denied == ["fire"]
+		and get_tree().get_nodes_in_group("fireball").size() == fireballs, str(denied))
+	await frames(40)
+	check("she thinks: the word is gone", lvl._thought.text.contains("word is gone"))
+	await _cottage_next()
+	check("Nan explains the Hush", await wait_until(func(): return lvl.stage == "explaining", 4.0))
+	for i in 6:
+		await _cottage_next()
+	check("then Nan gives her the lantern", await wait_until(func(): return lvl.stage == "lantern", 4.0))
+	await _cottage_next()
+	check("it comes to Echidna and her own light grows", await wait_until(func(): return lvl.has_lantern and player.get_node("PlayerLight").energy > 0.8, 8.0))
+	await _cottage_next()
+	await _cottage_next()
+	check("Nan sends her on, and the cellar door is free", await wait_until(func(): return lvl.stage == "free", 4.0)
+		and lvl.cellar_door.enabled)
+	await shot("cottage_free")
+	# Down the cellar door: on to the Passage
+	player.teleport_to(Vector2(lvl.CELLAR_X, 530))
+	await frames(10)
+	check("the cellar door can be used", await wait_until(func(): return lvl.cellar_door.is_focused(), 2.0))
+	await press_action("interact")
+	check("going down marks the scene done", lvl.stage == "leaving" and state().has_flag("cottage.done"))
+	check("and leads to the Passage", await wait_for_scene(TUTORIAL, 10.0))
+	# Anyone who already has her spells skips the fire beat, and goes on to the Belfry
+	state().clear_all()
+	state().set_flag("tutorial.done")
+	state().all_abilities = false
+	check("a finished tutorial leads on to the Belfry", Journey.after_story() == CHAPTER)
+	await open_scene(COTTAGE)
+	check("she already has her spells", state().has_ability("fire"))
+	await wait_until(func(): return lvl.stage == "greeting", 10.0)
+	await _cottage_next()
+	await _cottage_next()
+	await wait_until(func(): return lvl.stage == "talk", 5.0)
+	lvl.player.teleport_to(Vector2(720, 530))
+	await frames(20)
+	await press_action("interact")
+	await wait_until(func(): return lvl.stage == "conversation", 2.0)
+	await _cottage_next()
+	await _cottage_next()
+	await _cottage_next()
+	check("the fire beat is skipped for her", await wait_until(func(): return lvl.stage == "explaining", 5.0))
+	state().all_abilities = true
+
+
+# ================================================================ story interludes
+
+func scenario_interludes() -> void:
+	print("SCENARIO the story pictures after the bell and the dome")
+	var chapter_1: Node = load(CHAPTER).instantiate()
+	check("the Belfry's end card leads to the bell pictures", chapter_1.next_chapter == Journey.BELL_INTERLUDE)
+	chapter_1.free()
+	var chapter_2: Node = load("res://scenes/chapter/chapter_2.tscn").instantiate()
+	check("and the Observatory's to the dome pictures", chapter_2.next_chapter == Journey.DOME_INTERLUDE)
+	chapter_2.free()
+	for kind in ["bell", "dome"]:
+		var path := Journey.BELL_INTERLUDE if kind == "bell" else Journey.DOME_INTERLUDE
+		# (no finished chapter's card is waiting for these pictures)
+		ChapterComplete.pending = {}
+		await open_scene(path)
+		var count := 3
+		state().all_abilities = false
+		state().clear_all()
+		state().grant_ability("fire")
+		check("%s: %d pictures of pixel-art sprites, no drawn shapes" % [kind, count],
+			lvl.pictures.size() == count and lvl.find_children("*", "Polygon2D", true, false).is_empty()
+			and lvl.find_children("*", "Sprite2D", true, false).size() >= 1, "%d pictures, %d polygons, %d sprites" % [lvl.pictures.size(), lvl.find_children("*", "Polygon2D", true, false).size(), lvl.find_children("*", "Sprite2D", true, false).size()])
+		await seconds(1.5)
+		await shot("interlude_" + kind)
+		var guard := 0
+		while not lvl.finished and guard < 12:
+			guard += 1
+			await wait_until(func(): return not lvl._changing, 4.0)
+			await seconds(1.0)
+			if lvl.line == 0 or lvl.line == 1:
+				await shot("interlude_%s_%d_%d" % [kind, lvl.index, lvl.line])
+			lvl.next()
+			await seconds(0.5)
+		var want := Journey.OBSERVATORY if kind == "bell" else Journey.LANDING
+		check("%s: after the last picture it leads on" % kind, await wait_for_scene(want, 8.0))
+		if kind == "bell":
+			check("the Spring (heal) comes back with the last picture", state().has_flag("ability.heal"))
+	state().all_abilities = true
+
+
+
+# ================================================================ UI tours and kindle flames
+
+func scenario_tours() -> void:
+	print("SCENARIO the UI tours")
+	UiTour.enabled = true
+	state().clear_all()
+	state().all_abilities = true
+	check("the fire and Echo shrines name their tours", AbilityShrine.TOURS == {"fire": "fire", "echo": "echo"})
+	for id in ["basics", "fire", "echo", "objective", "runes"]:
+		var steps := UiTour.steps_for(id)
+		check("tour '%s' has steps with a title and text" % id, not steps.is_empty()
+			and steps.all(func(s): return s["title"] != "" and s["text"] != ""))
+	check("an unknown tour has no steps", UiTour.steps_for("nothing").is_empty())
+
+	# Part 1: health and the menu, a few seconds after the first card
+	await open_scene(TUTORIAL)
+	check("the first lesson names the 'basics' tour", lvl.get_node("Lessons/Lesson1").tour == "basics")
+	check("the tour waits for the card to clear", UiTour.current == null)
+	check("and then opens", await wait_until(func(): return UiTour.current != null, 6.0))
+	var tour: UiTour = UiTour.current
+	await seconds(0.6)
+	check("the game is paused while it is read", get_tree().paused and tour.id == "basics")
+	var rect := tour.target_rect(tour.steps[0])
+	var view := get_viewport().get_visible_rect().size
+	check("the first card frames the health bar, on screen", tour._frame.visible and Rect2(Vector2.ZERO, view).encloses(rect)
+		and rect.position.y < 40.0 and tour._title.text == "Health", str(rect))
+	check("the card sits clear of the framed part", not tour._card.get_global_rect().intersects(rect.grow(2.0)))
+	await shot("tour_basics_1")
+	await press_action("jump")
+	check("a press moves to the menu card", tour.index == 1 and tour._title.text == "The menu" and not tour._frame.visible
+		and tour._text.text.contains("Esc"), tour._text.text)
+	await seconds(0.6)
+	await shot("tour_basics_2")
+	await press_action("jump")
+	await frames(4)
+	check("the last press closes it and the game goes on", not is_instance_valid(tour) or tour.is_queued_for_deletion())
+	check("unpaused, and it is not shown again", not get_tree().paused and state().has_flag("ui.tour.basics")
+		and UiTour.play(lvl, "basics") == null)
+
+	# Esc closes it at once
+	state().clear_all()
+	var again := UiTour.play(lvl, "fire")
+	await seconds(0.6)
+	check("the fire tour frames the mana bar, then the spell slots", again.target_rect(again.steps[0]).position.x < 40.0
+		and again.target_rect(again.steps[1]).end.x > view.x - 20.0)
+	await shot("tour_fire_1")
+	await press_action("pause")
+	await frames(4)
+	check("Esc closes a tour and marks it seen", not get_tree().paused and state().has_flag("ui.tour.fire"))
+
+	# Part 3: how rune cubes are edited, when the Observatory begins
+	state().clear_all()
+	state().all_abilities = true
+	await open_scene("res://scenes/chapter/chapter_2.tscn")
+	check("Part 3's first room names the rune tour", lvl.get_node("R1").explainer == "runes")
+	check("and it opens after the act card", await wait_until(func(): return UiTour.current != null, 14.0))
+	tour = UiTour.current
+	await seconds(0.6)
+	var all_text := ""
+	for s in tour.steps:
+		all_text += s["title"] + " " + s["text"] + " "
+	check("it says LOCKED words never change, and how they look", all_text.contains("LOCKED words never change") and all_text.contains("padlock"))
+	check("it says words change only while the cube is off", all_text.contains("When you can change words")
+		and all_text.contains("Only while the cube is OFF") and all_text.contains("switch it off first"))
+	check("it names the Tab key for the runes list", all_text.contains("Tab: your runes") and all_text.contains("Press Tab"), all_text)
+	check("it says runes use mana", all_text.contains("mana"))
+	await shot("tour_runes_1")
+	for i in 4:
+		await press_action("jump")
+		await seconds(0.5)
+		await shot("tour_runes_%d" % (i + 2))
+	await press_action("jump")
+	await frames(4)
+	check("a five-card tour ends and sets its flag", state().has_flag("ui.tour.runes") and not get_tree().paused)
+
+	# Come in any other way (here: straight into the Kilnworks), and the first
+	# cube she reaches plays it
+	state().clear_all()
+	state().all_abilities = true
+	await open_scene(Journey.KILN)
+	await seconds(1.0)
+	check("no rune tour before she reaches a cube", UiTour.current == null)
+	var cube: RuneCube = lvl.get_node("R1/ForgeCube")
+	var her: Node2D = lvl.get_node("Player")
+	her.global_position = cube.global_position + Vector2(-30.0, -2.0)
+	her.reset_physics_interpolation()
+	check("reaching a cube plays the rune tour", await wait_until(func(): return UiTour.current != null and UiTour.current.id == "runes", 6.0))
+	await press_action("pause")
+	await frames(4)
+	check("seen once, it is marked and the game goes on", state().has_flag("ui.tour.runes") and not get_tree().paused)
+	her.global_position = cube.global_position + Vector2(-140.0, -2.0)
+	await frames(10)
+	her.global_position = cube.global_position + Vector2(-30.0, -2.0)
+	await seconds(1.5)
+	check("and never again", UiTour.current == null)
+	# ...unless she asks: Esc, Echidna, Runes, How rune cubes work
+	var menu: PauseMenu = lvl.get_node("PauseMenu")
+	menu._set_open(true)
+	await frames(4)
+	var how: Node = menu._runes_list.get_child(0) if menu._runes_list.get_child_count() > 0 else null
+	check("the menu's Runes list starts with How rune cubes work", how != null and how.text == "How rune cubes work")
+	if how:
+		(how.get_meta(&"action") as Callable).call()
+	check("choosing it closes the menu and plays the tour again", not menu.is_open
+		and await wait_until(func(): return UiTour.current != null and UiTour.current.id == "runes", 2.0))
+	await shot("tour_runes_replay")
+	await press_action("pause")
+	await frames(4)
+	check("and the game goes on after it", not get_tree().paused and UiTour.current == null)
+
+	# Part 2: the goal card
+	state().clear_all()
+	state().all_abilities = true
+	await open_scene(CHAPTER)
+	check("Part 2's first room names the goal-card tour", lvl.get_node("R1").explainer == "objective")
+	check("and it opens", await wait_until(func(): return UiTour.current != null, 14.0))
+	tour = UiTour.current
+	await seconds(0.6)
+	rect = tour.target_rect(tour.steps[0])
+	check("it frames the card in the top right", rect.end.x <= view.x and rect.position.x > view.x - 320.0 and rect.position.y < 40.0, str(rect))
+	await shot("tour_objective")
+	await press_action("pause")
+	await frames(4)
+	UiTour.enabled = false
+	state().clear_all()
+	state().all_abilities = true
+
+
+func scenario_kindle() -> void:
+	print("SCENARIO a flame to kindle at in every room")
+	UiTour.enabled = false
+	for path in [CHAPTER, "res://scenes/chapter/chapter_2.tscn"]:
+		state().clear_all()
+		state().all_abilities = true
+		await open_scene(path)
+		await frames(5)
+		var flames := get_tree().get_nodes_in_group("kindle_point")
+		var rooms := lvl.find_children("*", "Room", true, false)
+		check("%s: has rooms and kindle points" % path.get_file(), not rooms.is_empty() and not flames.is_empty())
+		for room: Room in rooms:
+			var near := flames.filter(func(f): return f is Node2D and f.has_method("is_kindling") and f.is_kindling() and room.bounds.has_point(f.global_position))
+			check("%s %s has a flame to kindle at" % [path.get_file(), room.title], not near.is_empty())
+		var sample: KindleFlame = lvl.find_children("KindleFlame", "", true, false)[0]
+		check("a room flame is a pixel sprite that kindles", sample.is_kindling() and sample.get_node("Figure") is AnimatedSprite2D
+			and sample.find_children("*", "Polygon2D", true, false).is_empty())
+		# A look at each added flame, from where the player arrives
+		var player: Node2D = lvl.get("player")
+		for flame: KindleFlame in lvl.find_children("KindleFlame", "", true, false):
+			if player != null:
+				player.teleport_to(flame.global_position + Vector2(70, -4))
+				await seconds(3.0)
+				await shot("kindle_%s_%s" % [path.get_file().get_basename(), flame.get_parent().name])
+	state().clear_all()
+	state().all_abilities = true
+
+
+# ================================================================ waymarks
+
+func scenario_waymarks() -> void:
+	print("SCENARIO the Choir's waymarks")
+	UiTour.enabled = false
+	var settings := get_tree().root.get_node("Settings")
+	var shown := {}
+	for path in [TUTORIAL, CHAPTER, "res://scenes/chapter/chapter_2.tscn"]:
+		state().clear_all()
+		state().all_abilities = true
+		await open_scene(path)
+		await frames(5)
+		var marks := get_tree().get_nodes_in_group("waymark")
+		var name_of: String = path.get_file().get_basename()
+		check("%s has waymarks" % name_of, marks.size() >= 8, str(marks.size()))
+		check("%s: every waymark is a pixel sprite pointing a known way" % name_of, _marks_ok(marks))
+		var tiles: Array = []
+		var player: Node2D = lvl.get("player")
+		for m: Waymark in marks:
+			if player != null:
+				player.teleport_to(Vector2(m.global_position.x - 140.0, 530.0))
+				await seconds(2.2)
+				await get_tree().process_frame
+				var img := get_tree().root.get_texture().get_image()
+				img.resize(384, 216, Image.INTERPOLATE_BILINEAR)
+				tiles.append(img)
+		for page in ceili(tiles.size() / 12.0):
+			var sheet := Image.create(1152, 864, false, Image.FORMAT_RGB8)
+			for i in range(page * 12, mini(tiles.size(), page * 12 + 12)):
+				var k := i - page * 12
+				sheet.blit_rect(tiles[i], Rect2i(0, 0, 384, 216), Vector2i((k % 3) * 384, (k / 3) * 216))
+			sheet.save_png(ProjectSettings.globalize_path(SHOTS + "waymarks_%s_%d.png" % [name_of, page]))
+		# hidden with guidance off
+		settings.guidance = Settings.GUIDANCE_OFF
+		await open_scene(path)
+		await frames(3)
+		check("%s: waymarks are hidden when guidance is off" % name_of, get_tree().get_nodes_in_group("waymark").all(func(m): return not m.visible))
+		settings.guidance = Settings.GUIDANCE_FULL
+	state().clear_all()
+	state().all_abilities = true
+
+
+# ================================================================ the title and the Long Stair
+
+func scenario_longstair() -> void:
+	print("SCENARIO the title screen and the Long Stair")
+	var gs := state()
+	gs.clear_all()
+	await open_scene(TITLE)
+	check("the parts list has an entry for the Long Stair", lvl.landing_button != null)
+	gs.set_flag("tutorial.done")
+	gs.set_flag("ch1.complete")
+	gs.set_flag("ch2.complete")
+	await open_scene(TITLE)
+	check("once the Observatory is done, Continue leads to the Landing", lvl._continue_target() == Journey.LANDING)
+	check("and the line under the menu counts the bells", lvl._progress.text.contains("0 of 4 bells"), lvl._progress.text)
+	gs.set_flag("kiln.complete")
+	await open_scene(TITLE)
+	check("a bell is counted", lvl._progress.text.contains("1 of 4 bells"), lvl._progress.text)
+	for f in ["cistern.complete", "lamps.complete", "galleries.complete"]:
+		gs.set_flag(f)
+	await open_scene(TITLE)
+	check("with four the Eye is open", lvl._progress.text.contains("Eye is open"), lvl._progress.text)
+	gs.set_flag("game.complete")
+	await open_scene(TITLE)
+	check("and a finished game says so", lvl._progress.text.contains("complete"), lvl._progress.text)
+	lvl.landing_button.pressed.emit()
+	check("the list's Long Stair entry opens the Landing", await wait_for_scene(Journey.LANDING))
+	gs.clear_all()
+	gs.all_abilities = true
 
 # ================================================================ draw order
 
@@ -840,3 +1228,12 @@ func scenario_layers() -> void:
 	var height := get_tree().root.get_visible_rect().size.y
 	check("act and lesson cards sit high, clear of the hanging signs", card._box.get_global_rect().end.y < height * 0.4,
 		"card ends at %.0f of %.0f" % [card._box.get_global_rect().end.y, height])
+
+
+func _marks_ok(marks: Array) -> bool:
+	for m in marks:
+		if not (m.get_node("Art/Slab") is AnimatedSprite2D) or not (m.direction in ["right", "left", "up", "down"]):
+			return false
+		if not m.find_children("*", "Polygon2D", true, false).is_empty():
+			return false
+	return true

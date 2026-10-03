@@ -27,6 +27,7 @@ func _ready() -> void:
 	if Engine.is_editor_hint():
 		return
 	add_to_group("chapter_checkpoint")
+	add_to_group("kindle_point")
 	collision_layer = 0
 	collision_mask = 1
 	monitorable = false
@@ -120,3 +121,8 @@ func _draw_flame() -> void:
 		var c: Color = [Color(0.3, 0.5, 1.0, 0.8), Color(0.55, 0.75, 1.0, 0.9), Color(0.9, 0.95, 1.0, 1.0)][i]
 		_flame.draw_colored_polygon(PackedVector2Array([
 			Vector2(-w / 2.0, -46), Vector2(w / 2.0, -46), Vector2(sin(t * 0.7) * 2.0, -46 - h)]), c)
+
+
+## A lit flame she can kindle her lantern at (hold the kindle key).
+func is_kindling() -> bool:
+	return true

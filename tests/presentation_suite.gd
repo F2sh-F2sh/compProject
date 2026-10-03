@@ -29,6 +29,7 @@ func run_suite(filter: String) -> void:
 		"parallax": scenario_parallax,
 		"light": scenario_light,
 		"post": scenario_post,
+		"brightness": scenario_brightness,
 		"glow": scenario_glow,
 		"audio": scenario_audio,
 		"hazards": scenario_hazards,
@@ -466,6 +467,81 @@ func scenario_light() -> void:
 	await shot("presentation_shaft")
 
 
+# ================================================================ brightness
+
+func scenario_brightness() -> void:
+	print("SCENARIO brightness: Dim, Normal and Bright, dark rooms, the unlit brazier")
+	var settings = get_tree().root.get_node("Settings")
+	await load_level(CHAPTER)
+	var post = lvl.get_node("PostFX")
+	var mat: ShaderMaterial = post.get_node("Screen").material
+	var aura: PointLight2D = player.get_node("PlayerLight")
+	var seen := {}
+	for level in [settings.Brightness.DIM, settings.Brightness.NORMAL, settings.Brightness.BRIGHT]:
+		settings.set_brightness(level)
+		await frames(3)
+		var ambient: Color = lvl.get_node("Darkness").color
+		seen[level] = {
+			"ambient": ambient.get_luminance(), "gloom": float(mat.get_shader_parameter("lantern_darkness")),
+			"light": aura.energy * aura.texture_scale, "lift": float(mat.get_shader_parameter("shadow_lift")),
+		}
+	var dim: Dictionary = seen[settings.Brightness.DIM]
+	var normal: Dictionary = seen[settings.Brightness.NORMAL]
+	var bright: Dictionary = seen[settings.Brightness.BRIGHT]
+	check("the ambient light rises from Dim to Normal to Bright",
+		dim["ambient"] < normal["ambient"] and normal["ambient"] < bright["ambient"], str(seen))
+	check("Dim is the original gloom (ambient about 0.2, lantern gloom 0.42)",
+		absf(dim["ambient"] - Color(0.2, 0.18, 0.3).get_luminance()) < 0.04 and is_equal_approx(dim["gloom"], 0.42))
+	check("the lantern's gloom and shadows ease as it gets brighter",
+		dim["gloom"] > normal["gloom"] and normal["gloom"] > bright["gloom"] and dim["lift"] > normal["lift"] and normal["lift"] > bright["lift"])
+	check("her own light grows with the setting", dim["light"] < normal["light"] and normal["light"] < bright["light"])
+	settings.set_brightness(settings.Brightness.NORMAL)
+	await frames(3)
+	# Normal is clearly brighter than Dim on screen (same spot)
+	await place(Vector2(380, FLOOR))
+	await seconds(0.6)
+	var lit := _mean_luma(await screen_image())
+	settings.set_brightness(settings.Brightness.DIM)
+	await seconds(0.3)
+	var gloomy := _mean_luma(await screen_image())
+	settings.set_brightness(settings.Brightness.NORMAL)
+	await frames(3)
+	check("Normal is at least 40% brighter than Dim on screen", lit > gloomy * 1.4, "mean luma %.3f vs %.3f" % [lit, gloomy])
+	# Rooms where the dark is part of the puzzle keep a darker ambient
+	var base: float = lvl.get_node("Darkness").color.get_luminance()
+	await place(lvl.get_node("R4").entry_spawn)
+	await seconds(2.2)
+	var in_watcher: float = lvl.get_node("Darkness").color.get_luminance()
+	check("the watcher room is darker than the rest", in_watcher < base * 0.7, "%.3f vs %.3f" % [in_watcher, base])
+	await place(lvl.get_node("R1").entry_spawn)
+	await seconds(2.2)
+	check("and the ambient returns on leaving it", absf(lvl.get_node("Darkness").color.get_luminance() - base) < 0.01)
+	# The old tutorial now has the same lantern as the chapters
+	await load_level(TUTORIAL)
+	await frames(10)
+	check("the tutorial's Echidna carries a lantern light too", player.has_node("PlayerLight")
+		and player.get_node("PlayerLight").energy > 1.0, "has=%s energy=%s brightness=%s" % [player.has_node("PlayerLight"), str(player.get_node_or_null("PlayerLight").energy if player.has_node("PlayerLight") else -1), str(get_tree().root.get_node("Settings").brightness)])
+	# An unlit brazier is a visible pilot flame, not a dim smudge
+	await load_level(CHAPTER)
+	var brazier: Brazier = lvl.get_node("R3/Brazier")
+	check("an unlit brazier glows (light energy at least 0.6)", not brazier.is_lit and brazier._light.energy >= 0.6,
+		"energy %.2f" % brazier._light.energy)
+	check("the unlit light is a warm gold, unlike the blue torches", brazier._light.color.r > brazier._light.color.b)
+	brazier.ignite()
+	await frames(4)
+	check("lit, it is the blue fire again", brazier._light.color.b > brazier._light.color.r)
+
+
+func _mean_luma(img: Image) -> float:
+	var sum := 0.0
+	var n := 0
+	for y in range(0, img.get_height(), 4):
+		for x in range(0, img.get_width(), 4):
+			sum += img.get_pixel(x, y).get_luminance()
+			n += 1
+	return sum / float(maxi(n, 1))
+
+
 # ================================================================ post pass
 
 func scenario_post() -> void:
@@ -484,6 +560,12 @@ func scenario_post() -> void:
 	for p in ["vignette", "fog_strength", "grain"]:
 		saved[p] = mat.get_shader_parameter(p)
 		mat.set_shader_parameter(p, 0.0)
+	# It is the falloff itself that is measured, so use the original (Dim)
+	# gloom and reach and no shadow lift, whatever the Brightness setting is
+	var falloff := {"lantern_darkness": 0.42, "lantern_outer": 440.0, "shadow_lift": 1.0}
+	for p in falloff:
+		saved[p] = mat.get_shader_parameter(p)
+		mat.set_shader_parameter(p, falloff[p])
 	var on := await screen_image()
 	post.visible = false
 	var off := await screen_image()
@@ -524,6 +606,9 @@ func scenario_glow() -> void:
 	await frames(2)
 	check("a lit brazier glows and sheds embers", embers.emitting and brazier.get_node("Halo").visible)
 	await place(Vector2(3000, FLOOR))
+	# (aimed along the open floor, whatever the real mouse is doing)
+	get_tree().root.warp_mouse(world_to_screen(player.global_position + Vector2(220, -14)))
+	await frames(2)
 	player.shoot_fireball()
 	await frames(2)
 	var fireballs := get_tree().get_nodes_in_group("fireball")
@@ -629,7 +714,7 @@ func scenario_audio() -> void:
 
 	# The tutorial's slime arena is a combat zone
 	await load_level(TUTORIAL)
-	await place(Vector2(6100, FLOOR))
+	await place(Vector2(7500, FLOOR))
 	await frames(4)
 	check("the tutorial slime arena counts as combat", director.is_combat())
 	await place(Vector2(5000, FLOOR))

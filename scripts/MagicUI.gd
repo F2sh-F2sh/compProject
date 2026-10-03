@@ -12,6 +12,18 @@ func _ready() -> void:
 	for slot in [heal_slot, fire_slot]:
 		slot.pivot_offset = slot.size / 2.0
 		slot.resized.connect(func(): slot.pivot_offset = slot.size / 2.0)
+	# A spell's slot appears once she has remembered it
+	GameState.flag_changed.connect(_on_flag_changed)
+	_show_known_spells()
+
+
+func _on_flag_changed(_id: String, _value: Variant) -> void:
+	_show_known_spells()
+
+
+func _show_known_spells() -> void:
+	heal_slot.visible = GameState.has_ability("heal")
+	fire_slot.visible = GameState.has_ability("fire")
 
 
 func update_display(current_mana: int, reloading: bool) -> void:

@@ -64,6 +64,10 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if Input.is_action_just_pressed(action):
+		# (A spell she has not remembered yet)
+		if not GameState.has_ability("echo"):
+			player.deny_ability("echo")
+			return
 		_hold = 0.0
 		_hold_used = false
 		if is_recording:

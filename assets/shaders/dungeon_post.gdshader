@@ -16,8 +16,8 @@ uniform vec2 world_size = vec2(576.0, 324.0);
 group_uniforms lantern;
 uniform vec2 lantern_uv = vec2(0.5, 0.6);   // the player's lantern, in screen UV
 uniform float lantern_inner = 150.0;        // world px: fully lit
-uniform float lantern_outer = 440.0;        // world px: full gloom
-uniform float lantern_darkness : hint_range(0.0, 1.0) = 0.42;
+uniform float lantern_outer = 620.0;        // world px: full gloom
+uniform float lantern_darkness : hint_range(0.0, 1.0) = 0.22;
 uniform float keep_bright_from : hint_range(0.0, 1.0) = 0.08;
 uniform float keep_bright_to : hint_range(0.0, 1.0) = 0.24;
 
@@ -34,10 +34,11 @@ group_uniforms grade;
 uniform vec4 shadow_tint : source_color = vec4(0.9, 0.96, 1.06, 1.0);
 uniform vec4 highlight_tint : source_color = vec4(1.02, 1.04, 1.06, 1.0);
 uniform float contrast : hint_range(0.5, 1.5) = 1.04;
+uniform float shadow_lift : hint_range(0.4, 1.2) = 1.0;   // below 1 lifts the shadows (the Brightness setting)
 uniform float saturation : hint_range(0.0, 1.5) = 0.86;
 
 group_uniforms frame;
-uniform float vignette : hint_range(0.0, 1.0) = 0.34;
+uniform float vignette : hint_range(0.0, 1.0) = 0.24;
 uniform float vignette_softness : hint_range(0.1, 1.0) = 0.7;
 uniform float grain : hint_range(0.0, 0.2) = 0.022;
 
@@ -99,6 +100,7 @@ void fragment() {
 	c *= mix(shadow_tint.rgb, highlight_tint.rgb, smoothstep(0.05, 0.5, l));
 	c = (c - 0.5) * contrast + 0.5;
 	c = mix(vec3(luma(c)), c, saturation);
+	c = pow(max(c, vec3(0.0)), vec3(shadow_lift));
 
 	// 5. Cinematic vignette (wider than tall) and grain
 	vec2 d = (SCREEN_UV - 0.5) * vec2(1.0, 1.25);

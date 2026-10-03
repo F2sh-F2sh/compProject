@@ -410,26 +410,22 @@ func solve_r4() -> void:
 	await walk_to(node("R4/TabletStrong").global_position.x - 10.0)
 	await interact()
 	check("R4 the tablet teaches Strong", RuneManager.knows(&"strong", get_tree()))
-	# First, the way it starts: its wind lets go of the stone before the wall
+	# The stone stands close to the cube: from where the cube is, its Strong wind
+	# drives the stone the whole way into the wall (no carrying the cube)
 	check("R4 open the loose cube", await open_cube(c))
 	check("R4 the cube says it draws on your mana", manager.assembly._cost.text.contains("mana per second"), manager.assembly._cost.text)
 	manager.assembly.select_kind(RuneFragments.Kind.MODIFIER)
 	manager.assembly.choose(&"strong")
 	check("R4 strong costs 8 a second, stated", manager.assembly._cost.text.contains("8 mana per second"), manager.assembly._cost.text)
 	await tap_action("ui_cancel")
-	# Carry it right behind the stone for a full run-up
-	await face("move_right")
-	await tap_action("rune_carry")
-	check("R4 pick up the cube", c.is_carried)
-	await walk_to(block.global_position.x - 90.0)
-	await tap_action("rune_carry")
-	check("R4 set it down behind the stone", not c.is_carried, "at %.0f" % c.global_position.x)
 	var mana_before: int = player.current_mana
 	check("R4 open it again", await open_cube(c))
 	manager.assembly.toggle_cube()
 	check("R4 the strong wind blows", c.is_active)
-	check("R4 the stone slams into the wall and breaks it", await wait_until(func(): return wall.is_broken, 5.0),
+	check("R4 the stone slams into the wall and breaks it at once, from where the cube stands", await wait_until(func(): return wall.is_broken, 5.0),
 		"stone x=%.0f, last impact %.0f" % [block.global_position.x, wall.last_impact])
+	check("R4 and it hits with room to spare (at least 1.3 times the momentum needed)", wall.last_impact >= wall.break_momentum * 1.3,
+		"%.0f against %.0f" % [wall.last_impact, wall.break_momentum])
 	check("R4 a player-powered rune spent her mana", player.current_mana < mana_before, "%d -> %d" % [mana_before, player.current_mana])
 	check("R4 the broken wall is saved", game_state().has_flag("ch2.r4.wall"))
 	await tap_action("rune_overview")
@@ -599,8 +595,12 @@ func scenario_room7() -> void:
 # ---------------------------------------------------------------- Room 8
 
 func solve_r8() -> void:
+	# Mana is the lantern's flame: kindle it at the room's shrine first
+	Input.action_press("reload")
+	await wait_until(func(): return player.current_mana >= 100, 3.0)
+	Input.action_release("reload")
+	check("R8 the room's shrine refills the lantern", player.current_mana >= 100, str(player.current_mana))
 	var portal: RuneCube = node("R8/PortalCube")
-	var fire: RuneCube = node("R8/FireCube")
 	var seal = node("R8/Seal")
 	await walk_to(node("R8/TabletUpRight").global_position.x - 10.0)
 	await interact()
@@ -609,8 +609,8 @@ func solve_r8() -> void:
 	portal.set_slot(RuneFragments.Kind.DIRECTION, &"up_right")
 	var far := RunePortal.far_centre(portal, RuneBook.spell(portal.recipe))
 	check("R8 from its start the portal would open short of the balcony", far.x < 155 * 64.0, "far side %s" % far.round())
-	# Over the fire cube, pick up the portal cube, carry it to the balcony wall
-	await run_to(portal.global_position.x - 34.0, [fire.global_position.x - 30.0])
+	# Pick up the portal cube and carry it to the balcony wall
+	await run_to(portal.global_position.x - 34.0)
 	await face("move_right")
 	await tap_action("rune_carry")
 	check("R8 pick up the portal cube", portal.is_carried)
@@ -799,9 +799,14 @@ func scenario_effects() -> void:
 	edge.deactivate()
 	await frames(30)
 	check("switched off, it melts", edge.get_node_or_null("IceBridge") == null)
-	# Fire: a real rune fireball burns the brambles; an Explode blast reaches them too
+	# Fire: a real rune fireball burns brambles; an Explode blast reaches them too (brambles
+	# made on the spot: no room has them now)
 	await enter_room("R8")
-	var brambles: Burnable = node("R8/Brambles")
+	var brambles: Burnable = load("res://scenes/runes/burnable.tscn").instantiate()
+	brambles.size = Vector2(32, 160)
+	node("R8").add_child(brambles)
+	brambles.global_position = Vector2(9824, 534)
+	await frames(3)
 	var torch_cube := await make_cube(node("R8"), Vector2(9760, 534), "fire/projectile/right/normal")
 	torch_cube.activate(false)
 	check("a rune fireball burns the brambles", await wait_until(func(): return brambles.is_cleared, 2.0))
@@ -884,7 +889,9 @@ func scenario_mana() -> void:
 	check("no automatic restart after exhaustion", not loose.is_active)
 	var low: int = player.current_mana
 	await seconds(2.0)
-	check("mana comes back once no rune draws on it", player.current_mana > low + 10, "%d -> %d" % [low, player.current_mana])
+	var floor_mana: int = int(manager.mana_cap() * 0.25)
+	check("only a trickle comes back once no rune draws on it: up to a quarter of the cap, no further",
+		player.current_mana > low and player.current_mana <= floor_mana, "%d -> %d (floor %d)" % [low, player.current_mana, floor_mana])
 	# Not enough to start: nothing is charged
 	player.current_mana = 2
 	var strong_needs := RuneRecipe.from_key("wind/push/left/strong")

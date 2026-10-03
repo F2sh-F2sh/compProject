@@ -3,24 +3,30 @@ extends Node2D
 
 ## Space Portal: a doorway just beyond the cube's face, and its far side
 ## `range` px further in the same direction, through walls and gates. The
-## player, loose objects and creatures that step into the doorway come out
-## of the far side moving exactly as they were. One way only; each body has
-## a short cooldown so it can't bounce back and forth. The far side is
-## checked when the rune is switched on: it must be open space inside the
-## room and not on a hazard, or the rune refuses to start (see problem()).
+## player, loose objects and creatures that step into either side come out
+## of the other moving exactly as they were: it works both ways. Something
+## that has just come out of a side has to step clear of it before that side
+## will take it back, so nothing bounces to and fro. The far side is checked
+## when the rune is switched on: it must be open space inside the room and
+## not on a hazard, or the rune refuses to start (see problem()).
 
 const DOOR_SIZE := Vector2(26, 44)
-const COOLDOWN := 0.7
+## How long a body that has just come through is held to the side it came out of.
+const SETTLE := 0.3
 
 var cube: RuneCube
 var direction := Vector2.RIGHT
 var entrance := Vector2.ZERO
 var exit_point := Vector2.ZERO
 var _door: Area2D
-var _cooldowns := {}
+var _far_door: Area2D
+## body -> the door it came out of (it can't use that one until it leaves it).
+var _arrived := {}
 var _time := 0.0
-## Bodies carried through (for tests).
+## Bodies carried through, either way (for tests).
 var carried: Array[Node] = []
+## Bodies carried back from the far side (for tests).
+var carried_back: Array[Node] = []
 
 
 static func door_centre(c: RuneCube, dir: Vector2) -> Vector2:
@@ -63,19 +69,26 @@ func setup(owner_cube: RuneCube, spell: Dictionary) -> void:
 	global_transform = Transform2D.IDENTITY
 	material = MagicLight.unshaded()
 	z_index = 3
-	_door = Area2D.new()
-	_door.collision_layer = 0
+	_door = _make_door(entrance)
+	_far_door = _make_door(exit_point)
+	Sfx.play("portal_open", entrance, -3.0)
+
+
+## One side of the portal: an area that notices the player and loose objects.
+func _make_door(at: Vector2) -> Area2D:
+	var door := Area2D.new()
+	door.collision_layer = 0
 	# The player and loose objects (layer 1)
-	_door.collision_mask = 1
-	_door.monitorable = false
+	door.collision_mask = 1
+	door.monitorable = false
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
 	rect.size = DOOR_SIZE
 	shape.shape = rect
-	_door.add_child(shape)
-	add_child(_door)
-	_door.global_position = entrance
-	Sfx.play("portal_open", entrance, -3.0)
+	door.add_child(shape)
+	add_child(door)
+	door.global_position = at
+	return door
 
 
 func stop() -> void:
@@ -85,28 +98,46 @@ func stop() -> void:
 
 func _physics_process(delta: float) -> void:
 	_time += delta
-	for body in _cooldowns.keys():
-		_cooldowns[body] -= delta
-		if _cooldowns[body] <= 0.0 or not is_instance_valid(body):
-			_cooldowns.erase(body)
-	for body in _door.get_overlapping_bodies():
-		if _cooldowns.has(body) or not body is CharacterBody2D:
-			continue
-		if body.get("is_dead") == true or body.get("controls_locked") == true:
-			continue
-		_carry(body)
+	# Something that came out of a side may use it again once it has left it
+	# (after a moment, so the areas have caught up with where it is now)
+	for body in _arrived.keys():
+		_arrived[body][1] += delta
+		if not is_instance_valid(body):
+			_arrived.erase(body)
+		elif _arrived[body][1] > SETTLE and not _really_in(body, _arrived[body][0]):
+			_arrived.erase(body)
+	for pair in [[_door, _far_door], [_far_door, _door]]:
+		var from: Area2D = pair[0]
+		for body in from.get_overlapping_bodies():
+			# (an area can still list a body for a frame after it was carried away)
+			if not body is CharacterBody2D or not _really_in(body, from):
+				continue
+			# Just through: neither side takes it again for a moment, and the
+			# side it came out of not until it has stepped clear of it
+			if _arrived.has(body) and (_arrived[body][0] == from or _arrived[body][1] < SETTLE):
+				continue
+			if body.get("is_dead") == true or body.get("controls_locked") == true:
+				continue
+			_carry(body, from, pair[1])
 	queue_redraw()
 
 
-func _carry(body: CharacterBody2D) -> void:
-	# Same place relative to the door, same velocity
-	body.global_position += exit_point - entrance
+## Whether a body is in a side now, by where it really is.
+func _really_in(body: Node2D, door: Area2D) -> bool:
+	return RuneManager.bounds_of(body).intersects(Rect2(door.global_position - DOOR_SIZE / 2.0, DOOR_SIZE))
+
+
+func _carry(body: CharacterBody2D, from: Area2D, to: Area2D) -> void:
+	# Same place relative to the side it went into, same velocity
+	body.global_position += to.global_position - from.global_position
 	body.reset_physics_interpolation()
-	_cooldowns[body] = COOLDOWN
+	_arrived[body] = [to, 0.0]
 	carried.append(body)
-	Sfx.play("portal_warp", exit_point, -2.0)
+	if from == _far_door:
+		carried_back.append(body)
+	Sfx.play("portal_warp", to.global_position, -2.0)
 	RuneJournal.note("portal")
-	ImpactFX.burst(get_parent(), exit_point, RuneFragments.ESSENCE_COLORS[&"space"], false, 10)
+	ImpactFX.burst(get_parent(), to.global_position, RuneFragments.ESSENCE_COLORS[&"space"], false, 10)
 
 
 func _draw() -> void:

@@ -42,6 +42,27 @@ const PRESETS := {
 ## Overrides (0 = use the weight class's value).
 @export var mass_override := 0.0
 @export var persist_id := ""
+## A pixel sprite (SurfaceArt) to show instead of the drawn crate or stone,
+## e.g. the Kilnworks' coal cart. Its feet sit at the body's origin.
+@export var sprite_name := ""
+## Groups it joins besides the usual ones (e.g. "coal" for the kiln's fuel).
+@export var extra_groups: PackedStringArray = []
+## An object the room's puzzle needs: if it is lost (burned in slag) before
+## the room is solved, the room says it can't be finished and how to reset.
+@export var required := false
+@export var required_reason := "Something this room needs has been lost."
+## Once this flag is set it is no longer needed.
+@export var required_until_flag := ""
+## Where it has to stay to be any use (empty: anywhere). Come to rest outside
+## it (fallen off the ledge it has to be pushed along) and it counts as lost.
+@export var required_area := Rect2()
+
+signal lost
+
+## Burned or sunk (in slag): gone until the room is reset.
+var is_lost := false
+## Taken in by something (the kiln's fuel bay): gone for good, and that's fine.
+var is_consumed := false
 
 var mass := 1.0
 var static_mu := 0.5
@@ -73,8 +94,15 @@ func _ready() -> void:
 	_art = Node2D.new()
 	_art.draw.connect(_draw_art)
 	add_child(_art)
+	if sprite_name != "":
+		var sprite := SurfaceArt.sprite(_art, sprite_name, Vector2.ZERO, 1.0)
+		sprite.name = "Sprite"
 	if Engine.is_editor_hint():
 		return
+	for g in extra_groups:
+		add_to_group(g)
+	if required:
+		add_to_group("puzzle_critical")
 	collision_layer = 3
 	collision_mask = 2
 	floor_snap_length = 4.0
@@ -119,12 +147,75 @@ func get_bounds() -> Rect2:
 
 
 func reset_state() -> void:
+	if is_consumed:
+		return
 	global_position = _start_position
 	velocity = Vector2.ZERO
 	_wind_force = Vector2.ZERO
 	_impulse = Vector2.ZERO
 	is_straining = false
+	if is_lost:
+		is_lost = false
+		_set_present(true)
 	reset_physics_interpolation()
+
+
+## Falls into slag: it burns (wood) or sinks (stone), and is gone until the
+## room is reset.
+func burn(_source: Node = null) -> void:
+	if is_lost or is_consumed:
+		return
+	is_lost = true
+	var at := global_position + Vector2(0, -size.y / 2.0)
+	Sfx.play("brambles_burn" if weight == Weight.CRATE else "fire_blast", at, 0.0, 0.0)
+	ImpactFX.burst(get_parent(), at, Color(1.0, 0.55, 0.22), false, 22)
+	ImpactFX.burst(get_parent(), at + Vector2(0, -12), Color(0.35, 0.32, 0.4), false, 12)
+	var t := create_tween()
+	t.tween_property(_art, "modulate", Color(1.6, 0.6, 0.3, 0.0), 0.7)
+	t.tween_callback(func():
+		if is_lost:
+			_set_present(false))
+	lost.emit()
+
+
+## Taken in for good (the kiln swallows its coal). Silent when it was already
+## in on loading.
+func consume(silent := false) -> void:
+	if is_consumed:
+		return
+	is_consumed = true
+	if silent:
+		_set_present(false)
+		return
+	var t := create_tween()
+	t.tween_property(_art, "modulate:a", 0.0, 0.5)
+	t.tween_callback(_set_present.bind(false))
+
+
+## Why the room can't be finished because of this object ("" if it can).
+func lost_reason() -> String:
+	if not required or is_consumed:
+		return ""
+	if required_until_flag != "" and GameState.has_flag(required_until_flag):
+		return ""
+	if is_lost:
+		return required_reason
+	if required_area.has_area() and is_on_floor() and not required_area.has_point(global_position):
+		return required_reason
+	return ""
+
+
+func _set_present(on: bool) -> void:
+	visible = on
+	_art.modulate = Color.WHITE
+	_collider.set_deferred("disabled", not on)
+	set_physics_process(on)
+	if on:
+		add_to_group("wind_receiver")
+		add_to_group("plate_weight")
+	else:
+		remove_from_group("wind_receiver")
+		remove_from_group("plate_weight")
 
 
 func _physics_process(delta: float) -> void:
@@ -195,6 +286,8 @@ func _update_feedback(delta: float) -> void:
 
 
 func _draw_art() -> void:
+	if sprite_name != "":
+		return
 	var w := roundf(size.x)
 	var h := roundf(size.y)
 	var x := -w / 2.0

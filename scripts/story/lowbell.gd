@@ -5,15 +5,12 @@ extends Node2D
 ## The camera comes down from the silent belfry on the mountain to her door;
 ## she steps out, sees the wind chimes swinging without a sound, and takes the
 ## lane to Nan's cottage. The villagers she passes have lost words to the
-## Hush. Knocking at Nan's door leads on to the Undercroft (for now through a
-## short card; Nan's own scene comes next).
+## Hush. Knocking at Nan's door leads inside, to her cottage (NanCottage).
 ## Everything is built from the surface and town pixel-art packs (SurfaceArt),
 ## drawn at 1.5x; the people are the story's pixel sprites.
 
 const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
 const PUDDLE := preload("res://scenes/fx/puddle.tscn")
-const TUTORIAL := "res://scenes/tutorial_level.tscn"
-const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
 const SELF_PATH := "res://scenes/story/lowbell.tscn"
 
 const FLOOR_Y := 534.0
@@ -29,12 +26,6 @@ const NAN_DOOR_X := 1836.0
 const LAMP := Color(0.7, 0.84, 1.0)
 ## The scale the packs are drawn at.
 const S := SurfaceArt.LANE_SCALE
-
-const BRIDGE := [
-	"Nan's fire was warm. But when she looked up, she could not remember Echidna's name. The Hush had reached her too.",
-	"She pressed her old lantern into Echidna's hands. “The bell,” she whispered. “Somebody has to ring the bell.”",
-	"So Echidna set off for the mountain, to find a way into the sealed Belfry.",
-]
 
 var player: CharacterBody2D
 var camera: Camera2D
@@ -61,7 +52,6 @@ var _named := false
 var _fade: ColorRect
 var _objective: PanelContainer
 var _hint: Label
-var _card: Label
 var _start_x := START_X
 var _walked := false
 var _wind: AudioStreamPlayer
@@ -451,6 +441,7 @@ func _build_post_and_menu() -> void:
 	post.name = "PostFX"
 	post.layer = 1
 	post.set_script(load("res://scripts/post_fx.gd"))
+	post.set("follows_brightness", false)
 	var screen := ColorRect.new()
 	screen.name = "Screen"
 	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -460,6 +451,7 @@ func _build_post_and_menu() -> void:
 	# Out under the sky: little lantern gloom, a grey mist, and the colour
 	# already draining out of everything (the Hush)
 	mat.set_shader_parameter("fog_floor_y", FLOOR_Y)
+	mat.set_shader_parameter("lantern_outer", 440.0)
 	mat.set_shader_parameter("lantern_darkness", 0.14)
 	mat.set_shader_parameter("fog_strength", 0.14)
 	mat.set_shader_parameter("fog_color", Color(0.46, 0.47, 0.56))
@@ -525,22 +517,6 @@ func _build_ui() -> void:
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(_fade)
 
-	var serif := SystemFont.new()
-	serif.font_names = PackedStringArray(StoryIntro.NARRATION_FONTS)
-	serif.font_italic = true
-	_card = Label.new()
-	_card.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_card.offset_left = 160
-	_card.offset_right = -160
-	_card.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_card.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_card.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_card.add_theme_font_override("font", serif)
-	_card.add_theme_font_size_override("font_size", 27)
-	_card.add_theme_color_override("font_color", Color("efe6d2"))
-	_card.modulate.a = 0.0
-	_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ui.add_child(_card)
 
 
 func _start_wind() -> void:
@@ -706,7 +682,7 @@ func _update_hints() -> void:
 # ------------------------------------------------------------------ leaving
 
 func next_scene() -> String:
-	return CHAPTER if GameState.has_flag("tutorial.done") else TUTORIAL
+	return Journey.COTTAGE
 
 
 ## Knocking at Nan's door: she answers, and the story moves on.
@@ -730,11 +706,6 @@ func knock() -> void:
 	t.tween_callback(func(): _nan.visible = true; _nan.frame = 0)
 	t.tween_interval(1.4)
 	t.tween_property(_fade, "color:a", 1.0, 1.2)
-	for text in BRIDGE:
-		t.tween_callback(func(): _card.text = text)
-		t.tween_property(_card, "modulate:a", 1.0, 0.8)
-		t.tween_interval(clampf(1.6 + text.length() * 0.05, 4.0, 8.0))
-		t.tween_property(_card, "modulate:a", 0.0, 0.6)
 	t.tween_callback(_leave)
 
 

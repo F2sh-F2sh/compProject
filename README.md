@@ -24,7 +24,7 @@ Open the project in Godot 4.7.2 and press **F5** (the title screen is the main s
 | Sprint | hold Shift | LT / LB |
 | Fireball | left click (aims at the mouse) | RT (aims with the right stick) |
 | Heal (stand still) | Q | X |
-| Refill mana | R | Y |
+| Kindle the lantern (refill mana: hold at a lit flame) | R | Y |
 | Record an Echo / hold to let Echoes fade | E | B |
 | Use, pull, ring, inscribe a rune cube | W / Up | D-pad up |
 | Pick up / set down a rune cube | F | R3 |
@@ -32,7 +32,8 @@ Open the project in Godot 4.7.2 and press **F5** (the title screen is the main s
 | Pause, map, ledger, settings | Esc | Start |
 | Fullscreen | F11 | |
 
-Keys can be changed in Settings & Controls, which also has guidance and assist options
+Keys can be changed in Settings & Controls, which also has brightness (Dim, Normal, Bright),
+guidance (new players start on Light; Full adds the extra cues) and assist options
 (damage taken, unlimited mana, always sprint, crouch toggle) and reduced motion.
 
 ## Tests
@@ -66,7 +67,9 @@ After a fresh clone, or after adding scripts with a `class_name`, run
 
 ## More
 
-- `docs/GAME_DESIGN.md`: the full game plan: story, world, chapters, NPCs, bosses, and the contest build.
+- `docs/GAME_DESIGN.md`: the game plan (v2, about two hours after the tutorial section): story, the
+  grandma scene, the Novices' Way, five chapters, earned spells, mana, combat, puzzles and the build
+  plan. `docs/GAME_DESIGN_v1_long.md` is the earlier 6 to 7 hour version, kept unchanged.
 - `docs/CHAPTER1_SOLUTIONS.md`: every room's solution, reset and saved ids.
 - `docs/CHAPTER2_SOLUTIONS.md`: Chapter 2 room by room, and every rune the cubes accept.
 - `docs/RUNE_SYSTEM_PROGRESS.md`: how the rune system works, its tuning, and its test record.

@@ -25,7 +25,9 @@ const FLOOR_Y := 534
 const LOW_CEIL := 4
 const HIGH_CEIL := 0
 
-const AMBIENT := Color(0.2, 0.18, 0.3)
+## A brighter dungeon (it was Color(0.2, 0.18, 0.3), which is the Dim brightness); the Brightness setting
+## scales this, and watcher rooms use less (MOOD_AMBIENT).
+const AMBIENT := Color(0.5, 0.48, 0.64)
 const TORCH_COLOR := Color(0.42, 0.6, 1.0)
 const BEAM_COLOR := Color(0.55, 0.8, 1.0)
 
@@ -293,16 +295,19 @@ func build_level() -> void:
 	level.set_script(load("res://scripts/puzzle/chapter_root.gd"))
 	level.set("chapter_id", "ch1")
 	level.set("total_pages", 7)
-	level.set("next_chapter", "res://scenes/chapter/chapter_2.tscn")
+	level.set("next_chapter", "res://scenes/story/interlude_bell.tscn")
+	level.set("unit_name", "part")
+	level.set("complete_heading", "PART 2 COMPLETE")
+	level.set("next_label", "Continue to Part 3: The Observatory")
 
 	var ambient := CanvasModulate.new()
 	ambient.name = "Darkness"
 	ambient.color = AMBIENT
 	add_owned(level, ambient)
 
-	background = tile_layer("Background", Vector2(0, 22), Color(0.8, 0.78, 0.9), -10, false, false)
-	back_decor = tile_layer("BackDecor", Vector2(0, 22), Color(0.95, 0.95, 1.0), -9, false, false)
-	earth = tile_layer("Earth", Vector2.ZERO, Color(0.66, 0.63, 0.76))
+	background = tile_layer("Background", Vector2(0, 22), Color(0.88, 0.86, 0.99), -10, false, false)
+	back_decor = tile_layer("BackDecor", Vector2(0, 22), Color(1.0, 1.0, 1.0), -9, false, false)
+	earth = tile_layer("Earth", Vector2.ZERO, Color(0.73, 0.69, 0.84))
 	ceiling = tile_layer("Ceiling", Vector2(0, -4))
 	ground = tile_layer("Ground")
 	ground_half = tile_layer("GroundHalf", Vector2(0, 32))
@@ -350,6 +355,9 @@ func place_atmosphere() -> void:
 
 ## Rooms with enemies to fight (the music's combat layer rises in them).
 const COMBAT_ROOMS := ["R4", "R7"]
+## Rooms where the dark is part of the puzzle (the watchers hunt in it) keep a
+## darker ambient than the rest of the (brighter) dungeon: a share of it.
+const MOOD_AMBIENT := {"R4": 0.5, "R7": 0.5}
 ## Each room's colour (post pass highlight tint, mist colour): cold for the
 ## cells, warm for the flame, amber for the works, teal by lantern light,
 ## violet in the belfry, gold at the great bell.
@@ -376,6 +384,7 @@ func make_room(id: String, title: String, x0: int, x1: int, ceil_row: int, entry
 		"combat": COMBAT_ROOMS.has(id),
 		"mood_highlight": MOODS[id][0],
 		"mood_fog": MOODS[id][1],
+		"mood_ambient": MOOD_AMBIENT.get(id, 1.0),
 	})
 	rooms[id] = room
 	# The room's acoustics: tall chambers echo like caverns, the chasm like a
@@ -521,16 +530,19 @@ func room_1_entrance() -> void:
 	plateau(1, 2)
 	curb(14)
 	var room := make_room("R1", "The Forgotten Entrance", 0, 20, LOW_CEIL, Vector2(380, 530))
+	waymarks(room, 0, 20)
 
 	inst(PUZZLE + "chapter_checkpoint.tscn", room, "Shrine", Vector2(cx(5), FLOOR_Y), {"checkpoint_id": "ch1.cp.start"})
 	page(room, 1, Vector2(128, 412), "The Bellkeeper's Ledger, i",
 		"The belfry is sealed. The watchers turn to stone in holy light, so we keep the lamps lit and the bells quiet.")
-	inst(PUZZLE + "pushable_block.tscn", room, "Block", Vector2(cx(9), FLOOR_Y))
+	# (shoved the wrong way into the wall it is stuck: the room says to reset)
+	inst(PUZZLE + "pushable_block.tscn", room, "Block", Vector2(cx(9), FLOOR_Y), {"needed_dir": 1, "required_until_flag": "ch1.r1.solved"})
 	var plate := inst("res://scenes/pressure_plate.tscn", room, "Plate", Vector2(874, FLOOR_Y))
 	var exit_gate := gate(room, "ExitGate", 20)
 	circuit(room, "PlateToGate", [plate], [exit_gate],
 		{"reveal_target": true, "persist_id": "ch1.r1.solved", "channel_y": 440.0, "symbol": 0})
-	guide(room, "Open the gate at the far end.", "I", "The Toll", "Chapter 1  ·  The Sealed Belfry")
+	guide(room, "Open the gate at the far end.", "I", "The Toll", "The Novices' Way  ·  Part 2  ·  The Sealed Belfry")
+	room.set("explainer", "objective")
 	step(room, "Stone on the plate: the gate opens", Cond.OPEN, exit_gate)
 	page_step(room, 1)
 
@@ -569,13 +581,15 @@ func room_2_bellkeeper() -> void:
 	floating_ledge(38, 39, 6, true)
 	curb(35)
 	var room := make_room("R2", "The Bellkeeper's Cell", 20, 44, LOW_CEIL, Vector2(1400, 530), true)
+	waymarks(room, 20, 44)
+	kindle_flame(room, 1384.0)
 	grated_cell(room, 27, 31)
 
 	slime(room, "BellSlime", Vector2(cx(28), 596), {"warded": true, "investigate_time": 12.0})
 	var plate_a := inst("res://scenes/pressure_plate.tscn", room, "PlateA", Vector2(2016, 598))
 	var bell := inst(PUZZLE + "puzzle_bell.tscn", room, "Bell", Vector2(2016, 400),
 		{"chain_length": 106.0, "pull_offset": Vector2(80, 74), "cooldown": 2.0})
-	inst(PUZZLE + "pushable_block.tscn", room, "Block", Vector2(cx(32), FLOOR_Y))
+	inst(PUZZLE + "pushable_block.tscn", room, "Block", Vector2(cx(32), FLOOR_Y), {"needed_dir": 1, "required_until_flag": "ch1.r2.solved"})
 	var plate_b := inst("res://scenes/pressure_plate.tscn", room, "PlateB", Vector2(2218, FLOOR_Y))
 	var exit_gate := gate(room, "ExitGate", 44)
 	circuit(room, "BothPlates", [plate_a, plate_b], [exit_gate],
@@ -597,8 +611,6 @@ func room_2_bellkeeper() -> void:
 
 	var signs := group(room, "Signs")
 	add_sign(signs, "Bells", 24.5, "Slimes follow the toll of a bell and sit where it rings.", FLOOR_Y, 180.0)
-	add_sign(signs, "Ring", 34.8, "Pull a bell's rope with {interact}, or strike the bell with a fireball ({shoot}).", FLOOR_Y, 190.0)
-	add_sign(signs, "TwoPlates", 40.6, "This gate wakes only while both of its plates are pressed at once.", FLOOR_Y, 180.0)
 
 	var deco := group(room, "Decor")
 	for c in [22, 29, 36, 42]:
@@ -628,6 +640,7 @@ func room_3_split_flame() -> void:
 	for x in range(57, 64):
 		floor_tile(x, 4)
 	var room := make_room("R3", "The Split Flame", 44, 64, HIGH_CEIL, Vector2(2890, 530))
+	waymarks(room, 44, 64)
 
 	inst(PUZZLE + "chapter_checkpoint.tscn", room, "Shrine", Vector2(cx(45), FLOOR_Y), {"checkpoint_id": "ch1.cp.r3"})
 	var brazier := inst(PUZZLE + "brazier.tscn", room, "Brazier", Vector2(cx(48), FLOOR_Y), {"beam_direction": Vector2.RIGHT})
@@ -699,6 +712,8 @@ func room_4_watcher() -> void:
 	floor_tile(73, 6)
 	floor_tile(74, 6)
 	var room := make_room("R4", "The Silent Watcher", 64, 84, LOW_CEIL, Vector2(4180, 530))
+	waymarks(room, 64, 84)
+	kindle_flame(room, cx(65))
 
 	var lever := inst(PUZZLE + "lever.tscn", room, "Lever", Vector2(cx(67), FLOOR_Y))
 	var lens := inst(PUZZLE + "light_lens.tscn", room, "Lens", Vector2(cx(79), 284), {"beam_direction": Vector2.DOWN})
@@ -728,7 +743,6 @@ func room_4_watcher() -> void:
 
 	var signs := group(room, "Signs")
 	add_sign(signs, "Watchers", 66.5, "Watchers hunt in darkness. Magic light turns them to stone, and stone is heavy.", FLOOR_Y, 190.0)
-	add_sign(signs, "Heavy", 71.5, "A heavy plate. Only stone can press it.", FLOOR_Y, 150.0)
 
 	var deco := group(room, "Decor")
 	for c in [65, 70, 76, 82]:
@@ -760,6 +774,7 @@ func room_5_machinery() -> void:
 		floor_tile(x, 3)
 		solid(x, 4)
 	var room := make_room("R5", "Broken Machinery", 84, 116, HIGH_CEIL, Vector2(5440, 530))
+	waymarks(room, 84, 116)
 	var course := 278.0
 	var step := 214.0
 
@@ -778,8 +793,11 @@ func room_5_machinery() -> void:
 			{"raised_head_bottom": course - 112.0 - 16.0, "travel_distance": 112.0, "start_phase": [0.0, 0.45][i],
 			"recovery_checkpoint": candle_pistons})
 	var block := inst(PUZZLE + "pushable_block.tscn", room, "ShieldBlock", Vector2(cx(103), course))
-	var statue := inst(TRAPS + "arcane_bolt_statue.tscn", room, "SkullPlaque", Vector2(108 * T - 12, course - 20),
-		{"fire_direction": Vector2.LEFT, "interval": 2.2, "bolt_range": 700.0})
+	# The skull plaque is set into the step's wall (its left edge flush with the wall face),
+	# so the block can only be pushed up against it, never into it. Its bolts start just
+	# outside the wall.
+	var statue := inst(TRAPS + "arcane_bolt_statue.tscn", room, "SkullPlaque", Vector2(108 * T + 32, course - 20),
+		{"fire_direction": Vector2.LEFT, "interval": 2.2, "bolt_range": 700.0, "muzzle": 38.0})
 	for i in 2:
 		inst(TRAPS + "magic_vent.tscn", room, "Vent%d" % (i + 1), Vector2(cx(109 + i * 2), step),
 			{"reach": 110.0, "idle_time": 1.4, "warning_time": 0.6, "active_time": 0.9, "start_phase": [0.0, 0.5][i]})
@@ -803,11 +821,7 @@ func room_5_machinery() -> void:
 		"The engineers built the works above the old tunnel so the watchers could not follow them home. The tunnel door only opens from the far side.")
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Lift", 86, "The lift carries you up into the works.", FLOOR_Y, 150.0)
 	# Up in the works the camera sits higher, so these signs hang lower
-	add_sign(signs, "Bolts", 102.5, "Skull plaques spit bolts. Stone stops them.", course + 14.0, 150.0)
-	add_sign(signs, "Vents", 110, "Vents flare before they burst.", step + 14.0, 140.0)
-	add_sign(signs, "Shortcut", 115, "This lever opens the tunnel back to the lift.", FLOOR_Y, 160.0)
 
 	var deco := group(room, "Decor")
 	torch(deco, 86)
@@ -840,6 +854,7 @@ func room_6_lantern() -> void:
 	pit(131, 134)
 	pit(137, 140)
 	var room := make_room("R6", "Lantern Crossing", 116, 144, LOW_CEIL, Vector2(7560, 530), true)
+	waymarks(room, 116, 144)
 	var pit_floor := 598.0
 	var rest_y := 462.0
 
@@ -905,9 +920,6 @@ func room_6_lantern() -> void:
 
 	var signs := group(room, "Signs")
 	add_sign(signs, "Wisp", 120, "Call the wisp from a rune stone with {interact}. Hidden paths turn solid in its light.", FLOOR_Y, 200.0)
-	add_sign(signs, "Crumble", 130, "Cracked ledges give way. Keep moving.", FLOOR_Y, 150.0)
-	add_sign(signs, "Crystal", 136, "Crystals drink the wisp's light too.", FLOOR_Y, 150.0)
-	add_sign(signs, "Walkway", 142.5, "This lever raises a walkway for the way back.", FLOOR_Y, 160.0)
 
 	var deco := group(room, "Decor")
 	for c in [118, 125, 130, 136, 143]:
@@ -945,6 +957,7 @@ func room_7_belfry() -> void:
 		solid(168, y)
 	ceiling.erase_cell(Vector2i(168, 0))
 	var room := make_room("R7", "The Sealed Belfry", 144, 173, HIGH_CEIL, Vector2(9300, 530), true)
+	waymarks(room, 144, 173)
 	grated_cell(room, 147, 150)
 	var beam_y := 372.0
 
@@ -972,7 +985,9 @@ func room_7_belfry() -> void:
 	circuit(room, "SealCircuit", [plate], [seal],
 		{"hold_time": 0.5, "persist_id": "ch1.r7.solved", "channel_y": 460.0, "symbol": 0, "solved_sound": ""})
 	guide(room, "Break the seal on the great door.", "IV", "The Belfry")
-	step(room, "The belfry flame burns", Cond.POWERED, brazier)
+	step(room, "The belfry flame burns", Cond.POWERED, brazier, {"todo_label": "Light the flame by the door"})
+	# The first time here the camera glances at it (the one cue that it is there)
+	room.set("glance_at", NodePath("BelfryFlame"))
 	step(room, "The mirror looks down on the heavy plate", Cond.PROPERTY, mirror, {"property": "facing", "value": 2})
 	step(room, "The barred window opens", Cond.OPEN, bars)
 	step(room, "The seal breaks", Cond.OPEN, seal)
@@ -987,11 +1002,10 @@ func room_7_belfry() -> void:
 		"If you are reading this, the seal has answered you. Ring the great bell once for me, stranger. It has been so quiet.")
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Belfry", 153, "The seal answers only to the watcher's weight.", FLOOR_Y, 160.0)
-	add_sign(signs, "MirrorControl", 156, "Turn the high mirror from here with {interact}.", FLOOR_Y, 150.0)
 
 	var deco := group(room, "Decor")
-	for c in [145, 152, 158, 165, 170]:
+	# (No wall torch under the flame at col 145: it would read as the same fire)
+	for c in [152, 158, 165, 170]:
 		torch(deco, c)
 	for c in [149, 157, 163, 171]:
 		torch(deco, c, 1)
@@ -1018,6 +1032,8 @@ func room_7_belfry() -> void:
 func room_8_choir() -> void:
 	shell(173, 195, LOW_CEIL)
 	var room := make_room("R8", "The Choir Loft", 173, 195, LOW_CEIL, Vector2(cx(174), 530))
+	waymarks(room, 173, 195)
+	kindle_flame(room, cx(175))
 	var lever_a := inst(PUZZLE + "lever.tscn", room, "LeverA", Vector2(cx(176), FLOOR_Y), {"spring_time": 2.5})
 	var lever_b := inst(PUZZLE + "lever.tscn", room, "LeverB", Vector2(cx(188), FLOOR_Y), {"spring_time": 2.5})
 	var loft_gate := gate(room, "LoftGate", 192)
@@ -1034,7 +1050,6 @@ func room_8_choir() -> void:
 
 	var signs := group(room, "Signs")
 	add_sign(signs, "Choir", 178.5, "Echoes do what you did: they pull levers, ring bells and turn mirrors too.", FLOOR_Y, 200.0)
-	add_sign(signs, "Spring", 182.5, "These levers spring back after a moment.", FLOOR_Y, 150.0)
 
 	var deco := group(room, "Decor")
 	for c in [175, 180, 185, 190]:
@@ -1060,6 +1075,8 @@ func room_9_great_bell() -> void:
 	for x in range(207, 215):
 		floor_tile(x, 3)
 	var room := make_room("R9", "The Great Bell", 195, 215, HIGH_CEIL, Vector2(cx(196), 530))
+	waymarks(room, 195, 215, false)
+	kindle_flame(room, cx(197))
 	var plate := inst("res://scenes/pressure_plate.tscn", room, "Plate", Vector2(cx(198), FLOOR_Y))
 	var stairs: Array = []
 	for i in 6:
@@ -1080,7 +1097,6 @@ func room_9_great_bell() -> void:
 	], [plate] + stairs.slice(0, 2))
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Bell", 199.5, "The great bell. Something must hold the plate while you climb.", FLOOR_Y, 180.0)
 
 	var deco := group(room, "Decor")
 	for c in [196, 200, 205]:
@@ -1108,7 +1124,7 @@ func place_player_and_ui() -> void:
 	camera.set("base_zoom", Vector2(2, 2))
 	camera.zoom = Vector2(2, 2)
 	add_owned(player, camera)
-	var aura := light(256, Color(0.78, 0.72, 1.0), 0.95, 1.0)
+	var aura := light(256, Color(0.78, 0.72, 1.0), 1.15, 1.45)
 	aura.name = "PlayerLight"
 	aura.position = Vector2(0, -20)
 	add_owned(player, aura)
@@ -1140,3 +1156,32 @@ func place_player_and_ui() -> void:
 	pause.name = "PauseMenu"
 	pause.set_script(load("res://scripts/ui/pause_menu.gd"))
 	add_owned(level, pause)
+
+
+## A flame by a room's entrance where she can kindle her lantern (fill her
+## mana), so running dry never sends her back through earlier rooms.
+func kindle_flame(room: Node, x: float) -> Node:
+	return inst(PUZZLE + "kindle_flame.tscn", room, "KindleFlame", Vector2(x, FLOOR_Y))
+
+
+# ---------------------------------------------------------------- waymarks
+# The Choir cut small glowing arrows into the walls of the Novices' Way so a
+# novice could always tell which way the path goes on (scripts/puzzle/waymark.gd).
+
+const WAY_Y := FLOOR_Y - 76
+
+
+func waymark(room: Node, x: float, dir := "right", y := WAY_Y) -> Node:
+	var count := room.get_children().filter(func(n): return String(n.name).begins_with("Waymark")).size()
+	return inst(PUZZLE + "waymark.tscn", room, "Waymark%d" % (count + 1), Vector2(x, y), {"direction": dir})
+
+
+## The usual three: soon after the way in, halfway (in a long room), and just
+## before the way out. `exit_arrow` is off for a room where the way on is not
+## to the right.
+func waymarks(room: Node, x0: int, x1: int, exit_arrow := true) -> void:
+	waymark(room, x0 * T + 7.5 * T)
+	if x1 - x0 >= 20:
+		waymark(room, (x0 + x1) * T / 2.0)
+	if exit_arrow:
+		waymark(room, x1 * T - 1.6 * T)

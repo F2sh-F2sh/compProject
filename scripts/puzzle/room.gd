@@ -37,12 +37,21 @@ extends Node2D
 @export var objective := ""
 ## Lore page ids found in this room (for the map).
 @export var page_ids: PackedStringArray = []
+## A node (path from this room) the camera glances at the first time ever the
+## player enters, so a key thing is noticed without any text.
+@export var glance_at: NodePath = ^""
+## A UiTour (scripts/ui/ui_tour.gd) played the first time ever in the room: "objective", "runes".
+@export var explainer := ""
 
 @export_group("Mood")
 ## The room's colour: the post pass's highlight tint and mist colour ease to
 ## these while the player is here (cold for the cells, amber for the works...).
 @export var mood_highlight := Color(1.02, 1.04, 1.06)
 @export var mood_fog := Color(0.27, 0.36, 0.48)
+## How bright the room's ambient light is, as a share of the level's (1.0 = the
+## same). Rooms where the dark is part of the puzzle (watchers hunt in the
+## dark) use less, so the rest of the dungeon can be bright.
+@export_range(0.2, 1.5, 0.05) var mood_ambient := 1.0
 
 var visited := false
 
@@ -77,6 +86,19 @@ func reset() -> void:
 		for projectile in get_tree().get_nodes_in_group(group):
 			if bounds.has_point(projectile.global_position):
 				projectile.queue_free()
+
+
+## Why the room can't be finished any more ("" while it still can): something
+## its puzzle needs is gone (a slime that had to hold a plate has been killed,
+## the coal cart has burned...). Pieces opt in by joining "puzzle_critical" and
+## answering lost_reason(); Reset Room puts them back.
+func broken_reason() -> String:
+	for node in get_tree().get_nodes_in_group("puzzle_critical"):
+		if is_ancestor_of(node) and node.has_method("lost_reason"):
+			var why: String = node.lost_reason()
+			if why != "":
+				return why
+	return ""
 
 
 func _resettables() -> Array[Node]:

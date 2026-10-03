@@ -117,11 +117,13 @@ func _ready() -> void:
 	add_child(_glow)
 	interactable = Interactable.new()
 	interactable.verb = "Inscribe"
+	interactable.use_priority = 1
 	interactable.size = Vector2(60, 52)
 	interactable.prompt_offset = Vector2(0, -52)
 	interactable.echo_can_use = false
 	add_child(interactable)
 	interactable.interacted.connect(_on_interacted)
+	interactable.body_entered.connect(_on_reached)
 	_start_position = global_position
 	var node := get_parent()
 	while node and not node is Room:
@@ -276,6 +278,7 @@ func activate(by_player := true) -> String:
 		RuneJournal.note("mana")
 	_glow.modulate = RuneFragments.essence_color(recipe.essence)
 	queue_redraw()
+	_refresh_verb()
 	activated.emit(self)
 	power_changed.emit(true)
 	if manager:
@@ -296,6 +299,7 @@ func deactivate(reason := "") -> void:
 	if reason == "exhausted":
 		_flash(State.NO_MANA, 1.5)
 	queue_redraw()
+	_refresh_verb()
 	deactivated.emit(self)
 	power_changed.emit(false)
 	if manager:
@@ -337,6 +341,7 @@ func _finish_once() -> void:
 		# The effect (a gust, a bolt) plays out on its own
 		effect = null
 		queue_redraw()
+		_refresh_verb()
 		deactivated.emit(self)
 		power_changed.emit(false)
 		if manager:
@@ -438,6 +443,14 @@ func _on_interacted(_by: Node) -> void:
 		manager.assembly.open(self)
 
 
+# The first time she reaches any rune cube (wherever she came in), the rune
+# tour explains how cubes are edited: Inscribe, words change only while the
+# cube is off, LOCKED words never, and the runes list on its key. Once per save.
+func _on_reached(body: Node) -> void:
+	if body.is_in_group("player") and not GameState.has_flag("ui.tour.runes") and not is_instance_valid(UiTour.current):
+		UiTour.play_later(self, "runes", 0.6)
+
+
 # ---------------------------------------------------------------- drawing
 
 func _draw() -> void:
@@ -509,3 +522,10 @@ func _process(_delta: float) -> void:
 		return
 	if is_carried:
 		_face.queue_redraw()
+
+
+## The prompt says what using the cube will do: inscribe it, or (while it
+## runs) look at it and switch it off first.
+func _refresh_verb() -> void:
+	if interactable:
+		interactable.verb = "Running: switch off to edit" if is_active else "Inscribe"

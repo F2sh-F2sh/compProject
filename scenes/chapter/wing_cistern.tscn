@@ -1,0 +1,610 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://scripts/puzzle/chapter_root.gd" id="1_b0vnb"]
+[ext_resource type="TileSet" path="res://assets/TileSet/dungeon_tileset.tres" id="2_ok2am"]
+[ext_resource type="PackedScene" path="res://scenes/puzzle/room.tscn" id="3_p40h8"]
+[ext_resource type="Script" path="res://scripts/puzzle/room.gd" id="4_cgswp"]
+[ext_resource type="Script" path="res://scripts/audio/reverb_zone.gd" id="5_ckiqd"]
+[ext_resource type="PackedScene" path="res://scenes/puzzle/waymark.tscn" id="6_rx8yr"]
+[ext_resource type="Script" path="res://scripts/puzzle/waymark.gd" id="7_ojmwm"]
+[ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="8_xwei0"]
+[ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="9_tnaif"]
+[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="10_f433o"]
+[ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="11_rl11w"]
+[ext_resource type="PackedScene" path="res://scenes/runes/rune_tablet.tscn" id="12_ci1vm"]
+[ext_resource type="Script" path="res://scripts/runes/rune_tablet.gd" id="13_ygp8s"]
+[ext_resource type="PackedScene" path="res://scenes/runes/rune_cube.tscn" id="14_bahll"]
+[ext_resource type="Script" path="res://scripts/runes/rune_cube.gd" id="15_ceceq"]
+[ext_resource type="PackedScene" path="res://scenes/pressure_plate.tscn" id="16_3m78w"]
+[ext_resource type="Script" path="res://scripts/pressure_plate.gd" id="17_uy8pq"]
+[ext_resource type="PackedScene" path="res://scenes/slime.tscn" id="18_vspy7"]
+[ext_resource type="Script" path="res://scripts/slime.gd" id="19_74cn4"]
+[ext_resource type="PackedScene" path="res://scenes/damage_number.tscn" id="20_3jgc4"]
+[ext_resource type="PackedScene" path="res://scenes/portcullis_gate.tscn" id="21_wixub"]
+[ext_resource type="Script" path="res://scripts/portcullis_gate.gd" id="22_7ov7m"]
+[ext_resource type="PackedScene" path="res://scenes/puzzle/circuit.tscn" id="23_jrvrn"]
+[ext_resource type="Script" path="res://scripts/puzzle/circuit.gd" id="24_j1lis"]
+[ext_resource type="Script" path="res://scripts/puzzle/objective_step.gd" id="25_qodap"]
+[ext_resource type="PackedScene" path="res://scenes/puzzle/hint_stone.tscn" id="26_xdu0u"]
+[ext_resource type="Script" path="res://scripts/puzzle/hint_stone.gd" id="27_srsvg"]
+[ext_resource type="PackedScene" path="res://scenes/torch_light.tscn" id="28_y4yw2"]
+[ext_resource type="Script" path="res://scripts/flicker_light.gd" id="29_1j7fb"]
+[ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/skull_pile.png" id="30_sq1y2"]
+[ext_resource type="PackedScene" path="res://scenes/puzzle/great_bell.tscn" id="31_yscat"]
+[ext_resource type="Script" path="res://scripts/puzzle/great_bell.gd" id="32_bdmoq"]
+[ext_resource type="Script" path="res://scripts/fx/dungeon_atmosphere.gd" id="33_f8oiq"]
+[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="34_4rfei"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="35_onpa4"]
+[ext_resource type="PackedScene" path="res://scenes/FireBall.tscn" id="36_g7fv0"]
+[ext_resource type="Script" path="res://scripts/camera_bounds.gd" id="37_rplrl"]
+[ext_resource type="Script" path="res://scripts/post_fx.gd" id="38_csxvk"]
+[ext_resource type="Shader" path="res://assets/shaders/dungeon_post.gdshader" id="39_55h5o"]
+[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="40_puhax"]
+[ext_resource type="Script" path="res://scripts/hud.gd" id="41_k5clp"]
+[ext_resource type="PackedScene" path="res://scenes/ammo_ui.tscn" id="42_wfybs"]
+[ext_resource type="Script" path="res://scripts/MagicUI.gd" id="43_c0xv0"]
+[ext_resource type="PackedScene" path="res://scenes/death_screen.tscn" id="44_y1i30"]
+[ext_resource type="Script" path="res://scripts/death_screen.gd" id="45_8v678"]
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="46_x5oei"]
+[ext_resource type="PackedScene" path="res://scenes/runes/rune_manager.tscn" id="47_6ueo1"]
+[ext_resource type="Script" path="res://scripts/runes/rune_manager.gd" id="48_5jgck"]
+
+[sub_resource type="Gradient" id="Gradient_0xh2v"]
+offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.15, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_y8k1s"]
+gradient = SubResource("Gradient_0xh2v")
+width = 128
+height = 128
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="Gradient" id="Gradient_y7qyc"]
+offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.15, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_abhov"]
+gradient = SubResource("Gradient_y7qyc")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="Gradient" id="Gradient_wyj0b"]
+offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.15, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_6p70f"]
+gradient = SubResource("Gradient_wyj0b")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_y3mn7"]
+shader = ExtResource("39_55h5o")
+shader_parameter/world_origin = null
+shader_parameter/world_size = null
+shader_parameter/lantern_uv = null
+shader_parameter/lantern_inner = null
+shader_parameter/lantern_outer = null
+shader_parameter/lantern_darkness = null
+shader_parameter/keep_bright_from = null
+shader_parameter/keep_bright_to = null
+shader_parameter/bloom_strength = null
+shader_parameter/bloom_threshold = null
+shader_parameter/fog_color = null
+shader_parameter/fog_strength = null
+shader_parameter/fog_floor_y = 534.0
+shader_parameter/shadow_tint = null
+shader_parameter/highlight_tint = null
+shader_parameter/contrast = null
+shader_parameter/shadow_lift = null
+shader_parameter/saturation = null
+shader_parameter/vignette = null
+shader_parameter/vignette_softness = null
+shader_parameter/grain = null
+
+[node name="Cistern" type="Node2D" unique_id=1941485346]
+script = ExtResource("1_b0vnb")
+chapter_id = "cistern"
+chapter_title = "The Drowned Cistern"
+unit_name = "wing"
+complete_heading = "THE BELL HAS RUNG"
+next_label = "Continue"
+grants_words = PackedStringArray("ice", "freeze", "long", "persist", "down_right")
+next_chapter = "res://scenes/story/interlude_cistern.tscn"
+
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=1288817007]
+color = Color(0.5, 0.48, 0.64, 1)
+
+[node name="Background" type="TileMapLayer" parent="." unique_id=1458725947]
+modulate = Color(0.88, 0.86, 0.99, 1)
+z_index = -10
+position = Vector2(0, 22)
+tile_map_data = PackedByteArray("AAAAAAEAAQAAAAAAAAAAAAIAAQAAAAAAAAAAAAMAAQADAAAAAAAAAAQAAQAEAAQAAAAAAAUAAQAEAAQAAAAAAAYAAQAAAAAAAAAAAAcAAQAEAAQAAAAAAAgAAQAAAAAAAAAAAAkAAQAAAAAAAAAAAAoAAQAAAAAAAAABAAEAAQAEAAQAAAABAAIAAQABAAAAAAABAAMAAQAAAAAAAAABAAQAAQAEAAQAAAABAAUAAQAAAAAAAAABAAYAAQAEAAQAAAABAAcAAQAAAAAAAAABAAgAAQAEAAQAAAABAAkAAQAAAAEAAAABAAoAAQAAAAAAAAACAAEAAQAEAAQAAAACAAIAAQAAAAAAAAACAAMAAQADAAAAAAACAAQAAQAEAAQAAAACAAUAAQABAAAAAAACAAYAAQAAAAAAAAACAAcAAQAEAAQAAAACAAgAAQAAAAAAAAACAAkAAQABAAAAAAACAAoAAQAEAAQAAAADAAEAAQAAAAAAAAADAAIAAQABAAEAAAADAAMAAQADAAAAAAADAAQAAQABAAAAAAADAAUAAQAAAAAAAAADAAYAAQAAAAAAAAADAAcAAQAEAAQAAAADAAgAAQAAAAAAAAADAAkAAQAEAAQAAAADAAoAAQAAAAAAAAAEAAEAAQAEAAQAAAAEAAIAAQAEAAQAAAAEAAMAAQAAAAAAAAAEAAQAAQACAAEAAAAEAAUAAQABAAAAAAAEAAYAAQABAAAAAAAEAAcAAQAAAAAAAAAEAAgAAQAAAAAAAAAEAAkAAQAAAAAAAAAEAAoAAQAAAAAAAAAFAAEAAQABAAAAAAAFAAIAAQACAAEAAAAFAAMAAQAAAAAAAAAFAAQAAQAAAAAAAAAFAAUAAQAEAAQAAAAFAAYAAQAEAAQAAAAFAAcAAQAAAAAAAAAFAAgAAQAEAAQAAAAFAAkAAQABAAAAAAAFAAoAAQAEAAQAAAAGAAEAAQAEAAQAAAAGAAIAAQABAAAAAAAGAAMAAQAEAAQAAAAGAAQAAQAEAAQAAAAGAAUAAQABAAAAAAAGAAYAAQAAAAAAAAAGAAcAAQAEAAQAAAAGAAgAAQAEAAQAAAAGAAkAAQAAAAAAAAAGAAoAAQAAAAAAAAAHAAEAAQABAAAAAAAHAAIAAQACAAAAAAAHAAMAAQABAAAAAAAHAAQAAQAEAAQAAAAHAAUAAQAAAAAAAAAHAAYAAQAEAAQAAAAHAAcAAQAAAAAAAAAHAAgAAQABAAAAAAAHAAkAAQABAAAAAAAHAAoAAQAAAAAAAAAIAAEAAQAAAAAAAAAIAAIAAQAAAAAAAAAIAAMAAQADAAAAAAAIAAQAAQAAAAAAAAAIAAUAAQAEAAQAAAAIAAYAAQACAAEAAAAIAAcAAQAEAAQAAAAIAAgAAQAAAAAAAAAIAAkAAQAEAAQAAAAIAAoAAQABAAAAAAAJAAEAAQAEAAQAAAAJAAIAAQAEAAQAAAAJAAMAAQAAAAAAAAAJAAQAAQAEAAQAAAAJAAUAAQAAAAAAAAAJAAYAAQAAAAAAAAAJAAcAAQABAAAAAAAJAAgAAQAAAAAAAAAJAAkAAQAAAAAAAAAJAAoAAQAEAAQAAAAKAAEAAQABAAAAAAAKAAIAAQAAAAAAAAAKAAMAAQAEAAQAAAAKAAQAAQAAAAAAAAAKAAUAAQABAAAAAAAKAAYAAQAEAAQAAAAKAAcAAQABAAAAAAAKAAgAAQAAAAAAAAAKAAkAAQAEAAQAAAAKAAoAAQAEAAQAAAALAAEAAQAAAAAAAAALAAIAAQAEAAQAAAALAAMAAQAAAAAAAAALAAQAAQAEAAQAAAALAAUAAQAEAAQAAAALAAYAAQAEAAQAAAALAAcAAQABAAAAAAALAAgAAQAAAAAAAAALAAkAAQACAAEAAAALAAoAAQACAAEAAAAMAAEAAQABAAAAAAAMAAIAAQAEAAQAAAAMAAMAAQAAAAAAAAAMAAQAAQAAAAAAAAAMAAUAAQAAAAAAAAAMAAYAAQAEAAQAAAAMAAcAAQAEAAQAAAAMAAgAAQABAAAAAAAMAAkAAQAAAAAAAAAMAAoAAQABAAAAAAANAAEAAQAAAAAAAAANAAIAAQAEAAQAAAANAAMAAQADAAAAAAANAAQAAQAAAAAAAAANAAUAAQAAAAAAAAANAAYAAQAAAAAAAAANAAcAAQABAAAAAAANAAgAAQAEAAQAAAANAAkAAQACAAAAAAANAAoAAQABAAAAAAAOAAEAAQAAAAAAAAAOAAIAAQAEAAQAAAAOAAMAAQAAAAAAAAAOAAQAAQAAAAAAAAAOAAUAAQAAAAAAAAAOAAYAAQAAAAAAAAAOAAcAAQAEAAQAAAAOAAgAAQABAAAAAAAOAAkAAQAAAAAAAAAOAAoAAQAEAAQAAAAPAAEAAQAAAAAAAAAPAAIAAQAEAAQAAAAPAAMAAQABAAAAAAAPAAQAAQAEAAQAAAAPAAUAAQAEAAQAAAAPAAYAAQAAAAAAAAAPAAcAAQAEAAQAAAAPAAgAAQABAAAAAAAPAAkAAQAEAAQAAAAPAAoAAQAAAAAAAAAQAAEAAQAEAAQAAAAQAAIAAQAAAAAAAAAQAAMAAQABAAAAAAAQAAQAAQACAAAAAAAQAAUAAQAAAAAAAAAQAAYAAQAAAAAAAAAQAAcAAQAAAAAAAAAQAAgAAQAEAAQAAAAQAAkAAQAEAAQAAAAQAAoAAQAEAAQAAAARAAEAAQABAAEAAAARAAIAAQAAAAAAAAARAAMAAQACAAAAAAARAAQAAQABAAAAAAARAAUAAQAEAAQAAAARAAYAAQAAAAAAAAARAAcAAQAAAAAAAAARAAgAAQACAAEAAAARAAkAAQAAAAAAAAARAAoAAQAAAAAAAAASAAEAAQAEAAQAAAASAAIAAQAAAAAAAAASAAMAAQADAAAAAAASAAQAAQABAAAAAAASAAUAAQAEAAQAAAASAAYAAQABAAAAAAASAAcAAQAEAAQAAAASAAgAAQAAAAAAAAASAAkAAQAEAAQAAAASAAoAAQABAAAAAAATAAEAAQABAAAAAAATAAIAAQABAAAAAAATAAMAAQABAAAAAAATAAQAAQAEAAQAAAATAAUAAQAEAAQAAAATAAYAAQAEAAQAAAATAAcAAQAAAAAAAAATAAgAAQABAAAAAAATAAkAAQABAAAAAAATAAoAAQAAAAAAAAAUAAEAAQAAAAAAAAAUAAIAAQABAAAAAAAUAAMAAQAEAAQAAAAUAAQAAQAEAAQAAAAUAAUAAQABAAAAAAAUAAYAAQABAAAAAAAUAAcAAQAAAAAAAAAUAAgAAQAEAAQAAAAUAAkAAQABAAEAAAAUAAoAAQAEAAQAAAAVAAEAAQAEAAQAAAAVAAIAAQAAAAAAAAAVAAMAAQADAAAAAAAVAAQAAQABAAAAAAAVAAUAAQAAAAAAAAAVAAYAAQAEAAQAAAAVAAcAAQAEAAQAAAAVAAgAAQAEAAQAAAAVAAkAAQAAAAAAAAAVAAoAAQAAAAAAAAAWAAEAAQAAAAAAAAAWAAIAAQAEAAQAAAAWAAMAAQADAAAAAAAWAAQAAQACAAEAAAAWAAUAAQAAAAAAAAAWAAYAAQAEAAQAAAAWAAcAAQAEAAQAAAAWAAgAAQAEAAQAAAAWAAkAAQAEAAQAAAAWAAoAAQAAAAAAAAAXAAEAAQABAAAAAAAXAAIAAQAEAAQAAAAXAAMAAQAAAAAAAAAXAAQAAQAAAAAAAAAXAAUAAQAAAAAAAAAXAAYAAQAEAAQAAAAXAAcAAQACAAEAAAAXAAgAAQABAAAAAAAXAAkAAQAEAAQAAAAXAAoAAQAEAAQAAAAYAAEAAQAAAAAAAAAYAAIAAQAAAAAAAAAYAAMAAQAAAAAAAAAYAAQAAQAAAAAAAAAYAAUAAQAAAAAAAAAYAAYAAQAEAAQAAAAYAAcAAQAEAAQAAAAYAAgAAQAAAAAAAAAYAAkAAQABAAAAAAAYAAoAAQAEAAQAAAAZAAEAAQAAAAAAAAAZAAIAAQAAAAAAAAAZAAMAAQAEAAQAAAAZAAQAAQAEAAQAAAAZAAUAAQABAAAAAAAZAAYAAQAEAAQAAAAZAAcAAQAAAAAAAAAZAAgAAQAEAAQAAAAZAAkAAQABAAAAAAAZAAoAAQABAAAAAAAaAAEAAQAEAAQAAAAaAAIAAQAEAAQAAAAaAAMAAQAAAAAAAAAaAAQAAQAAAAAAAAAaAAUAAQAEAAQAAAAaAAYAAQAEAAQAAAAaAAcAAQABAAAAAAAaAAgAAQAAAAAAAAAaAAkAAQABAAAAAAAaAAoAAQAEAAQAAAAbAAEAAQAEAAQAAAAbAAIAAQABAAAAAAAbAAMAAQAAAAAAAAAbAAQAAQAEAAQAAAAbAAUAAQAEAAQAAAAbAAYAAQAEAAQAAAAbAAcAAQAEAAQAAAAbAAgAAQAAAAAAAAAbAAkAAQAEAAQAAAAbAAoAAQAEAAQAAAAcAAEAAQAAAAAAAAAcAAIAAQAAAAAAAAAcAAMAAQADAAAAAAAcAAQAAQAAAAAAAAAcAAUAAQAAAAAAAAAcAAYAAQAAAAAAAAAcAAcAAQAAAAAAAAAcAAgAAQAAAAAAAAAcAAkAAQAAAAEAAAAcAAoAAQAEAAQAAAAdAAEAAQAEAAQAAAAdAAIAAQAEAAQAAAAdAAMAAQAEAAQAAAAdAAQAAQAEAAQAAAAdAAUAAQABAAAAAAAdAAYAAQABAAAAAAAdAAcAAQAAAAAAAAAdAAgAAQAEAAQAAAAdAAkAAQAAAAAAAAAdAAoAAQABAAAAAAAeAAEAAQAEAAQAAAAeAAIAAQAEAAQAAAAeAAMAAQABAAAAAAAeAAQAAQAAAAAAAAAeAAUAAQABAAAAAAAeAAYAAQAAAAEAAAAeAAcAAQAEAAQAAAAeAAgAAQAAAAAAAAAeAAkAAQABAAAAAAAeAAoAAQAAAAAAAAAfAAEAAQABAAAAAAAfAAIAAQAAAAAAAAAfAAMAAQABAAAAAAAfAAQAAQAEAAQAAAAfAAUAAQAAAAAAAAAfAAYAAQAEAAQAAAAfAAcAAQAEAAQAAAAfAAgAAQAEAAQAAAAfAAkAAQABAAAAAAAfAAoAAQAAAAAAAAAgAAEAAQABAAAAAAAgAAIAAQAEAAQAAAAgAAMAAQAAAAAAAAAgAAQAAQAEAAQAAAAgAAUAAQAEAAQAAAAgAAYAAQABAAAAAAAgAAcAAQAEAAQAAAAgAAgAAQAEAAQAAAAgAAkAAQAAAAAAAAAgAAoAAQAEAAQAAAAhAAEAAQAAAAAAAAAhAAIAAQAAAAAAAAAhAAMAAQADAAAAAAAhAAQAAQABAAAAAAAhAAUAAQAAAAAAAAAhAAYAAQAEAAQAAAAhAAcAAQAEAAQAAAAhAAgAAQABAAAAAAAhAAkAAQAEAAQAAAAhAAoAAQAEAAQAAAAiAAEAAQAEAAQAAAAiAAIAAQAAAAAAAAAiAAMAAQADAAAAAAAiAAQAAQAEAAQAAAAiAAUAAQAEAAQAAAAiAAYAAQAAAAAAAAAiAAcAAQAAAAAAAAAiAAgAAQAAAAAAAAAiAAkAAQABAAAAAAAiAAoAAQAAAAAAAAAjAAEAAQAEAAQAAAAjAAIAAQAAAAAAAAAjAAMAAQADAAAAAAAjAAQAAQAEAAQAAAAjAAUAAQAAAAAAAAAjAAYAAQAEAAQAAAAjAAcAAQAEAAQAAAAjAAgAAQAAAAAAAAAjAAkAAQAEAAQAAAAjAAoAAQABAAAAAAAkAAEAAQAAAAAAAAAkAAIAAQAAAAAAAAAkAAMAAQAEAAQAAAAkAAQAAQAAAAAAAAAkAAUAAQAAAAAAAAAkAAYAAQABAAAAAAAkAAcAAQAAAAAAAAAkAAgAAQABAAAAAAAkAAkAAQAAAAAAAAAkAAoAAQAEAAQAAAAlAAEAAQAEAAQAAAAlAAIAAQAEAAQAAAAlAAMAAQAEAAQAAAAlAAQAAQABAAEAAAAlAAUAAQABAAAAAAAlAAYAAQAAAAEAAAAlAAcAAQABAAAAAAAlAAgAAQAAAAAAAAAlAAkAAQAEAAQAAAAlAAoAAQAAAAAAAAAmAAEAAQABAAAAAAAmAAIAAQAAAAAAAAAmAAMAAQAEAAQAAAAmAAQAAQAAAAAAAAAmAAUAAQABAAEAAAAmAAYAAQAEAAQAAAAmAAcAAQABAAAAAAAmAAgAAQAAAAAAAAAmAAkAAQAEAAQAAAAmAAoAAQAEAAQAAAAnAAEAAQAEAAQAAAAnAAIAAQAEAAQAAAAnAAMAAQABAAAAAAAnAAQAAQABAAAAAAAnAAUAAQAAAAEAAAAnAAYAAQAEAAQAAAAnAAcAAQAEAAQAAAAnAAgAAQABAAAAAAAnAAkAAQAEAAQAAAAnAAoAAQAAAAAAAAAoAAEAAQAAAAAAAAAoAAIAAQAAAAAAAAAoAAMAAQAEAAQAAAAoAAQAAQAAAAAAAAAoAAUAAQABAAAAAAAoAAYAAQABAAAAAAAoAAcAAQACAAEAAAAoAAgAAQAAAAAAAAAoAAkAAQAAAAAAAAAoAAoAAQACAAAAAAApAAEAAQAEAAQAAAApAAIAAQAEAAQAAAApAAMAAQADAAAAAAApAAQAAQAAAAAAAAApAAUAAQABAAAAAAApAAYAAQABAAAAAAApAAcAAQAAAAAAAAApAAgAAQAAAAAAAAApAAkAAQAEAAQAAAApAAoAAQABAAEAAAAqAAEAAQAAAAAAAAAqAAIAAQAAAAAAAAAqAAMAAQACAAEAAAAqAAQAAQAAAAAAAAAqAAUAAQABAAAAAAAqAAYAAQABAAEAAAAqAAcAAQAAAAAAAAAqAAgAAQAAAAAAAAAqAAkAAQAAAAAAAAAqAAoAAQAAAAAAAAArAAEAAQAEAAQAAAArAAIAAQACAAEAAAArAAMAAQADAAAAAAArAAQAAQAEAAQAAAArAAUAAQABAAAAAAArAAYAAQAEAAQAAAArAAcAAQAEAAQAAAArAAgAAQAEAAQAAAArAAkAAQAEAAQAAAArAAoAAQAAAAAAAAAsAAEAAQAAAAAAAAAsAAIAAQAAAAAAAAAsAAMAAQAEAAQAAAAsAAQAAQAEAAQAAAAsAAUAAQAAAAAAAAAsAAYAAQAEAAQAAAAsAAcAAQAEAAQAAAAsAAgAAQAEAAQAAAAsAAkAAQAEAAQAAAAsAAoAAQAEAAQAAAAtAAEAAQAEAAQAAAAtAAIAAQAEAAQAAAAtAAMAAQABAAAAAAAtAAQAAQAEAAQAAAAtAAUAAQAEAAQAAAAtAAYAAQAAAAAAAAAtAAcAAQAEAAQAAAAtAAgAAQAEAAQAAAAtAAkAAQAAAAAAAAAtAAoAAQABAAAAAAAuAAEAAQABAAAAAAAuAAIAAQAEAAQAAAAuAAMAAQABAAEAAAAuAAQAAQABAAAAAAAuAAUAAQAEAAQAAAAuAAYAAQABAAAAAAAuAAcAAQACAAAAAAAuAAgAAQABAAAAAAAuAAkAAQABAAAAAAAuAAoAAQABAAAAAAA=")
+tile_set = ExtResource("2_ok2am")
+occlusion_enabled = false
+collision_enabled = false
+
+[node name="BackDecor" type="TileMapLayer" parent="." unique_id=302826564]
+z_index = -9
+position = Vector2(0, 22)
+tile_map_data = PackedByteArray("AAADAAYAAQADAAIAAAAIAAYAAQADAAIAAAANAAYAAQADAAIAAAAUAAYAAQADAAIAAAAGAAUAAQABAAIAAAARAAUAAQABAAMAAAAZAAYAAQADAAIAAAAeAAYAAQADAAIAAAAmAAYAAQADAAIAAAAsAAYAAQADAAIAAAAcAAUAAQABAAIAAAApAAUAAQABAAMAAAA=")
+tile_set = ExtResource("2_ok2am")
+occlusion_enabled = false
+collision_enabled = false
+
+[node name="Earth" type="TileMapLayer" parent="." unique_id=2124392507]
+modulate = Color(0.73, 0.69, 0.84, 1)
+tile_map_data = PackedByteArray("AAAAAP7/AgABAAAAAAAAAP//AgABAAAAAAAAAAAAAgAEAAQAAAAAAAEAAgABAAAAAAAAAAIAAgABAAAAAAAAAAMAAgAEAAQAAAAAAAkAAgAEAAQAAAAAAAoAAgABAAAAAAAAAAsAAgABAAAAAAAAAAwAAgAEAAQAAAAAAAQAAgABAAAAAAAAAAUAAgABAAAAAAAAAAYAAgAEAAQAAAAAAAcAAgABAAAAAAAAAAgAAgABAAAAAAABAP7/AgABAAAAAAABAP//AgAEAAQAAAABAAAAAgABAAAAAAABAAEAAgABAAAAAAABAAIAAgAEAAQAAAABAAMAAgABAAAAAAABAAkAAgABAAAAAAABAAoAAgABAAAAAAABAAsAAgAEAAQAAAABAAwAAgABAAAAAAACAP7/AgAEAAQAAAACAP//AgABAAAAAAACAAAAAgABAAAAAAACAAEAAgAEAAQAAAACAAIAAgABAAAAAAACAAMAAgABAAAAAAACAAkAAgABAAAAAAACAAoAAgAEAAQAAAACAAsAAgABAAAAAAACAAwAAgABAAAAAAADAP7/AgABAAAAAAADAP//AgABAAAAAAADAAAAAgAEAAQAAAADAAEAAgABAAAAAAADAAIAAgABAAAAAAADAAMAAgAEAAQAAAADAAkAAgAEAAQAAAADAAoAAgABAAAAAAADAAsAAgABAAAAAAADAAwAAgAEAAQAAAAEAP7/AgABAAAAAAAEAP//AgAEAAQAAAAEAAAAAgABAAAAAAAEAAEAAgABAAAAAAAEAAIAAgAEAAQAAAAEAAMAAgABAAAAAAAEAAkAAgABAAAAAAAEAAoAAgABAAAAAAAEAAsAAgAEAAQAAAAEAAwAAgABAAAAAAAFAP7/AgAEAAQAAAAFAP//AgABAAAAAAAFAAAAAgABAAAAAAAFAAEAAgAEAAQAAAAFAAIAAgABAAAAAAAFAAMAAgABAAAAAAAFAAkAAgABAAAAAAAFAAoAAgAEAAQAAAAFAAsAAgABAAAAAAAFAAwAAgABAAAAAAAGAP7/AgABAAAAAAAGAP//AgABAAAAAAAGAAAAAgAEAAQAAAAGAAEAAgABAAAAAAAGAAIAAgABAAAAAAAGAAMAAgAEAAQAAAAGAAkAAgAEAAQAAAAGAAoAAgABAAAAAAAGAAsAAgABAAAAAAAGAAwAAgAEAAQAAAAHAP7/AgABAAAAAAAHAP//AgAEAAQAAAAHAAAAAgABAAAAAAAHAAEAAgABAAAAAAAHAAIAAgAEAAQAAAAHAAMAAgABAAAAAAAHAAkAAgABAAAAAAAHAAoAAgABAAAAAAAHAAsAAgAEAAQAAAAHAAwAAgABAAAAAAAIAP7/AgAEAAQAAAAIAP//AgABAAAAAAAIAAAAAgABAAAAAAAIAAEAAgAEAAQAAAAIAAIAAgABAAAAAAAIAAMAAgABAAAAAAAIAAkAAgABAAAAAAAIAAoAAgAEAAQAAAAIAAsAAgABAAAAAAAIAAwAAgABAAAAAAAJAP7/AgABAAAAAAAJAP//AgABAAAAAAAJAAAAAgAEAAQAAAAJAAEAAgABAAAAAAAJAAIAAgABAAAAAAAJAAMAAgAEAAQAAAAJAAkAAgAEAAQAAAAJAAoAAgABAAAAAAAJAAsAAgABAAAAAAAJAAwAAgAEAAQAAAAKAP7/AgABAAAAAAAKAP//AgAEAAQAAAAKAAAAAgABAAAAAAAKAAEAAgABAAAAAAAKAAIAAgAEAAQAAAAKAAMAAgABAAAAAAAKAAkAAgABAAAAAAAKAAoAAgABAAAAAAAKAAsAAgAEAAQAAAAKAAwAAgABAAAAAAALAP7/AgAEAAQAAAALAP//AgABAAAAAAALAAAAAgABAAAAAAALAAEAAgAEAAQAAAALAAIAAgABAAAAAAALAAMAAgABAAAAAAALAAkAAgABAAAAAAALAAoAAgAEAAQAAAALAAsAAgABAAAAAAALAAwAAgABAAAAAAAMAP7/AgABAAAAAAAMAP//AgABAAAAAAAMAAAAAgAEAAQAAAAMAAEAAgABAAAAAAAMAAIAAgABAAAAAAAMAAMAAgAEAAQAAAAMAAkAAgAEAAQAAAAMAAoAAgABAAAAAAAMAAsAAgABAAAAAAAMAAwAAgAEAAQAAAANAP7/AgABAAAAAAANAP//AgAEAAQAAAANAAAAAgABAAAAAAANAAEAAgABAAAAAAANAAIAAgAEAAQAAAANAAMAAgABAAAAAAANAAkAAgABAAAAAAANAAoAAgABAAAAAAANAAsAAgAEAAQAAAANAAwAAgABAAAAAAAOAP7/AgAEAAQAAAAOAP//AgABAAAAAAAOAAAAAgABAAAAAAAOAAEAAgAEAAQAAAAOAAIAAgABAAAAAAAOAAMAAgABAAAAAAAOAAkAAgABAAAAAAAOAAoAAgAEAAQAAAAOAAsAAgABAAAAAAAOAAwAAgABAAAAAAAPAP7/AgABAAAAAAAPAP//AgABAAAAAAAPAAAAAgAEAAQAAAAPAAEAAgABAAAAAAAPAAIAAgABAAAAAAAPAAMAAgAEAAQAAAAPAAkAAgAEAAQAAAAPAAoAAgABAAAAAAAPAAsAAgABAAAAAAAPAAwAAgAEAAQAAAAQAP7/AgABAAAAAAAQAP//AgAEAAQAAAAQAAAAAgABAAAAAAAQAAEAAgABAAAAAAAQAAIAAgAEAAQAAAAQAAMAAgABAAAAAAAQAAkAAgABAAAAAAAQAAoAAgABAAAAAAAQAAsAAgAEAAQAAAAQAAwAAgABAAAAAAARAP7/AgAEAAQAAAARAP//AgABAAAAAAARAAAAAgABAAAAAAARAAEAAgAEAAQAAAARAAIAAgABAAAAAAARAAMAAgABAAAAAAARAAkAAgABAAAAAAARAAoAAgAEAAQAAAARAAsAAgABAAAAAAARAAwAAgABAAAAAAASAP7/AgABAAAAAAASAP//AgABAAAAAAASAAAAAgAEAAQAAAASAAEAAgABAAAAAAASAAIAAgABAAAAAAASAAMAAgAEAAQAAAASAAkAAgAEAAQAAAASAAoAAgABAAAAAAASAAsAAgABAAAAAAASAAwAAgAEAAQAAAATAP7/AgABAAAAAAATAP//AgAEAAQAAAATAAAAAgABAAAAAAATAAEAAgABAAAAAAATAAIAAgAEAAQAAAATAAMAAgABAAAAAAATAAkAAgABAAAAAAATAAoAAgABAAAAAAATAAsAAgAEAAQAAAATAAwAAgABAAAAAAAUAP7/AgAEAAQAAAAUAP//AgABAAAAAAAUAAAAAgABAAAAAAAUAAEAAgAEAAQAAAAUAAIAAgABAAAAAAAUAAMAAgABAAAAAAAUAAkAAgABAAAAAAAUAAoAAgAEAAQAAAAUAAsAAgABAAAAAAAUAAwAAgABAAAAAAAVAP7/AgABAAAAAAAVAP//AgABAAAAAAAVAAAAAgAEAAQAAAAVAAEAAgABAAAAAAAVAAIAAgABAAAAAAAVAAMAAgAEAAQAAAAVAAkAAgAEAAQAAAAVAAoAAgABAAAAAAAVAAsAAgABAAAAAAAVAAwAAgAEAAQAAAAWAP7/AgABAAAAAAAWAP//AgAEAAQAAAAWAAAAAgABAAAAAAAWAAEAAgABAAAAAAAWAAIAAgAEAAQAAAAWAAMAAgABAAAAAAAWAAkAAgABAAAAAAAWAAoAAgABAAAAAAAWAAsAAgAEAAQAAAAWAAwAAgABAAAAAAAWAAQAAgABAAAAAAAWAAUAAgAEAAQAAAAXAP7/AgAEAAQAAAAXAP//AgABAAAAAAAXAAAAAgABAAAAAAAXAAEAAgAEAAQAAAAXAAIAAgABAAAAAAAXAAMAAgABAAAAAAAXAAkAAgABAAAAAAAXAAoAAgAEAAQAAAAXAAsAAgABAAAAAAAXAAwAAgABAAAAAAAYAP7/AgABAAAAAAAYAP//AgABAAAAAAAYAAAAAgAEAAQAAAAYAAEAAgABAAAAAAAYAAIAAgABAAAAAAAYAAMAAgAEAAQAAAAYAAkAAgAEAAQAAAAYAAoAAgABAAAAAAAYAAsAAgABAAAAAAAYAAwAAgAEAAQAAAAZAP7/AgABAAAAAAAZAP//AgAEAAQAAAAZAAAAAgABAAAAAAAZAAEAAgABAAAAAAAZAAIAAgAEAAQAAAAZAAMAAgABAAAAAAAZAAkAAgABAAAAAAAZAAoAAgABAAAAAAAZAAsAAgAEAAQAAAAZAAwAAgABAAAAAAAaAP7/AgAEAAQAAAAaAP//AgABAAAAAAAaAAAAAgABAAAAAAAaAAEAAgAEAAQAAAAaAAIAAgABAAAAAAAaAAMAAgABAAAAAAAaAAkAAgABAAAAAAAaAAoAAgAEAAQAAAAaAAsAAgABAAAAAAAaAAwAAgABAAAAAAAbAP7/AgABAAAAAAAbAP//AgABAAAAAAAbAAAAAgAEAAQAAAAbAAEAAgABAAAAAAAbAAIAAgABAAAAAAAbAAMAAgAEAAQAAAAbAAkAAgAEAAQAAAAbAAoAAgABAAAAAAAbAAsAAgABAAAAAAAbAAwAAgAEAAQAAAAcAP7/AgABAAAAAAAcAP//AgAEAAQAAAAcAAAAAgABAAAAAAAcAAEAAgABAAAAAAAcAAIAAgAEAAQAAAAcAAMAAgABAAAAAAAcAAkAAgABAAAAAAAcAAoAAgABAAAAAAAcAAsAAgAEAAQAAAAcAAwAAgABAAAAAAAdAP7/AgAEAAQAAAAdAP//AgABAAAAAAAdAAAAAgABAAAAAAAdAAEAAgAEAAQAAAAdAAIAAgABAAAAAAAdAAMAAgABAAAAAAAdAAkAAgABAAAAAAAdAAoAAgAEAAQAAAAdAAsAAgABAAAAAAAdAAwAAgABAAAAAAAeAP7/AgABAAAAAAAeAP//AgABAAAAAAAeAAAAAgAEAAQAAAAeAAEAAgABAAAAAAAeAAIAAgABAAAAAAAeAAMAAgAEAAQAAAAeAAkAAgAEAAQAAAAeAAoAAgABAAAAAAAeAAsAAgABAAAAAAAeAAwAAgAEAAQAAAAfAP7/AgABAAAAAAAfAP//AgAEAAQAAAAfAAAAAgABAAAAAAAfAAEAAgABAAAAAAAfAAIAAgAEAAQAAAAfAAMAAgABAAAAAAAfAAkAAgABAAAAAAAfAAoAAgABAAAAAAAfAAsAAgAEAAQAAAAfAAwAAgABAAAAAAAgAP7/AgAEAAQAAAAgAP//AgABAAAAAAAgAAAAAgABAAAAAAAgAAEAAgAEAAQAAAAgAAIAAgABAAAAAAAgAAMAAgABAAAAAAAgAAkAAgABAAAAAAAgAAoAAgAEAAQAAAAgAAsAAgABAAAAAAAgAAwAAgABAAAAAAAhAP7/AgABAAAAAAAhAP//AgABAAAAAAAhAAAAAgAEAAQAAAAhAAEAAgABAAAAAAAhAAIAAgABAAAAAAAhAAMAAgAEAAQAAAAhAAkAAgAEAAQAAAAhAAoAAgABAAAAAAAhAAsAAgABAAAAAAAhAAwAAgAEAAQAAAAiAP7/AgABAAAAAAAiAP//AgAEAAQAAAAiAAAAAgABAAAAAAAiAAEAAgABAAAAAAAiAAIAAgAEAAQAAAAiAAMAAgABAAAAAAAiAAkAAgABAAAAAAAiAAoAAgABAAAAAAAiAAsAAgAEAAQAAAAiAAwAAgABAAAAAAAjAP7/AgAEAAQAAAAjAP//AgABAAAAAAAjAAAAAgABAAAAAAAjAAEAAgAEAAQAAAAjAAIAAgABAAAAAAAjAAMAAgABAAAAAAAjAAkAAgABAAAAAAAjAAoAAgAEAAQAAAAjAAsAAgABAAAAAAAjAAwAAgABAAAAAAAkAP7/AgABAAAAAAAkAP//AgABAAAAAAAkAAAAAgAEAAQAAAAkAAEAAgABAAAAAAAkAAIAAgABAAAAAAAkAAMAAgAEAAQAAAAkAAkAAgAEAAQAAAAkAAoAAgABAAAAAAAkAAsAAgABAAAAAAAkAAwAAgAEAAQAAAAlAP7/AgABAAAAAAAlAP//AgAEAAQAAAAlAAAAAgABAAAAAAAlAAEAAgABAAAAAAAlAAIAAgAEAAQAAAAlAAMAAgABAAAAAAAlAAkAAgABAAAAAAAlAAoAAgABAAAAAAAlAAsAAgAEAAQAAAAlAAwAAgABAAAAAAAmAP7/AgAEAAQAAAAmAP//AgABAAAAAAAmAAAAAgABAAAAAAAmAAEAAgAEAAQAAAAmAAIAAgABAAAAAAAmAAMAAgABAAAAAAAmAAkAAgABAAAAAAAmAAoAAgAEAAQAAAAmAAsAAgABAAAAAAAmAAwAAgABAAAAAAAnAP7/AgABAAAAAAAnAP//AgABAAAAAAAnAAAAAgAEAAQAAAAnAAEAAgABAAAAAAAnAAIAAgABAAAAAAAnAAMAAgAEAAQAAAAnAAkAAgAEAAQAAAAnAAoAAgABAAAAAAAnAAsAAgABAAAAAAAnAAwAAgAEAAQAAAAoAP7/AgABAAAAAAAoAP//AgAEAAQAAAAoAAAAAgABAAAAAAAoAAEAAgABAAAAAAAoAAIAAgAEAAQAAAAoAAMAAgABAAAAAAAoAAkAAgABAAAAAAAoAAoAAgABAAAAAAAoAAsAAgAEAAQAAAAoAAwAAgABAAAAAAApAP7/AgAEAAQAAAApAP//AgABAAAAAAApAAAAAgABAAAAAAApAAEAAgAEAAQAAAApAAIAAgABAAAAAAApAAMAAgABAAAAAAApAAkAAgABAAAAAAApAAoAAgAEAAQAAAApAAsAAgABAAAAAAApAAwAAgABAAAAAAAqAP7/AgABAAAAAAAqAP//AgABAAAAAAAqAAAAAgAEAAQAAAAqAAEAAgABAAAAAAAqAAIAAgABAAAAAAAqAAMAAgAEAAQAAAAqAAkAAgAEAAQAAAAqAAoAAgABAAAAAAAqAAsAAgABAAAAAAAqAAwAAgAEAAQAAAArAP7/AgABAAAAAAArAP//AgAEAAQAAAArAAAAAgABAAAAAAArAAEAAgABAAAAAAArAAIAAgAEAAQAAAArAAMAAgABAAAAAAArAAkAAgABAAAAAAArAAoAAgABAAAAAAArAAsAAgAEAAQAAAArAAwAAgABAAAAAAAsAP7/AgAEAAQAAAAsAP//AgABAAAAAAAsAAAAAgABAAAAAAAsAAEAAgAEAAQAAAAsAAIAAgABAAAAAAAsAAMAAgABAAAAAAAsAAkAAgABAAAAAAAsAAoAAgAEAAQAAAAsAAsAAgABAAAAAAAsAAwAAgABAAAAAAAtAP7/AgABAAAAAAAtAP//AgABAAAAAAAtAAAAAgAEAAQAAAAtAAEAAgABAAAAAAAtAAIAAgABAAAAAAAtAAMAAgAEAAQAAAAtAAkAAgAEAAQAAAAtAAoAAgABAAAAAAAtAAsAAgABAAAAAAAtAAwAAgAEAAQAAAAuAP7/AgABAAAAAAAuAP//AgAEAAQAAAAuAAAAAgABAAAAAAAuAAEAAgABAAAAAAAuAAIAAgAEAAQAAAAuAAMAAgABAAAAAAAuAAkAAgABAAAAAAAuAAoAAgABAAAAAAAuAAsAAgAEAAQAAAAuAAwAAgABAAAAAAAuAAQAAgABAAAAAAAuAAUAAgAEAAQAAAAuAAYAAgABAAAAAAAuAAcAAgABAAAAAAAuAAgAAgAEAAQAAAA=")
+tile_set = ExtResource("2_ok2am")
+
+[node name="Ceiling" type="TileMapLayer" parent="." unique_id=1573772396]
+position = Vector2(0, -4)
+tile_map_data = PackedByteArray("AAABAAQAAAABAAMAAAACAAQAAAAEAAMAAAADAAQAAAAFAAMAAAAEAAQAAAAFAAMAAAAFAAQAAAAEAAMAAAAGAAQAAAAGAAMAAAAHAAQAAAAFAAMAAAAIAAQAAAABAAMAAAAJAAQAAAABAAMAAAAKAAQAAAABAAMAAAALAAQAAAAGAAMAAAAMAAQAAAAFAAMAAAANAAQAAAAEAAMAAAAOAAQAAAAGAAMAAAAPAAQAAAABAAMAAAAQAAQAAAABAAMAAAARAAQAAAABAAMAAAASAAQAAAAEAAMAAAATAAQAAAABAAMAAAAUAAQAAAAEAAMAAAAVAAQAAAABAAMAAAAXAAQAAAABAAMAAAAYAAQAAAAFAAMAAAAZAAQAAAAEAAMAAAAaAAQAAAAFAAMAAAAbAAQAAAABAAMAAAAcAAQAAAADAAMAAAAdAAQAAAABAAMAAAAeAAQAAAADAAMAAAAfAAQAAAABAAMAAAAgAAQAAAADAAMAAAAhAAQAAAABAAMAAAAiAAQAAAAGAAMAAAAjAAQAAAAFAAMAAAAkAAQAAAADAAMAAAAlAAQAAAAFAAMAAAAmAAQAAAADAAMAAAAnAAQAAAAEAAMAAAAoAAQAAAABAAMAAAApAAQAAAAFAAMAAAAqAAQAAAABAAMAAAArAAQAAAAGAAMAAAAsAAQAAAADAAMAAAAtAAQAAAADAAMAAAA=")
+tile_set = ExtResource("2_ok2am")
+
+[node name="Ground" type="TileMapLayer" parent="." unique_id=435677584]
+tile_map_data = PackedByteArray("AAABAAgAAAAAAAAAAAACAAgAAAACAAAAAAADAAgAAAAAAAAAAAAEAAgAAAAAAAAAAAAFAAgAAAAAAAAAAAAGAAgAAAACAAAAAAAHAAgAAAACAAAAAAAIAAgAAAABAAAAAAAJAAgAAAACAAAAAAAKAAgAAAACAAAAAAALAAgAAAAAAAAAAAAMAAgAAAAAAAAAAAANAAgAAAABAAAAAAAOAAgAAAAAAAAAAAAPAAgAAAAAAAAAAAAQAAgAAAACAAAAAAARAAgAAAACAAAAAAASAAgAAAAAAAAAAAATAAgAAAAAAAAAAAAUAAgAAAACAAAAAAAVAAgAAAABAAAAAAAWAAgAAAAAAAAAAAAXAAgAAAABAAAAAAAYAAgAAAACAAAAAAAZAAgAAAACAAAAAAAaAAgAAAACAAAAAAAbAAgAAAACAAAAAAAcAAgAAAACAAAAAAAdAAgAAAAAAAAAAAAeAAgAAAAAAAAAAAAfAAgAAAAAAAAAAAAgAAgAAAABAAAAAAAhAAgAAAACAAAAAAAiAAgAAAACAAAAAAAjAAgAAAACAAAAAAAkAAgAAAABAAAAAAAlAAgAAAABAAAAAAAmAAgAAAAAAAAAAAAnAAgAAAAAAAAAAAAoAAgAAAABAAAAAAApAAgAAAAAAAAAAAAqAAgAAAAAAAAAAAArAAgAAAAAAAAAAAAsAAgAAAACAAAAAAAtAAgAAAABAAAAAAA=")
+tile_set = ExtResource("2_ok2am")
+
+[node name="GroundHalf" type="TileMapLayer" parent="." unique_id=293391019]
+position = Vector2(0, 32)
+tile_set = ExtResource("2_ok2am")
+
+[node name="R1" type="Node2D" parent="." unique_id=1884036520 instance=ExtResource("3_p40h8")]
+script = ExtResource("4_cgswp")
+room_id = "cistern.r1"
+title = "The First Pool"
+bounds = Rect2(0, 128, 1472, 448)
+entry_spawn = Vector2(160, 530)
+act = "I"
+act_title = "The First Pool"
+act_subtitle = "The Long Stair  ·  The Drowned Cistern"
+objective = "Open the gate."
+page_ids = PackedStringArray()
+mood_highlight = Color(0.94, 1.04, 1.12, 1)
+mood_fog = Color(0.22, 0.36, 0.52, 1)
+
+[node name="Acoustics" type="Area2D" parent="R1" unique_id=1965842588]
+position = Vector2(0, 128)
+script = ExtResource("5_ckiqd")
+size = Vector2(1472, 448)
+
+[node name="Waymark1" type="Node2D" parent="R1" unique_id=1595038310 instance=ExtResource("6_rx8yr")]
+position = Vector2(480, 458)
+script = ExtResource("7_ojmwm")
+
+[node name="Waymark2" type="Node2D" parent="R1" unique_id=582429228 instance=ExtResource("6_rx8yr")]
+position = Vector2(704, 458)
+script = ExtResource("7_ojmwm")
+
+[node name="Waymark3" type="Node2D" parent="R1" unique_id=1019621605 instance=ExtResource("6_rx8yr")]
+position = Vector2(1305.6, 458)
+script = ExtResource("7_ojmwm")
+
+[node name="Shrine" type="Area2D" parent="R1" unique_id=535591314 instance=ExtResource("8_xwei0")]
+position = Vector2(160, 534)
+script = ExtResource("9_tnaif")
+checkpoint_id = "cistern.cp.start"
+
+[node name="KindleFlame" type="Node2D" parent="R1" unique_id=1877807950 instance=ExtResource("10_f433o")]
+position = Vector2(288, 534)
+script = ExtResource("11_rl11w")
+
+[node name="TabletIce" type="Node2D" parent="R1" unique_id=61139665 instance=ExtResource("12_ci1vm")]
+position = Vector2(352, 534)
+script = ExtResource("13_ygp8s")
+fragment = &"ice"
+text = "Cold that holds its shape."
+
+[node name="TabletFreeze" type="Node2D" parent="R1" unique_id=102474042 instance=ExtResource("12_ci1vm")]
+position = Vector2(432, 534)
+script = ExtResource("13_ygp8s")
+fragment = &"freeze"
+text = "What is held still is heavy."
+
+[node name="TabletLong" type="Node2D" parent="R1" unique_id=996109835 instance=ExtResource("12_ci1vm")]
+position = Vector2(512, 534)
+script = ExtResource("13_ygp8s")
+fragment = &"long"
+text = "Cold reaches further than it seems."
+
+[node name="PoolCube" type="Node2D" parent="R1" unique_id=1409168488 instance=ExtResource("14_bahll")]
+position = Vector2(672, 534)
+script = ExtResource("15_ceceq")
+display_name = "Pool Cube"
+start_recipe = "wind/push/right/normal"
+carryable = false
+locked_slots = 4
+
+[node name="SlimePlate" type="Area2D" parent="R1" unique_id=1565821418 instance=ExtResource("16_3m78w")]
+position = Vector2(928, 534)
+script = ExtResource("17_uy8pq")
+width = 56.0
+stone_only = true
+
+[node name="Slime" type="CharacterBody2D" parent="R1" unique_id=461529815 groups=["enemy"] instance=ExtResource("18_vspy7")]
+position = Vector2(928, 530)
+collision_mask = 2
+script = ExtResource("19_74cn4")
+damage_number_scene = ExtResource("20_3jgc4")
+max_health = 10
+detection_range = 0.0
+home_radius = 1.0
+investigate_time = 9.0
+respawn_on_room_reset = true
+required = true
+required_reason = "The slime that had to hold the plate has been killed, and only a frozen creature can press it."
+required_until_flag = "cistern.r1.solved"
+
+[node name="Glow" type="PointLight2D" parent="R1/Slime" unique_id=1377768377]
+position = Vector2(0, -10)
+color = Color(0.45, 1, 0.55, 1)
+energy = 0.55
+texture = SubResource("GradientTexture2D_y8k1s")
+height = 40.0
+
+[node name="PoolGate" type="Node2D" parent="R1" unique_id=1340211129 instance=ExtResource("21_wixub")]
+position = Vector2(1248, 534)
+script = ExtResource("22_7ov7m")
+height = 150.0
+
+[node name="PlateToGate" type="Node2D" parent="R1" unique_id=1399713404 node_paths=PackedStringArray("sources", "targets") instance=ExtResource("23_jrvrn")]
+z_index = -5
+script = ExtResource("24_j1lis")
+sources = [NodePath("../SlimePlate")]
+targets = [NodePath("../PoolGate")]
+persist_id = "cistern.r1.solved"
+reveal_target = true
+channel_y = 440.0
+
+[node name="Step1" type="Node" parent="R1" unique_id=625231980]
+script = ExtResource("25_qodap")
+label = "Freeze learned"
+condition = 6
+flag = "rune.frag.freeze"
+
+[node name="Step2" type="Node" parent="R1" unique_id=509735521 node_paths=PackedStringArray("target")]
+script = ExtResource("25_qodap")
+label = "The frozen slime holds the plate: the gate opens"
+condition = 2
+target = NodePath("../PoolGate")
+
+[node name="HintStone" type="Node2D" parent="R1" unique_id=1062255740 node_paths=PackedStringArray("focus_nodes") instance=ExtResource("26_xdu0u")]
+position = Vector2(244, 534)
+script = ExtResource("27_srsvg")
+hints = PackedStringArray("The plate wants stone, and the slime on it is not stone. Yet.", "A frozen creature is as heavy as stone. The cube\'s chill is too short to reach the slime.", "Read the tablets, inscribe Ice, Freeze and Long on the cube and switch it on, then walk through the gate before the slime thaws.")
+focus_nodes = [NodePath("../PoolCube"), NodePath("../SlimePlate"), NodePath("../Slime"), NodePath("../TabletIce"), NodePath("../TabletFreeze"), NodePath("../TabletLong")]
+
+[node name="Decor" type="Node2D" parent="R1" unique_id=1505383106]
+
+[node name="Torch3_6" type="PointLight2D" parent="R1/Decor" unique_id=1181303131 instance=ExtResource("28_y4yw2")]
+position = Vector2(224, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="Torch8_6" type="PointLight2D" parent="R1/Decor" unique_id=1348303279 instance=ExtResource("28_y4yw2")]
+position = Vector2(544, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="Torch13_6" type="PointLight2D" parent="R1/Decor" unique_id=1380373508 instance=ExtResource("28_y4yw2")]
+position = Vector2(864, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="Torch20_6" type="PointLight2D" parent="R1/Decor" unique_id=1236764318 instance=ExtResource("28_y4yw2")]
+position = Vector2(1312, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="SkullPile4" type="Sprite2D" parent="R1/Decor" unique_id=384815711]
+position = Vector2(1312, 534)
+texture = ExtResource("30_sq1y2")
+centered = false
+offset = Vector2(-64, -64)
+
+[node name="R2" type="Node2D" parent="." unique_id=1676091380 instance=ExtResource("3_p40h8")]
+script = ExtResource("4_cgswp")
+room_id = "cistern.r2"
+title = "The Sluice"
+bounds = Rect2(1408, 128, 1600, 448)
+entry_spawn = Vector2(1504, 530)
+objective = "Ring the Tide Bell."
+page_ids = PackedStringArray()
+mood_highlight = Color(0.94, 1.04, 1.12, 1)
+mood_fog = Color(0.22, 0.36, 0.52, 1)
+
+[node name="Acoustics" type="Area2D" parent="R2" unique_id=2037642517]
+position = Vector2(1408, 128)
+script = ExtResource("5_ckiqd")
+size = Vector2(1600, 448)
+
+[node name="Waymark1" type="Node2D" parent="R2" unique_id=1671884070 instance=ExtResource("6_rx8yr")]
+position = Vector2(1888, 458)
+script = ExtResource("7_ojmwm")
+
+[node name="Waymark2" type="Node2D" parent="R2" unique_id=604059643 instance=ExtResource("6_rx8yr")]
+position = Vector2(2176, 458)
+script = ExtResource("7_ojmwm")
+
+[node name="Shrine" type="Area2D" parent="R2" unique_id=617273422 instance=ExtResource("8_xwei0")]
+position = Vector2(1568, 534)
+script = ExtResource("9_tnaif")
+checkpoint_id = "cistern.cp.sluice"
+
+[node name="KindleFlame" type="Node2D" parent="R2" unique_id=2034187166 instance=ExtResource("10_f433o")]
+position = Vector2(1696, 534)
+script = ExtResource("11_rl11w")
+
+[node name="TabletPersist" type="Node2D" parent="R2" unique_id=1852665656 instance=ExtResource("12_ci1vm")]
+position = Vector2(1824, 534)
+script = ExtResource("13_ygp8s")
+fragment = &"persist"
+text = "The word that made the silence."
+
+[node name="SluiceCube" type="Node2D" parent="R2" unique_id=784074819 instance=ExtResource("14_bahll")]
+position = Vector2(2144, 534)
+script = ExtResource("15_ceceq")
+display_name = "Sluice Cube"
+start_recipe = "wind/push/right/normal"
+carryable = false
+locked_slots = 4
+
+[node name="PlateA" type="Area2D" parent="R2" unique_id=433750714 instance=ExtResource("16_3m78w")]
+position = Vector2(2350, 534)
+script = ExtResource("17_uy8pq")
+width = 64.0
+stone_only = true
+
+[node name="PlateB" type="Area2D" parent="R2" unique_id=935357481 instance=ExtResource("16_3m78w")]
+position = Vector2(2420, 534)
+script = ExtResource("17_uy8pq")
+width = 64.0
+stone_only = true
+
+[node name="SlimeA" type="CharacterBody2D" parent="R2" unique_id=630904546 groups=["enemy"] instance=ExtResource("18_vspy7")]
+position = Vector2(2350, 530)
+collision_mask = 2
+script = ExtResource("19_74cn4")
+damage_number_scene = ExtResource("20_3jgc4")
+max_health = 10
+detection_range = 0.0
+home_radius = 1.0
+investigate_time = 9.0
+respawn_on_room_reset = true
+required = true
+required_reason = "A slime that had to hold a plate has been killed, and only frozen creatures can press them."
+required_until_flag = "cistern.r2.solved"
+
+[node name="Glow" type="PointLight2D" parent="R2/SlimeA" unique_id=1076555019]
+position = Vector2(0, -10)
+color = Color(0.45, 1, 0.55, 1)
+energy = 0.55
+texture = SubResource("GradientTexture2D_y8k1s")
+height = 40.0
+
+[node name="SlimeB" type="CharacterBody2D" parent="R2" unique_id=625054027 groups=["enemy"] instance=ExtResource("18_vspy7")]
+position = Vector2(2420, 530)
+collision_mask = 2
+script = ExtResource("19_74cn4")
+damage_number_scene = ExtResource("20_3jgc4")
+max_health = 10
+detection_range = 0.0
+home_radius = 1.0
+investigate_time = 9.0
+respawn_on_room_reset = true
+required = true
+required_reason = "A slime that had to hold a plate has been killed, and only frozen creatures can press them."
+required_until_flag = "cistern.r2.solved"
+
+[node name="Glow" type="PointLight2D" parent="R2/SlimeB" unique_id=700440189]
+position = Vector2(0, -10)
+color = Color(0.45, 1, 0.55, 1)
+energy = 0.55
+texture = SubResource("GradientTexture2D_y8k1s")
+height = 40.0
+
+[node name="SluiceGate" type="Node2D" parent="R2" unique_id=140229009 instance=ExtResource("21_wixub")]
+position = Vector2(2656, 534)
+script = ExtResource("22_7ov7m")
+height = 150.0
+
+[node name="PlatesToGate" type="Node2D" parent="R2" unique_id=1858466310 node_paths=PackedStringArray("sources", "targets") instance=ExtResource("23_jrvrn")]
+z_index = -5
+script = ExtResource("24_j1lis")
+sources = [NodePath("../PlateA"), NodePath("../PlateB")]
+targets = [NodePath("../SluiceGate")]
+hold_time = 0.5
+persist_id = "cistern.r2.solved"
+reveal_target = true
+channel_y = 440.0
+symbol = 2
+
+[node name="GreatBell" type="Node2D" parent="R2" unique_id=194650394 instance=ExtResource("31_yscat")]
+position = Vector2(2784, 414)
+script = ExtResource("32_bdmoq")
+tolls = 2
+announce = "The Tide Bell rings out."
+announce_sub = "Water runs again through every channel."
+
+[node name="Step1" type="Node" parent="R2" unique_id=425074306 node_paths=PackedStringArray("target")]
+script = ExtResource("25_qodap")
+label = "Both slimes frozen on their plates: the gate opens"
+condition = 2
+target = NodePath("../SluiceGate")
+
+[node name="Step2" type="Node" parent="R2" unique_id=558266182 node_paths=PackedStringArray("target")]
+script = ExtResource("25_qodap")
+label = "The Tide Bell rings"
+target = NodePath("../GreatBell")
+
+[node name="HintStone" type="Node2D" parent="R2" unique_id=272327018 node_paths=PackedStringArray("focus_nodes") instance=ExtResource("26_xdu0u")]
+position = Vector2(1596, 534)
+script = ExtResource("27_srsvg")
+hints = PackedStringArray("Two plates, two slimes, one cube. The gate wants both held at once.", "A cold that reaches further is Long. Both slimes are inside one Long chill, but only just.", "Inscribe Ice, Freeze and Long on the cube, switch it on and go through the gate before the cold lets go (six seconds).")
+focus_nodes = [NodePath("../SluiceCube"), NodePath("../PlateA"), NodePath("../PlateB"), NodePath("../SlimeA"), NodePath("../SlimeB")]
+
+[node name="Decor" type="Node2D" parent="R2" unique_id=1227299876]
+
+[node name="Torch25_6" type="PointLight2D" parent="R2/Decor" unique_id=512934006 instance=ExtResource("28_y4yw2")]
+position = Vector2(1632, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="Torch30_6" type="PointLight2D" parent="R2/Decor" unique_id=111812775 instance=ExtResource("28_y4yw2")]
+position = Vector2(1952, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="Torch38_6" type="PointLight2D" parent="R2/Decor" unique_id=1747640469 instance=ExtResource("28_y4yw2")]
+position = Vector2(2464, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="Torch44_6" type="PointLight2D" parent="R2/Decor" unique_id=1394736949 instance=ExtResource("28_y4yw2")]
+position = Vector2(2848, 420)
+color = Color(0.42, 0.6, 1, 1)
+energy = 1.3
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.92)
+shadow_filter = 1
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 2.1
+height = 40.0
+script = ExtResource("29_1j7fb")
+base_energy = 1.3
+
+[node name="SkullPile4" type="Sprite2D" parent="R2/Decor" unique_id=2083552959]
+position = Vector2(2848, 534)
+texture = ExtResource("30_sq1y2")
+centered = false
+offset = Vector2(-64, -64)
+
+[node name="Atmosphere" type="Node2D" parent="." unique_id=419910061]
+script = ExtResource("33_f8oiq")
+wall_path = NodePath("../Background")
+decor_path = NodePath("../BackDecor")
+breaches = Array[Rect2i]([Rect2i(4, 4, 3, 2), Rect2i(16, 4, 3, 2), Rect2i(26, 4, 3, 2), Rect2i(40, 4, 3, 2)])
+extra_shafts = PackedVector2Array()
+reference_center = Vector2(704, 400)
+seed = 13
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=973951145 node_paths=PackedStringArray("hurtbox") groups=["player"] instance=ExtResource("34_4rfei")]
+z_index = 1
+position = Vector2(380, 530)
+collision_mask = 2
+script = ExtResource("35_onpa4")
+fireball_scene = ExtResource("36_g7fv0")
+hurtbox = NodePath("Hurtbox")
+
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=377851154]
+zoom = Vector2(2, 2)
+script = ExtResource("37_rplrl")
+bounds = Rect2(0, 128, 1472, 448)
+
+[node name="PlayerLight" type="PointLight2D" parent="Player" unique_id=322199010]
+position = Vector2(0, -20)
+color = Color(0.78, 0.72, 1, 1)
+energy = 1.15
+texture = SubResource("GradientTexture2D_6p70f")
+texture_scale = 1.45
+height = 40.0
+
+[node name="PostFX" type="CanvasLayer" parent="." unique_id=1414462365]
+script = ExtResource("38_csxvk")
+
+[node name="Screen" type="ColorRect" parent="PostFX" unique_id=105756775]
+material = SubResource("ShaderMaterial_y3mn7")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1164875932 groups=["gameplay_ui", "hud"] instance=ExtResource("40_puhax")]
+script = ExtResource("41_k5clp")
+
+[node name="AmmoUI" type="CanvasLayer" parent="." unique_id=1170242058 groups=["gameplay_ui"] instance=ExtResource("42_wfybs")]
+script = ExtResource("43_c0xv0")
+
+[node name="DeathUI" type="CanvasLayer" parent="." unique_id=1955869174]
+layer = 2
+
+[node name="DeathScreen" type="Control" parent="DeathUI" unique_id=905570687 groups=["death_screen"] instance=ExtResource("44_y1i30")]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("45_8v678")
+
+[node name="PauseMenu" type="CanvasLayer" parent="." unique_id=1942693163]
+script = ExtResource("46_x5oei")
+
+[node name="RuneManager" type="Node2D" parent="." unique_id=964715483 instance=ExtResource("47_6ueo1")]
+script = ExtResource("48_5jgck")
+starting_fragments = PackedStringArray("wind", "push", "left", "normal")

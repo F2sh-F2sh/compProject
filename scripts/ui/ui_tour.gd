@@ -1,0 +1,281 @@
+class_name UiTour
+extends CanvasLayer
+
+## A short, one-time look at one part of the screen: the game pauses, the rest
+## of the view dims, a frame marks the part being explained and a card says
+## what it is. Space, Enter or a click moves to the next card; Esc closes it.
+## Each tour is shown once per save (flag "ui.tour.<id>").
+##
+## The tours: "basics" (health, the Esc menu), "fire" (mana, the spell slots),
+## "echo" (the Echo tag), "objective" (the goal card) and "runes" (how rune
+## cubes are edited). Rooms and shrines name the tour they play (`explainer`,
+## `tour`). Tests switch it off with `UiTour.enabled = false`.
+
+signal finished
+
+const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const INK := Color("e4ddf2")
+const DIM := Color("9c92b8")
+const FRAME := Color(0.88, 0.85, 0.94)
+
+## Off in the automated tests, which would otherwise be paused by it.
+static var enabled := true
+static var current: UiTour
+
+var id := ""
+var steps: Array = []
+var index := -1
+var is_open := false
+
+var _was_paused := false
+var _dim: Array[ColorRect] = []
+var _frame: Panel
+var _card: PanelContainer
+var _eyebrow: Label
+var _title: Label
+var _text: Label
+var _hint: Label
+var _cooldown := 0.0
+
+
+## Plays a tour the first time only (or always with `force`). Returns it, or
+## null when it is off, already seen or unknown.
+static func play(host: Node, tour_id: String, force := false) -> UiTour:
+	if (not enabled and not force) or is_instance_valid(current):
+		return null
+	var flag := "ui.tour." + tour_id
+	if GameState.has_flag(flag) and not force:
+		return null
+	var list := steps_for(tour_id)
+	if list.is_empty() or host == null or not host.is_inside_tree():
+		return null
+	var tour := UiTour.new()
+	tour.id = tour_id
+	tour.steps = list
+	host.get_tree().root.add_child(tour)
+	return tour
+
+
+## Plays a tour once the title cards have had time to go (and only if the
+## player is still around to read it).
+static func play_later(host: Node, tour_id: String, seconds: float) -> void:
+	if not enabled or GameState.has_flag("ui.tour." + tour_id) or host == null or not host.is_inside_tree():
+		return
+	host.get_tree().create_timer(seconds).timeout.connect(func():
+		if is_instance_valid(host) and host.is_inside_tree():
+			var player := host.get_tree().get_first_node_in_group("player")
+			if player != null and (player.get("is_dead") or player.get("controls_locked")):
+				play_later(host, tour_id, 2.0)
+			else:
+				play(host, tour_id))
+
+
+## What each tour says. A step: "corner" ("tl", "tr", "br", "bl" or "" for no
+## frame), "rect" (offset from that corner, in screen pixels), "title", "text".
+static func steps_for(tour_id: String) -> Array:
+	match tour_id:
+		"basics":
+			return [
+				{"corner": "tl", "rect": Rect2(16, 16, 372, 42), "eyebrow": "THE SCREEN · 1 OF 2", "title": "Health",
+					"text": "This bar is your health. Spikes, traps and slimes take it down. If it runs out, you wake at your last candle with it full again."},
+				{"corner": "", "rect": Rect2(), "eyebrow": "THE SCREEN · 2 OF 2", "title": "The menu",
+					"text": InputLabels.format("Press {pause} at any time to pause and open the menu: your spells and controls, the room map (with Reset Room), the journal, and the settings.")},
+			]
+		"fire":
+			return [
+				{"corner": "tl", "rect": Rect2(16, 52, 192, 24), "eyebrow": "THE SCREEN · MANA", "title": "Mana is your flame",
+					"text": InputLabels.format("Spells draw on this bar, and it does not fill by itself. To kindle your lantern again, hold {reload} next to a lit flame like this one. Beaten slimes drop sparks that give some back.")},
+				{"corner": "br", "rect": Rect2(-176, -104, 160, 88), "eyebrow": "THE SCREEN · SPELLS", "title": "Your spells",
+					"text": "Each spell has a slot here: its key on top and its mana cost below. A slot goes dim when you don't have enough mana for it. New spells appear here as you remember them."},
+			]
+		"echo":
+			return [
+				{"corner": "tl", "rect": Rect2(16, 76, 140, 18), "eyebrow": "THE SCREEN · ECHO", "title": "The Echo tag",
+					"text": InputLabels.format("When you press {echo}, a red REC tag shows how much recording time is left. Each Echo you have out is a diamond here, and it holds some of your mana until it fades.")},
+			]
+		"objective":
+			return [
+				{"corner": "tr", "rect": Rect2(-292, 16, 276, 78), "eyebrow": "THE SCREEN · THE GOAL", "title": "The goal card",
+					"text": InputLabels.format("Each room names its goal here, and ticks off the steps as you do them. If you are stuck, the skull stones in a room give hints, and {pause} opens the room map and Reset Room.")},
+			]
+		"runes":
+			return [
+				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 1 OF 5", "title": "Four words in a cube",
+					"text": InputLabels.format("A rune cube holds a spell of four words: what it is made of, what it does, which way, and how. Walk up to a cube and press {interact} to inscribe it: pick a word for each part from the words you have learned, then switch it on.")},
+				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 2 OF 5", "title": "When you can change words",
+					"text": "Only while the cube is OFF. A running cube's words can't be changed: switch it off first (at the cube, or from your runes list), change what you need, and switch it on again."},
+				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 3 OF 5", "title": "LOCKED words never change",
+					"text": "A word with a padlock and the word LOCKED is carved into the stone: it can never be changed, on any cube. Some cubes have one or two locked words; some are locked completely and can only be switched on and off. Read a cube before you plan with it."},
+				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 4 OF 5", "title": InputLabels.format("{rune_overview}: your runes"),
+					"text": InputLabels.format("Press {rune_overview} at any time to see every cube in the room: what each one does, whether it is on, what it costs and which words are locked. Switch any running cube off from there, from anywhere in the room, or press Inscribe on the cube you are standing at.")},
+				{"corner": "tl", "rect": Rect2(16, 52, 192, 24), "eyebrow": "RUNE CUBES · 5 OF 5", "title": "Running runes use mana",
+					"text": "A rune you power drains this bar while it runs, and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. Kindle at a flame when you run low."},
+			]
+	return []
+
+
+func _ready() -> void:
+	layer = 20
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	current = self
+	is_open = true
+	_was_paused = get_tree().paused
+	get_tree().paused = true
+	Crosshair.arrow()
+	_build()
+	_show_step(0)
+
+
+func _exit_tree() -> void:
+	if current == self:
+		current = null
+
+
+func _build() -> void:
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(root)
+	for i in 4:
+		var d := ColorRect.new()
+		d.color = Color(0.02, 0.01, 0.05, 0.62)
+		d.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		root.add_child(d)
+		_dim.append(d)
+	_frame = Panel.new()
+	_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var frame_style := StyleBoxFlat.new()
+	frame_style.bg_color = Color(1, 1, 1, 0.0)
+	frame_style.set_border_width_all(2)
+	frame_style.border_color = FRAME
+	frame_style.set_corner_radius_all(3)
+	_frame.add_theme_stylebox_override("panel", frame_style)
+	root.add_child(_frame)
+	_card = PanelContainer.new()
+	_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.1, 0.08, 0.15, 0.96)
+	style.set_border_width_all(2)
+	style.border_color = FRAME
+	style.set_content_margin_all(18)
+	_card.add_theme_stylebox_override("panel", style)
+	_card.custom_minimum_size = Vector2(420, 0)
+	root.add_child(_card)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 8)
+	_card.add_child(box)
+	_eyebrow = _label(11, DIM)
+	_title = _label(20, INK)
+	_text = _label(13, INK)
+	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_text.custom_minimum_size = Vector2(384, 0)
+	_hint = _label(10, DIM)
+	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	for l in [_eyebrow, _title, _text, _hint]:
+		box.add_child(l)
+
+
+func _label(size: int, color: Color) -> Label:
+	var l := Label.new()
+	l.add_theme_font_override("font", FONT)
+	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_color_override("font_color", color)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
+
+
+## The frame's rectangle on screen for a step (empty if it has none).
+func target_rect(step: Dictionary) -> Rect2:
+	var corner: String = step.get("corner", "")
+	if corner == "":
+		return Rect2()
+	var r: Rect2 = step["rect"]
+	var view := get_viewport().get_visible_rect().size
+	var origin := Vector2(view.x if corner in ["tr", "br"] else 0.0, view.y if corner in ["bl", "br"] else 0.0)
+	return Rect2(origin + r.position, r.size)
+
+
+func _show_step(i: int) -> void:
+	index = i
+	_cooldown = 0.35
+	var step: Dictionary = steps[i]
+	_eyebrow.text = step.get("eyebrow", "")
+	_title.text = step["title"]
+	_text.text = step["text"]
+	_hint.text = "%s  ·  Esc: close" % ("Space / click: next" if i + 1 < steps.size() else "Space / click: done")
+	Sfx.play("ui_click", null, -8.0)
+	_layout()
+	_card.modulate.a = 0.0
+	create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).tween_property(_card, "modulate:a", 1.0, 0.25)
+
+
+func _layout() -> void:
+	var view := get_viewport().get_visible_rect().size
+	var hole := target_rect(steps[index])
+	_frame.visible = hole.size != Vector2.ZERO
+	if not _frame.visible:
+		# No part of the screen: one dim over everything
+		_dim[0].position = Vector2.ZERO
+		_dim[0].size = view
+		for i in range(1, 4):
+			_dim[i].size = Vector2.ZERO
+	else:
+		hole = hole.grow(5.0)
+		_frame.position = hole.position
+		_frame.size = hole.size
+		_dim[0].position = Vector2.ZERO
+		_dim[0].size = Vector2(view.x, maxf(hole.position.y, 0.0))
+		_dim[1].position = Vector2(0, hole.end.y)
+		_dim[1].size = Vector2(view.x, maxf(view.y - hole.end.y, 0.0))
+		_dim[2].position = Vector2(0, hole.position.y)
+		_dim[2].size = Vector2(maxf(hole.position.x, 0.0), hole.size.y)
+		_dim[3].position = Vector2(hole.end.x, hole.position.y)
+		_dim[3].size = Vector2(maxf(view.x - hole.end.x, 0.0), hole.size.y)
+	await get_tree().process_frame
+	var card_size := _card.get_combined_minimum_size()
+	_card.size = card_size
+	var pos := Vector2((view.x - card_size.x) / 2.0, (view.y - card_size.y) / 2.0)
+	if hole.size != Vector2.ZERO:
+		# Beside the highlighted part, on the side with room
+		var centre := hole.get_center()
+		pos.x = clampf(centre.x - card_size.x / 2.0, 16.0, view.x - card_size.x - 16.0)
+		pos.y = hole.end.y + 18.0 if centre.y < view.y / 2.0 else hole.position.y - card_size.y - 18.0
+	_card.position = pos
+
+
+func _process(delta: float) -> void:
+	_cooldown = maxf(_cooldown - delta, 0.0)
+
+
+func _input(event: InputEvent) -> void:
+	if not is_open:
+		return
+	if event.is_action_pressed("pause", false) or event.is_action_pressed("ui_cancel", false):
+		get_viewport().set_input_as_handled()
+		close()
+		return
+	var press: bool = event.is_action_pressed("jump", false) or event.is_action_pressed("interact", false) \
+		or event.is_action_pressed("ui_accept", false) \
+		or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT)
+	if press:
+		get_viewport().set_input_as_handled()
+		next()
+
+
+func next() -> void:
+	if not is_open or _cooldown > 0.0:
+		return
+	if index + 1 < steps.size():
+		_show_step(index + 1)
+	else:
+		close()
+
+
+func close() -> void:
+	if not is_open:
+		return
+	is_open = false
+	GameState.set_flag("ui.tour." + id)
+	get_tree().paused = _was_paused
+	finished.emit()
+	queue_free()

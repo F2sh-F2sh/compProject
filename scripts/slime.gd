@@ -41,8 +41,17 @@ enum State { PATROL, ALERTED, INVESTIGATE, WINDUP, LUNGE, DEFEATED }
 @export var respawn_on_room_reset := false
 ## A slime the puzzle needs alive: hits only make its ward shimmer.
 @export var warded := false
+## A slime the puzzle needs, but which can be killed. If it dies before the
+## room is solved, the room says it can't be finished and how to reset it.
+@export var required := false
+## What that message says went wrong.
+@export var required_reason := "A slime this room needs is gone."
+## Once this flag is set, the slime is no longer needed (e.g. the room is solved).
+@export var required_until_flag := ""
 ## Health the slime leaves behind when defeated.
 @export var drops_health := 1
+## Mana a defeated slime leaves as a spark mote.
+@export var drops_mana := 6
 
 var health: int
 var player
@@ -72,6 +81,8 @@ func _ready():
 	_start_position = global_position
 	player = get_tree().get_first_node_in_group("player")
 	add_to_group("plate_weight")
+	if required:
+		add_to_group("puzzle_critical")
 	if hears_bells:
 		add_to_group("bell_listener")
 	if respawn_on_room_reset:
@@ -385,6 +396,8 @@ func die():
 	# a room reset brings them back)
 	if not respawn_on_room_reset and drops_health > 0:
 		Pickup.drop(get_parent(), global_position + Vector2(0, -10), drops_health)
+		if drops_mana > 0:
+			Pickup.drop_mote(get_parent(), global_position + Vector2(8, -10), drops_mana)
 
 	var puff := CPUParticles2D.new()
 	puff.one_shot = true
@@ -415,6 +428,15 @@ func die():
 			collision_mask = 0)
 	else:
 		tween.chain().tween_callback(queue_free)
+
+
+## Why the room can't be finished because of this slime ("" if it can).
+func lost_reason() -> String:
+	if not required or not is_dead:
+		return ""
+	if required_until_flag != "" and GameState.has_flag(required_until_flag):
+		return ""
+	return required_reason
 
 
 ## Room reset: back to the starting spot, full health, calm.

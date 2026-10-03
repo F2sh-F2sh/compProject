@@ -65,11 +65,11 @@ refused ("Wind Push can't point Up").
 ## Room 4 — The Fractured Seal  [r4]
 Goal: break through the cracked wall. The loose cube has no channel: it uses her own mana.
 1. Read the tablet: learn **Strong** (8 mana a second; needs 16 to start).
-2. Carry the cube right behind the stone block (from where it starts, its wind lets go of the
-   stone too early).
-3. Inscribe Strong and switch it on. The stone reaches the wall at about 310 px/s (momentum
-   ~937 against the wall's 800) and breaks it. A crate can never break it (its top speed gives
-   less than 800). If the stone stops short, blow it back Left and try again.
+2. Inscribe Strong on the loose cube and switch it on. The cube already stands right behind the
+   stone, so its wind drives the stone along the floor into the wall at once: it arrives at about
+   310 px/s (momentum ~937 against the wall's 640) and breaks it. A crate can never break it (its
+   top speed gives less than 640). If the stone ever stops short, carry the cube right behind it
+   (F) and switch it on again.
 
 ## Room 5 — The Frozen Crossing  [r5]
 Goal: across the spiked pit. A cube is set into the pit's edge, its top flush with the floor,
@@ -104,13 +104,11 @@ start (needs 16), so the only working split is the intended one.
 Goal: the seal on the balcony. A portal cube, carved Space / Portal / ? / Long. Its doorway is
 just off the cube's upper-right corner; the far side opens 253 px right and 253 px up.
 1. Read the tablet: learn **Up-Right**.
-2. Hop over the fire cube, pick up the portal cube and carry it close to the balcony wall
+2. Pick up the portal cube and carry it close to the balcony wall
    (from its starting spot the far side opens in empty air; the test uses x 9736).
 3. Inscribe Up-Right and switch it on (10 mana, then 8 a second).
 4. Jump into the doorway over the cube: you come out above the balcony still moving as you
    were, and land on it. Open the seal (W): Chapter 2 is complete.
-Optional: carry the fire cube past the portal cube and switch it on to burn the brambles; the
-alcove behind them has a tablet teaching **Split**.
 
 ## Every rune the cubes accept
 

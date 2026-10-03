@@ -138,6 +138,61 @@ Only note what confused you, and where.
       shrine with solved rooms still solved and pages still collected.
 - [ ] Dying respawns me at the last shrine I walked past, with full health.
 
+## Finite mana (2026-10-01)
+
+- [ ] Mana no longer refills anywhere: R does nothing but hint away from a flame; holding it at a
+      shrine, candle, lit brazier or the Kept Flame refills over 1.5 s. Is it clear where to refill?
+- [ ] Does running dry feel fair in the Passage slimes, Belfry rooms 3 and 7, and Observatory rooms
+      with no shrine (rooms 1, 2, 3, 5, 7)? Do you ever get stuck with mana you cannot get back?
+- [ ] Spark motes from slimes: noticeable, and a useful +6?
+
+## Nan's cottage and the earned spells (2026-10-01)
+
+- [ ] **Knocking** at Nan's door in Lowbell now leads into her cottage (the three text cards are
+      gone). Does the door opening, Nan in the doorway, then the fade into the cottage feel right?
+- [ ] **The cottage.** Does the room read as a cosy, drained-of-colour cottage (stone wall, hearth with
+      a low blue fire, table, jar shelf, herbs, candles)? Is Nan, seated and small in her armchair, clear?
+- [ ] **The conversation** is short and plain. Each line waits for a press (W, Space or Enter). Is any
+      line too long, too slow, or confusing? Does it make clear that Echidna has lost her spells too,
+      and why she is going down the cellar?
+- [ ] **The fire beat.** Nan asks Echidna to light the fire; the hint tells her to try her fire key;
+      it only sputters and she thinks "the word is gone". Does it feel like a story moment (not a
+      broken key)? What if you do nothing for 30 seconds (it carries on)?
+- [ ] **The lantern** leaves the table and comes to Echidna, and her light grows. Is that clear?
+- [ ] **The cellar door** is the way on; the screen fades into **The Novices' Way · Phase 1**.
+- [ ] **Earning the spells.** There is no fireball, heal or Echo at the start; the key just sputters.
+      Phase 4 (the Kept Flame) gives fire before the pistons that need it; phase 5 (the Spring) gives
+      heal after them; phase 7 (the Echo stone) gives Echo before the Echo lesson. After each, a card
+      names the word and says what it does, and the spell's slot appears on the HUD.
+- [ ] Do the three cards read clearly (and do they overlap any sign badly)? Is the fire card in
+      phase 4 enough, now the pistons sign only says to press the fire key?
+- [ ] **Saves.** A save from before this change keeps all three spells (open the old save and check the
+      slots). Starting Part 2 or Part 3 straight from the title's Tutorial list gives all three.
+- [ ] The pause menu's Spells list says "forgotten" for any spell not yet remembered.
+
+## A brighter dungeon, fewer hints, the Novices' Way wording (2026-09-30)
+
+- [ ] **Brightness.** On Normal you can see the walls, floor and props properly, and it still
+      feels like a dungeon, not an office. Compare Dim (the old look), Normal and Bright in
+      Settings, in the Passage, Room 1 and Room 7. Is Normal the right default?
+- [ ] The watcher rooms (Belfry rooms 4 and 7, Observatory room 6) still feel dark, and the
+      watchers are still readable. Does anything feel unfairly hard to see?
+- [ ] **Room 7's flame.** Walking into Room 7 the first time, the camera looks up at the
+      belfry flame for a moment. Is it clear that this small gold flame is the thing to
+      light? Is the card line ("Light the flame by the door") needed, or too much?
+- [ ] Every unlit brazier now has a small warm-gold flame and a ring that opens out of it.
+      Does it read as "light me" everywhere, and do the lit blue ones still look right?
+- [ ] **Fewer hints.** With the new default (Light guidance) nobody needs the cards at the top
+      of the screen to find the room goal, and the rooms still make sense. Which rooms made
+      you stuck for more than a couple of minutes? (The log records time per room.)
+- [ ] The skull hints: the first one only says where to look; the arrows come with the second.
+- [ ] Do you miss any of the removed signs (pushing a block, ringing a bell, the lift, bolts,
+      vents, crumbling ledges, the Observatory's plates and edge cube)? Note which.
+- [ ] **Wording.** The title screen's Tutorial opens "The Novices' Way" with Part 1 The Passage,
+      Part 2 The Belfry and Part 3 The Observatory. The cards read "Part 1 Complete",
+      "PART 2 COMPLETE" and "TUTORIAL COMPLETE", and the pause menu says Restart and Room Map.
+      Anything still saying "Chapter 1" or "Chapter 2" for the early game?
+
 ## The story intro and Lowbell (2026-09-30)
 
 - [ ] The story: each picture is on screen long enough to read and to watch its movement,
@@ -245,7 +300,6 @@ Nothing in this chapter has been played by a human yet; everything below is unch
       while you use the lectern.
 - [ ] Room 8: the portal doorway (off the cube's upper-right corner) is findable; coming out
       above the balcony feels good. The ending sequence works.
-- [ ] Optional: burning the brambles with the fire cube is discoverable.
 
 ## Sound (checked only numerically so far)
 - [ ] New sounds: rune on / off / refused, placing a cube, the pedestal socket, a fragment learned,
@@ -274,3 +328,75 @@ Nothing in this chapter has been played by a human yet; everything below is unch
   a Persist bridge outlasts ten seconds; rune fire and Explode blasts burn brambles;
   Glow and Beam freeze a watcher; the cracked wall needs momentum 800 (a fast crate can't).
 - Layout: every room has a goal, steps and a hint stone; no wall tile floats.
+
+## Opening, spells and teaching pass (needs a human)
+
+- [ ] New Game plays the nine pictures and then drops straight into the Passage (no village, no cottage).
+- [ ] The last picture mentions the Novices' Way and her lost spells; it reads clearly.
+- [ ] The Passage order: cellar, broken stair, traps, **Echo Door**, **Kept Flame** (fireball), **Cells** (slimes), exit.
+      Reading the Kept Flame gives fire and the Passage ends soon after; no Spring anywhere.
+- [ ] A tour appears a few seconds in (health, then the Esc menu); another after the Echo stone (the Echo tag)
+      and after the Kept Flame (mana, spell slots). Each shows once, pauses, and Esc closes it.
+- [ ] Belfry room 1 shows the goal-card tour once.
+- [ ] After the great bell: three pictures; the third gives back heal with a reason and says what it does.
+      Heal does not work in the Belfry and works in the Observatory.
+- [ ] Observatory room 1: the rune tour (4 cards) explains locked words, Tab, switching a running cube off, and mana.
+      Is it too long? Does the room's cube really have only its direction editable?
+- [ ] Run out of mana in Belfry rooms 2, 4, 8, 9 and Observatory rooms 2, 3, 5, 7: the entrance flame is there,
+      holding R refills, and you never have to go back a room.
+
+## Waymarks (needs a human)
+
+- [ ] Glowing arrows in the walls point the way on through the Passage and every Belfry and Observatory room.
+- [ ] They read as part of the dungeon (carved stone), not as interface; not too bright, not too many.
+- [ ] They disappear when Guidance is set to Off.
+- [ ] Rooms that climb (Belfry R5 lift, R9 great bell stairs): is a right arrow enough, or should one point up?
+
+## The rough loop after the Novices' Way (needs a human)
+
+- [ ] After the dome pictures the game drops onto the Landing: five doors, only the first open, a Kindle flame, a shrine.
+- [ ] Kilnworks: the Cold Forge (now a long room: see its own section below) and the Kiln Heart (Strong wind puts the stone
+      on the plate, burn the brambles, ring the Forge Bell).
+- [ ] Cistern: the First Pool (a Long chill freezes the slime on the plate) and the Sluice (two slimes, two plates). Do the
+      slimes stay on their plates?
+- [ ] Lampworks: the beam across the pit lights the crystal; carry the glow cube under the high crystal.
+- [ ] Galleries: carry the portal cube to the wall and jump through; an Echo holds the plate for the stairs.
+- [ ] After each bell: 2 or 3 pictures straight away, then the card with your time and deaths (Continue / Return to Title),
+      then back on the Landing with that wing's bell-light lit and the next door open.
+- [ ] After four bells the fifth door shows the pictures and opens the Eye.
+- [ ] The Eye: any other sentence says "not enough"; Ice Freeze Self Large shows the Stillness and brings you back; Light Beam Up Long ends
+      the game with the two closing pictures, then THE END card (the whole run's time and deaths, "Thank you for playing."),
+      and Return to Title, which then says the game is complete.
+
+## The Cold Forge (needs a human; time it)
+
+Play it cold, without reading docs/STORY_PLAYTHROUGH.md first. Note the time from the Landing door to walking through
+the Forge Door, how many hints you used, and where you got stuck.
+- [ ] The Landing makes clear why you go in: the Choir's note, the warm first door with light under it, frost on the rest.
+- [ ] The Cold Hearth: is it clear the cube has to fire twice (brambles first, then the pilot flame)?
+- [ ] Throwing your own fire into the bellows shaft: do you think of it? Does the turning bolt read as "air carries fire"?
+- [ ] Riding the shaft: you settle near the top and can step off left or right onto the ledges without precise timing.
+- [ ] The kiln roof and the jump to the coal loft feel fair (a sprint jump).
+- [ ] The cart: pushing it off before the slag bridge is up burns it; the red banner says why and how to reset; Esc opens on
+      Reset Room; Reset Room brings the cart back. Does the bridge-first order feel fair or like a trap?
+- [ ] Carrying the cube down and up the loft's lift, and into the shaft from the roof side.
+- [ ] The slag plug: does "a steady wind only leans, a gust strikes" come across from trying both?
+- [ ] Getting past the cube on the landing and the stone into the alcove, and back out with the Bench Cube.
+- [ ] The kiln's three lamps (coal, air, fire) and its messages when a try fails ("only hisses", "no coal", "no air")
+      tell you what is missing.
+- [ ] The finale (perch current + bursting bolt up the shaft into the pipe): satisfying, or too hard to see?
+- [ ] The roar: light, sound, the frost melting, the door sliding up, the camera moment. Too long? Too short?
+- [ ] The three ledger pages: can you find them all? (The third is in a small cell high above the coal loft.)
+- [ ] Total time. The target is at least 30 minutes for a first-time player; the design estimate is 22 to 35.
+
+## Playtest fixes (2026-10-02, needs a human)
+
+- [ ] A room that can no longer be finished (the coal cart burned; a slime that had to hold a plate killed) shows the red
+      banner after the room's title has gone, and Esc opens straight on Map, Reset Room.
+- [ ] Choosing Return to Title at the end of a part no longer skips the pictures: the pictures come first, then the card.
+- [ ] Portals work both ways: walk back into the far side and you come out of the near one.
+- [ ] Rune editing is explained: the rune tour plays the first time you reach any cube (5 cards: four words, words change
+      only while the cube is OFF, LOCKED words never change, Tab lists your runes, running runes use mana); the cube's
+      prompt says "Running: switch off to edit" while it runs; locked slots show a padlock and LOCKED; the Tab list
+      repeats the rules and has an Inscribe button; Esc, Echidna, Runes, "How rune cubes work" plays the tour again.
+- [ ] Title: Continue goes to the Landing after the Observatory; the progress line counts bells; the Long Stair is in the parts list.

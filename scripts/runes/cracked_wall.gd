@@ -18,6 +18,9 @@ signal broken
 @export var break_momentum := 660.0
 ## Saved once broken (a solved room stays solved).
 @export var persist_id := ""
+## A pixel sprite (SurfaceArt) to show instead of the drawn bricks, e.g. the
+## Kilnworks' plug of cold slag. Its feet sit at the wall's origin.
+@export var sprite_name := ""
 
 var is_broken := false
 ## Same as is_broken (what objective steps and gates ask).
@@ -34,6 +37,9 @@ func _ready() -> void:
 	_shape.shape = rect
 	_shape.position = Vector2(0, -size.y / 2.0)
 	add_child(_shape)
+	if sprite_name != "":
+		var sprite := SurfaceArt.sprite(self, sprite_name, Vector2.ZERO, 1.0)
+		sprite.name = "Sprite"
 	if Engine.is_editor_hint():
 		return
 	collision_layer = 3
@@ -88,6 +94,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
+	if sprite_name != "":
+		return
 	var w := size.x
 	var h := size.y
 	var r := Rect2(-w / 2.0, -h, w, h)

@@ -12,6 +12,13 @@ extends CharacterBody2D
 		queue_redraw()
 @export var push_speed := 70.0
 @export var friction := 900.0
+## Which way the room's puzzle needs it pushed (1 right, -1 left, 0 either).
+## Shoved the other way up against a wall, nobody can get behind it any more:
+## the room then says it can't be finished and how to reset it.
+@export var needed_dir := 0
+@export var required_reason := "The stone block is pushed up against the wall: nobody can get behind it to push it back."
+## Once this flag is set (the room solved), where it is no longer matters.
+@export var required_until_flag := ""
 
 var _start_position := Vector2.ZERO
 var _push_dir := 0.0
@@ -45,7 +52,26 @@ func _ready() -> void:
 	add_to_group("plate_weight")
 	add_to_group("resettable")
 	add_to_group("world")
+	if needed_dir != 0:
+		add_to_group("puzzle_critical")
 	_start_position = global_position
+
+
+## Why the room can't be finished because of this block ("" if it can): it
+## sits against something solid on the side she would have to push from.
+func lost_reason() -> String:
+	if needed_dir == 0 or not is_on_floor():
+		return ""
+	if required_until_flag != "" and GameState.has_flag(required_until_flag):
+		return ""
+	var box := RectangleShape2D.new()
+	box.size = Vector2(14.0, block_size.y - 8.0)
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = box
+	query.transform = Transform2D(0.0, global_position + Vector2(-needed_dir * (block_size.x / 2.0 + 9.0), -block_size.y / 2.0 - 2.0))
+	query.collision_mask = 2
+	query.exclude = [get_rid()]
+	return required_reason if not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty() else ""
 
 
 ## Called by the player each frame they walk into the block.

@@ -173,3 +173,9 @@ func _draw() -> void:
 		draw_line(a + across, b - direction * 6.0 + across, Color(col, 0.2 * fade), 1.0)
 	# The marked area: exactly where the wind works
 	draw_dashed_rect(self, o, direction, free_reach, width, Color(col, 0.45))
+
+
+## True if a point is inside the working region of this current (where it
+## carries fire). The region already stops at the first wall.
+func carries(point: Vector2) -> bool:
+	return overlaps(origin(), direction, free_reach, width, Rect2(point - Vector2(2, 2), Vector2(4, 4)))

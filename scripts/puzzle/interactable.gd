@@ -19,6 +19,9 @@ const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
 @export var prompt_offset := Vector2(0, -70)
 ## Whether an Echo replaying a recorded use can use it too.
 @export var echo_can_use := true
+## When several are in reach, the higher one is used (a rune cube over a hint
+## stone beside it), then the nearest.
+@export var use_priority := 0
 
 static var _focused: Interactable = null
 
@@ -52,12 +55,18 @@ func is_focused() -> bool:
 	return _focused == self
 
 
+## True while the player is close enough to use it.
+func in_reach() -> bool:
+	return _is_usable()
+
+
 func _physics_process(_delta: float) -> void:
 	var usable: bool = _is_usable()
 	if usable:
 		var mine := _player.global_position.distance_to(global_position)
-		if not is_instance_valid(_focused) or not _focused._is_usable() \
-				or mine < _focused._player.global_position.distance_to(_focused.global_position) - 0.5:
+		if not is_instance_valid(_focused) or not _focused._is_usable() or use_priority > _focused.use_priority \
+				or (use_priority == _focused.use_priority \
+				and mine < _focused._player.global_position.distance_to(_focused.global_position) - 0.5):
 			_focused = self
 	elif _focused == self:
 		_focused = null
@@ -76,7 +85,7 @@ func _physics_process(_delta: float) -> void:
 	if show and Input.is_action_just_pressed(action):
 		interacted.emit(_player)
 		# So an Echo being recorded can repeat it
-		if _player.has_method("record_interaction"):
+		if _player and _player.has_method("record_interaction"):
 			_player.record_interaction(self)
 
 

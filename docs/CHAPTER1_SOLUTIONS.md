@@ -125,7 +125,7 @@ Every solution below is also played automatically by `tests/chapter_suite.gd`
 - **Route:** ride the lift up to the works → cross the rising spikes while they are down
   (a candle catches non-lethal hits) → run under each piston while it is raised (a crush
   fades you back to the piston candle just before them) → push
-  the stone block ahead of you all the way to the skull plaque (it stops every bolt) →
+  the stone block ahead of you all the way to the wall under the skull plaque (the plaque is set into the wall; the block stops every bolt) →
   stand on the block and hop up to the ledge → pass the two vents between bursts (they
   flare before bursting) → drop into the end hall.
 - **Shortcut:** the one-way lever in the end hall opens the tunnel gate under the works,

@@ -22,6 +22,9 @@ enum Condition {
 
 ## What the HUD says once the step is done.
 @export var label := ""
+## Shown on the objective card as a line to follow until the step is done. Left
+## empty, a step is named only after it is done. (Use sparingly.)
+@export var todo_label := ""
 @export var condition: Condition = Condition.POWERED
 @export var target: Node
 @export var area := Rect2()

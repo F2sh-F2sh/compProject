@@ -10,13 +10,17 @@ extends CanvasLayer
 ## or a controller (d-pad, A, B).
 ##
 ## A running cube can be looked at and switched off here, but its rune can
-## only be changed once it is off.
+## only be changed once it is off. Words carved into the stone (locked
+## quadrants) never change; they carry a padlock and the word LOCKED. A banner
+## at the top always says which of these rules applies to this cube right now.
 
 const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
 const INK := Color("e4ddf2")
 const DIM := Color("9c92b8")
 const BAD := Color("ff9a8a")
 const GOOD := Color("a8e0ff")
+const WARN := Color("ffc070")
+const LOCK := Color(0.78, 0.72, 0.95)
 
 var is_open := false
 var cube: RuneCube
@@ -33,7 +37,10 @@ var _state: Label
 var _toggle: Button
 var _close: Button
 var _note: Label
+var _banner: Label
 var _palette_buttons: Array[Button] = []
+## Why the last pick was refused ("" when it wasn't), shown until the next refresh.
+var refused := ""
 
 
 func _ready() -> void:
@@ -46,6 +53,7 @@ func _ready() -> void:
 func open(target: RuneCube) -> void:
 	if is_open or target == null:
 		return
+	refused = ""
 	cube = target
 	cube.is_selected = true
 	is_open = true
@@ -93,15 +101,22 @@ func _unhandled_input(event: InputEvent) -> void:
 # ---------------------------------------------------------------- actions
 
 func select_kind(kind: int) -> void:
+	refused = ""
 	selected_kind = kind
 	Sfx.play("ui_hover", null, -8.0)
 	_refresh()
 
 
 func choose(id: StringName) -> void:
-	if cube == null or not cube.can_edit() or cube.is_slot_locked(selected_kind):
-		Sfx.play("rune_blocked", null, -6.0)
+	if cube == null:
 		return
+	if not cube.can_edit() or cube.is_slot_locked(selected_kind):
+		Sfx.play("rune_blocked", null, -6.0)
+		refused = why_not_editable(selected_kind)
+		_note.text = refused
+		_note.add_theme_color_override("font_color", BAD)
+		return
+	refused = ""
 	cube.set_slot(selected_kind, id)
 	Sfx.play("rune_select", null, -4.0)
 	_refresh()
@@ -129,12 +144,43 @@ func toggle_cube() -> void:
 		close()
 
 
+## Why the word in quadrant `kind` can't be changed right now ("" if it can).
+func why_not_editable(kind: int) -> String:
+	if cube == null:
+		return ""
+	if cube.is_active:
+		return "This cube is running. Switch it off first: a running cube's words can't be changed."
+	if cube.is_slot_locked(kind):
+		return "The %s is LOCKED: it is carved into the stone and can never be changed. Pick a part without a padlock." \
+			% RuneFragments.KIND_NAMES[kind].to_lower()
+	return ""
+
+
+## The rule that matters for this cube right now, for the banner.
+func banner_text() -> String:
+	if cube == null:
+		return ""
+	var locked := 0
+	for kind in 4:
+		if cube.is_slot_locked(kind):
+			locked += 1
+	if cube.is_active:
+		return "RUNNING  ·  Switch it off to change its words."
+	if locked == 4:
+		return "Every word on this cube is LOCKED (carved in). You can only switch it on and off."
+	if locked > 0:
+		return "Words with a padlock are LOCKED and can't be changed. The other %d can, while the cube is off." % (4 - locked)
+	return "Pick a word for each part. You can change them whenever the cube is off."
+
+
 # ---------------------------------------------------------------- view
 
 func _refresh() -> void:
 	if cube == null:
 		return
 	var editable := cube.can_edit()
+	_banner.text = banner_text()
+	_banner.add_theme_color_override("font_color", WARN if cube.is_active else LOCK)
 	for kind in 4:
 		var id := cube.recipe.get_slot(kind)
 		var b := _slot_buttons[kind]
@@ -149,7 +195,9 @@ func _refresh() -> void:
 	var locked := cube.is_slot_locked(selected_kind)
 	_palette_title.text = "%s fragments you know" % RuneFragments.KIND_NAMES[selected_kind]
 	if locked:
-		_palette_title.text = "This %s is carved deep: it can't be changed." % RuneFragments.KIND_NAMES[selected_kind].to_lower()
+		_palette_title.text = "LOCKED: this %s is carved in and can't be changed." % RuneFragments.KIND_NAMES[selected_kind].to_lower()
+	elif not editable:
+		_palette_title.text = "Switch the cube off to change its %s." % RuneFragments.KIND_NAMES[selected_kind].to_lower()
 	for id in RuneFragments.of_kind(selected_kind):
 		if not RuneManager.knows(id, get_tree()):
 			continue
@@ -167,6 +215,10 @@ func _refresh() -> void:
 	_toggle.text = "Switch off" if cube.is_active else "Switch on"
 	_toggle.disabled = not cube.is_active and not d["valid"]
 	_note.text = "" if editable else "Switch the cube off to change its rune."
+	_note.add_theme_color_override("font_color", DIM)
+	if refused != "":
+		_note.text = refused
+		_note.add_theme_color_override("font_color", BAD)
 	var power := "Powered by the dungeon" if cube.fed_by_dungeon() else "Draws on your mana"
 	_state.text = "%s  ·  %s  ·  %s" % [cube.display_name, "ON" if cube.is_active else "off", power]
 	_state.add_theme_color_override("font_color", DIM)
@@ -232,6 +284,12 @@ func _build() -> void:
 	_state = _label("", 13, DIM)
 	_state.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(_state)
+	# The rule that applies to this cube right now (running, locked words...)
+	_banner = _label("", 14, LOCK)
+	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_banner.custom_minimum_size = Vector2(700, 0)
+	outer.add_child(_banner)
 
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 24)
@@ -310,6 +368,11 @@ func _build() -> void:
 	_style_button(_close)
 	_close.pressed.connect(close)
 	buttons.add_child(_close)
+	var rules := _label("", 12, Color("c8bce6"))
+	rules.name = "Rules"
+	rules.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rules.text = InputLabels.format("Words change only while the cube is OFF   ·   LOCKED words never change   ·   {rune_overview}: every rune in this room")
+	outer.add_child(rules)
 	var hint := _label("Arrows / d-pad: choose   ·   Enter / A: pick   ·   Esc / B: done", 11, DIM)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	outer.add_child(hint)
@@ -329,7 +392,14 @@ func _draw_slot(canvas: Control, kind: int) -> void:
 	canvas.draw_string(FONT, Vector2(0, canvas.size.y - 10), RuneFragments.name_of(id) if id != &"" else "(broken)",
 		HORIZONTAL_ALIGNMENT_CENTER, w, 14, INK if id != &"" else BAD)
 	if cube.is_slot_locked(kind):
-		canvas.draw_rect(Rect2(canvas.size.x - 16, 6, 10, 10), Color(0.7, 0.65, 0.85, 0.8), false, 1.5)
+		# A padlock in the corner and the word LOCKED: carved in, can't change
+		var p := Vector2(canvas.size.x - 20, 8)
+		canvas.draw_arc(p + Vector2(6, 7), 4.0, PI, TAU, 10, LOCK, 2.0)
+		canvas.draw_rect(Rect2(p + Vector2(0, 7), Vector2(12, 9)), LOCK)
+		canvas.draw_rect(Rect2(p + Vector2(5, 10), Vector2(2, 3)), Color(0.1, 0.08, 0.16))
+		canvas.draw_string(FONT, Vector2(6, 18), "LOCKED", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, LOCK)
+	elif cube.is_active:
+		canvas.draw_string(FONT, Vector2(6, 18), "RUNNING", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, WARN)
 
 
 func _label(text: String, size: int, color: Color) -> Label:

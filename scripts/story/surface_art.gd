@@ -30,6 +30,16 @@ const STRIPS := {
 	"tam": 3, "mira": 3, "pip": 3, "edda": 3, "nan": 3, "monk": 3, "ilse": 3,
 	"wren_bed": 2, "great_bell": 2, "shrine_bell": 1, "candle": 3, "chime_tube": 1, "chime_post": 1,
 	"rune_cube": 1, "rune_cube_great": 1, "door_echidna": 2, "door_nan": 2,
+	# The Novices' Way (tools/generate_shrine_sprites.gd)
+	"kept_flame": 3, "spring": 3, "echo_stone": 2,
+	# Nan's cottage (tools/generate_cottage_sprites.gd)
+	"nan_seated": 3, "hearth": 3, "table": 1, "shelf_jars": 1, "cellar_door": 2,
+	# The Kilnworks (tools/generate_kiln_sprites.gd)
+	"great_kiln": 2, "kiln_chimney": 2, "lamp_fuel": 2, "lamp_air": 2, "lamp_fire": 2, "coal_cart": 1,
+	"slag": 4, "slag_crust": 1, "forge_door": 2, "bellows": 1, "anvil": 1, "tool_rack": 1, "coal_heap": 1,
+	"smith_plaque": 1, "chalk_steps": 1, "chalk_route": 1, "chalk_star": 1, "frost_a": 1, "frost_b": 1, "door_frost": 1,
+	# The Choir's waymarks (tools/generate_waymark_sprites.gd)
+	"waymark": 3,
 }
 ## The scale everything is drawn at in Lowbell.
 const LANE_SCALE := 1.5

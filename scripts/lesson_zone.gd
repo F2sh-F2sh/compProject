@@ -2,18 +2,23 @@
 class_name LessonZone
 extends Area2D
 
-## One lesson of the tutorial. Walking into it the first time shows a lesson
-## card ("LESSON 3 / Sprint jumps") and saves it as the respawn point, so a
+## One lesson of the tutorial (a stretch of the Novices' Way). Walking into it the first time shows its card
+## ("PHASE 2 . THE BROKEN STAIR / Sprint Jumps") and saves it as the respawn point, so a
 ## death restarts the current lesson instead of the whole tutorial. The node
 ## marks the lesson's left edge on the floor; `spawn` is where to respawn,
 ## relative to it.
 
+## The lesson's id (saved as its respawn point); not what the card says.
 @export var number := 1
+## The small line above the title, e.g. "PHASE 4 . THE KEPT FLAME". Empty = "LESSON n".
+@export var eyebrow := ""
 @export var title := ""
 @export var subtitle := ""
 @export var height := 520.0
 @export var width := 256.0
 @export var spawn := Vector2(48, 0)
+## A UiTour to play a few seconds after the card, the first time (UiTour.steps_for).
+@export var tour := ""
 
 var _shown := false
 
@@ -63,4 +68,6 @@ func _on_body_entered(body: Node) -> void:
 		return
 	_shown = true
 	GameState.set_checkpoint(_scene_path(), get_id())
-	TitleCard.show_card(owner if owner else get_parent(), "LESSON %d" % number, title, subtitle, 2.2)
+	TitleCard.show_card(owner if owner else get_parent(), eyebrow if eyebrow != "" else "LESSON %d" % number, title, subtitle, 2.2)
+	if tour != "":
+		UiTour.play_later(self, tour, 3.6)

@@ -7,6 +7,8 @@ signal footstep(at: Vector2)
 signal died
 ## Emitted when she uses something (a lever, a rope), so an Echo can repeat it.
 signal interaction_performed(target: Node)
+## She tried a spell she has not remembered yet: "fire", "heal" or "echo".
+signal ability_denied(id: String)
 
 @export var fireball_scene: PackedScene
 @export var hurtbox: Hurtbox
@@ -19,7 +21,9 @@ var mana_debt := 0
 const FIREBALL_COST := 5
 const HEAL_COST := 20
 var current_mana := MAX_MANA
-const RELOAD_TIME := 2.0
+## Kindling the lantern at a lit flame (hold the kindle key, R) takes this long.
+const RELOAD_TIME := 1.5
+const KINDLE_RANGE := 70.0
 var is_reloading := false
 var reload_progress := 0.0
 ## Set by the RuneManager while runes she powers are drawing upkeep.
@@ -50,6 +54,7 @@ const COYOTE_DURATION = 0.1
 var heal_channel: HealChannel
 var _aim_marker: Node2D
 var _crouch_toggled := false
+var _last_denied := -1000
 
 const HIT_INVULNERABILITY := 0.8
 ## How long a knockback overrides movement input.
@@ -139,8 +144,21 @@ func _ready() -> void:
 	update_health_ui.call_deferred()
 	update_mana_ui.call_deferred()
 
+## A spell she has not remembered yet: a faint sputter (so the key is not
+## silent), and a signal for any scene that wants to react to it.
+func deny_ability(id: String) -> void:
+	if Time.get_ticks_msec() - _last_denied > 600:
+		_last_denied = Time.get_ticks_msec()
+		Sfx.play("fizzle", global_position, -8.0)
+		ImpactFX.burst(get_parent(), global_position + Vector2(0, -18), Color(0.5, 0.48, 0.65), false, 3)
+	ability_denied.emit(id)
+
+
 func shoot_fireball() -> void:
 	if fireball_scene == null:
+		return
+	if not GameState.has_ability("fire"):
+		deny_ability("fire")
 		return
 	if current_mana < FIREBALL_COST or is_reloading:
 		# A spell with nothing behind it: a sputter, not silence
@@ -172,7 +190,7 @@ func shoot_fireball() -> void:
 	update_mana_ui()
 	flash_spell("fireball")
 	if current_mana <= 0:
-		start_reload()
+		hint_kindle()
 
 
 ## Which way a fireball from `origin` would fly: toward the mouse, or with a
@@ -430,11 +448,17 @@ func _physics_process(delta: float) -> void:
 	if Settings.assist_infinite_mana and current_mana < get_mana_cap() and not is_reloading:
 		current_mana = get_mana_cap()
 		update_mana_ui()
-	Crosshair.aim(current_mana >= FIREBALL_COST and not is_reloading)
+	Crosshair.aim(current_mana >= FIREBALL_COST and not is_reloading and GameState.has_ability("fire"))
 
 	if Input.is_action_just_pressed("heal"):
 		heal_player()
 		
+	# Kindling lasts only while the key is held and she stays at the flame
+	if is_reloading and (not Input.is_action_pressed("reload") or not (Settings.assist_infinite_mana or near_kindle())):
+		is_reloading = false
+		reload_progress = 0.0
+		update_mana_ui()
+
 	if is_reloading:
 		reload_progress += delta
 		update_mana_ui()
@@ -851,6 +875,30 @@ func _apply_squash(amount: Vector2) -> void:
 	animated_sprite.scale = sprite_base_scale * amount
 	animated_sprite.position = sprite_base_pos
 
+## Whether she stands at a lit flame that can refill her (a shrine, a lit
+## brazier, a candle, the Kept Flame): nodes in the group "kindle_point" with
+## is_kindling().
+func near_kindle() -> bool:
+	for point in get_tree().get_nodes_in_group("kindle_point"):
+		if point is Node2D and point.has_method("is_kindling") and point.is_kindling() \
+				and absf(point.global_position.x - global_position.x) < KINDLE_RANGE \
+				and absf(point.global_position.y - global_position.y) < 90.0:
+			return true
+	return false
+
+
+var _last_kindle_hint := -10000
+
+
+## Tells her where mana comes from (not more than once in a while).
+func hint_kindle() -> void:
+	if Settings.assist_infinite_mana or Time.get_ticks_msec() - _last_kindle_hint < 4000:
+		return
+	_last_kindle_hint = Time.get_ticks_msec()
+	FloatText.spawn(get_parent(), global_position + Vector2(0, -52), "Hold %s at a lit flame to kindle your lantern" % InputLabels.primary("reload"),
+		Color(0.72, 0.9, 1.0), 20.0, 2.6)
+
+
 func start_reload():
 	if is_reloading:
 		return
@@ -861,6 +909,10 @@ func start_reload():
 		return
 
 	if current_mana >= get_mana_cap():
+		return
+	# Mana is the lantern's flame: it only comes back at a lit flame
+	if not Settings.assist_infinite_mana and not near_kindle():
+		hint_kindle()
 		return
 
 	is_reloading = true
@@ -893,6 +945,9 @@ func flash_spell(spell: String) -> void:
 ## Healing is channelled (see scripts/player/heal_channel.gd); the mana and
 ## health change only when the channel completes, in complete_heal().
 func heal_player():
+	if not GameState.has_ability("heal"):
+		deny_ability("heal")
+		return
 	if heal_channel:
 		heal_channel.try_start()
 	else:
@@ -940,4 +995,4 @@ func complete_heal():
 	)
 
 	if current_mana <= 0:
-		start_reload()
+		hint_kindle()
