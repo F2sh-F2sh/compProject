@@ -100,9 +100,10 @@ func _make_pictures() -> Array:
 	]
 
 
-## Where the pictures lead when they are over.
+## Where the pictures lead when they are over: out onto the surface, to
+## Lowbell's lane and Nan's cottage (whose cellar door is the way down).
 func _next_scene() -> String:
-	return Journey.after_story()
+	return Journey.LOWBELL
 
 
 func _exit_tree() -> void:
@@ -214,7 +215,6 @@ func _after_pictures() -> void:
 	ChapterComplete.pending = {}
 	var stats: Dictionary = card["stats"].duplicate()
 	stats["next"] = _next_scene() if _next_scene() != Journey.TITLE else ""
-	stats["explore"] = false
 	results_card = ChapterComplete.open(self, String(card["name"]), stats)
 
 

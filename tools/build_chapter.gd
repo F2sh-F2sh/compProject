@@ -296,9 +296,9 @@ func build_level() -> void:
 	level.set("chapter_id", "ch1")
 	level.set("total_pages", 7)
 	level.set("next_chapter", "res://scenes/story/interlude_bell.tscn")
-	level.set("unit_name", "part")
-	level.set("complete_heading", "PART 2 COMPLETE")
-	level.set("next_label", "Continue to Part 3: The Observatory")
+	level.set("unit_name", "level")
+	level.set("complete_heading", "LEVEL 2 COMPLETE")
+	level.set("next_label", "Continue to Level 3: The Observatory")
 
 	var ambient := CanvasModulate.new()
 	ambient.name = "Darkness"
@@ -541,7 +541,7 @@ func room_1_entrance() -> void:
 	var exit_gate := gate(room, "ExitGate", 20)
 	circuit(room, "PlateToGate", [plate], [exit_gate],
 		{"reveal_target": true, "persist_id": "ch1.r1.solved", "channel_y": 440.0, "symbol": 0})
-	guide(room, "Open the gate at the far end.", "I", "The Toll", "The Novices' Way  ·  Part 2  ·  The Sealed Belfry")
+	guide(room, "Open the gate at the far end.", "I", "The Toll", "The Novices' Way  ·  Level 2  ·  The Sealed Belfry")
 	room.set("explainer", "objective")
 	step(room, "Stone on the plate: the gate opens", Cond.OPEN, exit_gate)
 	page_step(room, 1)
@@ -1078,6 +1078,20 @@ func room_9_great_bell() -> void:
 	waymarks(room, 195, 215, false)
 	kindle_flame(room, cx(197))
 	var plate := inst("res://scenes/pressure_plate.tscn", room, "Plate", Vector2(cx(198), FLOOR_Y))
+	# The hot spring at the foot of the stair: running water the Hush has never
+	# held still. Drinking from it gives back the word SPRING (heal), here at
+	# the end of the Belfry rather than in the pictures after it.
+	var spring := Node2D.new()
+	spring.name = "HotSpring"
+	spring.set_script(load("res://scripts/puzzle/ability_shrine.gd"))
+	spring.position = Vector2(cx(200), FLOOR_Y)
+	spring.z_index = -1
+	var spring_props := {"ability": "heal", "sprite_name": "spring", "word": "SPRING", "verb": "Drink", "steam": true, "sprite_scale": 2.0,
+		"glow_color": Color(0.4, 0.85, 0.95),
+		"story": "A hot spring, still running under the bell tower. Running water is the one thing the Hush has never held still.\nStand still and press {heal} to heal yourself: 2 health for 20 mana. A hit breaks it."}
+	for k in spring_props:
+		spring.set(k, spring_props[k])
+	add_owned(room, spring)
 	var stairs: Array = []
 	for i in 6:
 		stairs.append(inst(PUZZLE + "spectral_platform.tscn", room, "Stair%d" % (i + 1),
@@ -1086,6 +1100,7 @@ func room_9_great_bell() -> void:
 	# The chapter ends when its rope is pulled (the rope reaches the balcony)
 	var great_bell := inst(PUZZLE + "great_bell.tscn", room, "GreatBell", Vector2(cx(211), 94))
 	guide(room, "Climb to the great bell and ring it.")
+	step(room, "Drink from the hot spring: a word comes back", Cond.FLAG, null, {"flag": "ability.heal"})
 	step(room, "Something holds the plate: the stairs rise", Cond.POWERED, plate)
 	step(room, "Up to the great bell", Cond.REACHED, null, {"area": Rect2(208 * T, 150, 7 * T, 70)})
 	step(room, "The great bell rings", Cond.POWERED, great_bell)

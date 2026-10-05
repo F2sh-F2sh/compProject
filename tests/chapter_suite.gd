@@ -53,6 +53,7 @@ func run_suite(filter: String) -> void:
 		"save": scenario_save_and_checkpoints,
 		"reset": scenario_reset_rules,
 		"stuck": scenario_stuck_block,
+		"ways": scenario_ways_back,
 		"hazards": scenario_hazard_rules,
 		"guide": scenario_guidance,
 		"flame": scenario_flame,
@@ -585,6 +586,12 @@ func solve_r9() -> void:
 	var recorder = player.get_node("EchoRecorder")
 	recorder.clear_echoes()
 	await frames(10)
+	# The hot spring at the foot of the stair gives back the word SPRING (heal)
+	var spring: Node2D = node("R9/HotSpring")
+	await walk_to(spring.global_position.x - 6.0)
+	await interact()
+	check("R9 drinking from the hot spring gives back SPRING (heal)", await wait_until(func(): return game_state().has_flag("ability.heal"), 3.0))
+	await shot("r9_hot_spring")
 	await walk_to(plate.global_position.x - 70.0)
 	# Record walking onto the plate; the finished Echo keeps standing on it
 	await tap_action("echo")
@@ -710,7 +717,9 @@ func scenario_room2() -> void:
 	await solve_r2()
 	await seconds(12.0)
 	check("slime leaves plate A after she has gone through", not plate_a.is_pressed)
-	check("a gate she has come through stays open", exit_gate.open_amount >= 1.0)
+	# (the way back is caged once she is in the next room, whatever its plates say)
+	check("a gate she has come through drops shut behind her and stays shut", exit_gate.sealed and exit_gate.is_fully_closed(),
+		"open %.2f" % exit_gate.open_amount)
 
 	# Alternative: a fireball from plate B rings the bell
 	await load_level()
@@ -971,7 +980,9 @@ func scenario_save_and_checkpoints() -> void:
 		"pos=%s" % player.global_position.round())
 	check("respawn is in room 3", current_room_id() == "ch1.r3", current_room_id())
 	check("full health after a death", player.current_health == 10)
-	check("solved room stays solved after death", node("R1/ExitGate").open_amount >= 1.0)
+	# (solved and saved; she is two rooms on, so the way back to it is caged)
+	check("solved room stays solved after death, and the way back stays caged", game_state().has_flag("ch1.r1.solved")
+		and node("R1/ExitGate").sealed and node("R1/ExitGate").is_fully_closed(), "open %.2f" % node("R1/ExitGate").open_amount)
 	check("collected page does not come back", not lvl.has_node("R1/LorePage1"))
 	check("the room 3 shrine is lit on respawn", node("R3/Shrine").is_lit)
 	check("pages counted for the pause menu", lvl.pages_found() == 1)
@@ -1022,12 +1033,14 @@ func scenario_reset_rules() -> void:
 	check("reset clears Echoes", recorder.echoes.size() == 0)
 	check("reset returns the mana cap", player.get_mana_cap() == 100, "cap=%d" % player.get_mana_cap())
 
-	# A solved (saved) puzzle survives a reset
+	# A solved (saved) puzzle survives a reset of the room she is in (room 2,
+	# with room 1's way out caged behind her: she can't go back into room 1)
 	await solve_r1()
-	await place(Vector2(700, FLOOR))
+	var block_at: Vector2 = node("R1/Block").global_position
 	lvl.reset_current_room()
 	await seconds(0.6)
-	check("saved solutions survive a reset", await wait_until(func(): return node("R1/ExitGate").open_amount >= 1.0, 2.0))
+	check("saved solutions survive a reset", current_room_id() == "ch1.r2" and game_state().has_flag("ch1.r1.solved")
+		and node("R1/Block").global_position.distance_to(block_at) < 1.0 and node("R1/ExitGate").sealed, current_room_id())
 
 	# Reset in a creature room puts the watcher back to patrolling
 	await enter_room("R4")
@@ -1069,6 +1082,48 @@ func scenario_stuck_block() -> void:
 	await walk_to(start_x + 260.0, false, 8.0)
 	await frames(20)
 	check("on its plate against the kerb it is fine", lvl.broken_reason == "", lvl.broken_reason)
+
+
+## On into the next room, the gate drops behind her and stays down (whatever
+## its circuit says, and through Reset Room); open doorways between rooms get
+## gates of their own. Continuing from a shrine in an earlier room leaves the
+## way on open; from a shrine further on, the ways back are shut at once.
+func scenario_ways_back() -> void:
+	print("SCENARIO the way back shuts behind her")
+	await load_level()
+	game_state().set_flag("ch1.r1.solved")
+	await load_level(true)
+	await seconds(0.5)
+	var gate: PortcullisGate = node("R1/ExitGate")
+	check("Room 1's exit gate stands open (its plate was solved)", await wait_until(func(): return gate.open_amount >= 1.0, 3.0))
+	var back_gates := lvl.find_children("BackGate", "", true, false)
+	check("the open doorways between rooms have gates ready to drop", back_gates.size() >= 4
+		and back_gates.all(func(g): return g is PortcullisGate and g.open_amount >= 1.0), str(back_gates.size()))
+	# (past Room 1's block, by its open gate)
+	await place(Vector2(1180, FLOOR))
+	await walk_to(1460.0)
+	check("on into Room 2", current_room_id() == "ch1.r2", current_room_id())
+	check("the gate drops behind her", await wait_until(func(): return gate.is_fully_closed(), 3.0) and gate.sealed)
+	await walk_to(1200.0, false, 3.0)
+	check("and there is no walking back through it", player.global_position.x > gate.global_position.x + 10.0,
+		"x=%.0f" % player.global_position.x)
+	lvl.reset_current_room()
+	await seconds(1.2)
+	check("Reset Room doesn't raise it", gate.is_fully_closed())
+	await shot("ways_back_gate")
+	# Continuing from the first shrine (in Room 1): the way on is open again
+	game_state().set_checkpoint(LEVEL, "ch1.cp.start")
+	await load_level(true)
+	await seconds(0.5)
+	gate = node("R1/ExitGate")
+	check("from the first shrine, the way on into Room 2 is open", current_room_id() == "ch1.r1"
+		and gate.open_amount >= 1.0 and not gate.sealed, current_room_id())
+	# From Room 3's shrine: the ways back behind it are shut at once
+	game_state().set_checkpoint(LEVEL, "ch1.cp.r3")
+	await load_level(true)
+	await seconds(0.5)
+	check("from Room 3's shrine, the ways back are shut already and the way on is not", current_room_id() == "ch1.r3"
+		and node("R1/ExitGate").sealed and node("R2/ExitGate").sealed and not node("R3/ExitGate").sealed, current_room_id())
 
 
 func scenario_hazard_rules() -> void:

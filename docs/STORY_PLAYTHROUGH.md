@@ -34,8 +34,9 @@ The Observatory's floor lens showed a frozen room far below. The only way is dow
 the wall is still glowing and part is dead cold. A Smith's ledger tells her why the wings were split in four:
 *"We feared one spell too strong to carry, so we hid its parts apart."* The wing's bell is the **Forge Bell**.
 
-**Rough playthrough, six rooms and a boss**
-1. **The Cold Forge** (built and finished; the rest of this list is still a sketch). The Smith let the Great Kiln
+**Rough playthrough, six rooms and a boss** (rooms 1 and 2 are built and finished; the rest of this list is
+still a sketch)
+1. **The Cold Forge** (built and finished). The Smith let the Great Kiln
    go cold so the Hush's frost would have nothing to hold; relighting it is what thaws the Forge Door. The kiln
    needs three things at once: **coal** in its fuel bay, **air** blowing into the pipe in its left side, and a
    **flame that bursts** reaching the firebox through that pipe (a plain spark only hisses on the frosted coal).
@@ -59,20 +60,43 @@ the wall is still glowing and part is dead cold. A Smith's ledger tells her why 
    10. Out the same way (shaft, roof, loft, lift) through the Forge Door.
    Three optional ledger pages (one under a bramble mat in a cell above the loft). Five hint stones, three stages
    each. Design estimate for a first-time player: about 22 to 35 minutes; it needs a human playtest to confirm.
-2. **The Fuse Row.** Bramble fuses burn along a rail toward the gate. Light them in the order the fuse burns, then
+2. **The Kiln Heart** (built and finished). The Great Kiln's heat runs on into the Smith's last forge: a long hall
+   over a lake of slag, then the tower where the Forge Bell hangs frozen. The **Heart**, the Smith's crucible sunk
+   in the tower floor, wakes it: three skips of coal tipped into it and its three burners lit at the same moment.
+   1. *The Shutter Hall (Delay).* The Ash Lamp beyond the shutter is too far for her own fire. The Shutter Cube
+      throws further (its first three words are carved: Fire, Projectile, Right), but the shutter stands open only
+      while someone is on its plate, and she can't be at the cube and on the plate at once. The Delay tablet:
+      inscribe Delay, switch the cube on and run back onto the plate; two seconds later the bolt flies through the
+      open shutter and lights the lamp, which holds the shutter open for good.
+   2. *The Slag Lake.* Three heat vents (dungeon machinery, always on) rise out of the slag. Walk off the bank into
+      the first, ride it up and step onto the first ledge; hop the break in it and walk off its end into the
+      second vent; the third lets her off on the gallery. A fall in the slag puts her back at the last candle.
+   3. *The Coal Racks (Large).* Three skips of coal sit on three iron racks over the Heart's rim, one above
+      another. Carry the gallery's cube to the pedestal at the gallery's end: `Wind · Burst · Right` tips only the
+      middle skip into the Heart; with Large (a gust three times as tall) all three go. Wind blows through iron bars.
+   4. *The Heart (Split).* Carry the cube down (over the fourth vent onto the middle rack, off its end, over the
+      Heart's rim) to the pedestal beside the Heart. Each burner flares and dies in half a second, so lighting them
+      one at a time does nothing; `Fire · Projectile · Up-Right · Split` throws one bolt three ways and lights all
+      three at once. The Heart beats: the frost lets go of the bell, its burners burn steady, the hoist starts.
+   5. *The bell.* The hoist is the only way up to the Forge Bell. Ring it.
+   Three optional ledger pages (a shelf over the hall, reached with a charged jump; a low ledge in the lake under
+   the break in the first ledge; a ledge beside the hoist halfway up). Four hint stones, three stages each. Design
+   estimate for a first-time player: about 12 to 20 minutes; it needs a human playtest to confirm.
+3. **The Fuse Row.** Bramble fuses burn along a rail toward the gate. Light them in the order the fuse burns, then
    hold the gate with a Delayed bolt (`Fire · Projectile · Right · Delay`) landing as the moving gate opens.
    Wrong order burns the last fuse and the room resets.
-3. **The Cinder Hall.** Cinders are sparks that ignore fire and run toward warmth. Steer them with Strong wind into the
+4. **The Cinder Hall.** Cinders are sparks that ignore fire and run toward warmth. Steer them with Strong wind into the
    bramble gate (they ignite it), but stop one cinder before it reaches your own lit brazier.
-4. **The Clinker Line.** A slow kiln golem carries a burning coal along a belt. Tip it with `Wind · Push · Right · Strong`
+5. **The Clinker Line.** A slow kiln golem carries a burning coal along a belt. Tip it with `Wind · Push · Right · Strong`
    so the coal spills on a fuse, while a second cube must hold a stone on the weighted plate.
-5. **The Bellows.** Fire plus wind: a bellows pushes flame along a channel. `Fire · Burst · Up-Right · Explode` cracks
+6. **The Bellows.** Fire plus wind: a bellows pushes flame along a channel. `Fire · Burst · Up-Right · Explode` cracks
    the wall; then burn the brambles behind it before the vents lift the flame away.
-6. **The Slag Climb.** Vertical room: vents lift Echidna and the Cinders. Time Burst shots to reach three
+7. **The Slag Climb.** Vertical room: vents lift Echidna and the Cinders. Time Burst shots to reach three
    ledges without using the second flame. The first mana pool is only enough if she kindles at the midpoint flame.
-- **Boss: the Kiln Heart.** Phase 1 (cold): light three vents with one `Fire · Projectile · Up · Split`.
-  Phase 2 (overheating): blow its cinders into quench puddles and crack its armour with a delayed Explode.
-  Phase 3 (settle): drive a stone onto its core with wind to seal it.
+- **Boss (sketch): the Kiln Heart overheating.** Phase 1 (cold): light three vents with one `Fire · Projectile ·
+  Up · Split`. Phase 2 (overheating): blow its cinders into quench puddles and crack its armour with a delayed
+  Explode. Phase 3 (settle): drive a stone onto its core with wind to seal it. (The built Kiln Heart, room 2
+  above, uses the first phase's idea without the fight.)
 
 **Ends.** The Forge Bell rings, warm gold light along the Landing, and a line of small chalk footprints leads into
 the next door. New words: Fire, Projectile, Up, Large, Burst, Delay, Explode.
@@ -94,20 +118,76 @@ Ilse cast. A Warden's ledger: *"The water remembers. It has been waiting sixty y
 behind a pane of glass, drawing a star. This is where Echidna learns **Persist**: "the word that made the silence".
 The bell is the **Tide Bell**.
 
-**Rough playthrough**
-1. **The First Pool.** Freeze a platform out of water: `Ice · Freeze · Down · Large`. Harder bit: the pool drains
-   after ten seconds unless the ice has Persist, which she hasn't learned yet, so she has to freeze two platforms
-   and hop between them before the first melts.
-2. **The Tide Stairs.** A tide clock raises and drops the water every eight seconds. Freeze at exactly the height
-   that lets her step on a high ledge, then wait for the tide to leave her standing.
+**Rough playthrough** (rooms 1 and 2 are built and finished: room 1 replaces the old First Pool sketch and borrows
+the tide clock from the Tide Stairs; room 2 takes in the Tide Stairs, the Frozen Weights and the Sluice. The rest is
+still a sketch)
+1. **The Still Water** (built and finished). The Warden of Waters' clock hall, flooded and stopped. Everything in it
+   is about freezing things, and each kind of thing frozen is useful in its own way. The one rule: **rising water
+   freezes where it first meets the cold.**
+   1. *The Cold Stair.* Two pools of black water, far too cold to swim. `Ice · Freeze` on the Brink Cube (its
+      direction is carved) freezes the first pool's top into a floor for a few breaths: hop the cube, walk across.
+      On the island, the Long tablet: Long on the Island Cube freezes all but the last stretch of the long second
+      pool (a normal freeze reaches well under half); run along the ice and jump the rest.
+   2. *The Ice Door.* A plug of old ice fills the doorway to the hall. Her own fire melts it; the Warden's cube,
+      hers to carry, waits behind it.
+   3. *The Gatekeeper.* A slime shut in a cell under an iron grate sits on a plate that wants stone. Frozen, a
+      creature is as heavy as stone, and cold sinks through iron bars: the cube on the grate, `Ice · Freeze ·
+      Down`, two seconds on the plate, and the Clock Gate up on the walkway is open for good.
+   4. *The Fountain Court.* Five fountains leap and fall; frozen, a fountain is a pillar. The Fountain Cube hangs
+      high above them, worked from a lectern on the floor (Ice and Freeze carved). Straight down it freezes two
+      jets low and useless. **Down-Right** (the court's tablet) and Long lay the cold aslant across all five:
+      each leap freezes where it meets the cold's slanted edge, a stair of pillars up to the walkway (without
+      Long only the two tallest). It holds a few breaths: climb quickly, with the cube.
+   5. *The Tide Clock.* A glass column the tide fills and empties every twelve seconds, a brass float riding it.
+      The clock strikes only when the float is *held* at the hour mark at the top, and its strike opens the
+      Sluice Door. Cold across the column stops the tide short; the cold must lie just above the mark. Along the
+      walkway, through the Clock Gate and up three steps to the clock gallery, level with the clock's top: the
+      cube there, `Ice · Freeze · Left`, switched on as the tide starts to rise. (Large makes the cold taller and
+      the tide freezes a stride short; the room says how far short. From the walkway the steps block the cold.)
+   6. Down the steps, along the walkway, down to the floor and through the open Sluice Door.
+   Three optional ledger pages (a shelf over the island, the top of the Fountain Cube, the clock gallery's
+   corner). Five hint stones, three stages each. The scripted route takes 63 s of game time when it knows every
+   answer (the Cold Forge's takes 113). Design estimate for a first-time player: about 20 to 30 minutes; it needs
+   a human playtest to confirm.
+2. **The Great Sluice** (built and finished; it ends the wing for now). The Warden's sluice works, which fed every
+   water clock in the Cistern. The Warden drowned the Tide Bell in its well, so the Hush would not hear it, and
+   balanced the Great Sluice that drains it on two counterweights: a weight of three held still on a pan, and the
+   tide held at its high mark. Here she learns **Persist**, the cold that never lets go (the Warden carved it for
+   Ilse, the winter before the Hush), and uses the Hush's own word four ways.
+   1. *The Silence Gallery.* A slime in a cell under a grate holds a plate that opens the Silence Gate only after
+      it has been held eight seconds; a freeze lets go after six. The tablet by the door teaches Persist; on the
+      Keeper Cube over the grate (`Ice · Freeze · Down · Persist`, free: the dungeon feeds it) the slime stays
+      frozen and the gate opens for good.
+   2. *The Tide Hall.* An eighteen-tile basin set with iron teeth. Its tide fills it, stands, empties and rests,
+      over and over; while the water is up the doorway gates are shut. The Tide Lever, a cube over the west
+      doorway worked from a lectern (her mana pays), freezes the whole tide into a floor of ice: switched on while
+      the hall is dry, the rising tide freezes level with the doorways; switched on while it is up, it freezes
+      where it stands. Its own freeze lets go after six seconds, too soon to cross: with Persist it holds while she
+      walks across, hops the low pier and takes the Sluice Cube (the room's only free cube), and goes out through
+      the east doorway. (About 60 of her 100 mana for a steady walker.)
+   3. *The Weigh House.* A pan wants three weights of stone at once. The Ballast sits on a shelf over it: a steady
+      wind from the Drover Cube can't shift it, a Strong one shoves it off, and a kerb by the wall stops it on the
+      pan. Two slimes hop about on the pan, too light alive: the Sluice Cube in the socket under the shelf (`Ice ·
+      Freeze · Right · Persist`, free on the socket) freezes them as they stray into its cold, and keeps them
+      frozen.
+   4. *The High Mark.* Up the Weigh House lift to the high ledge, through the high door over the hall, where the
+      tide's top can be seen beside the high mark. With the pan held, she switches the lever on (Persist) as the
+      tide stands at its top: two breaths of both counterweights and the Great Sluice opens for good, the well
+      drains through the sluice gate, and the Hush's frost in the well melts.
+   5. *The Fallen Span.* The High Walk to the well has a three-tile gap. With the sluice open the pan's work is
+      done: she switches the Sluice Cube off, takes it from its socket, rides the lift up and sets it at the edge:
+      `Ice · Bridge · Right`.
+   6. Down into the drained well from the far end of the High Walk, and the Tide Bell.
+   Three optional ledger pages: iv on a high shelf in the gallery (a charged jump); v washed out past the sluice gate;
+   vi on the far pier, where Wren once dared the Warden to freeze the sea (the tide frozen on its way down, a little
+   under the pier's top, from the high ledge; a lectern on the pier brings her down onto the next tide frozen at the
+   doorways). Five hint stones, two kindle flames, three candles. The scripted route takes 143 s of game time when it
+   knows every answer (the Still Water's takes 63). Design estimate for a first-time player: about 45 to 70 minutes;
+   it needs a human playtest to confirm.
 3. **The Jellies.** Brine Jellies float at tide level and sting. Freeze one as a moving platform (its drift is the
    timing puzzle), or pop one with fire for a three-second steam updraft to reach a ledge no platform reaches.
 4. **The Long Bridge.** `Ice · Bridge · Right · Long` with Persist costs upkeep every second. She must budget mana:
    the room is longer than her mana lasts, so she needs the mid-room Kindle flame, and a cube already off.
-5. **The Frozen Weights.** A plate needs weight three. Freeze a slime so it is heavy, add a crate, and melt a
-   gate with a timed fire bolt, all before the slime thaws and wanders off the plate.
-6. **The Sluice.** A water-clock machine: freeze its wheel at the right second to open the sluice, then run
-   through before it thaws. Her Echo must freeze the wheel a second time for the way back.
 - **Boss: Mere, the Cistern Leviathan.** Phase 1: freeze footholds before the tide takes them. Phase 2: freeze Mere
   mid-leap with Persist for a walkway (watch upkeep). Phase 3: span its jaws with a Long bridge, then melt its gill
   seal so it coughs up the Tide Bell's clapper.
@@ -230,11 +310,13 @@ The clues were there the whole way: Wren's chalk drawings (a star, an arrow up, 
 
 ## The map arrows (done in the game now)
 
-Glowing carved arrows, the Choir's **waymarks**, now sit in the walls along the whole Passage and in all 17 rooms
-of the Belfry and the Observatory: one soon after the way in, one in the middle of a long room, and one before the
-way out. They are pixel art, a slab with a soft blue glow, and they are hidden when guidance is off. In the lore the
-monks cut them for the novices, so they belong to the dungeon and not the interface. New chapters get the same
-treatment.
+Arrows chalked on the walls, the Choir's **waymarks**, now sit along the whole Passage, in all 17 rooms of the
+Belfry and the Observatory, in the wings, and on the way through Lowbell to Nan's door: one soon after the way in,
+one in the middle of a long room, one before the way out, and up arrows where the way on is a column of air. They
+are pale pixel-art chalk with only a faint light, so they blend into the stone (they were glowing slabs, which
+looked like part of the interface), and they are hidden when guidance is off. In the lore Wren chalked them for
+whoever comes after her (the same chalk as her steps and stars), so they belong to the dungeon and not the
+interface.
 
 ---
 

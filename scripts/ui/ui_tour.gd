@@ -36,6 +36,12 @@ var _title: Label
 var _text: Label
 var _hint: Label
 var _cooldown := 0.0
+## The arrows from the card to the parts of the screen it explains.
+var _arrows: Control
+var _time := 0.0
+
+const ARROW := Color(1.0, 0.82, 0.38)
+const ARROW_EDGE := Color(0.08, 0.05, 0.12, 0.95)
 
 
 ## Plays a tour the first time only (or always with `force`). Returns it, or
@@ -70,21 +76,34 @@ static func play_later(host: Node, tour_id: String, seconds: float) -> void:
 				play(host, tour_id))
 
 
+## Where things are on the screen (offsets from the top-left corner): the
+## health bar and its number, the mana bar and its number. (The health bar's
+## arrow comes up through the gap between the mana plate and the numbers.)
+const HEALTH_BAR := Rect2(150, 22, 94, 28)
+const HEALTH_NUMBER := Rect2(282, 56, 62, 18)
+const MANA_BAR := Rect2(18, 56, 166, 14)
+const MANA_NUMBER := Rect2(202, 56, 80, 18)
+
 ## What each tour says. A step: "corner" ("tl", "tr", "br", "bl" or "" for no
-## frame), "rect" (offset from that corner, in screen pixels), "title", "text".
+## frame), "rect" (offset from that corner, in screen pixels), "title", "text",
+## and optionally "arrows": the parts an arrow points at, each {"corner",
+## "rect"}, numbered 1, 2... (the text names them by number). A framed step with
+## no "arrows" gets one arrow at its frame.
 static func steps_for(tour_id: String) -> Array:
 	match tour_id:
 		"basics":
 			return [
-				{"corner": "tl", "rect": Rect2(16, 16, 372, 42), "eyebrow": "THE SCREEN · 1 OF 2", "title": "Health",
-					"text": "This bar is your health. Spikes, traps and slimes take it down. If it runs out, you wake at your last candle with it full again."},
+				{"corner": "tl", "rect": Rect2(16, 16, 372, 60), "eyebrow": "THE SCREEN · 1 OF 2", "title": "Health",
+					"arrows": [{"corner": "tl", "rect": HEALTH_BAR}, {"corner": "tl", "rect": HEALTH_NUMBER}],
+					"text": "(1) This bar is your health. Spikes, traps and slimes take it down. (2) The same, in numbers: health left out of the most you can have. If it runs out, you wake at your last candle with it full again."},
 				{"corner": "", "rect": Rect2(), "eyebrow": "THE SCREEN · 2 OF 2", "title": "The menu",
 					"text": InputLabels.format("Press {pause} at any time to pause and open the menu: your spells and controls, the room map (with Reset Room), the journal, and the settings.")},
 			]
 		"fire":
 			return [
-				{"corner": "tl", "rect": Rect2(16, 52, 192, 24), "eyebrow": "THE SCREEN · MANA", "title": "Mana is your flame",
-					"text": InputLabels.format("Spells draw on this bar, and it does not fill by itself. To kindle your lantern again, hold {reload} next to a lit flame like this one. Beaten slimes drop sparks that give some back.")},
+				{"corner": "tl", "rect": Rect2(16, 52, 270, 26), "eyebrow": "THE SCREEN · MANA", "title": "Mana is your flame",
+					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
+					"text": InputLabels.format("(1) This bar is your mana, your lantern's flame. Spells draw on it, and it does not fill by itself. (2) The same, in numbers. To fill it again, hold {reload} beside a flame bowl like this one (one burns at the way into most rooms), a shrine, a candle or a lit brazier. Wall torches won't do. Beaten slimes drop sparks that give some back.")},
 				{"corner": "br", "rect": Rect2(-176, -104, 160, 88), "eyebrow": "THE SCREEN · SPELLS", "title": "Your spells",
 					"text": "Each spell has a slot here: its key on top and its mana cost below. A slot goes dim when you don't have enough mana for it. New spells appear here as you remember them."},
 			]
@@ -108,8 +127,9 @@ static func steps_for(tour_id: String) -> Array:
 					"text": "A word with a padlock and the word LOCKED is carved into the stone: it can never be changed, on any cube. Some cubes have one or two locked words; some are locked completely and can only be switched on and off. Read a cube before you plan with it."},
 				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 4 OF 5", "title": InputLabels.format("{rune_overview}: your runes"),
 					"text": InputLabels.format("Press {rune_overview} at any time to see every cube in the room: what each one does, whether it is on, what it costs and which words are locked. Switch any running cube off from there, from anywhere in the room, or press Inscribe on the cube you are standing at.")},
-				{"corner": "tl", "rect": Rect2(16, 52, 192, 24), "eyebrow": "RUNE CUBES · 5 OF 5", "title": "Running runes use mana",
-					"text": "A rune you power drains this bar while it runs, and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. Kindle at a flame when you run low."},
+				{"corner": "tl", "rect": Rect2(16, 52, 270, 26), "eyebrow": "RUNE CUBES · 5 OF 5", "title": "Running runes use mana",
+					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
+					"text": "A rune you power drains your mana (1) while it runs (2), and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. When you run low, kindle at a flame bowl, a shrine, a candle or a lit brazier (not a wall torch)."},
 			]
 	return []
 
@@ -173,6 +193,11 @@ func _build() -> void:
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	for l in [_eyebrow, _title, _text, _hint]:
 		box.add_child(l)
+	_arrows = Control.new()
+	_arrows.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_arrows.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_arrows.draw.connect(_draw_arrows)
+	root.add_child(_arrows)
 
 
 func _label(size: int, color: Color) -> Label:
@@ -186,13 +211,60 @@ func _label(size: int, color: Color) -> Label:
 
 ## The frame's rectangle on screen for a step (empty if it has none).
 func target_rect(step: Dictionary) -> Rect2:
-	var corner: String = step.get("corner", "")
+	return _on_screen(step.get("corner", ""), step.get("rect", Rect2()))
+
+
+## What a step's arrows point at, on screen, in their numbered order.
+func arrow_targets(step: Dictionary) -> Array:
+	var out := []
+	for a in step.get("arrows", []):
+		out.append(_on_screen(a["corner"], a["rect"]))
+	if out.is_empty() and target_rect(step).size != Vector2.ZERO:
+		out.append(target_rect(step))
+	return out
+
+
+func _on_screen(corner: String, r: Rect2) -> Rect2:
 	if corner == "":
 		return Rect2()
-	var r: Rect2 = step["rect"]
 	var view := get_viewport().get_visible_rect().size
 	var origin := Vector2(view.x if corner in ["tr", "br"] else 0.0, view.y if corner in ["bl", "br"] else 0.0)
 	return Rect2(origin + r.position, r.size)
+
+
+## Arrows from the card to each part it explains (numbered when there are
+## several), drawn on top of the dimmed screen. They bob gently toward it.
+func _draw_arrows() -> void:
+	if index < 0 or index >= steps.size() or _card.modulate.a <= 0.0:
+		return
+	var targets := arrow_targets(steps[index])
+	var card := Rect2(_card.position, _card.size)
+	var bob := 3.0 * sin(_time * 5.0)
+	var last_tail_x := -INF
+	for i in targets.size():
+		var t: Rect2 = targets[i]
+		var above := t.get_center().y < card.position.y
+		var tail_x := clampf(t.get_center().x, card.position.x + 24.0, card.end.x - 24.0)
+		# (tails at least a badge apart)
+		tail_x = maxf(tail_x, last_tail_x + 34.0)
+		last_tail_x = tail_x
+		var tail := Vector2(tail_x, card.position.y - 12.0 if above else card.end.y + 12.0)
+		var tip := Vector2(t.get_center().x, t.end.y + 4.0 if above else t.position.y - 4.0)
+		var dir := (tip - tail).normalized()
+		tip += dir * bob
+		var side := dir.orthogonal()
+		var base := tip - dir * 13.0
+		var start := tail + dir * 11.0
+		var alpha := _card.modulate.a
+		_arrows.draw_line(start, base, Color(ARROW_EDGE, alpha), 7.0)
+		_arrows.draw_line(start, base, Color(ARROW, alpha), 3.0)
+		_arrows.draw_colored_polygon(PackedVector2Array([tip + dir * 3.0, base + side * 10.0 - dir * 2.0, base - side * 10.0 - dir * 2.0]),
+			Color(ARROW_EDGE, alpha))
+		_arrows.draw_colored_polygon(PackedVector2Array([tip, base + side * 7.0, base - side * 7.0]), Color(ARROW, alpha))
+		if targets.size() > 1:
+			_arrows.draw_circle(tail, 11.0, Color(ARROW_EDGE, alpha))
+			_arrows.draw_circle(tail, 9.0, Color(ARROW, alpha))
+			_arrows.draw_string(FONT, tail + Vector2(-4.0, 5.0), str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(ARROW_EDGE, alpha))
 
 
 func _show_step(i: int) -> void:
@@ -236,15 +308,21 @@ func _layout() -> void:
 	_card.size = card_size
 	var pos := Vector2((view.x - card_size.x) / 2.0, (view.y - card_size.y) / 2.0)
 	if hole.size != Vector2.ZERO:
-		# Beside the highlighted part, on the side with room
+		# Beside the highlighted part, on the side with room (further off when
+		# arrows point from it, so they read as arrows)
+		var gap := 56.0 if not arrow_targets(steps[index]).is_empty() else 18.0
 		var centre := hole.get_center()
 		pos.x = clampf(centre.x - card_size.x / 2.0, 16.0, view.x - card_size.x - 16.0)
-		pos.y = hole.end.y + 18.0 if centre.y < view.y / 2.0 else hole.position.y - card_size.y - 18.0
+		pos.y = hole.end.y + gap if centre.y < view.y / 2.0 else hole.position.y - card_size.y - gap
 	_card.position = pos
+	_arrows.queue_redraw()
 
 
 func _process(delta: float) -> void:
 	_cooldown = maxf(_cooldown - delta, 0.0)
+	_time += delta
+	if _arrows:
+		_arrows.queue_redraw()
 
 
 func _input(event: InputEvent) -> void:

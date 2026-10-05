@@ -29,6 +29,10 @@ func _run() -> void:
 	# (loaded at run time: UiTour needs the autoloads, which are not up while this script compiles)
 	var ui_tour: GDScript = load("res://scripts/ui/ui_tour.gd")
 	ui_tour.set("enabled", false)
+	# The admin switch (every level open, for testing by hand) is off: the tests
+	# check the real locks
+	var journey: GDScript = load("res://scripts/story/journey.gd")
+	journey.set("admin_unlock", false)
 	game_state.clear_all()
 	var settings := root.get_node("Settings")
 	settings.persist_to_disk = false

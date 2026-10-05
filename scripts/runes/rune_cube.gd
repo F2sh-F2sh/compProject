@@ -306,6 +306,13 @@ func deactivate(reason := "") -> void:
 		manager.runes_changed.emit()
 
 
+## Part of the dungeon's own machinery (the Cold Forge's bellows shaft, the
+## Kiln Heart's heat vents): fed by the dungeon, every word carved, fixed in
+## place and running from the start. The runes list leaves it running.
+func is_machinery() -> bool:
+	return start_active and dungeon_powered and not carryable and locked_slots == 15
+
+
 func toggle() -> String:
 	if is_active:
 		deactivate()

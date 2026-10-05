@@ -38,6 +38,7 @@ func _run() -> void:
 	changed = _trim_signs() or changed
 	changed = _fire_last() or changed
 	changed = _waymarks() or changed
+	changed = _level_one() or changed
 
 	if changed:
 		for layer_name in LAYERS:
@@ -379,4 +380,16 @@ func _waymarks() -> bool:
 	for i in WAYMARKS_AT.size():
 		_text += '\n[node name="Waymark%d" parent="Waymarks" instance=ExtResource("63_waymark")]\nposition = Vector2(%d, 458)\n' % [i + 1, WAYMARKS_AT[i]]
 	print("waymarks: applied")
+	return true
+
+
+# The tutorial is Level 1: the first place she comes to in the dungeon, down
+# Nan's cellar door. Its first card and its welcome sign say so.
+func _level_one() -> bool:
+	if _text.contains("LEVEL 1 · THE PASSAGE"):
+		print("level one: already applied")
+		return false
+	_set_props('name="Lesson1" type="Area2D" parent="Lessons"', {"eyebrow": '"LEVEL 1 · THE PASSAGE · THE CELLAR"'})
+	_replace_text("Welcome to the Novices' Way.\nUse {move_left}", "Level 1: the Passage.\nUse {move_left}")
+	print("level one: applied")
 	return true

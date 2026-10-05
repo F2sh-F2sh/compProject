@@ -11,6 +11,9 @@ extends Node2D
 
 const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
 const PUDDLE := preload("res://scenes/fx/puddle.tscn")
+const WAYMARK := preload("res://scenes/puzzle/waymark.tscn")
+## Chalk arrows low on the walls along the lane, pointing on to Nan's door.
+const ARROWS_AT := [742.0, 962.0, 1640.0]
 const SELF_PATH := "res://scenes/story/lowbell.tscn"
 
 const FLOOR_Y := 534.0
@@ -230,6 +233,11 @@ func _build_street() -> void:
 	SurfaceArt.sprite(street, "tree_big", Vector2(1968, FLOOR_Y + 2))
 	SurfaceArt.sprite(street, "fence", Vector2(1934, FLOOR_Y + 1))
 	SurfaceArt.sprite(street, "fence_broken", Vector2(1985, FLOOR_Y + 1))
+	# Chalk arrows on the walls: the way to Nan's
+	for x in ARROWS_AT:
+		var mark: Node2D = WAYMARK.instantiate()
+		mark.position = Vector2(x, FLOOR_Y - 44)
+		add_child(mark)
 	# Puddles in the lane
 	for spec in [[562.0, 60.0], [1350.0, 84.0]]:
 		var puddle: Node2D = PUDDLE.instantiate()

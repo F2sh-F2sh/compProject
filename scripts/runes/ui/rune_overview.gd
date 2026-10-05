@@ -134,8 +134,10 @@ func _refresh() -> void:
 		row.add_child(edit)
 		inscribe_buttons[c] = edit
 		var off := Button.new()
-		off.text = "Switch off"
-		off.disabled = not c.is_active
+		off.text = "Always on" if c.is_machinery() else "Switch off"
+		off.disabled = not c.is_active or c.is_machinery()
+		if c.is_machinery():
+			off.tooltip_text = "Part of the dungeon's machinery: it keeps running."
 		off.custom_minimum_size = Vector2(130, 36)
 		_style(off)
 		off.pressed.connect(func():
@@ -150,7 +152,7 @@ func _refresh() -> void:
 	var upkeep := m.total_upkeep
 	_summary.text = "Your runes cost %s mana per second.  Mana %d / %d" % [RuneBook._num(upkeep), m.mana(), m.player.get_mana_cap() if m.player else 0] \
 		if upkeep > 0.0 else "None of your runes is drawing mana.  Mana %d / %d" % [m.mana(), m.player.get_mana_cap() if m.player else 0]
-	_all.disabled = m.active_cubes().is_empty()
+	_all.disabled = not m.active_cubes().any(func(c): return not c.is_machinery())
 	if first:
 		first.grab_focus()
 	elif not _all.disabled:

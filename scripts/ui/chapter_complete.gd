@@ -18,7 +18,6 @@ static var pending := {}
 var _root: Control
 var title_button: Button
 var continue_button: Button
-var explore_button: Button
 
 
 ## `stats`: {time, deaths, resets, hints, pages, total_pages}
@@ -86,10 +85,7 @@ func _build(chapter_name: String, stats: Dictionary) -> void:
 		buttons.add_child(continue_button)
 	title_button = _button("Return to Title", _to_title)
 	buttons.add_child(title_button)
-	# After the story pictures there is no level left to explore
-	if stats.get("explore", true):
-		explore_button = _button("Keep exploring", _close)
-		buttons.add_child(explore_button)
+	# (only on, or back to the title: there is no staying in a finished level)
 	_root.modulate.a = 0.0
 	var tween := create_tween()
 	tween.tween_property(_root, "modulate:a", 1.0, 1.2)

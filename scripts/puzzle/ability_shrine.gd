@@ -23,6 +23,10 @@ const TOURS := {"fire": "fire", "echo": "echo"}
 ## What the card says under the word. {shoot}, {heal} and {echo} show the keys.
 @export_multiline var story := ""
 @export var glow_color := Color(0.45, 0.65, 1.0)
+## Soft steam rising off it (the hot spring in the bell tower).
+@export var steam := false
+## How big its sprite is drawn (the hot spring is drawn at 2).
+@export var sprite_scale := 1.0
 
 var interactable: Interactable
 var figure: AnimatedSprite2D
@@ -33,13 +37,13 @@ var _time := 0.0
 func _ready() -> void:
 	add_to_group("ability_shrine")
 	add_to_group("kindle_point")
-	figure = SurfaceArt.animated(self, sprite_name, Vector2.ZERO, 6.0, 1.0)
+	figure = SurfaceArt.animated(self, sprite_name, Vector2.ZERO, 6.0, sprite_scale)
 	figure.name = "Figure"
 	# The Echo stone's two frames are states (dim, remembered), not an animation
 	var animated_frames: bool = int(SurfaceArt.STRIPS.get(sprite_name, 1)) > 2
 	if not animated_frames:
 		figure.stop()
-	var height := SurfaceArt.size_of(sprite_name).y
+	var height := SurfaceArt.size_of(sprite_name).y * sprite_scale
 	_light = PointLight2D.new()
 	_light.texture = LightTextures.radial(256)
 	_light.color = glow_color
@@ -53,6 +57,13 @@ func _ready() -> void:
 	interactable.prompt_offset = Vector2(0, -height - 14.0)
 	add_child(interactable)
 	interactable.interacted.connect(_on_used)
+	if steam:
+		var wisps := GlowFX.embers(Color(0.86, 0.93, 1.0, 0.7), 26, 22.0, 26.0, 2.8)
+		wisps.name = "Steam"
+		wisps.scale_amount_min = 1.0
+		wisps.scale_amount_max = 2.0
+		wisps.position = Vector2(8, -height * 0.55)
+		add_child(wisps)
 	_refresh()
 
 
@@ -78,7 +89,7 @@ func _on_used(_by: Node) -> void:
 	if first:
 		GameState.grant_ability(ability)
 		Sfx.play("rune_learn", global_position, -3.0, 0.0)
-		FloatText.spawn(get_parent(), global_position + Vector2(0, -SurfaceArt.size_of(sprite_name).y - 24.0),
+		FloatText.spawn(get_parent(), global_position + Vector2(0, -SurfaceArt.size_of(sprite_name).y * sprite_scale - 24.0),
 			"+ " + word, glow_color.lightened(0.3), 30.0, 1.8)
 		_flare()
 		_refresh()
@@ -95,13 +106,13 @@ func _on_used(_by: Node) -> void:
 func _flare() -> void:
 	var ring := _Ring.new()
 	ring.color = glow_color
-	ring.position = Vector2(0, -SurfaceArt.size_of(sprite_name).y * 0.55)
+	ring.position = Vector2(0, -SurfaceArt.size_of(sprite_name).y * sprite_scale * 0.55)
 	add_child(ring)
 	var t := create_tween().set_parallel()
 	t.tween_property(ring, "radius", 90.0, 1.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	t.tween_property(ring, "modulate:a", 0.0, 1.1)
 	t.chain().tween_callback(ring.queue_free)
-	ImpactFX.burst(get_parent(), global_position + Vector2(0, -SurfaceArt.size_of(sprite_name).y * 0.6), glow_color, false, 12)
+	ImpactFX.burst(get_parent(), global_position + Vector2(0, -SurfaceArt.size_of(sprite_name).y * sprite_scale * 0.6), glow_color, false, 12)
 
 
 ## The expanding ring (an effect, so it is drawn rather than a sprite).

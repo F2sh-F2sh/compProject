@@ -8,7 +8,7 @@ extends Area2D
 ## run statistics ("<stat_prefix>.stat.time" / ".deaths").
 
 @export_file("*.tscn") var next_scene_path := ""
-@export var completion_text := "Part 1 Complete  ·  The Passage"
+@export var completion_text := "Level 1 Complete  ·  The Passage"
 @export var trigger_size := Vector2(40, 64)
 ## Saved when the level is finished (e.g. "tutorial.done").
 @export var completion_flag := ""
@@ -17,9 +17,9 @@ extends Area2D
 ## Where this level's run statistics are kept.
 @export var stat_prefix := "tutorial"
 ## The card's heading and the level's name on it.
-@export var card_heading := "PART 1 COMPLETE"
+@export var card_heading := "LEVEL 1 COMPLETE"
 @export var card_title := "The Passage"
-@export var card_next_label := "Continue to Part 2: The Belfry"
+@export var card_next_label := "Continue to Level 2: The Belfry"
 
 const TITLE_FONT_NAMES := ["Cinzel", "Trajan Pro", "Times New Roman", "Georgia", "Liberation Serif", "DejaVu Serif", "serif"]
 
@@ -116,5 +116,4 @@ func _show_card() -> void:
 		"next": next_scene_path,
 		"heading": card_heading,
 		"next_label": card_next_label,
-		"explore": false,
 	})

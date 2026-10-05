@@ -150,9 +150,13 @@ func room_cubes() -> Array[RuneCube]:
 	return cubes.filter(func(c): return c.is_carried or room.contains(c.global_position + Vector2(0, -8)))
 
 
+## Switches every running rune off (the dungeon's own machinery keeps running,
+## unless a reset puts everything back).
 func deactivate_all(reason := "") -> int:
 	var n := 0
 	for cube in active_cubes():
+		if cube.is_machinery() and reason != "reset":
+			continue
 		cube.deactivate(reason)
 		n += 1
 	return n

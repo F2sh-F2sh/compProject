@@ -73,8 +73,8 @@ func build_level() -> void:
 	level.set_script(load("res://scripts/puzzle/chapter_root.gd"))
 	level.set("chapter_id", PREFIX)
 	level.set("chapter_title", "The Sealed Observatory")
-	level.set("unit_name", "part")
-	level.set("complete_heading", "TUTORIAL COMPLETE")
+	level.set("unit_name", "level")
+	level.set("complete_heading", "LEVEL 3 COMPLETE")
 	level.set("next_chapter", "res://scenes/story/interlude_dome.tscn")
 	level.set("next_label", "Continue: the way down")
 	level.set("total_pages", 0)
@@ -205,7 +205,7 @@ func room_1_broken_inscription() -> void:
 	var exit_gate := gate(room, "ExitGate", 18)
 	circuit(room, "PlateToGate", [p], [exit_gate],
 		{"reveal_target": true, "persist_id": "ch2.r1.solved", "channel_y": 440.0, "symbol": 0})
-	guide(room, "Open the gate at the far end.", "I", "The Wind", "The Novices' Way  ·  Part 3  ·  The Sealed Observatory")
+	guide(room, "Open the gate at the far end.", "I", "The Wind", "The Novices' Way  ·  Level 3  ·  The Sealed Observatory")
 	room.set("explainer", "runes")
 	step(room, "A new fragment learned", Cond.FLAG, null, {"flag": "rune.frag.right"})
 	step(room, "The mended rune blows", Cond.POWERED, c)
@@ -356,7 +356,7 @@ func room_4_fractured_seal() -> void:
 	var block := stone(room, "Stone", cx(66))
 	var wall := inst(RUNES + "cracked_wall.tscn", room, "CrackedWall", Vector2(cx(71), FLOOR_Y),
 		{"size": Vector2(32, 262), "break_momentum": 640.0, "persist_id": "ch2.r4.wall"})
-	guide(room, "Break through the cracked wall.", "II", "Stone and Frost", "The Novices' Way  ·  Part 3  ·  The Sealed Observatory")
+	guide(room, "Break through the cracked wall.", "II", "Stone and Frost", "The Novices' Way  ·  Level 3  ·  The Sealed Observatory")
 	step(room, "Strong learned", Cond.FLAG, null, {"flag": "rune.frag.strong"})
 	step(room, "The cracked wall gives way", Cond.OPEN, wall)
 
@@ -449,7 +449,7 @@ func room_6_watchers_lock() -> void:
 	var exit_gate := gate(room, "ExitGate", 122)
 	circuit(room, "PlatesToGate", [plate_a, plate_b], [exit_gate],
 		{"hold_time": 0.5, "reveal_target": true, "persist_id": "ch2.r6.solved", "channel_y": 440.0, "symbol": 2})
-	guide(room, "Hold both heavy plates at once.", "III", "Light and Space", "The Novices' Way  ·  Part 3  ·  The Sealed Observatory")
+	guide(room, "Hold both heavy plates at once.", "III", "Light and Space", "The Novices' Way  ·  Level 3  ·  The Sealed Observatory")
 	step(room, "Down learned", Cond.FLAG, null, {"flag": "rune.frag.down"})
 	step(room, "The watcher turns to stone on the plate", Cond.POWERED, plate_a)
 	step(room, "Both plates held: the gate opens", Cond.OPEN, exit_gate)

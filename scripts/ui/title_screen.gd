@@ -21,7 +21,10 @@ var part_1_button: Button
 var part_2_button: Button
 var part_3_button: Button
 var landing_button: Button
+var admin_button: Button
 var _parts: VBoxContainer
+## ADMIN (temporary, see Journey.admin_unlock): every wing's rooms and the Eye.
+var _admin: VBoxContainer
 var _menu: VBoxContainer
 var _settings: VBoxContainer
 var _progress: Label
@@ -144,29 +147,34 @@ func _build_ui() -> void:
 	_menu.add_child(continue_button)
 	new_button = _button("New Game", _on_new_game)
 	_menu.add_child(new_button)
-	tutorial_button = _button("Tutorial", _on_tutorial)
+	tutorial_button = _button("Choose a Level", _on_tutorial)
 	_menu.add_child(tutorial_button)
 	_menu.add_child(_button("Settings & Controls", func(): _show_settings(true)))
 	_menu.add_child(_button("Quit", func(): get_tree().quit()))
 	_progress = _label("", FONT, 13, Color("b8acd8"))
 	_menu.add_child(_progress)
 
-	# "Tutorial" opens its three parts: the whole early game is one tutorial
-	# section, "The Novices' Way"
+	# "Choose a Level" opens the levels: Level 1 (the tutorial, the first place
+	# in the dungeon), Level 2 and Level 3, all on the Novices' Way, then the
+	# Long Stair
 	_parts = VBoxContainer.new()
 	_parts.visible = false
 	_parts.add_theme_constant_override("separation", 8)
 	column.add_child(_parts)
 	_parts.add_child(_label("The Novices' Way", FONT, 13, Color("b8acd8")))
-	part_1_button = _button("Part 1 · The Passage", _on_part_1)
+	part_1_button = _button("Level 1 · The Passage (tutorial)", _on_part_1)
 	_parts.add_child(part_1_button)
-	part_2_button = _button("Part 2 · The Belfry", func(): _jump_to(CHAPTER))
+	part_2_button = _button("Level 2 · The Belfry", func(): _jump_to(CHAPTER))
 	_parts.add_child(part_2_button)
-	part_3_button = _button("Part 3 · The Observatory", func(): _jump_to(CHAPTER_2))
+	part_3_button = _button("Level 3 · The Observatory", func(): _jump_to(CHAPTER_2))
 	_parts.add_child(part_3_button)
 	_parts.add_child(_label("After it", FONT, 13, Color("b8acd8")))
 	landing_button = _button("The Long Stair · the four wings", func(): _jump_to(Journey.LANDING))
 	_parts.add_child(landing_button)
+	if Journey.admin_unlock:
+		admin_button = _button("Admin: any wing, any room", func(): _show_admin(true))
+		_parts.add_child(admin_button)
+		_build_admin(column)
 	_parts.add_child(_button("Back", func(): _show_parts(false)))
 
 	_settings = VBoxContainer.new()
@@ -236,11 +244,11 @@ func _refresh() -> void:
 		if Journey.eye_open():
 			_progress.text = "The Long Stair: all four bells rung; the Eye is open"
 	elif GameState.has_flag("ch1.complete"):
-		_progress.text = "The Novices' Way: Part 2 done  ·  ledger pages %d / 7" % pages
+		_progress.text = "Level 2 done  ·  ledger pages %d / 7" % pages
 	elif rooms > 0 or pages > 0:
-		_progress.text = "The Novices' Way, Part 2: %d of 9 rooms  ·  ledger pages %d / 7" % [rooms, pages]
+		_progress.text = "Level 2: %d of 9 rooms  ·  ledger pages %d / 7" % [rooms, pages]
 	elif GameState.has_flag("tutorial.done"):
-		_progress.text = "The Novices' Way: Part 1 done"
+		_progress.text = "Level 1 done"
 	else:
 		_progress.text = ""
 	(continue_button if has_save else new_button).grab_focus()
@@ -309,6 +317,53 @@ func _on_part_1() -> void:
 ## would have remembered on the way there.
 func _jump_to(path: String) -> void:
 	Journey.skipping_to(path)
+	_start(path)
+
+
+# ------------------------------------------------------------------ admin (temporary)
+
+## The admin page: every room of the four wings, and the Eye, each started
+## directly with the spells and words of everything before it.
+const ADMIN_ROOMS := [
+	["Kilnworks · The Cold Forge", Journey.KILN, "R1"], ["Kilnworks · The Kiln Heart", Journey.KILN, "R2"],
+	["Cistern · The Still Water", Journey.CISTERN, "R1"], ["Cistern · The Great Sluice", Journey.CISTERN, "R2"],
+	["Lampworks · The Reading Room", Journey.LAMPS, "R1"], ["Lampworks · The Lamp Stair", Journey.LAMPS, "R2"],
+	["Galleries · The First Door", Journey.GALLERIES, "R1"], ["Galleries · The Fold Bell", Journey.GALLERIES, "R2"],
+	["The Eye", Journey.EYE, "R1"],
+]
+
+
+func _build_admin(column: VBoxContainer) -> void:
+	_admin = VBoxContainer.new()
+	_admin.visible = false
+	_admin.add_theme_constant_override("separation", 8)
+	column.add_child(_admin)
+	_admin.add_child(_label("Admin: start any room (nothing before it needs finishing)", FONT, 13, Color("ffd88a")))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 6)
+	_admin.add_child(grid)
+	for spec in ADMIN_ROOMS:
+		var b := _button(spec[0], _admin_jump.bind(spec[1], spec[2]))
+		b.custom_minimum_size = Vector2(290, 36)
+		b.add_theme_font_size_override("font_size", 14)
+		grid.add_child(b)
+	_admin.add_child(_button("Back", func(): _show_admin(false)))
+
+
+func _show_admin(show: bool) -> void:
+	_parts.visible = not show
+	_admin.visible = show
+	if show:
+		((_admin.get_child(1) as GridContainer).get_child(0) as Button).grab_focus()
+	elif admin_button:
+		admin_button.grab_focus()
+
+
+func _admin_jump(path: String, room: String) -> void:
+	Journey.admin_prepare(path, room)
+	Journey.admin_start_room = room
 	_start(path)
 
 

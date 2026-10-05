@@ -63,7 +63,13 @@ func build_wing_components() -> void:
 		[RUNES + "eye_altar.tscn", "EyeAltar", Node2D, "res://scripts/runes/eye_altar.gd"],
 		[PUZZLE + "great_kiln.tscn", "GreatKiln", Node2D, "res://scripts/puzzle/great_kiln.gd"],
 		[PUZZLE + "forge_door.tscn", "ForgeDoor", Node2D, "res://scripts/puzzle/forge_door.gd"],
+		[PUZZLE + "heart_crucible.tscn", "HeartCrucible", Node2D, "res://scripts/puzzle/heart_crucible.gd"],
 		[TRAPS + "slag_pool.tscn", "SlagPool", Area2D, "res://scripts/traps/slag_pool.gd"],
+		[TRAPS + "cistern_pool.tscn", "CisternPool", Area2D, "res://scripts/traps/cistern_pool.gd"],
+		[PUZZLE + "fountain.tscn", "Fountain", Node2D, "res://scripts/puzzle/fountain.gd"],
+		[PUZZLE + "tide_clock.tscn", "TideClock", Node2D, "res://scripts/puzzle/tide_clock.gd"],
+		[TRAPS + "tide_pool.tscn", "TidePool", Node2D, "res://scripts/traps/tide_pool.gd"],
+		[PUZZLE + "tide_mark.tscn", "TideMark", Node2D, "res://scripts/puzzle/tide_mark.gd"],
 	]
 	for row in table:
 		var node: Node = row[2].new()
@@ -232,7 +238,7 @@ const KILN_ROAR_FLAG := "kiln.r1.kiln"
 
 func build_kiln() -> void:
 	begin("Kiln", "kiln", "The Kilnworks", Journey.KILN_INTERLUDE, Journey.WINGS[0]["words"])
-	level.set("total_pages", 3)
+	level.set("total_pages", 6)
 	(level.get_node("Darkness") as CanvasModulate).color = KILN_COLD
 	kiln_cold_forge()
 	kiln_heart()
@@ -278,25 +284,25 @@ func deco_sprite(parent: Node, sprite_name: String, pos: Vector2, flip := false,
 
 
 ## A patch of the Hush's frost on the wall that melts when the kiln roars.
-func frost(parent: Node, pos: Vector2, which := "frost_a", flip := false) -> void:
+func frost(parent: Node, pos: Vector2, which := "frost_a", flip := false, flag := KILN_ROAR_FLAG) -> void:
 	var n := Node2D.new()
 	n.name = "Frost%d" % parent.get_child_count()
 	n.position = pos
 	n.set_script(load("res://scripts/fx/melting_frost.gd"))
 	n.set("sprite_name", which)
-	n.set("melt_flag", KILN_ROAR_FLAG)
+	n.set("melt_flag", flag)
 	n.set("flip", flip)
 	add_owned(parent, n)
 
 
-## One of the Smith's ledger pages (the Kilnworks has three).
+## One of the Smith's ledger pages (the Kilnworks has six, three a room).
 func kiln_page(parent: Node, id: int, pos: Vector2, title: String, text: String) -> void:
 	inst(PUZZLE + "lore_page.tscn", parent, "LorePage%d" % id, pos,
 		{"page_id": "kiln.page.%d" % id, "title": title, "text": text})
 	var ids: PackedStringArray = parent.get("page_ids")
 	ids.append("kiln.page.%d" % id)
 	parent.set("page_ids", ids)
-	ledger.append({"id": "kiln.page.%d" % id, "numeral": ["i", "ii", "iii"][id - 1],
+	ledger.append({"id": "kiln.page.%d" % id, "numeral": ["i", "ii", "iii", "iv", "v", "vi"][id - 1],
 		"title": title, "text": text, "room": parent.get("title")})
 
 
@@ -506,106 +512,689 @@ func kiln_cold_forge() -> void:
 	prop(deco, "cobweb_corner", cx(43) + 8, 12.0, true, true)
 
 
-## The Kiln Heart. A stone block on a heavy plate opens the gate (a Strong
-## wind drives it; a kerb stops it on the plate), brambles hide the bell
-## behind it, and the Forge Bell ends the wing.
+## THE KILN HEART. The Great Kiln's heat runs on into the Smith's last forge:
+## a long hall over a lake of slag, ending in the tower where the Forge Bell
+## hangs frozen. The Heart (the Smith's crucible, sunk in the tower floor;
+## scripts/puzzle/heart_crucible.gd) wakes it: three skips of coal tipped into
+## it and its three burners lit at the same moment. Five parts, three of them
+## a new word:
+##   the Shutter Hall (cols 45-52)  DELAY: the shutter stands open only while
+##     someone is on its plate, and the lamp beyond it is out of reach of her
+##     own fire. The cube by the shutter throws further, but she can't be at the
+##     cube and on the plate at once: a bolt that waits two seconds can.
+##   the Slag Lake (cols 59-74)  three heat vents (dungeon machinery, always on)
+##     and the ledges between them: up a column, off onto the next ledge.
+##   the Coal Racks (the gallery, cols 71-87)  LARGE: from the pedestal at the
+##     end of the gallery one wide gust tips the skips off all three iron racks
+##     (wind blows through iron bars) into the Heart; a normal one reaches one.
+##   the Heart (cols 89-97)  SPLIT: from the pedestal beside it, one bolt thrown
+##     three ways up and to the right lights the three burners hanging over it
+##     at once (each dies within half a second, so one at a time won't do).
+##   the bell (cols 98-101)  the Heart's roar thaws the bell and drives the
+##     hoist, the only way up to it.
+## Optional: three ledger pages (a shelf over the hall, a ledge low in the lake
+## beside the second vent, a ledge beside the hoist halfway up).
 func kiln_heart() -> void:
-	var o := 22
-	shell(22 + o, 46 + o, LOW_CEIL, false, true)
-	curb(40 + o)
-	var room := mk_room("R2", "The Kiln Heart", 22 + o, 46 + o, LOW_CEIL, Vector2(cx(23 + o), 530))
-	waymarks(room, 22 + o, 46 + o, false)
-	shrine(room, "heart", cx(24 + o))
-	kindle_flame(room, cx(26 + o))
-	tablet(room, "up", cx(27 + o) + 16, "Heat rises, and so does what it moves.")
-	tablet(room, "large", cx(29 + o), "A wide hearth warms a wide room.")
-	var c := cube(room, "Heart Cube", cx(33 + o), "wind/push/right/normal")
-	var block := stone(room, "Stone", cx(35 + o))
-	var p := plate(room, "HeavyPlate", 2544.0 + o * T, {"stone_only": true, "width": 48.0})
-	var exit_gate := gate(room, "HeartGate", 41 + o)
-	circuit(room, "PlateToGate", [p], [exit_gate],
-		{"reveal_target": true, "persist_id": "kiln.r2.solved", "channel_y": 440.0, "symbol": 1})
-	var brambles := inst(RUNES + "burnable.tscn", room, "Brambles", Vector2(cx(42 + o), FLOOR_Y), {"size": Vector2(32, 128)})
-	var bell := wing_bell(room, cx(43 + o), "The Forge Bell rings out.", "Heat runs through the cold stone, and the furnaces stir.")
-	guide(room, "Ring the Forge Bell.")
-	step(room, "The stone on the plate: the gate opens", Cond.OPEN, exit_gate)
-	step(room, "The brambles burn", Cond.OPEN, brambles)
+	shell(44, 102, HIGH_CEIL, false, true)
+	# The Shutter Hall is a low antechamber; its east wall comes down to the
+	# shutter's doorway (col 52)
+	for x in range(45, 53):
+		ceiling.erase_cell(Vector2i(x, 0))
+		for y in range(0, 4 if x < 52 else 6):
+			solid(x, y)
+		if x < 52:
+			ceiling.set_cell(Vector2i(x, 4), 0, BEAMS[rng.randi_range(0, BEAMS.size() - 1)])
+	var room := mk_room("R2", "The Kiln Heart", 44, 102, HIGH_CEIL, Vector2(cx(45), 530), true)
+	var deco := group(room, "Decor")
+	var machinery := {"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": 15, "start_active": true}
+
+	# ---------------------------------------------------- the Shutter Hall (Delay)
+	shrine(room, "heart", cx(45))
+	kindle_flame(room, cx(46))
+	var tab_delay := tablet(room, "delay", 3096.0, "A flame that waits, then flies.")
+	var shutter_plate := plate(room, "ShutterPlate", 3176.0, {"width": 56.0})
+	var shutter_cube := cube(room, "Shutter Cube", cx(51), "fire/projectile/right/normal",
+		{"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM | LOCK_DIRECTION})
+	var shutter := gate(room, "Shutter", 52)
+	# Beyond the shutter: the cube's bolt reaches it; her own fire, thrown from
+	# the plate, dies a stride short
+	var ash_lamp := inst(PUZZLE + "brazier.tscn", room, "AshLamp", Vector2(cx(58), FLOOR_Y), {"persist_id": "kiln.r2.ash"})
+	circuit(room, "ShutterCircuit", [shutter_plate, ash_lamp], [shutter],
+		{"mode": 1, "channel_y": 470.0, "symbol": 0, "solved_sound": ""})
+	room.set("glance_at", NodePath("AshLamp"))
+	# The Smith's notes on a shelf over the hall (a charged jump)
+	ledge_run(50, 50, 6, true)
+	kiln_page(room, 4, Vector2(cx(50), 404.0), "The Smith's Ledger, iv",
+		"The Kiln Heart takes the Great Kiln's heat up the tower and wakes the Forge Bell with it. Three skips of coal and three burners lit together, or it lies cold. When the Hush came I let it go cold, and the bell froze in its tower.")
+
+	# ---------------------------------------------------- the Slag Lake (three heat vents)
+	# Each vent is a column of heat (a mounted dungeon cube, always on) rising
+	# out of the slag; the next ledge starts a hand's width from its edge (and
+	# is square there), so she rides up and steps off. A fall in the slag puts
+	# her back at the last candle she touched.
+	var bank_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleBank", Vector2(cx(56), FLOOR_Y))
+	var candle_a := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleLedgeA", Vector2(cx(61), 274.0))
+	var candle_b := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleLedgeB", Vector2(cx(67), 274.0))
+	var candle_g := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleGallery", Vector2(cx(72), 274.0))
+	slag_pool(room, 59, 62, bank_candle)
+	slag_pool(room, 63, 67, candle_a)
+	slag_pool(room, 68, 74, candle_b)
+	slag_pool(room, 75, 84, candle_g)
+	# The first ledge is broken in the middle (a hop across, or a drop to the
+	# ledge low in the lake below it)
+	ledge_run(61, 61, 4)
+	ledge_run(63, 63, 4)
+	ledge_run(66, 68, 4, false, false, false)
+	var vents := []
+	for x in [60 * T, 65 * T, 70 * T]:
+		vents.append(cube(room, "Vent %d" % (vents.size() + 1), x, "wind/lift/up/normal", machinery, 598.0))
+	# The ledge low in the lake, under the break: walk off its end into the
+	# second vent
+	ledge_run(62, 63, 7, true)
+	kiln_page(room, 5, Vector2(cx(62), 468.0), "The Smith's Ledger, v",
+		"My apprentice crossed the lake on the heat. Up the column, off at the top, never look down. He fell twice and the slag spat him back both times. He did not fall a third time.")
+
+	# ---------------------------------------------------- the gallery and the Coal Racks (Large)
+	# The far gallery, on over the end of the lake to the tower
+	ledge_run(71, 84, 4, false, false, false)
+	inst(PUZZLE + "kindle_flame.tscn", room, "KindleGallery", Vector2(cx(73) + 16, 274.0))
+	inst(PUZZLE + "chapter_checkpoint.tscn", room, "ShrineGallery", Vector2(cx(74) + 24, 274.0), {"checkpoint_id": "kiln.cp.gallery"})
+	var reveal := Area2D.new()
+	reveal.name = "HeartReveal"
+	reveal.set_script(load("res://scripts/puzzle/reveal_trigger.gd"))
+	reveal.position = Vector2(cx(71) + 16, 274.0)
+	reveal.set("look_at", Vector2(5760.0, 330.0))
+	reveal.set("flag", "kiln.r2.revealed")
+	add_owned(room, reveal)
+	var tab_large := tablet(room, "large", cx(77), "A wide breath fills the whole forge.", 274.0)
+	var rack_cube := cube(room, "Rack Cube", cx(79), "wind/push/right/normal", {}, 274.0)
+	# The pedestal at the very end of the gallery, so a gust from it starts clear of the ledge
+	var rack_pedestal := inst(RUNES + "rune_pedestal.tscn", room, "RackPedestal", Vector2(85 * T - 16, 274.0))
+	# The fourth vent, beside the gallery's end: the way back up from the tower floor
+	pit(85, 85)
+	vents.append(cube(room, "Vent 4", cx(85), "wind/lift/up/normal", machinery, 598.0))
+	# Three iron racks over the Heart's west rim, one above another, a skip of
+	# coal near the end of each: from the pedestal a normal gust (96 px tall)
+	# reaches the middle one, a Large one (288 px) all three
+	var skips := []
+	for i in 3:
+		var surface: float = [146.0, 274.0, 402.0][i]
+		inst(PUZZLE + "iron_grate.tscn", room, "Rack%d" % (i + 1), Vector2(5536.0, surface), {"width": 144.0})
+		skips.append(inst(RUNES + "wind_body.tscn", room, "Skip%d" % (i + 1), Vector2(5650.0, surface), {
+			"size": Vector2(40, 40), "sprite_name": "coal_cart", "extra_groups": PackedStringArray(["coal"]),
+			"persist_id": "kiln.r2.skip.%d" % (i + 1), "required": true, "required_until_flag": "kiln.r2.heart",
+			"required_reason": "A skip of coal fell where it can't be tipped into the Heart.",
+			"required_area": Rect2(5530.0, 90.0, 160.0, 320.0)}))
+
+	# ---------------------------------------------------- the Heart (Split)
+	pit(89, 90)
+	var burner_paths: Array[NodePath] = [NodePath("../BurnerHigh"), NodePath("../BurnerMid"), NodePath("../BurnerLow")]
+	var heart := inst(PUZZLE + "heart_crucible.tscn", room, "Heart", Vector2(90 * T, 598.0), {
+		"persist_id": "kiln.r2.heart", "burners": burner_paths,
+		"coal_ids": PackedStringArray(["kiln.r2.skip.1", "kiln.r2.skip.2", "kiln.r2.skip.3"])})
+	# Its three burners hang beside it on chains from the roof, along the fan of
+	# a split bolt thrown up and to the right from the pedestal by it: each 200
+	# px along its line (all three catch in the same instant), low enough to be
+	# seen from the pedestal
+	var burners := []
+	for spec in [["BurnerHigh", Vector2(6043, 347)], ["BurnerMid", Vector2(6087, 381)], ["BurnerLow", Vector2(6121, 425)]]:
+		var pos: Vector2 = spec[1]
+		burners.append(inst(PUZZLE + "brazier.tscn", room, spec[0], pos, {"hang_length": pos.y - 42.0, "burn_time": 0.5}))
+	var tab_split := tablet(room, "split", 5848.0, "One flame, thrown three ways.")
+	var heart_pedestal := inst(RUNES + "rune_pedestal.tscn", room, "HeartPedestal", Vector2(cx(92), FLOOR_Y))
+	# Down on the tower floor for the first time: a look at the burners
+	var burner_look := Area2D.new()
+	burner_look.name = "BurnerReveal"
+	burner_look.set_script(load("res://scripts/puzzle/reveal_trigger.gd"))
+	burner_look.position = Vector2(cx(91), FLOOR_Y)
+	burner_look.set("look_at", Vector2(6080.0, 390.0))
+	burner_look.set("flag", "kiln.r2.burners_seen")
+	add_owned(room, burner_look)
+
+	# ---------------------------------------------------- the bell
+	# The hoist is the only way up to it: it waits on the floor until the Heart beats
+	var hoist := inst(TRAPS + "moving_platform.tscn", room, "BellHoist", Vector2(98 * T, FLOOR_Y - 18),
+		{"width_tiles": 2, "travel": Vector2(0, -324), "speed": 70.0, "end_pause": 1.4, "requires_power": true})
+	circuit(room, "HeartToHoist", [heart], [hoist],
+		{"latch": true, "hold_time": 2.6, "reveal_target": true, "persist_id": "kiln.r2.hoist", "channel_y": 470.0, "symbol": 2})
+	ledge_run(100, 101, 3, false, false, false)
+	var bell := inst(PUZZLE + "great_bell.tscn", room, "GreatBell", Vector2(cx(100), 90.0),
+		{"announce": "The Forge Bell rings out.", "announce_sub": "Heat runs through the cold stone, and the furnaces stir.", "tolls": 2})
+	# A ledge beside the hoist, halfway up: step off on the way past
+	ledge_run(100, 100, 5)
+	kiln_page(room, 6, Vector2(cx(100), 306.0), "The Smith's Ledger, vi",
+		"The girl asked to ring the Forge Bell. I let her, once. She laughed at the noise and drew a star on the hoist. If someone finds this: the bell is still yours to ring. Make it loud.")
+
+	# ---------------------------------------------------- the goal and its steps
+	guide(room, "Wake the Kiln Heart and ring the Forge Bell.", "II", "The Kiln Heart", "The Long Stair  ·  The Kilnworks")
+	step(room, "Delay learned", Cond.FLAG, null, {"flag": "rune.frag.delay"})
+	step(room, "The Ash Lamp burns: the shutter stays open", Cond.POWERED, ash_lamp)
+	step(room, "Across the slag lake", Cond.REACHED, null, {"area": Rect2(71 * T, 220, 6 * T, 70)})
+	step(room, "Large learned", Cond.FLAG, null, {"flag": "rune.frag.large"})
+	step(room, "Three skips of coal in the Heart", Cond.PROPERTY, heart, {"property": "fuel_state", "value": 1})
+	step(room, "Split learned", Cond.FLAG, null, {"flag": "rune.frag.split"})
+	step(room, "The Kiln Heart beats", Cond.POWERED, heart)
+	step(room, "Up to the Forge Bell", Cond.REACHED, null, {"area": Rect2(100 * T, 150, 2 * T, 70)})
 	step(room, "The Forge Bell rings", Cond.POWERED, bell)
-	hint(room, Vector2(cx(24 + o) + 28, FLOOR_Y), [
-		"A stone block, a heavy plate and a cube. The brambles around the bell are dry.",
-		"A normal wind cannot shift the stone. You learned Strong in the Observatory.",
-		"Inscribe Strong on the loose cube beside the stone and switch it on: the stone slides onto the plate. Then burn the brambles with your own fireball and ring the bell.",
-	], [c, block, p, brambles])
-	dress(room, 22 + o, 46 + o, [25 + o, 31 + o, 38 + o, 44 + o])
+	for i in 3:
+		step(room, "Ledger page %s found" % ["iv", "v", "vi"][i], Cond.FLAG, null,
+			{"flag": "kiln.page.%d" % (i + 4), "optional": true})
+
+	hint(room, Vector2(cx(47), FLOOR_Y), [
+		"The lamp beyond the shutter is out of reach of your own fire. The cube by the shutter throws further.",
+		"The shutter stays up only while someone stands on the plate, and you can't be at the cube and on the plate at once.",
+		"Read the Delay tablet. Inscribe Delay on the cube and switch it on, then run back onto the plate: two seconds later its bolt flies through the open shutter and lights the lamp.",
+	], [shutter_cube, shutter_plate, shutter, ash_lamp, tab_delay])
+	hint(room, Vector2(cx(54) - 8, FLOOR_Y), [
+		"Three columns of heat rise out of the slag.",
+		"Ride a column to its top and step off onto the ledge beside it. If you fall, the slag throws you back to the last candle you touched.",
+		"Walk off the bank into the first column, rise, and step right onto the ledge. Hop the break in it (or drop through onto the low ledge) and walk off the far end into the next column. The third lets you off on the gallery.",
+	], vents.slice(0, 3))
+	hint(room, Vector2(cx(81), 274.0), [
+		"Three skips of coal sit on three iron racks over the Heart. It needs all three.",
+		"A gust from the pedestal at the end of the gallery strikes only what is level with it. The racks are iron bars: wind blows straight through them.",
+		"Set the gallery's cube in the pedestal and inscribe Wind, Burst, Right, Large: one wide gust tips all three skips into the Heart.",
+	], [rack_cube, rack_pedestal, tab_large] + skips)
+	hint(room, Vector2(cx(94) - 8, FLOOR_Y), [
+		"Three burners hang beside the Heart. Each flares and dies in half a breath. The Heart beats only when all three burn at once, and only with all its coal in.",
+		"One flame thrown three ways reaches three places at once. From the pedestal beside the Heart, the burners fan out up and to the right.",
+		"Bring a cube to the pedestal beside the Heart and inscribe Fire, Projectile, Up-Right, Split.",
+	], [heart, heart_pedestal, tab_split] + burners)
+
+	# ---------------------------------------------------- dressing: light, the Smith's things, Wren, the frost
+	for c in [47, 49]:
+		torch(deco, c)
+	for c in [55, 60, 64, 69, 73, 78, 83, 87, 93, 96]:
+		torch(deco, c, 2)
+	decor(48, 5, W_BANNER_FLEUR)
+	decor(78, 1, W_WINDOW_BARRED)
+	decor(95, 1, W_WINDOW_MOON)
+	deco_sprite(deco, "smith_plaque", Vector2(cx(54), 420.0))
+	deco_sprite(deco, "chalk_steps", Vector2(3560.0, FLOOR_Y), false, -1, true)
+	deco_sprite(deco, "tool_rack", Vector2(cx(80), 230.0))
+	deco_sprite(deco, "coal_heap", Vector2(cx(82) + 20, 274.0), true, -1)
+	deco_sprite(deco, "anvil", Vector2(cx(95) + 8, FLOOR_Y), false, 1)
+	deco_sprite(deco, "bellows", Vector2(cx(96), FLOOR_Y), true, 1)
+	deco_sprite(deco, "chalk_star", Vector2(cx(98) + 32, 440.0), false, -1, true)
+	for spec in [[Vector2(cx(97), 120), "frost_a", false], [Vector2(cx(101) - 10, 300), "frost_b", true], [Vector2(cx(93), 70), "frost_b", false],
+			[Vector2(cx(88), 200), "frost_a", false], [Vector2(cx(99), 40), "frost_a", true], [Vector2(cx(91), 430), "frost_b", false]]:
+		frost(deco, spec[0], spec[1], spec[2], "kiln.r2.heart")
+	waymark(room, cx(49), "right")
+	waymark(room, cx(54), "right")
+	for x in [60 * T, 65 * T, 70 * T]:
+		waymark(room, x, "up", 470.0)
+	waymark(room, cx(62) + 40, "right", 210.0)
+	waymark(room, cx(67) + 40, "right", 210.0)
+	waymark(room, cx(76), "right", 210.0)
+	waymark(room, 5712.0, "down", 210.0)
+	waymark(room, cx(94), "right")
+	waymark(room, cx(98) + 32, "up", 300.0)
+	prop(deco, "cobweb_corner", cx(101) + 8, 12.0, true, true)
 
 # ================================================================ the Drowned Cistern (ice)
 
 func build_cistern() -> void:
 	begin("Cistern", "cistern", "The Drowned Cistern", Journey.CISTERN_INTERLUDE, Journey.WINGS[1]["words"])
-	cistern_first_pool()
-	cistern_sluice()
+	level.set("total_pages", 6)
+	cistern_still_water()
+	cistern_great_sluice()
+	ledger.sort_custom(func(a, b): return a["id"] < b["id"])
+	level.set("ledger", ledger)
 	finish()
 
 
-## A slime that cannot be bothered to move stands on a heavy plate. Only
-## stone presses it: but a frozen slime is stone. Her cube reaches it only
-## with Long (the slime is 240 px away; a normal chill reaches 160).
-func cistern_first_pool() -> void:
+## A pool of the Cistern's cold water filling a trench over columns c0..c1.
+func cistern_pool(room: Node, c0: int, c1: int, candle: Node) -> Node:
+	pit(c0, c1)
+	var centre := (c0 * T + (c1 + 1) * T) / 2.0
+	return inst(TRAPS + "cistern_pool.tscn", room, "Pool%d" % c0, Vector2(centre, 598.0),
+		{"tiles": c1 - c0 + 1, "recovery_checkpoint": candle})
+
+
+## One of the Warden of Waters' ledger pages (the Cistern's first room has three).
+func cistern_page(parent: Node, id: int, pos: Vector2, title: String, text: String) -> void:
+	inst(PUZZLE + "lore_page.tscn", parent, "LorePage%d" % id, pos,
+		{"page_id": "cistern.page.%d" % id, "title": title, "text": text})
+	var ids: PackedStringArray = parent.get("page_ids")
+	ids.append("cistern.page.%d" % id)
+	parent.set("page_ids", ids)
+	ledger.append({"id": "cistern.page.%d" % id, "numeral": ["i", "ii", "iii", "iv", "v", "vi"][id - 1],
+		"title": title, "text": text, "room": parent.get("title")})
+
+
+## THE STILL WATER. The Warden of Waters' clock hall, flooded and stopped.
+## Everything here is about freezing things, and each kind of thing frozen is
+## useful in its own way (scripts/runes/effects/freeze_field.gd asks anything
+## "freezable"; rising water freezes where it first meets the cold):
+##   The Cold Stair (cols 0-21, low): two pools of black water too cold to swim.
+##     ICE and FREEZE on the Brink Cube freeze the first pool's surface into a
+##     floor for a few breaths (water held still is a floor). On the island,
+##     LONG on the Island Cube freezes all but a hop of the long second pool.
+##   The Ice Door (col 22): a plug of old ice fills the doorway to the hall.
+##     Her own fire melts it (ice gives way to fire); the Warden's cube, free,
+##     waits behind it.
+##   The Gatekeeper (col 34, under the walkway): a slime shut in a cell under
+##     an iron grate sits on a plate that wants stone. Frozen, a creature is as
+##     heavy as stone, and cold sinks through iron bars: the cube set on the
+##     grate, Freeze Down, two seconds on the plate, and the Clock Gate up on
+##     the walkway is open for good.
+##   The Fountain Court (cols 39-42): five fountains leap and fall. Frozen, a
+##     fountain is a pillar, and a jet leaping into the cold freezes where it
+##     meets it. The Fountain Cube hangs high above them, worked from a lectern:
+##     DOWN-RIGHT with Long lays its cold aslant across all five, freezing them
+##     into a stair up to the walkway (be quick: it holds a few breaths).
+##   The Tide Clock (cols 26-27): a glass column the tide fills and empties.
+##     It strikes when its float is HELD at the hour mark; its strike opens the
+##     Sluice Door (col 56). The cold must lie just above the mark: the Warden's
+##     cube on the clock gallery, the step level with the clock's top, facing it
+##     (anywhere lower, the tide freezes short of the hour, and the room says so).
+## Optional: three ledger pages (a shelf over the island, the top of the
+## Fountain Cube, the clock gallery's corner).
+func cistern_still_water() -> void:
 	shell(0, 22, LOW_CEIL, true, false)
-	var room := mk_room("R1", "The First Pool", 0, 22, LOW_CEIL, Vector2(cx(2), 530))
-	waymarks(room, 0, 22)
+	shell(22, 56, HIGH_CEIL, false, false)
+	var room := mk_room("R1", "The Still Water", 0, 56, HIGH_CEIL, Vector2(cx(2), 530), true)
+	var deco := group(room, "Decor")
+	var cold := "cistern.r1.clock"
+
+	# ---------------------------------------------------- the Cold Stair: Ice, Freeze, Long
 	shrine(room, "start", cx(2))
-	kindle_flame(room, cx(4))
-	var t1 := tablet(room, "ice", cx(5), "Cold that holds its shape.")
-	var t2 := tablet(room, "freeze", cx(6) + 16, "What is held still is heavy.")
-	var t3 := tablet(room, "long", cx(7) + 32, "Cold reaches further than it seems.")
-	var c := cube(room, "Pool Cube", cx(10), "wind/push/right/normal", {"carryable": false, "locked_slots": LOCK_DIRECTION})
-	var p := plate(room, "SlimePlate", cx(14), {"stone_only": true, "width": 56.0})
-	var s := slime(room, "Slime", Vector2(cx(14), 530), {"hears_bells": false, "home_radius": 1.0, "detection_range": 0.0, "max_health": 10,
-		"required": true, "required_reason": "The slime that had to hold the plate has been killed, and only a frozen creature can press it.", "required_until_flag": "cistern.r1.solved"})
-	var exit_gate := gate(room, "PoolGate", 19)
-	circuit(room, "PlateToGate", [p], [exit_gate],
-		{"reveal_target": true, "persist_id": "cistern.r1.solved", "channel_y": 440.0, "symbol": 0})
-	guide(room, "Open the gate.", "I", "The First Pool", "The Long Stair  ·  The Drowned Cistern")
+	kindle_flame(room, cx(3))
+	var tab_ice := tablet(room, "ice", cx(4), "Cold that holds its shape.")
+	var tab_freeze := tablet(room, "freeze", cx(5) + 8, "What reaches the cold is held still.")
+	var stair_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleStair", Vector2(396.0, FLOOR_Y))
+	var brink := cube(room, "Brink Cube", 432.0, "wind/push/right/normal", {"carryable": false, "locked_slots": LOCK_DIRECTION})
+	var pool_a := cistern_pool(room, 7, 8, stair_candle)
+	var island_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleIsland", Vector2(600.0, FLOOR_Y))
+	var tab_long := tablet(room, "long", 644.0, "Cold reaches further than it seems.")
+	var island := cube(room, "Island Cube", 688.0, "ice/freeze/right/normal",
+		{"carryable": false, "locked_slots": LOCK_ESSENCE | LOCK_FORM | LOCK_DIRECTION})
+	var pool_b := cistern_pool(room, 11, 16, island_candle)
+	# The Warden's notes on a shelf over the island (a charged jump)
+	ledge_run(9, 9, 6, true)
+	cistern_page(room, 1, Vector2(cx(9), 404.0), "The Warden's Ledger, i",
+		"The Cistern measured the sky by its water: the tide filled the clock, the clock struck, and the Choir wrote down the hour. The night the Hush came every clock in the Cistern stopped at the same minute, and the water stood still.")
+	inst("res://scenes/hazard_checkpoint.tscn", room, "CandleBank", Vector2(1120.0, FLOOR_Y))
+
+	# ---------------------------------------------------- the Ice Door
+	var plug := inst(RUNES + "burnable.tscn", room, "IcePlug", Vector2(cx(22), FLOOR_Y), {"kind": 1, "size": Vector2(48, 150)})
+	var warden := cube(room, "Warden Cube", 1512.0, "wind/push/right/normal")
+
+	# ---------------------------------------------------- the Clock Hall
+	shrine(room, "hall", cx(24))
+	kindle_flame(room, 1616.0)
+	var clock := inst(PUZZLE + "tide_clock.tscn", room, "TideClock", Vector2(1728.0, FLOOR_Y), {"persist_id": cold})
+	var reveal := Area2D.new()
+	reveal.name = "ClockReveal"
+	reveal.set_script(load("res://scripts/puzzle/reveal_trigger.gd"))
+	reveal.position = Vector2(cx(23) + 24, FLOOR_Y)
+	reveal.set("look_at", Vector2(1728.0, 340.0))
+	reveal.set("flag", "cistern.r1.revealed")
+	add_owned(room, reveal)
+	# The clock gallery (level with the clock's top), the stair down to the walkway
+	ledge_run(28, 29, 3, false, false, true)
+	ledge_run(30, 30, 3, true)
+	ledge_run(31, 31, 4)
+	ledge_run(32, 38, 4, true, false, false)
+	cistern_page(room, 3, Vector2(1890.0, 176.0), "The Warden's Ledger, iii",
+		"To stop the clock you need only stop the water. To stop it at the hour, the cold must lie above the mark, no lower: the tide freezes where it first touches the cold. I taught every novice that, and it was still the Hush that did it best.")
+	# The Clock Gate on the walkway: rock down from the roof to just over it
+	for y in range(0, 3):
+		solid(34, y)
+	ceiling.erase_cell(Vector2i(34, 0))
+	var clock_gate := inst("res://scenes/portcullis_gate.tscn", room, "ClockGate", Vector2(cx(34), 306.0), {"height": 114.0})
+	# The gatekeeper: a slime shut in a cell under a grate, sitting on a plate
+	# that wants stone (cold sinks through iron bars)
+	grated_cell(room, 34, 34)
+	var gate_plate := inst("res://scenes/pressure_plate.tscn", room, "GatePlate", Vector2(cx(34), 598.0), {"stone_only": true, "width": 56.0})
+	var keeper := slime(room, "Keeper", Vector2(cx(34), 594), {"hears_bells": false, "home_radius": 1.0, "detection_range": 0.0,
+		"max_health": 10, "required": true, "required_until_flag": "cistern.r1.gate",
+		"required_reason": "The slime that had to hold the plate has been killed, and only something as heavy as stone can press it."})
+	circuit(room, "KeeperToGate", [gate_plate], [clock_gate],
+		{"latch": true, "hold_time": 2.0, "reveal_target": true, "persist_id": "cistern.r1.gate", "channel_y": 420.0, "symbol": 1})
+
+	# ---------------------------------------------------- the Fountain Court: Down-Right
+	# Five fountains, 45 px apart; frozen by cold laid aslant (Down-Right) from
+	# the Fountain Cube, each where its leap first meets the cold's lower edge:
+	# a stair of pillars 45 px a step, the top one level with the walkway (306).
+	# (The cube's corner sits where that edge passes through the jets' tops,
+	# and the lowest is still inside a Long reach; a normal one reaches three.)
+	var fountains := []
+	for i in 5:
+		var top_y := 306.0 + 45.0 * i
+		fountains.append(inst(PUZZLE + "fountain.tscn", room, "Fountain%d" % (i + 1), Vector2(2512.0 + 45.0 * i, FLOOR_Y), {
+			"max_height": FLOOR_Y - top_y + 6.0, "rest_height": 14.0, "rest_time": 0.5 + 0.1 * (i % 3),
+			"rise_time": 0.45, "hold_time": 1.8 + 0.25 * ((i + 1) % 3), "fall_time": 0.45, "phase": 0.7 * i}))
+	var fountain_cube := cube(room, "Fountain Cube", 2517.0, "ice/freeze/down/normal",
+		{"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM}, 245.0)
+	var lectern := inst(RUNES + "rune_lectern.tscn", room, "FountainLectern", Vector2(2784.0, FLOOR_Y), {"cube": fountain_cube})
+	var tab_dr := tablet(room, "down_right", 2856.0, "Cold falls aslant, like rain on a wind.")
+	cistern_page(room, 2, Vector2(2517.0, 196.0), "The Warden's Ledger, ii",
+		"The fountains were the novices' stair. We froze them every morning, all at once, aslant, and climbed to the clock before they let go. Wren ran up them laughing and never once looked down.")
+
+	# ---------------------------------------------------- the way on: the Sluice Door
+	shrine(room, "east", cx(47))
+	kindle_flame(room, cx(48))
+	var door := gate(room, "SluiceDoor", 56)
+	circuit(room, "ClockToDoor", [clock], [door],
+		{"latch": true, "reveal_target": true, "persist_id": "cistern.r1.door", "channel_y": 96.0, "symbol": 2})
+
+	# ---------------------------------------------------- the goal and its steps
+	guide(room, "Open the Sluice Door.", "I", "The Still Water", "The Long Stair  ·  The Drowned Cistern")
 	step(room, "Freeze learned", Cond.FLAG, null, {"flag": "rune.frag.freeze"})
-	step(room, "The frozen slime holds the plate: the gate opens", Cond.OPEN, exit_gate)
-	hint(room, Vector2(cx(3) + 20, FLOOR_Y), [
-		"The plate wants stone, and the slime on it is not stone. Yet.",
-		"A frozen creature is as heavy as stone. The cube's chill is too short to reach the slime.",
-		"Read the tablets, inscribe Ice, Freeze and Long on the cube and switch it on, then walk through the gate before the slime thaws.",
-	], [c, p, s, t1, t2, t3])
-	dress(room, 0, 22, [3, 8, 13, 20])
+	step(room, "Across the first pool", Cond.REACHED, null, {"area": Rect2(576, 480, 128, 70)})
+	step(room, "Long learned", Cond.FLAG, null, {"flag": "rune.frag.long"})
+	step(room, "Across the second pool", Cond.REACHED, null, {"area": Rect2(1088, 480, 320, 70)})
+	step(room, "The old ice melts", Cond.OPEN, plug)
+	step(room, "A frozen slime holds the plate: the Clock Gate opens", Cond.OPEN, clock_gate)
+	step(room, "Down-Right learned", Cond.FLAG, null, {"flag": "rune.frag.down_right"})
+	step(room, "Up the frozen fountains to the walkway", Cond.REACHED, null, {"area": Rect2(2048, 262, 448, 60)})
+	step(room, "The tide held at the hour: the clock strikes", Cond.POWERED, clock)
+	step(room, "The Sluice Door opens", Cond.OPEN, door)
+	for i in 3:
+		step(room, "Ledger page %s found" % ["i", "ii", "iii"][i], Cond.FLAG, null,
+			{"flag": "cistern.page.%d" % (i + 1), "optional": true})
+
+	hint(room, Vector2(cx(1), FLOOR_Y), [
+		"The water is far too cold to swim. The cube at its edge can hold it still.",
+		"Read the tablets: Ice and Freeze. Cold that reaches the water turns its top to ice for a few breaths, solid enough to walk on.",
+		"Inscribe Ice and Freeze on the Brink Cube, switch it on and cross before the ice gives way. On the island, Long carries the cold nearly twice as far: run along the ice and jump the last stretch.",
+	], [brink, island, pool_a, pool_b, tab_ice, tab_freeze, tab_long])
+	hint(room, Vector2(1200.0, FLOOR_Y), [
+		"A plug of old ice fills the doorway to the hall.",
+		"Ice holds against cold. It doesn't hold against fire.",
+		"Throw a fireball at the ice. The cube behind it is yours to carry.",
+	], [plug, warden])
+	hint(room, Vector2(2120.0, FLOOR_Y), [
+		"The gate up on the walkway opens while the plate in the cell under this grate is held down by something heavy. The slime shut in with it isn't heavy enough.",
+		"What the cold holds still is as heavy as stone. And cold sinks through iron bars.",
+		"Set your cube down on the grate, right over the slime, inscribe Ice, Freeze, Down and switch it on. Two seconds on the plate and the gate stays open.",
+	], [gate_plate, keeper, clock_gate])
+	hint(room, Vector2(2928.0, FLOOR_Y), [
+		"The fountains leap and fall. Frozen, a fountain is a pillar you can stand on.",
+		"A jet that leaps into the cold freezes where it first meets it. The cube high above the fountains is worked from the lectern; its cold can only fall from up there. Which way, to touch every fountain at a different height?",
+		"At the lectern: Down-Right and Long. The cold falls aslant across all five and freezes them into a stair up to the walkway. Climb quickly; it holds a few breaths.",
+	], [fountain_cube, lectern, tab_dr] + fountains)
+	hint(room, Vector2(1640.0, FLOOR_Y), [
+		"The Sluice Door opens when the tide clock strikes. It strikes only when its float is held still at the hour mark at the top.",
+		"Rising water freezes where it first touches the cold. Cold across the column stops the tide short of the mark; cold just above the mark stops it at the hour.",
+		"Carry the cube up to the clock gallery, the step level with the top of the clock, set it down facing the clock and inscribe Ice, Freeze, Left. The cold lasts a few breaths: switch it on as the tide starts to rise.",
+	], [clock, door])
+
+	# ---------------------------------------------------- dressing: light, the Warden's things, Wren, the Hush's frost
+	for c in [1, 6, 12, 18]:
+		torch(deco, c)
+	for c in [24, 30, 37, 44, 50, 54]:
+		torch(deco, c, 2)
+	torch(deco, 52)
+	decor(10, 5, W_BANNER_FLEUR)
+	decor(20, 5, W_WINDOW_BARRED)
+	decor(32, 1, W_WINDOW_MOON)
+	decor(46, 2, W_WINDOW_BARRED)
+	deco_sprite(deco, "warden_plaque", Vector2(cx(19), 470.0))
+	for x in [cx(29), cx(45) + 16, cx(53)]:
+		deco_sprite(deco, "cistern_pipe", Vector2(x, FLOOR_Y), false, -2)
+	deco_sprite(deco, "chalk_steps", Vector2(620.0, FLOOR_Y), false, -1, true)
+	deco_sprite(deco, "chalk_steps", Vector2(2740.0, FLOOR_Y), true, -1, true)
+	deco_sprite(deco, "chalk_star", Vector2(1846.0, 160.0), false, -1, true)
+	for spec in [[Vector2(1580, 300), "frost_a", false], [Vector2(1880, 110), "frost_b", true], [Vector2(2300, 150), "frost_a", true],
+			[Vector2(2700, 260), "frost_b", false], [Vector2(3200, 330), "frost_a", false], [Vector2(3480, 180), "frost_b", true]]:
+		frost(deco, spec[0], spec[1], spec[2], cold)
+	waymark(room, cx(5) + 40, "right")
+	waymark(room, cx(10), "right")
+	waymark(room, cx(20) + 32, "right")
+	waymark(room, cx(36), "right")
+	waymark(room, 2696.0, "up", 420.0)
+	waymark(room, 2420.0, "left", 240.0)
+	waymark(room, 1960.0, "up", 180.0)
+	waymark(room, cx(51), "right")
+	prop(deco, "cobweb_corner", cx(55) + 8, 12.0, true, true)
 
 
-## The Sluice. Two slimes, two heavy plates, one cube: the second slime is as
-## far from the cube as a Long chill reaches. The Cistern's bell is behind
-## the gate.
-func cistern_sluice() -> void:
-	shell(22, 46, LOW_CEIL, false, true)
-	var room := mk_room("R2", "The Sluice", 22, 46, LOW_CEIL, Vector2(cx(23), 530))
-	waymarks(room, 22, 46, false)
-	shrine(room, "sluice", cx(24))
-	kindle_flame(room, cx(26))
-	tablet(room, "persist", cx(28), "The word that made the silence.")
-	var c := cube(room, "Sluice Cube", cx(33), "wind/push/right/normal", {"carryable": false, "locked_slots": LOCK_DIRECTION})
-	var pa := plate(room, "PlateA", 2350.0, {"stone_only": true, "width": 64.0})
-	var pb := plate(room, "PlateB", 2420.0, {"stone_only": true, "width": 64.0})
-	var needed := {"required": true, "required_reason": "A slime that had to hold a plate has been killed, and only frozen creatures can press them.", "required_until_flag": "cistern.r2.solved"}
-	var sa := slime(room, "SlimeA", Vector2(2350.0, 530), {"hears_bells": false, "home_radius": 1.0, "detection_range": 0.0, "max_health": 10}.merged(needed))
-	var sb := slime(room, "SlimeB", Vector2(2420.0, 530), {"hears_bells": false, "home_radius": 1.0, "detection_range": 0.0, "max_health": 10}.merged(needed))
-	var exit_gate := gate(room, "SluiceGate", 41)
-	circuit(room, "PlatesToGate", [pa, pb], [exit_gate],
-		{"hold_time": 0.5, "reveal_target": true, "persist_id": "cistern.r2.solved", "channel_y": 440.0, "symbol": 2})
-	var bell := wing_bell(room, cx(43), "The Tide Bell rings out.", "Water runs again through every channel.")
-	guide(room, "Ring the Tide Bell.")
-	step(room, "Both slimes frozen on their plates: the gate opens", Cond.OPEN, exit_gate)
+## THE GREAT SLUICE. The Warden's sluice works, which fed every water clock in
+## the Cistern. The Warden drowned the Tide Bell in its well and balanced the
+## Great Sluice that drains it on two counterweights: a weight of three held
+## still on a pan, and the tide held at its high mark. Here she learns PERSIST,
+## "the word that made the silence" (the Warden carved it for Ilse), and uses
+## the Hush's own word to make the bell ring. Columns 56-119:
+##   The Silence Gallery (56-74, low): a slime in a cell under a grate holds a
+##     plate that opens the Silence Gate only after eight seconds; a freeze
+##     lasts six. Persist on the Keeper Cube (cold that never lets go).
+##   The Tide Hall (75-94): an 18-tile basin set with iron teeth, whose tide
+##     (scripts/traps/tide_pool.gd) fills it, holds, empties and stays dry, over
+##     and over. The Tide Lever (a mounted cube over the west doorway, its cold
+##     reaching down to just under the doorways, worked from a lectern at
+##     either doorway or on the high ledge, paid for with her mana) freezes the
+##     whole tide: a floor of ice. Switched on while the hall is dry, the
+##     rising tide freezes as it reaches the cold, just under the doorways;
+##     switched on while the tide is up, it freezes where it stands. Its own
+##     freeze lasts six seconds, too short to cross: Persist holds it while she
+##     walks across, hopping the low pier for the Sluice Cube. The doorway
+##     gates are open only while the floor is dry or frozen below them. The
+##     high mark wants the tide frozen at its very top (from the high ledge,
+##     where she can see it); the far pier (a page) wants it frozen on its way
+##     down, a little below the pier's top.
+##   The Weigh House (95-108): a pan that wants three weights of stone at once:
+##     the Ballast, pushed off its shelf by the Drover Cube (it needs a Strong
+##     wind; a kerb by the Bell Well's wall stops it on the pan), and the two
+##     slimes that hop about on the pan, frozen as they stray into the cold of
+##     the Sluice Cube set in the socket under the shelf (Ice, Freeze, Right,
+##     Persist: free on the socket, and held, or they thaw). A lift to the High
+##     Walk and the high ledge.
+##   The Bell Well (109-118): the Tide Bell drowned in its tank. The Great
+##     Sluice opens (two breaths of both counterweights, then for good, saved)
+##     with the pan weighed and the tide held at its high mark; the well drains
+##     through the sluice gate. The High Walk's span over the pan has fallen:
+##     with the sluice open the pan's work is done, so the Sluice Cube comes out
+##     of its socket and, set at the edge, bridges the gap (Ice, Bridge, Right).
+##     She drops into the well from the far end and rings the bell.
+## Optional: three ledger pages (a shelf in the gallery, the far pier, and the
+## outflow past the sluice gate).
+func cistern_great_sluice() -> void:
+	var o := 56
+	shell(o, o + 19, LOW_CEIL, false, false)
+	shell(o + 19, o + 38, HIGH_CEIL, false, false)
+	shell(o + 38, o + 63, HIGH_CEIL, false, true)
+	var room := mk_room("R2", "The Great Sluice", o, o + 63, HIGH_CEIL, Vector2(cx(o + 1), 530), true)
+	var deco := group(room, "Decor")
+	var drained := "cistern.r2.well"
+	# The high ledge and the High Walk (cap tiles in row 2)
+	var high_walk := 146.0
+
+	# ---------------------------------------------------- the Silence Gallery: Persist
+	shrine(room, "sluice", cx(o + 2))
+	kindle_flame(room, cx(o + 3))
+	var tab_persist := tablet(room, "persist", cx(o + 5), "The cold that never lets go.")
+	ledge_run(o + 6, o + 6, 6, true)
+	cistern_page(room, 4, Vector2(cx(o + 6), 404.0), "The Warden's Ledger, iv",
+		"Ilse came to me the winter before the Hush and asked for the word that holds water still for ever. I carved PERSIST for her on the sluice, the way I carve all the words. I did not ask what she meant to hold still. I have asked every day since.")
+	grated_cell(room, o + 10, o + 10)
+	var cell_plate := inst("res://scenes/pressure_plate.tscn", room, "CellPlate", Vector2(cx(o + 10), 598.0), {"stone_only": true, "width": 56.0})
+	var keeper := slime(room, "Keeper", Vector2(cx(o + 10), 594), {"hears_bells": false, "home_radius": 1.0, "detection_range": 0.0,
+		"max_health": 10, "required": true, "required_until_flag": "cistern.r2.silence",
+		"required_reason": "The slime that had to hold the slow plate has been killed, and only something as heavy as stone can press it."})
+	var keeper_cube := cube(room, "Keeper Cube", cx(o + 10), "ice/freeze/down/normal",
+		{"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM | LOCK_DIRECTION})
+	var silence_gate := gate(room, "SilenceGate", o + 15)
+	circuit(room, "SlowPlate", [cell_plate], [silence_gate],
+		{"latch": true, "hold_time": 8.0, "reveal_target": true, "persist_id": "cistern.r2.silence", "channel_y": 420.0, "symbol": 0})
+	var west_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleWest", Vector2(cx(o + 17), FLOOR_Y))
+
+	# ---------------------------------------------------- the Tide Hall
+	pit(o + 20, o + 37)
+	# The low pier (a hop up from ice at the doorways) holds the Sluice Cube;
+	# the far pier floats high (a page), above anything frozen low
+	for x in [o + 25, o + 26]:
+		solid(x, 8)
+		solid(x, 9)
+		ground_half.set_cell(Vector2i(x, 7), 0, LEDGES[x % LEDGES.size()])
+	ledge_run(o + 30, o + 31, 4)
+	# The high door in the east wall, onto the high ledge (the high mark is
+	# carved on the wall under it)
+	for y in [0, 1, 2]:
+		earth.erase_cell(Vector2i(o + 38, y))
+	var east_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleEast", Vector2(cx(o + 40), FLOOR_Y))
+	inst("res://scenes/hazard_checkpoint.tscn", room, "CandleHigh", Vector2(cx(o + 44), high_walk))
+	var candle_paths: Array[NodePath] = [NodePath("../CandleWest"), NodePath("../CandleEast"), NodePath("../CandleHigh")]
+	# The basin's iron teeth: no crossing the dry floor
+	inst("res://scenes/spike_trap.tscn", room, "TeethWest", Vector2((o + 20) * T + 160.0, 598.0),
+		{"spike_count": 10, "damage_amount": 1, "recovery_checkpoint": west_candle})
+	inst("res://scenes/spike_trap.tscn", room, "TeethEast", Vector2((o + 27) * T + 352.0, 598.0),
+		{"spike_count": 22, "damage_amount": 1, "recovery_checkpoint": east_candle})
+	var tide := inst(TRAPS + "tide_pool.tscn", room, "Tide", Vector2((o + 29) * T, 598.0), {
+		"tiles": 18, "low_level": -14.0, "high_level": 372.0, "rise_time": 6.0, "hold_high": 2.5, "fall_time": 5.0, "hold_low": 7.0,
+		"recovery_checkpoints": candle_paths, "flush_with": PackedFloat32Array([float(FLOOR_Y)])})
+	var floor_mark := inst(PUZZLE + "tide_mark.tscn", room, "FloorMark", Vector2(cx(o + 19), 528.0),
+		{"pool": NodePath("../Tide"), "mode": 0, "visible_mark": false})
+	var high_mark := inst(PUZZLE + "tide_mark.tscn", room, "HighMark", Vector2((o + 38) * T - 4.0, 244.0),
+		{"pool": NodePath("../Tide"), "mode": 1, "slack": 8.0})
+	var west_gate := gate(room, "WestTideGate", o + 19)
+	var east_gate := gate(room, "EastTideGate", o + 38)
+	circuit(room, "TideToWestGate", [floor_mark], [west_gate], {"channel_y": 560.0, "symbol": 1, "solved_sound": "", "show_channels": false})
+	circuit(room, "TideToEastGate", [floor_mark], [east_gate], {"channel_y": 560.0, "symbol": 1, "solved_sound": "", "show_channels": false})
+	# The Tide Lever: a cube on a bracket over the west doorway, its cold
+	# reaching down to just under the doorways; worked from three lecterns
+	# (her mana pays for it)
+	var lever := cube(room, "Tide Lever", cx(o + 20), "ice/freeze/down/normal",
+		{"carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM}, 378.0)
+	var west_lectern := inst(RUNES + "rune_lectern.tscn", room, "WestLectern", Vector2(cx(o + 18), FLOOR_Y), {"cube": lever})
+	var east_lectern := inst(RUNES + "rune_lectern.tscn", room, "EastLectern", Vector2(cx(o + 39), FLOOR_Y), {"cube": lever})
+	var high_lectern := inst(RUNES + "rune_lectern.tscn", room, "HighLectern", Vector2(cx(o + 40), high_walk), {"cube": lever})
+	var sluice_cube := cube(room, "Sluice Cube", (o + 26) * T, "wind/push/right/normal", {}, 502.0)
+	cistern_page(room, 6, Vector2((o + 31) * T + 32.0, 248.0), "The Warden's Ledger, vi",
+		"The girl drew a star on the far pier at low tide and dared me to freeze the sea so she could reach it. I did. She stood on the ice and laughed and said the water was holding its breath.")
+	# The Warden's own lectern on the far pier: the way back down (the next
+	# tide frozen level with the doorways)
+	inst(RUNES + "rune_lectern.tscn", room, "PierLectern", Vector2((o + 30) * T + 20.0, 274.0), {"cube": lever})
+	var reveal := Area2D.new()
+	reveal.name = "TideReveal"
+	reveal.set_script(load("res://scripts/puzzle/reveal_trigger.gd"))
+	reveal.position = Vector2(cx(o + 17), FLOOR_Y)
+	reveal.set("look_at", Vector2((o + 29) * T, 400.0))
+	reveal.set("flag", "cistern.r2.revealed")
+	add_owned(room, reveal)
+	# The high ledge (through the high door, over the hall) and the High Walk
+	# east over the Weigh House to the Bell Well, a gap between where the lift
+	# comes up; the Walk's span over the pan has fallen (three tiles: an ice
+	# bridge from the edge crosses it, a jump doesn't)
+	ledge_run(o + 37, o + 40, 2, false, true, false)
+	ledge_run(o + 43, o + 47, 2, false, false, true)
+	ledge_run(o + 51, o + 53, 2)
+
+	# ---------------------------------------------------- the Weigh House
+	inst(TRAPS + "moving_platform.tscn", room, "WeighLift", Vector2((o + 41) * T, FLOOR_Y - 18),
+		{"width_tiles": 2, "travel": Vector2(0, high_walk - FLOOR_Y), "speed": 70.0, "end_pause": 1.4})
+	shrine(room, "weigh", cx(o + 43))
+	kindle_flame(room, cx(o + 44))
+	# The Ballast's shelf with its Drover at the far end; under it the pan's
+	# socket, and the pan running east to a kerb by the Bell Well's wall (which
+	# stops a stone shoved along it, so it comes to rest on the pan)
+	var drover_lectern := inst(RUNES + "rune_lectern.tscn", room, "DroverLectern", Vector2(cx(o + 45), FLOOR_Y))
+	ledge_run(o + 46, o + 48, 6)
+	var drover := cube(room, "Drover Cube", (o + 46) * T + 32.0, "wind/push/right/normal",
+		{"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM | LOCK_DIRECTION}, 402.0)
+	drover_lectern.set("cube", drover)
+	var ballast := stone(room, "Ballast", (o + 49) * T - 28.0, {"required": true, "required_until_flag": "cistern.r2.sluice",
+		"required_reason": "The ballast stone fell where it can't be put on the pan.",
+		"required_area": Rect2(6500.0, 380.0, 476.0, 170.0)}, 402.0)
+	var pedestal := inst(RUNES + "rune_pedestal.tscn", room, "WeighPedestal", Vector2((o + 49) * T - 60.0, FLOOR_Y))
+	var pan := inst("res://scenes/pressure_plate.tscn", room, "WeighPan", Vector2((o + 49) * T + 76.0, FLOOR_Y),
+		{"stone_only": true, "width": 232.0, "weight_needed": 3})
+	ground_half.set_cell(Vector2i(o + 52, 7), 0, LEDGES[(o + 52) % LEDGES.size()])
+	# The Warden's two live weights, hopping about on the pan: too light alive
+	var needed := {"hears_bells": false, "detection_range": 0.0, "home_radius": 50.0, "max_health": 10, "required": true,
+		"required_until_flag": "cistern.r2.sluice",
+		"required_reason": "A slime the pan needed has been killed, and only creatures held still by the cold can make up its weight."}
+	var weigher_a := slime(room, "WeigherA", Vector2((o + 49) * T + 60.0, 530), needed)
+	var weigher_b := slime(room, "WeigherB", Vector2((o + 49) * T + 120.0, 530), needed)
+
+	# ---------------------------------------------------- the Bell Well and the Great Sluice
+	# The tank: a wall each side, its floor a pit at 598; the sluice gate at the
+	# foot of its east wall lets the water out into the outflow
+	for y in range(3, 9):
+		solid(o + 53, y)
+	pit(o + 54, o + 62)
+	for y in range(3, 7):
+		solid(o + 59, y)
+	var well := inst(TRAPS + "tide_pool.tscn", room, "BellWell", Vector2((o + 54) * T + 160.0, 598.0), {
+		"tiles": 5, "still": true, "high_level": 298.0, "low_level": -14.0, "persist_id": drained,
+		"recovery_checkpoints": candle_paths})
+	var sluice_gate := inst("res://scenes/portcullis_gate.tscn", room, "GreatSluiceGate", Vector2(cx(o + 59), 598.0), {"height": 150.0})
+	var bell := inst(PUZZLE + "great_bell.tscn", room, "GreatBell", Vector2(cx(o + 56) - 46.0, 478.0),
+		{"announce": "The Tide Bell rings out.", "announce_sub": "Water runs again through every channel, and the Cistern breathes.",
+		"tolls": 2, "chain_length": 462.0})
+	circuit(room, "GreatSluice", [pan, high_mark], [well, sluice_gate],
+		{"latch": true, "hold_time": 2.0, "reveal_target": true, "persist_id": "cistern.r2.sluice", "channel_y": 96.0, "symbol": 2})
+	cistern_page(room, 5, Vector2(cx(o + 61), 566.0), "The Warden's Ledger, v",
+		"I balanced the Great Sluice on two counterweights: a weight of three held still on the pan, and the tide held at its height. Then I drowned the Tide Bell in its well, so the Hush would not hear it ring. If you are reading this, ring it. Let it hear.")
+
+	# ---------------------------------------------------- the goal and its steps
+	guide(room, "Drain the Bell Well and ring the Tide Bell.", "II", "The Great Sluice", "The Long Stair  ·  The Drowned Cistern")
+	step(room, "Persist learned", Cond.FLAG, null, {"flag": "rune.frag.persist"})
+	step(room, "The slow plate held: the Silence Gate opens", Cond.OPEN, silence_gate)
+	step(room, "The Sluice Cube, from the low pier", Cond.REACHED, null, {"area": Rect2((o + 25) * T, 440, 2 * T, 70)})
+	step(room, "Across the Tide Hall", Cond.REACHED, null, {"area": Rect2((o + 39) * T, 480, 4 * T, 70)})
+	step(room, "Three weights on the pan", Cond.POWERED, pan)
+	step(room, "Up to the High Walk", Cond.REACHED, null, {"area": Rect2((o + 37) * T, high_walk - 50.0, 17 * T, 70)})
+	step(room, "The tide held at its high mark", Cond.POWERED, high_mark)
+	step(room, "The Great Sluice opens: the well drains", Cond.POWERED, well)
+	step(room, "Over the fallen span", Cond.REACHED, null, {"area": Rect2((o + 51) * T, high_walk - 50.0, 3 * T, 70)})
 	step(room, "The Tide Bell rings", Cond.POWERED, bell)
-	hint(room, Vector2(cx(24) + 28, FLOOR_Y), [
-		"Two plates, two slimes, one cube. The gate wants both held at once.",
-		"A cold that reaches further is Long. Both slimes are inside one Long chill, but only just.",
-		"Inscribe Ice, Freeze and Long on the cube, switch it on and go through the gate before the cold lets go (six seconds).",
-	], [c, pa, pb, sa, sb])
-	dress(room, 22, 46, [25, 30, 38, 44])
+	for i in 3:
+		step(room, "Ledger page %s found" % ["iv", "v", "vi"][i], Cond.FLAG, null,
+			{"flag": "cistern.page.%d" % (i + 4), "optional": true})
+
+	hint(room, Vector2(cx(o + 8), FLOOR_Y), [
+		"The plate in the cell opens the gate, but only once it has been held down a long while. A freeze lets go too soon.",
+		"Read the tablet by the door. Persist: cold that never lets go, for as long as its cube is on.",
+		"Inscribe Persist on the cube over the grate and switch it on. Wait: the slime stays frozen, and after a few breaths the gate grinds open for good.",
+	], [keeper_cube, keeper, cell_plate, silence_gate, tab_persist])
+	hint(room, Vector2(cx(o + 16), FLOOR_Y), [
+		"The tide fills the hall and empties it, over and over, and the floor under it is iron teeth. While the water is up, the doorway gates stay shut.",
+		"The Tide Lever over the doorway, worked from this lectern, freezes the tide into a floor of ice. Switched on while the hall is dry, the rising tide freezes as it reaches the cold, just under the doorway. But its freeze lets go after six seconds.",
+		"Inscribe Persist on the lever and switch it on while the hall is dry: the rising tide freezes just under the doorway and holds while your mana lasts. Walk across, hop the low pier for the Sluice Cube, and go on. Switch it off from your runes (Tab) once you're over.",
+	], [lever, west_lectern, tide, west_gate, east_gate, sluice_cube])
+	hint(room, Vector2(cx(o + 39), high_walk), [
+		"Every ledge in the hall wants the tide frozen at its own height.",
+		"From up here you can watch the tide stand at its top, beside the high mark on the wall. Switched on while the tide is up, the lever freezes it where it stands.",
+		"Switch the lever on from this lectern while the tide stands at its very top: it freezes at the high mark. The far pier wants it frozen on its way down, a little below the pier's top.",
+	], [lever, high_lectern, tide, high_mark])
+	hint(room, Vector2(cx(o + 45) + 88.0, FLOOR_Y), [
+		"The pan wants three weights of stone at once. The stone on the shelf and the two slimes make three.",
+		"A steady wind can't shift the stone: it takes a Strong one. A frozen slime is as heavy as stone, but it thaws unless the cold persists.",
+		"Strong on the Drover Cube (its lectern is by the flame) pushes the stone off its shelf; the kerb stops it on the pan. Set the Sluice Cube in the socket under the shelf with Ice, Freeze, Persist (it already faces the pan): the slimes freeze as they hop into its cold, and stay frozen.",
+	], [pan, ballast, drover, drover_lectern, pedestal, weigher_a, weigher_b])
+	hint(room, Vector2(cx(o + 46), high_walk), [
+		"The Tide Bell is drowned in its well, past the fallen span. The Great Sluice drains it, but only while both its counterweights hold: the pan weighed, and the tide held still at its high mark.",
+		"Hold the pan first, with the slimes frozen on it; then the tide at its very top, from the high ledge. Once the sluice opens it stays open, and the pan's work is done.",
+		"With the pan held, freeze the tide at its top with the Tide Lever and Persist: two breaths of both, and the sluice opens for good. Then switch the Sluice Cube off, take it from its socket, set it at the edge of the fallen span and write Ice, Bridge, Right.",
+	], [well, sluice_gate, pan, high_mark, bell, east_lectern])
+
+	# ---------------------------------------------------- dressing
+	for c in [1, 7, 13]:
+		torch(deco, o + c)
+	for c in [21, 27, 34, 55, 61]:
+		torch(deco, o + c, 2)
+	for c in [44, 50]:
+		torch(deco, o + c, 1)
+	decor(o + 4, 5, W_BANNER_FLEUR)
+	decor(o + 29, 1, W_WINDOW_MOON)
+	decor(o + 49, 1, W_WINDOW_BARRED)
+	deco_sprite(deco, "warden_plaque", Vector2(cx(o + 12), 470.0))
+	for p in [Vector2(cx(o + 14), FLOOR_Y), Vector2(cx(o + 47), FLOOR_Y), Vector2(cx(o + 62), 598.0)]:
+		deco_sprite(deco, "cistern_pipe", p, false, -2)
+	deco_sprite(deco, "chalk_star", Vector2((o + 30) * T + 32.0, 230.0), false, -1, true)
+	deco_sprite(deco, "chalk_steps", Vector2(cx(o + 9), FLOOR_Y), false, -1, true)
+	for spec in [[Vector2(cx(o + 42), 60), "frost_a", false], [Vector2(cx(o + 47), 250), "frost_b", true], [Vector2(cx(o + 55), 90), "frost_a", true],
+			[Vector2(cx(o + 58), 200), "frost_b", false], [Vector2(cx(o + 62), 330), "frost_a", false]]:
+		frost(deco, spec[0], spec[1], spec[2], drained)
+	waymark(room, cx(o + 6) + 32, "right")
+	waymark(room, cx(o + 13), "right")
+	waymark(room, cx(o + 40), "right")
+	waymark(room, cx(o + 43), "up", 420.0)
+	waymark(room, cx(o + 46), "right", high_walk - 60.0)
+	waymark(room, cx(o + 54), "down", 200.0)
+	prop(deco, "cobweb_corner", cx(o + 62) + 8, 12.0, true, true)
 
 
 # ================================================================ the Lampworks (light)

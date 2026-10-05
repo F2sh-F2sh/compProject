@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/heart_crucible.gd" id="1_m5nrf"]
+
+[node name="HeartCrucible" type="Node2D" unique_id=944480530]
+script = ExtResource("1_m5nrf")
+coal_ids = PackedStringArray()

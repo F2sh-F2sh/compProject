@@ -17,6 +17,8 @@ signal power_changed(powered: bool)
 @export var light_radius := 0.0
 ## Lit braziers go out again after this many seconds (0 = burn forever).
 @export var burn_time := 0.0
+## Saved once lit (for one that burns forever and holds something open).
+@export var persist_id := ""
 ## 0 stands on the ground; -1 / 1 hangs on an iron shelf from a wall on the
 ## left / right, `bracket_length` px away (nothing solid under it, so
 ## fireballs can reach it from below).
@@ -96,7 +98,11 @@ func _ready() -> void:
 	_embers = GlowFX.embers(Color(0.6, 0.8, 1.0), 10, 30.0, 7.0)
 	_embers.position = Vector2(0, BOWL_Y - 4.0)
 	add_child(_embers)
-	_set_lit(start_lit, true)
+	_set_lit(start_lit or _saved_lit(), true)
+
+
+func _saved_lit() -> bool:
+	return persist_id != "" and GameState.has_flag(persist_id)
 
 
 func is_powered() -> bool:
@@ -122,7 +128,7 @@ func get_light_origin() -> Vector2:
 
 
 func reset_state() -> void:
-	_set_lit(start_lit, true)
+	_set_lit(start_lit or _saved_lit(), true)
 
 
 func _on_area_entered(area: Area2D) -> void:
@@ -137,6 +143,8 @@ func _set_lit(lit: bool, silent := false) -> void:
 		return
 	is_lit = lit
 	_burn_left = burn_time
+	if lit and persist_id != "" and burn_time <= 0.0:
+		GameState.set_flag(persist_id)
 	if lit and light_radius > 0.0:
 		add_to_group(MagicLight.AURA_GROUP)
 	elif is_in_group(MagicLight.AURA_GROUP):

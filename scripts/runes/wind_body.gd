@@ -114,6 +114,9 @@ func _ready() -> void:
 	if weight != Weight.CRATE:
 		add_to_group("stone_weight")
 	_start_position = global_position
+	# Taken in for good on an earlier visit (a skip of coal in the Kiln Heart)
+	if persist_id != "" and GameState.has_flag(persist_id):
+		consume.call_deferred(true)
 
 
 func _apply_preset() -> void:
@@ -178,12 +181,31 @@ func burn(_source: Node = null) -> void:
 	lost.emit()
 
 
+## Falls into the Cistern's cold water: it sinks, and is gone until the room
+## is reset.
+func sink(_source: Node = null) -> void:
+	if is_lost or is_consumed:
+		return
+	is_lost = true
+	var at := global_position + Vector2(0, -size.y / 2.0)
+	Sfx.play("puddle_splash", at, 0.0, 0.1)
+	ImpactFX.burst(get_parent(), at, Color(0.6, 0.85, 1.0), false, 18)
+	var t := create_tween()
+	t.tween_property(_art, "modulate", Color(0.4, 0.6, 0.9, 0.0), 0.8)
+	t.tween_callback(func():
+		if is_lost:
+			_set_present(false))
+	lost.emit()
+
+
 ## Taken in for good (the kiln swallows its coal). Silent when it was already
 ## in on loading.
 func consume(silent := false) -> void:
 	if is_consumed:
 		return
 	is_consumed = true
+	if persist_id != "":
+		GameState.set_flag(persist_id)
 	if silent:
 		_set_present(false)
 		return

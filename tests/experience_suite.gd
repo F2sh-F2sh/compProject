@@ -157,7 +157,7 @@ func scenario_title() -> void:
 	await seconds(2.0)
 	await shot("title_intro")
 	lvl.skip()
-	check("the story leads straight to the Passage", await wait_for_scene(TUTORIAL))
+	check("the story leads out onto Lowbell's lane (Nan's cottage, then the dungeon)", await wait_for_scene(LOWBELL))
 
 	# After the tutorial, Continue and New Game go straight to the chapter
 	state().clear_all()
@@ -181,22 +181,24 @@ func scenario_title() -> void:
 		and state().has_flag("tutorial.done"))
 	check("the story plays again", await wait_for_scene(STORY))
 	lvl.skip()
-	check("and after the tutorial, the story leads on to the Belfry", await wait_for_scene(CHAPTER))
+	check("it leads out onto Lowbell's lane again", await wait_for_scene(LOWBELL))
+	check("and after the tutorial, Nan's cellar door leads on to the Belfry", Journey.after_story() == CHAPTER)
 
-	# The Tutorial entry opens its three parts; Part 1 always replays from the start
+	# Choose a Level lists the levels; Level 1 (the tutorial) always replays from the start
 	await open_scene(TITLE)
 	lvl.tutorial_button.pressed.emit()
 	await frames(3)
-	check("the Tutorial entry lists its three parts", lvl._parts.visible and not lvl._menu.visible
-		and lvl.part_1_button.text.contains("Passage") and lvl.part_2_button.text.contains("Belfry")
-		and lvl.part_3_button.text.contains("Observatory"))
+	check("Choose a Level lists Level 1 (the tutorial), 2 and 3", lvl._parts.visible and not lvl._menu.visible
+		and lvl.part_1_button.text.begins_with("Level 1") and lvl.part_1_button.text.contains("Passage")
+		and lvl.part_2_button.text.begins_with("Level 2") and lvl.part_3_button.text.begins_with("Level 3"),
+		"%s / %s / %s" % [lvl.part_1_button.text, lvl.part_2_button.text, lvl.part_3_button.text])
 	lvl.part_1_button.pressed.emit()
-	check("Part 1 opens the tutorial", await wait_for_scene(TUTORIAL))
+	check("Level 1 opens the tutorial", await wait_for_scene(TUTORIAL))
 	await open_scene(TITLE)
 	lvl.tutorial_button.pressed.emit()
 	await frames(3)
 	lvl.part_3_button.pressed.emit()
-	check("Part 3 opens the Observatory", await wait_for_scene("res://scenes/chapter/chapter_2.tscn"))
+	check("Level 3 opens the Observatory", await wait_for_scene("res://scenes/chapter/chapter_2.tscn"))
 
 
 func scenario_continue() -> void:
@@ -765,7 +767,7 @@ func scenario_story() -> void:
 		await seconds(0.8)
 		guard += 1
 	check("all nine pictures can be paged through", seen.size() == 9, str(seen.keys()))
-	check("and the last leads to the Passage", await wait_for_scene(TUTORIAL, 5.0))
+	check("and the last leads out onto Lowbell's lane", await wait_for_scene(LOWBELL, 5.0))
 	# Holding Esc skips straight there
 	state().clear_all()
 	await open_scene(STORY)
@@ -773,7 +775,7 @@ func scenario_story() -> void:
 	Input.action_press("pause")
 	await seconds(1.3)
 	Input.action_release("pause")
-	check("holding Esc skips the story", await wait_for_scene(TUTORIAL, 4.0))
+	check("holding Esc skips the story", await wait_for_scene(LOWBELL, 4.0))
 
 
 func scenario_lowbell() -> void:
@@ -953,13 +955,16 @@ func scenario_interludes() -> void:
 		# (no finished chapter's card is waiting for these pictures)
 		ChapterComplete.pending = {}
 		await open_scene(path)
-		var count := 3
+		var count := 2 if kind == "bell" else 3
 		state().all_abilities = false
 		state().clear_all()
 		state().grant_ability("fire")
 		check("%s: %d pictures of pixel-art sprites, no drawn shapes" % [kind, count],
 			lvl.pictures.size() == count and lvl.find_children("*", "Polygon2D", true, false).is_empty()
 			and lvl.find_children("*", "Sprite2D", true, false).size() >= 1, "%d pictures, %d polygons, %d sprites" % [lvl.pictures.size(), lvl.find_children("*", "Polygon2D", true, false).size(), lvl.find_children("*", "Sprite2D", true, false).size()])
+		if kind == "bell":
+			check("the bell's pictures no longer show the Spring (it is drunk in the bell tower now)",
+				not lvl.pictures.any(_is_spring_picture))
 		await seconds(1.5)
 		await shot("interlude_" + kind)
 		var guard := 0
@@ -974,9 +979,13 @@ func scenario_interludes() -> void:
 		var want := Journey.OBSERVATORY if kind == "bell" else Journey.LANDING
 		check("%s: after the last picture it leads on" % kind, await wait_for_scene(want, 8.0))
 		if kind == "bell":
-			check("the Spring (heal) comes back with the last picture", state().has_flag("ability.heal"))
+			check("anyone who walked past the hot spring still has heal after the bell", state().has_flag("ability.heal"))
 	state().all_abilities = true
 
+
+
+func _is_spring_picture(picture: Dictionary) -> bool:
+	return String(picture.get("era", "")) == "THE SPRING"
 
 
 # ================================================================ UI tours and kindle flames
@@ -1232,7 +1241,7 @@ func scenario_layers() -> void:
 
 func _marks_ok(marks: Array) -> bool:
 	for m in marks:
-		if not (m.get_node("Art/Slab") is AnimatedSprite2D) or not (m.direction in ["right", "left", "up", "down"]):
+		if not (m.get_node("Art/Chalk") is AnimatedSprite2D) or not (m.direction in ["right", "left", "up", "down"]):
 			return false
 		if not m.find_children("*", "Polygon2D", true, false).is_empty():
 			return false

@@ -405,10 +405,10 @@ func scenario_playthrough() -> void:
 	monitor_camera = false
 	check("camera never showed outside the level", camera_worst <= 0.5,
 		"worst overshoot=%.2f %s" % [camera_worst, camera_worst_at])
-	# The Part 1 card: her time and deaths, then Continue on into the Belfry
+	# The Level 1 card: her time and deaths, then Continue on into the Belfry
 	var card_up := await wait_until(func(): return is_instance_valid(exit.results_card), 8.0)
 	var labels: Array = exit.results_card.find_children("*", "Label", true, false).map(func(l): return l.text) if card_up else []
-	check("the exit shows the Part 1 card with the run's time and deaths", card_up and labels.has("Time") and labels.has("Deaths"), str(labels))
+	check("the exit shows the Level 1 card with the run's time and deaths", card_up and labels.has("Time") and labels.has("Deaths"), str(labels))
 	await seconds(1.0)
 	await shot("play_06_card")
 	if card_up:
@@ -763,7 +763,7 @@ func scenario_slimes() -> void:
 		var healed := await wait_until(func(): return player.current_health == 8, 3.0)
 		# (a collected orb is freed at the end of the frame; give a slow frame time to
 		# pass. A weak reference, so the wait doesn't hold on to a freed orb.)
-		var orb_ref := weakref(orb)
+		var orb_ref: WeakRef = weakref(orb)
 		await wait_until(func(): return orb_ref.get_ref() == null, 1.0)
 		check("the orb drifts to a hurt Echidna and heals her", healed and not is_instance_valid(orb),
 			"hp=%d" % player.current_health)

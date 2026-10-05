@@ -155,6 +155,10 @@ func _on_used(_by: Node) -> void:
 			root.show_toast(_sealed_line(), 4.0)
 		return
 	Sfx.play("ui_click", global_position, -2.0)
+	# (admin, for testing: with the admin switch on she may not have played the
+	# wings before this one, so the door gives her their words)
+	if Journey.admin_unlock:
+		Journey.admin_prepare(Journey.EYE if index >= Journey.WINGS.size() else target_scene())
 	opened.emit(target_scene())
 	get_tree().change_scene_to_file.call_deferred(target_scene())
 

@@ -91,10 +91,6 @@ func _make_pictures() -> Array:
 		{"era": "THE BELFRY", "lines": ["But the bell was cracked, and its tone was thin. It had pushed the Hush back for a while, not for good.",
 				"On the stair above, someone had drawn a small chalk star on the wall. It had not been there before."],
 			"build": _thin_bell, "zoom": [1.0, 1.1], "from": Vector2.ZERO, "to": Vector2(10, 10), "min": [5.0, 6.0]},
-		{"era": "THE SPRING", "lines": ["At the foot of the stair, the bell's ring shook an old spring loose. It had been dry for nine years, and it began to run.",
-				"Running water is the one thing the Hush has never held still. Echidna cupped it in her hands, and a lost word came back: SPRING.",
-				InputLabels.format("Stand still and press {heal} to heal yourself. It restores 2 health and costs 20 mana, and a hit breaks it.")],
-			"build": _the_spring, "zoom": [1.0, 1.08], "from": Vector2(0, 10), "to": Vector2(0, -10), "min": [5.0, 6.0, 5.5]},
 	]
 
 
@@ -109,8 +105,9 @@ func _next_scene() -> String:
 	return Journey.LANDING
 
 
-## The Spring (heal) comes back with the last picture, however it is left
-## (finished, or skipped with Esc); the good ending is saved the same way.
+## The good ending is saved when its pictures are left (finished, or skipped
+## with Esc). The Spring (heal) is drunk from in the bell tower; anyone who
+## walked past it still has it after the bell, so nothing later is out of reach.
 func _finish() -> void:
 	if kind == "bell":
 		GameState.grant_ability("heal")
@@ -183,43 +180,6 @@ func _thin_bell(p: Node2D) -> void:
 		var t := p.create_tween().set_parallel()
 		t.tween_property(star, "modulate:a", 1.0, 2.0).set_delay(1.0)
 		t.tween_property(star_glow, "modulate:a", 1.0, 2.0).set_delay(1.0)
-
-
-## The old spring under the belfry, running again, and the word SPRING
-## lighting up above it as Echidna remembers it.
-func _the_spring(p: Node2D) -> void:
-	var c := _canvas(p)
-	_brick_wall(c, 0.5)
-	SurfaceArt.ground(c, -176, 560, 150, 1.0, 6, ["brick_ledge_a", "brick_ledge_b"], ["bricks_a", "bricks_b"], 9)
-	var spring := SurfaceArt.animated(c, "spring", Vector2(212, 150), 6.0, 1.0)
-	spring.name = "Spring"
-	var echidna := AnimatedSprite2D.new()
-	echidna.sprite_frames = ECHIDNA
-	echidna.offset = ECHIDNA.get_meta(&"sprite_offset", Vector2(0, -32))
-	echidna.scale = Vector2.ONE * (0.812 / SurfaceArt.LANE_SCALE)
-	echidna.position = Vector2(150, 150)
-	c.add_child(echidna)
-	echidna.play(&"idle")
-	var glow := StoryPaint.glow(c, Vector2(212, 120), 46.0, Color(0.4, 0.85, 0.95), 1.0)
-	glow.modulate.a = 0.0
-	StoryPaint.motes(c, Rect2(190, 90, 44, 50), Color(0.55, 0.9, 1.0), 14)
-	var word := Label.new()
-	word.text = "SPRING"
-	word.add_theme_font_override("font", StoryPaint.label_font())
-	word.add_theme_font_size_override("font_size", 44)
-	word.add_theme_color_override("font_color", Color(0.6, 0.92, 1.0))
-	word.modulate.a = 0.0
-	word.position = Vector2(470, 120)
-	p.add_child(word)
-	_cues[0] = func() -> void:
-		var t := p.create_tween()
-		t.tween_property(glow, "modulate:a", 0.5, 3.0)
-	_cues[1] = func() -> void:
-		Sfx.play("rune_learn", null, -6.0, 0.0)
-		var t := p.create_tween().set_parallel()
-		t.tween_property(glow, "modulate:a", 1.0, 1.0)
-		t.tween_property(word, "modulate:a", 1.0, 1.2)
-		t.tween_property(word, "position:y", 100.0, 3.0)
 
 
 # ------------------------------------------------------------------ the Long Stair

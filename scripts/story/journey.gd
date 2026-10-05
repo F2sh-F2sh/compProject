@@ -20,6 +20,15 @@ extends RefCounted
 ## shown to the player, so old saves keep working. The wings use the flags
 ## "kiln.", "cistern.", "lamps.", "galleries." and "eye.".
 
+## ADMIN, TEMPORARY (for testing): every level can be played without
+## finishing the one before it. Every door on the Long Stair opens, and the
+## title's "Choose a Level" adds a page that starts any wing's room or the Eye
+## directly (with the spells and words of everything before it). Set this to
+## false to turn it all off. The automated tests always turn it off.
+static var admin_unlock := true
+## The room a level starts in ("R2"), set by that admin page; used once.
+static var admin_start_room := ""
+
 const TITLE := "res://scenes/ui/title_screen.tscn"
 const STORY := "res://scenes/story/story_intro.tscn"
 const LOWBELL := "res://scenes/story/lowbell.tscn"
@@ -83,8 +92,9 @@ const STOPS := [
 ]
 
 
-## Where the way on leads after the story pictures: the Passage, or
-## straight to the Belfry for anyone who has already walked it.
+## Where Nan's cellar door leads (after the story pictures, Lowbell and her
+## cottage): the Passage, or straight to the Belfry for anyone who has
+## already walked it.
 static func after_story() -> String:
 	return BELFRY if GameState.has_flag("tutorial.done") else PASSAGE
 
@@ -110,6 +120,8 @@ static func name_of(scene_path: String) -> String:
 ## Whether wing `i` (0 to 3) has been opened: the first once the Observatory
 ## is done, each next one once the one before has rung its bell.
 static func wing_open(i: int) -> bool:
+	if admin_unlock:
+		return true
 	if i <= 0:
 		return GameState.has_flag("ch2.complete")
 	return GameState.has_flag(WINGS[i - 1]["done"])
@@ -129,7 +141,24 @@ static func bells_rung() -> int:
 
 ## The Eye opens when all four bells have rung.
 static func eye_open() -> bool:
-	return bells_rung() >= WINGS.size()
+	return admin_unlock or bells_rung() >= WINGS.size()
+
+
+## ADMIN: what she needs to play a later level straight away (the spells, and
+## the words taught before it; starting past a wing's first room, that wing's
+## words too), without marking anything before it as finished.
+static func admin_prepare(scene_path: String, room := "R1") -> void:
+	GameState.grant_all_abilities()
+	var later := [LANDING, KILN, CISTERN, LAMPS, GALLERIES, EYE]
+	if later.has(scene_path):
+		teach_words(OBSERVATORY_WORDS)
+	for i in WINGS.size():
+		if WINGS[i]["scene"] == scene_path:
+			if room != "R1":
+				teach_words(WINGS[i]["words"])
+			break
+		if later.has(scene_path):
+			teach_words(WINGS[i]["words"])
 
 
 ## The pictures that follow a wing's bell ("" for a scene that is not a wing).

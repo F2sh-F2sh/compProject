@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/fountain.gd" id="1_ksd4r"]
+
+[node name="Fountain" type="Node2D" unique_id=865175183]
+script = ExtResource("1_ksd4r")

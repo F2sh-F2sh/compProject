@@ -82,7 +82,7 @@ shader_parameter/vignette = null
 shader_parameter/vignette_softness = null
 shader_parameter/grain = null
 
-[node name="Landing" type="Node2D" unique_id=272377872]
+[node name="Landing" type="Node2D" unique_id=40639882]
 script = ExtResource("1_2du45")
 chapter_id = "landing"
 chapter_title = "The Long Stair"
@@ -91,10 +91,10 @@ complete_heading = "THE BELL HAS RUNG"
 next_label = "Continue"
 grants_words = PackedStringArray()
 
-[node name="Darkness" type="CanvasModulate" parent="." unique_id=244984489]
+[node name="Darkness" type="CanvasModulate" parent="." unique_id=577953088]
 color = Color(0.5, 0.48, 0.64, 1)
 
-[node name="Background" type="TileMapLayer" parent="." unique_id=1362184628]
+[node name="Background" type="TileMapLayer" parent="." unique_id=1363671971]
 modulate = Color(0.88, 0.86, 0.99, 1)
 z_index = -10
 position = Vector2(0, 22)
@@ -103,7 +103,7 @@ tile_set = ExtResource("2_enu5v")
 occlusion_enabled = false
 collision_enabled = false
 
-[node name="BackDecor" type="TileMapLayer" parent="." unique_id=1443738077]
+[node name="BackDecor" type="TileMapLayer" parent="." unique_id=895738038]
 z_index = -9
 position = Vector2(0, 22)
 tile_map_data = PackedByteArray("AAADAAYAAQADAAIAAAAMAAYAAQADAAIAAAAWAAYAAQADAAIAAAAcAAYAAQADAAIAAAAGAAUAAQABAAIAAAAaAAUAAQABAAMAAAA=")
@@ -111,25 +111,25 @@ tile_set = ExtResource("2_enu5v")
 occlusion_enabled = false
 collision_enabled = false
 
-[node name="Earth" type="TileMapLayer" parent="." unique_id=139149604]
+[node name="Earth" type="TileMapLayer" parent="." unique_id=1583783107]
 modulate = Color(0.73, 0.69, 0.84, 1)
 tile_map_data = PackedByteArray("AAAAAP7/AgABAAAAAAAAAP//AgABAAAAAAAAAAAAAgAEAAQAAAAAAAEAAgABAAAAAAAAAAIAAgABAAAAAAAAAAMAAgAEAAQAAAAAAAkAAgAEAAQAAAAAAAoAAgABAAAAAAAAAAsAAgABAAAAAAAAAAwAAgAEAAQAAAAAAAQAAgABAAAAAAAAAAUAAgABAAAAAAAAAAYAAgAEAAQAAAAAAAcAAgABAAAAAAAAAAgAAgABAAAAAAABAP7/AgABAAAAAAABAP//AgAEAAQAAAABAAAAAgABAAAAAAABAAEAAgABAAAAAAABAAIAAgAEAAQAAAABAAMAAgABAAAAAAABAAkAAgABAAAAAAABAAoAAgABAAAAAAABAAsAAgAEAAQAAAABAAwAAgABAAAAAAACAP7/AgAEAAQAAAACAP//AgABAAAAAAACAAAAAgABAAAAAAACAAEAAgAEAAQAAAACAAIAAgABAAAAAAACAAMAAgABAAAAAAACAAkAAgABAAAAAAACAAoAAgAEAAQAAAACAAsAAgABAAAAAAACAAwAAgABAAAAAAADAP7/AgABAAAAAAADAP//AgABAAAAAAADAAAAAgAEAAQAAAADAAEAAgABAAAAAAADAAIAAgABAAAAAAADAAMAAgAEAAQAAAADAAkAAgAEAAQAAAADAAoAAgABAAAAAAADAAsAAgABAAAAAAADAAwAAgAEAAQAAAAEAP7/AgABAAAAAAAEAP//AgAEAAQAAAAEAAAAAgABAAAAAAAEAAEAAgABAAAAAAAEAAIAAgAEAAQAAAAEAAMAAgABAAAAAAAEAAkAAgABAAAAAAAEAAoAAgABAAAAAAAEAAsAAgAEAAQAAAAEAAwAAgABAAAAAAAFAP7/AgAEAAQAAAAFAP//AgABAAAAAAAFAAAAAgABAAAAAAAFAAEAAgAEAAQAAAAFAAIAAgABAAAAAAAFAAMAAgABAAAAAAAFAAkAAgABAAAAAAAFAAoAAgAEAAQAAAAFAAsAAgABAAAAAAAFAAwAAgABAAAAAAAGAP7/AgABAAAAAAAGAP//AgABAAAAAAAGAAAAAgAEAAQAAAAGAAEAAgABAAAAAAAGAAIAAgABAAAAAAAGAAMAAgAEAAQAAAAGAAkAAgAEAAQAAAAGAAoAAgABAAAAAAAGAAsAAgABAAAAAAAGAAwAAgAEAAQAAAAHAP7/AgABAAAAAAAHAP//AgAEAAQAAAAHAAAAAgABAAAAAAAHAAEAAgABAAAAAAAHAAIAAgAEAAQAAAAHAAMAAgABAAAAAAAHAAkAAgABAAAAAAAHAAoAAgABAAAAAAAHAAsAAgAEAAQAAAAHAAwAAgABAAAAAAAIAP7/AgAEAAQAAAAIAP//AgABAAAAAAAIAAAAAgABAAAAAAAIAAEAAgAEAAQAAAAIAAIAAgABAAAAAAAIAAMAAgABAAAAAAAIAAkAAgABAAAAAAAIAAoAAgAEAAQAAAAIAAsAAgABAAAAAAAIAAwAAgABAAAAAAAJAP7/AgABAAAAAAAJAP//AgABAAAAAAAJAAAAAgAEAAQAAAAJAAEAAgABAAAAAAAJAAIAAgABAAAAAAAJAAMAAgAEAAQAAAAJAAkAAgAEAAQAAAAJAAoAAgABAAAAAAAJAAsAAgABAAAAAAAJAAwAAgAEAAQAAAAKAP7/AgABAAAAAAAKAP//AgAEAAQAAAAKAAAAAgABAAAAAAAKAAEAAgABAAAAAAAKAAIAAgAEAAQAAAAKAAMAAgABAAAAAAAKAAkAAgABAAAAAAAKAAoAAgABAAAAAAAKAAsAAgAEAAQAAAAKAAwAAgABAAAAAAALAP7/AgAEAAQAAAALAP//AgABAAAAAAALAAAAAgABAAAAAAALAAEAAgAEAAQAAAALAAIAAgABAAAAAAALAAMAAgABAAAAAAALAAkAAgABAAAAAAALAAoAAgAEAAQAAAALAAsAAgABAAAAAAALAAwAAgABAAAAAAAMAP7/AgABAAAAAAAMAP//AgABAAAAAAAMAAAAAgAEAAQAAAAMAAEAAgABAAAAAAAMAAIAAgABAAAAAAAMAAMAAgAEAAQAAAAMAAkAAgAEAAQAAAAMAAoAAgABAAAAAAAMAAsAAgABAAAAAAAMAAwAAgAEAAQAAAANAP7/AgABAAAAAAANAP//AgAEAAQAAAANAAAAAgABAAAAAAANAAEAAgABAAAAAAANAAIAAgAEAAQAAAANAAMAAgABAAAAAAANAAkAAgABAAAAAAANAAoAAgABAAAAAAANAAsAAgAEAAQAAAANAAwAAgABAAAAAAAOAP7/AgAEAAQAAAAOAP//AgABAAAAAAAOAAAAAgABAAAAAAAOAAEAAgAEAAQAAAAOAAIAAgABAAAAAAAOAAMAAgABAAAAAAAOAAkAAgABAAAAAAAOAAoAAgAEAAQAAAAOAAsAAgABAAAAAAAOAAwAAgABAAAAAAAPAP7/AgABAAAAAAAPAP//AgABAAAAAAAPAAAAAgAEAAQAAAAPAAEAAgABAAAAAAAPAAIAAgABAAAAAAAPAAMAAgAEAAQAAAAPAAkAAgAEAAQAAAAPAAoAAgABAAAAAAAPAAsAAgABAAAAAAAPAAwAAgAEAAQAAAAQAP7/AgABAAAAAAAQAP//AgAEAAQAAAAQAAAAAgABAAAAAAAQAAEAAgABAAAAAAAQAAIAAgAEAAQAAAAQAAMAAgABAAAAAAAQAAkAAgABAAAAAAAQAAoAAgABAAAAAAAQAAsAAgAEAAQAAAAQAAwAAgABAAAAAAARAP7/AgAEAAQAAAARAP//AgABAAAAAAARAAAAAgABAAAAAAARAAEAAgAEAAQAAAARAAIAAgABAAAAAAARAAMAAgABAAAAAAARAAkAAgABAAAAAAARAAoAAgAEAAQAAAARAAsAAgABAAAAAAARAAwAAgABAAAAAAASAP7/AgABAAAAAAASAP//AgABAAAAAAASAAAAAgAEAAQAAAASAAEAAgABAAAAAAASAAIAAgABAAAAAAASAAMAAgAEAAQAAAASAAkAAgAEAAQAAAASAAoAAgABAAAAAAASAAsAAgABAAAAAAASAAwAAgAEAAQAAAATAP7/AgABAAAAAAATAP//AgAEAAQAAAATAAAAAgABAAAAAAATAAEAAgABAAAAAAATAAIAAgAEAAQAAAATAAMAAgABAAAAAAATAAkAAgABAAAAAAATAAoAAgABAAAAAAATAAsAAgAEAAQAAAATAAwAAgABAAAAAAAUAP7/AgAEAAQAAAAUAP//AgABAAAAAAAUAAAAAgABAAAAAAAUAAEAAgAEAAQAAAAUAAIAAgABAAAAAAAUAAMAAgABAAAAAAAUAAkAAgABAAAAAAAUAAoAAgAEAAQAAAAUAAsAAgABAAAAAAAUAAwAAgABAAAAAAAVAP7/AgABAAAAAAAVAP//AgABAAAAAAAVAAAAAgAEAAQAAAAVAAEAAgABAAAAAAAVAAIAAgABAAAAAAAVAAMAAgAEAAQAAAAVAAkAAgAEAAQAAAAVAAoAAgABAAAAAAAVAAsAAgABAAAAAAAVAAwAAgAEAAQAAAAWAP7/AgABAAAAAAAWAP//AgAEAAQAAAAWAAAAAgABAAAAAAAWAAEAAgABAAAAAAAWAAIAAgAEAAQAAAAWAAMAAgABAAAAAAAWAAkAAgABAAAAAAAWAAoAAgABAAAAAAAWAAsAAgAEAAQAAAAWAAwAAgABAAAAAAAXAP7/AgAEAAQAAAAXAP//AgABAAAAAAAXAAAAAgABAAAAAAAXAAEAAgAEAAQAAAAXAAIAAgABAAAAAAAXAAMAAgABAAAAAAAXAAkAAgABAAAAAAAXAAoAAgAEAAQAAAAXAAsAAgABAAAAAAAXAAwAAgABAAAAAAAYAP7/AgABAAAAAAAYAP//AgABAAAAAAAYAAAAAgAEAAQAAAAYAAEAAgABAAAAAAAYAAIAAgABAAAAAAAYAAMAAgAEAAQAAAAYAAkAAgAEAAQAAAAYAAoAAgABAAAAAAAYAAsAAgABAAAAAAAYAAwAAgAEAAQAAAAZAP7/AgABAAAAAAAZAP//AgAEAAQAAAAZAAAAAgABAAAAAAAZAAEAAgABAAAAAAAZAAIAAgAEAAQAAAAZAAMAAgABAAAAAAAZAAkAAgABAAAAAAAZAAoAAgABAAAAAAAZAAsAAgAEAAQAAAAZAAwAAgABAAAAAAAaAP7/AgAEAAQAAAAaAP//AgABAAAAAAAaAAAAAgABAAAAAAAaAAEAAgAEAAQAAAAaAAIAAgABAAAAAAAaAAMAAgABAAAAAAAaAAkAAgABAAAAAAAaAAoAAgAEAAQAAAAaAAsAAgABAAAAAAAaAAwAAgABAAAAAAAbAP7/AgABAAAAAAAbAP//AgABAAAAAAAbAAAAAgAEAAQAAAAbAAEAAgABAAAAAAAbAAIAAgABAAAAAAAbAAMAAgAEAAQAAAAbAAkAAgAEAAQAAAAbAAoAAgABAAAAAAAbAAsAAgABAAAAAAAbAAwAAgAEAAQAAAAcAP7/AgABAAAAAAAcAP//AgAEAAQAAAAcAAAAAgABAAAAAAAcAAEAAgABAAAAAAAcAAIAAgAEAAQAAAAcAAMAAgABAAAAAAAcAAkAAgABAAAAAAAcAAoAAgABAAAAAAAcAAsAAgAEAAQAAAAcAAwAAgABAAAAAAAdAP7/AgAEAAQAAAAdAP//AgABAAAAAAAdAAAAAgABAAAAAAAdAAEAAgAEAAQAAAAdAAIAAgABAAAAAAAdAAMAAgABAAAAAAAdAAkAAgABAAAAAAAdAAoAAgAEAAQAAAAdAAsAAgABAAAAAAAdAAwAAgABAAAAAAAeAP7/AgABAAAAAAAeAP//AgABAAAAAAAeAAAAAgAEAAQAAAAeAAEAAgABAAAAAAAeAAIAAgABAAAAAAAeAAMAAgAEAAQAAAAeAAkAAgAEAAQAAAAeAAoAAgABAAAAAAAeAAsAAgABAAAAAAAeAAwAAgAEAAQAAAAfAP7/AgABAAAAAAAfAP//AgAEAAQAAAAfAAAAAgABAAAAAAAfAAEAAgABAAAAAAAfAAIAAgAEAAQAAAAfAAMAAgABAAAAAAAfAAkAAgABAAAAAAAfAAoAAgABAAAAAAAfAAsAAgAEAAQAAAAfAAwAAgABAAAAAAAfAAQAAgABAAAAAAAfAAUAAgAEAAQAAAAfAAYAAgABAAAAAAAfAAcAAgABAAAAAAAfAAgAAgAEAAQAAAA=")
 tile_set = ExtResource("2_enu5v")
 
-[node name="Ceiling" type="TileMapLayer" parent="." unique_id=539540725]
+[node name="Ceiling" type="TileMapLayer" parent="." unique_id=793240583]
 position = Vector2(0, -4)
 tile_map_data = PackedByteArray("AAABAAQAAAAGAAMAAAACAAQAAAAFAAMAAAADAAQAAAABAAMAAAAEAAQAAAAFAAMAAAAFAAQAAAAFAAMAAAAGAAQAAAAFAAMAAAAHAAQAAAAFAAMAAAAIAAQAAAADAAMAAAAJAAQAAAAGAAMAAAAKAAQAAAAFAAMAAAALAAQAAAAFAAMAAAAMAAQAAAAEAAMAAAANAAQAAAABAAMAAAAOAAQAAAABAAMAAAAPAAQAAAABAAMAAAAQAAQAAAAEAAMAAAARAAQAAAADAAMAAAASAAQAAAAFAAMAAAATAAQAAAAEAAMAAAAUAAQAAAABAAMAAAAVAAQAAAAEAAMAAAAWAAQAAAAGAAMAAAAXAAQAAAABAAMAAAAYAAQAAAAFAAMAAAAZAAQAAAAEAAMAAAAaAAQAAAADAAMAAAAbAAQAAAAGAAMAAAAcAAQAAAADAAMAAAAdAAQAAAABAAMAAAAeAAQAAAABAAMAAAA=")
 tile_set = ExtResource("2_enu5v")
 
-[node name="Ground" type="TileMapLayer" parent="." unique_id=814749406]
+[node name="Ground" type="TileMapLayer" parent="." unique_id=465729011]
 tile_map_data = PackedByteArray("AAABAAgAAAACAAAAAAACAAgAAAACAAAAAAADAAgAAAAAAAAAAAAEAAgAAAACAAAAAAAFAAgAAAABAAAAAAAGAAgAAAACAAAAAAAHAAgAAAABAAAAAAAIAAgAAAAAAAAAAAAJAAgAAAABAAAAAAAKAAgAAAACAAAAAAALAAgAAAACAAAAAAAMAAgAAAACAAAAAAANAAgAAAABAAAAAAAOAAgAAAACAAAAAAAPAAgAAAABAAAAAAAQAAgAAAACAAAAAAARAAgAAAABAAAAAAASAAgAAAABAAAAAAATAAgAAAABAAAAAAAUAAgAAAACAAAAAAAVAAgAAAAAAAAAAAAWAAgAAAAAAAAAAAAXAAgAAAAAAAAAAAAYAAgAAAAAAAAAAAAZAAgAAAAAAAAAAAAaAAgAAAAAAAAAAAAbAAgAAAABAAAAAAAcAAgAAAABAAAAAAAdAAgAAAABAAAAAAAeAAgAAAACAAAAAAA=")
 tile_set = ExtResource("2_enu5v")
 
-[node name="GroundHalf" type="TileMapLayer" parent="." unique_id=1417545475]
+[node name="GroundHalf" type="TileMapLayer" parent="." unique_id=792428321]
 position = Vector2(0, 32)
 tile_set = ExtResource("2_enu5v")
 
-[node name="R1" type="Node2D" parent="." unique_id=1884036520 instance=ExtResource("3_k85qp")]
+[node name="R1" type="Node2D" parent="." unique_id=1371402519 instance=ExtResource("3_k85qp")]
 script = ExtResource("4_3jv44")
 room_id = "landing.r1"
 title = "The Landing"
@@ -141,54 +141,54 @@ glance_at = NodePath("Door1")
 mood_highlight = Color(1, 1.02, 1.06, 1)
 mood_fog = Color(0.3, 0.32, 0.5, 1)
 
-[node name="Acoustics" type="Area2D" parent="R1" unique_id=1080860629]
+[node name="Acoustics" type="Area2D" parent="R1" unique_id=1453298283]
 position = Vector2(0, 128)
 script = ExtResource("5_75jax")
 size = Vector2(2048, 448)
 
-[node name="Shrine" type="Area2D" parent="R1" unique_id=535591314 instance=ExtResource("6_4ut4q")]
+[node name="Shrine" type="Area2D" parent="R1" unique_id=1987904416 instance=ExtResource("6_4ut4q")]
 position = Vector2(160, 534)
 script = ExtResource("7_nd5le")
 checkpoint_id = "landing.cp.start"
 
-[node name="KindleFlame" type="Node2D" parent="R1" unique_id=213996987 instance=ExtResource("8_rnsp7")]
+[node name="KindleFlame" type="Node2D" parent="R1" unique_id=1395731769 instance=ExtResource("8_rnsp7")]
 position = Vector2(288, 534)
 script = ExtResource("9_j8nku")
 
-[node name="Door1" type="Node2D" parent="R1" unique_id=2026733713 instance=ExtResource("10_52l27")]
+[node name="Door1" type="Node2D" parent="R1" unique_id=1225409874 instance=ExtResource("10_52l27")]
 position = Vector2(544, 534)
 script = ExtResource("11_y16jn")
 tint = Color(1, 0.7, 0.4, 1)
 label_text = "Kilnworks"
 
-[node name="Door2" type="Node2D" parent="R1" unique_id=619794063 instance=ExtResource("10_52l27")]
+[node name="Door2" type="Node2D" parent="R1" unique_id=1409764518 instance=ExtResource("10_52l27")]
 position = Vector2(864, 534)
 script = ExtResource("11_y16jn")
 index = 1
 tint = Color(0.5, 0.8, 1, 1)
 label_text = "Cistern"
 
-[node name="Door3" type="Node2D" parent="R1" unique_id=1603574004 instance=ExtResource("10_52l27")]
+[node name="Door3" type="Node2D" parent="R1" unique_id=1981188051 instance=ExtResource("10_52l27")]
 position = Vector2(1184, 534)
 script = ExtResource("11_y16jn")
 index = 2
 tint = Color(1, 0.92, 0.55, 1)
 label_text = "Lampworks"
 
-[node name="Door4" type="Node2D" parent="R1" unique_id=1302422074 instance=ExtResource("10_52l27")]
+[node name="Door4" type="Node2D" parent="R1" unique_id=1486879759 instance=ExtResource("10_52l27")]
 position = Vector2(1504, 534)
 script = ExtResource("11_y16jn")
 index = 3
 tint = Color(0.8, 0.65, 1, 1)
 label_text = "Galleries"
 
-[node name="Door5" type="Node2D" parent="R1" unique_id=1103594642 instance=ExtResource("10_52l27")]
+[node name="Door5" type="Node2D" parent="R1" unique_id=1252691598 instance=ExtResource("10_52l27")]
 position = Vector2(1824, 534)
 script = ExtResource("11_y16jn")
 index = 4
 label_text = "The Eye"
 
-[node name="Signs" type="Node2D" parent="R1" unique_id=283993570]
+[node name="Signs" type="Node2D" parent="R1" unique_id=1855893233]
 
 [node name="Choir" type="Node2D" parent="R1/Signs" unique_id=1507923509 instance=ExtResource("12_nveny")]
 position = Vector2(390.4, 456)
@@ -196,15 +196,15 @@ script = ExtResource("13_4dxdr")
 text = "The Choir's last note: Four bells hold the Eye shut. Ring the Forge Bell first: its heat runs in the pipes behind every door and thaws the next."
 width = 210.0
 
-[node name="Chalk" type="Node2D" parent="R1/Signs" unique_id=1592538416 instance=ExtResource("12_nveny")]
+[node name="Chalk" type="Node2D" parent="R1/Signs" unique_id=559825643 instance=ExtResource("12_nveny")]
 position = Vector2(1920, 456)
 script = ExtResource("13_4dxdr")
 text = "A chalk star, and below it: don't be afraid of the cold. -W"
 width = 170.0
 
-[node name="Chalk" type="Node2D" parent="R1" unique_id=1382145904]
+[node name="Chalk" type="Node2D" parent="R1" unique_id=1769029808]
 
-[node name="ChalkSteps0" type="Node2D" parent="R1/Chalk" unique_id=1659171551]
+[node name="ChalkSteps0" type="Node2D" parent="R1/Chalk" unique_id=823112945]
 z_index = -1
 position = Vector2(372, 534)
 script = ExtResource("14_40et1")
@@ -213,7 +213,7 @@ sprite_scale = 1.0
 play = false
 unshaded = true
 
-[node name="ChalkSteps1" type="Node2D" parent="R1/Chalk" unique_id=892674762]
+[node name="ChalkSteps1" type="Node2D" parent="R1/Chalk" unique_id=1932456194]
 z_index = -1
 position = Vector2(436, 534)
 script = ExtResource("14_40et1")
@@ -222,7 +222,7 @@ sprite_scale = 1.0
 play = false
 unshaded = true
 
-[node name="ChalkSteps2" type="Node2D" parent="R1/Chalk" unique_id=405756496]
+[node name="ChalkSteps2" type="Node2D" parent="R1/Chalk" unique_id=287519262]
 z_index = -1
 position = Vector2(470, 534)
 script = ExtResource("14_40et1")
@@ -231,7 +231,7 @@ sprite_scale = 1.0
 play = false
 unshaded = true
 
-[node name="Decor" type="Node2D" parent="R1" unique_id=926058288]
+[node name="Decor" type="Node2D" parent="R1" unique_id=1482386135]
 
 [node name="Torch3_6" type="PointLight2D" parent="R1/Decor" unique_id=1181303131 instance=ExtResource("15_ta0bg")]
 position = Vector2(224, 420)
@@ -246,7 +246,7 @@ height = 40.0
 script = ExtResource("16_hj5i6")
 base_energy = 1.3
 
-[node name="Torch12_6" type="PointLight2D" parent="R1/Decor" unique_id=542708929 instance=ExtResource("15_ta0bg")]
+[node name="Torch12_6" type="PointLight2D" parent="R1/Decor" unique_id=2064798646 instance=ExtResource("15_ta0bg")]
 position = Vector2(800, 420)
 color = Color(0.42, 0.6, 1, 1)
 energy = 1.3
@@ -259,7 +259,7 @@ height = 40.0
 script = ExtResource("16_hj5i6")
 base_energy = 1.3
 
-[node name="Torch22_6" type="PointLight2D" parent="R1/Decor" unique_id=51360420 instance=ExtResource("15_ta0bg")]
+[node name="Torch22_6" type="PointLight2D" parent="R1/Decor" unique_id=952668592 instance=ExtResource("15_ta0bg")]
 position = Vector2(1440, 420)
 color = Color(0.42, 0.6, 1, 1)
 energy = 1.3
@@ -272,7 +272,7 @@ height = 40.0
 script = ExtResource("16_hj5i6")
 base_energy = 1.3
 
-[node name="Torch28_6" type="PointLight2D" parent="R1/Decor" unique_id=763440951 instance=ExtResource("15_ta0bg")]
+[node name="Torch28_6" type="PointLight2D" parent="R1/Decor" unique_id=1272232226 instance=ExtResource("15_ta0bg")]
 position = Vector2(1824, 420)
 color = Color(0.42, 0.6, 1, 1)
 energy = 1.3
@@ -285,13 +285,13 @@ height = 40.0
 script = ExtResource("16_hj5i6")
 base_energy = 1.3
 
-[node name="SkullPile4" type="Sprite2D" parent="R1/Decor" unique_id=174875986]
+[node name="SkullPile4" type="Sprite2D" parent="R1/Decor" unique_id=675712503]
 position = Vector2(1888, 534)
 texture = ExtResource("17_plvb7")
 centered = false
 offset = Vector2(-64, -64)
 
-[node name="Atmosphere" type="Node2D" parent="." unique_id=811543483]
+[node name="Atmosphere" type="Node2D" parent="." unique_id=1090236169]
 script = ExtResource("18_ukpbs")
 wall_path = NodePath("../Background")
 decor_path = NodePath("../BackDecor")
@@ -308,12 +308,12 @@ script = ExtResource("20_kkkkp")
 fireball_scene = ExtResource("21_xsgs4")
 hurtbox = NodePath("Hurtbox")
 
-[node name="Camera2D" type="Camera2D" parent="Player" unique_id=628453996]
+[node name="Camera2D" type="Camera2D" parent="Player" unique_id=2135101815]
 zoom = Vector2(2, 2)
 script = ExtResource("22_07adr")
 bounds = Rect2(0, 128, 2048, 448)
 
-[node name="PlayerLight" type="PointLight2D" parent="Player" unique_id=1503237240]
+[node name="PlayerLight" type="PointLight2D" parent="Player" unique_id=651868401]
 position = Vector2(0, -20)
 color = Color(0.78, 0.72, 1, 1)
 energy = 1.15
@@ -321,10 +321,10 @@ texture = SubResource("GradientTexture2D_6p70f")
 texture_scale = 1.45
 height = 40.0
 
-[node name="PostFX" type="CanvasLayer" parent="." unique_id=543985465]
+[node name="PostFX" type="CanvasLayer" parent="." unique_id=419079282]
 script = ExtResource("23_n4g8g")
 
-[node name="Screen" type="ColorRect" parent="PostFX" unique_id=1879191502]
+[node name="Screen" type="ColorRect" parent="PostFX" unique_id=349649036]
 material = SubResource("ShaderMaterial_tbgvx")
 anchors_preset = 15
 anchor_right = 1.0
@@ -337,7 +337,7 @@ script = ExtResource("26_2uhcl")
 [node name="AmmoUI" type="CanvasLayer" parent="." unique_id=1170242058 groups=["gameplay_ui"] instance=ExtResource("27_0d247")]
 script = ExtResource("28_ohpsk")
 
-[node name="DeathUI" type="CanvasLayer" parent="." unique_id=212597444]
+[node name="DeathUI" type="CanvasLayer" parent="." unique_id=1105489665]
 layer = 2
 
 [node name="DeathScreen" type="Control" parent="DeathUI" unique_id=905570687 groups=["death_screen"] instance=ExtResource("29_feqg5")]
@@ -350,9 +350,9 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("30_0awuf")
 
-[node name="PauseMenu" type="CanvasLayer" parent="." unique_id=1294921203]
+[node name="PauseMenu" type="CanvasLayer" parent="." unique_id=11067669]
 script = ExtResource("31_m0mpg")
 
-[node name="RuneManager" type="Node2D" parent="." unique_id=964715483 instance=ExtResource("32_fsxh6")]
+[node name="RuneManager" type="Node2D" parent="." unique_id=659081104 instance=ExtResource("32_fsxh6")]
 script = ExtResource("33_cqpe3")
 starting_fragments = PackedStringArray("wind", "push", "left", "normal")

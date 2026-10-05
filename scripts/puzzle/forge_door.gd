@@ -18,6 +18,8 @@ const SIZE := Vector2(64, 152)
 
 var is_open := false
 var open_amount := 0.0
+## Shut behind her for good (see seal()).
+var sealed := false
 var _art: Node2D
 var _sprite: AnimatedSprite2D
 var _body: StaticBody2D
@@ -55,7 +57,7 @@ func is_powered() -> bool:
 
 
 func set_powered(powered: bool) -> void:
-	if powered and not is_open:
+	if powered and not is_open and not sealed:
 		_open(false)
 
 
@@ -84,6 +86,27 @@ func _open(silent: bool) -> void:
 		Sfx.play("gate_slam", global_position + Vector2(0, -SIZE.y), -4.0))
 
 
+## Shut again behind her once she has gone on into the next room (she is not
+## meant to go back): it grinds down and stays down. It still counts as
+## opened (the forge's goal stays done). Instant when restoring a save.
+func seal(instant := false) -> void:
+	if sealed:
+		return
+	sealed = true
+	if open_amount <= 0.0:
+		return
+	_shape.set_deferred("disabled", false)
+	if instant:
+		open_amount = 0.0
+		_art.position.y = 0.0
+		return
+	Sfx.play("gate_rumble", global_position + Vector2(0, -SIZE.y / 2.0), 0.0, 0.0)
+	var t := create_tween()
+	t.tween_property(self, "open_amount", 0.0, 1.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	t.parallel().tween_property(_art, "position:y", 0.0, 1.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	t.tween_callback(func(): Sfx.play("gate_slam", global_position, -2.0))
+
+
 func reset_state() -> void:
-	# A door that has opened stays open
+	# A door that has opened stays open (and one sealed behind her stays shut)
 	pass

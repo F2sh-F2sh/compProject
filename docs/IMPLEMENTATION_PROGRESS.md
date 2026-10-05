@@ -19,9 +19,8 @@ states) and [PLAYTEST_CHECKLIST.md](PLAYTEST_CHECKLIST.md) (what a human still n
 
 ## Status: all milestones implemented and passing automated tests
 
-Last full run (2026-09-29, after the enjoyment pass): `tutorial suite: passed=140 failed=0`,
-`chapter suite: passed=274 failed=0`, `presentation suite: passed=88 failed=0`,
-`experience suite: passed=59 failed=0` (`RESULT passed=561 failed=0`).
+Last full run (2026-10-05, after the Great Sluice): tutorial 173, chapter 341, presentation 111, experience 243,
+rune 304, wing 530, all passing (1,702 checks). The first full run (2026-09-29) was 561 checks in four suites.
 
 | Milestone | Status |
 |---|---|
@@ -36,6 +35,11 @@ Last full run (2026-09-29, after the enjoyment pass): `tutorial suite: passed=14
 ## How to run
 - Play: run the project (F5): the title screen, then the tutorial and the chapter. To jump
   straight in, open `res://scenes/chapter/chapter_1.tscn` and press F6.
+- **Admin switch (temporary, on as of 2026-10-04):** `Journey.admin_unlock` at the top of
+  `scripts/story/journey.gd`. While it is true every door on the Long Stair is open, and the title's
+  Choose a Level has "Admin: any wing, any room", which starts any wing's room or the Eye directly with the
+  spells and words of everything before it (nothing is marked finished). Set it to false before release.
+  The tests always turn it off (`tests/run_tests.gd`); wing `admin` tests it.
 - Rebuild the chapter after changing the builder:
   `godot --headless --path . --script res://tools/build_chapter.gd`
   (this **overwrites** `scenes/chapter/chapter_1.tscn` and the component scenes in
@@ -45,9 +49,11 @@ Last full run (2026-09-29, after the enjoyment pass): `tutorial suite: passed=14
   `--disable-vsync` is optional but recommended: the game time is the same, the run is several times faster, and
   with vsync on a long run can stall while the screen is asleep. Run one test process at a time (the presentation
   audio check measures the real sound output).
-  Chapter scenarios: `r1`…`r9`, `save`, `reset`, `stuck`, `hazards`, `guide`, `full`, and `look`
+  Chapter scenarios: `r1`…`r9`, `save`, `reset`, `stuck`, `ways`, `hazards`, `guide`, `full`, and `look`
   (screenshots of every room into `user://test_shots/`, not run by default). Wing scenarios include `k1`,
-  `forge_full`, `forge_broken`, `forge_page3` and `forge_look` (screenshots, not run by default).
+  `forge_full`, `forge_broken`, `forge_page3`, `k2`, `heart_full`, `heart_broken`, `c1`, `c1_full`, `c1_short`,
+  `c1_broken`, `c2`, `c2_full`, `c2_pages`, `c2_broken`, and `forge_look`, `heart_look`, `c1_look` and `c2_look`
+  (screenshots, not run by default).
 - Rebuild the Long Stair and its wings after changing `tools/build_wings.gd`:
   `godot --headless --path . --script res://tools/build_wings.gd`, then
   `git checkout -- scenes/puzzle scenes/runes scenes/traps scenes/creatures` to drop the builder's noise.
@@ -856,6 +862,212 @@ Landing (warm door, sealed door), THE END card.
 shaft and lift feel, the roar, the rune tour's length (five cards), the banner's wording, and the Galleries'
 portal now that it works both ways (walking under its far side on top of the wall sends you back down, which is
 right but may surprise).
+
+## The Kiln Heart rebuilt, and the second playtest list (2026-10-03)
+
+Requested: make the Kilnworks' second room "a lot longer and complicated like room 1", and eight fixes from the
+user's playtest list: say which flame refills mana (not "a torch"); arrows that blend into the background; cage the
+old room behind her when she enters a new one; the hot spring that gives heal at the end of its part, not in the
+pictures; at the end of each part only the title or the next part; after the opening pictures, walk on the surface
+to Nan's house instead of dropping straight into the dungeon; call the tutorial "Level 1"; and the interface tour
+should point arrows at what it explains (the health bar, then the mana bar and its number), with "MP" renamed MANA
+and moved to the left (health to the right).
+
+**1. The Kiln Heart (Kilnworks room 2), rebuilt.** 59 columns (44-102, the old room was 25), five parts, three new
+words; the chain and the numbers are in `docs/STORY_PLAYTHROUGH.md`. In short: the Shutter Hall (**Delay**: the
+Shutter Cube's bolt waits two seconds while she stands on the plate that holds the shutter open, and lights the Ash
+Lamp beyond it, which holds the shutter for good); the Slag Lake (three heat vents, mounted dungeon cubes that run
+from the start, and ledges a hand's width from each column); the Coal Racks (**Large**: from the pedestal at the end
+of the gallery, a normal gust tips the middle skip of coal into the Heart, a Large one all three); the Heart (**Split**:
+`Fire · Projectile · Up-Right · Split` from the pedestal beside it lights its three hanging burners together; each
+burns only half a second, so one at a time does nothing); the hoist, the only way up to the Forge Bell. Built by
+`kiln_heart()` in `tools/build_wings.gd`.
+- **New pieces:** `HeartCrucible` (scripts/puzzle/heart_crucible.gd: coal in its mouth, three lamps, "it's cold: n of 3
+  skips" when the burners flare over an empty Heart, the beat: light, sound, camera, a title card, the frost melting,
+  its burners burning steady, a kindle point; saved); its pixel sprite (`_heart_crucible` in
+  tools/generate_kiln_sprites.gd). `WindBody.persist_id` (a skip the Heart took stays taken), `Brazier.persist_id`
+  (the Ash Lamp stays lit), a frost patch can melt on any flag. **Iron grates now let wind through** (their bars join
+  `wind_permeable`, which WindField's rays already skipped, but nothing had joined it): without it a gust from the
+  gallery could never reach the top rack's skip. Running "machinery" cubes (the vents and the Cold Forge's shaft:
+  fed by the dungeon, every word carved, on from the start) show "Always on" in the Tab list, and Deactivate All
+  leaves them running.
+- **Found while testing:** a gap in the first ledge over the lake (the low ledge with the fifth page was unreachable:
+  walking off the ledge's end, the second vent's column catches her first); the burners first hung where the zoomed
+  camera couldn't see them from the pedestal (now lower, and the camera glances at them the first time she reaches
+  the tower floor); after the beat the burners went dark again (they now burn steady).
+
+**2. Which flame.** `KindlePrompt` (scripts/ui/kindle_prompt.gd) floats over the nearest flame she can kindle at
+whenever her mana isn't full: a faint "[R]" from 220 px, "[R] Kindle" in reach. Pressing R away from one says which
+kinds work (a flame bowl, a shrine, a candle, a lit brazier; "Wall torches won't do") and which side the nearest is
+on; the interface tour's mana card says the same.
+
+**3. Arrows that blend in.** Waymarks are chalk now (a pale 24×12 pixel arrow, the faintest light; Wren's chalk in
+the lore), and Lowbell has three on the way to Nan's door.
+
+**4. The cage behind her.** Going into a room further on than ever drops the gate or door at its way in for good
+(`PortcullisGate.seal()`, `ForgeDoor.seal()`; `ChapterRoot._enter`); doorways with nothing to close them get a raised
+"BackGate" at load. On a reload (Continue, or a death) the ways back are shut up to the room she starts in, never
+the way out of it, so she can't be shut in.
+
+**5. The hot spring.** At the end of Part 2 (the Belfry's room 9, after the great bell): an `AbilityShrine` showing
+the spring (sprite at 2x, steam), "Drink"; it gives heal. The bell's pictures no longer have the spring picture
+(they still give heal if the spring was somehow missed).
+
+**6. The end of a part.** The end card has Continue and Return to Title only (the "explore" button is gone).
+
+**7. Walking to Nan's.** After the opening pictures the game goes to Lowbell (`story_intro._next_scene()` returns
+`Journey.LOWBELL`): she walks through the village to Nan's door, then the cottage, then the cellar.
+
+**8. Levels.** "Choose a Level" on the title: Level 1 · The Passage (tutorial), Level 2 · The Belfry, Level 3 · The
+Observatory; the Passage's first sign and phase card say Level 1; the end cards say LEVEL n COMPLETE ("Continue to
+Level 2: The Belfry", "Continue to Level 3: The Observatory"). Internal ids and save flags are unchanged.
+
+**9. The HUD and its tour.** MANA (the bar and "MANA n") on the left, health ("n / max") on the right; the pause menu
+says MANA. The interface tour draws gold arrows (numbered when there are two) at the health bar and its number, and
+at the mana bar and its number.
+
+**Tests** (real input unless noted): wing `k2` (the Kiln Heart part by part, 51 checks, including the wrong tries: her
+own fire from the plate, the cube's bolt on the shut shutter, a normal gust, a burner lit by hand, the burners over an
+empty Heart), `heart_full` (the whole room from the Forge Door to the bell with her own feet and no teleports, 19;
+the scripted route takes 73 s of game time when it knows every answer), `heart_broken` (a skip on the tower floor or
+in the slag; the banner; Reset Room, 5), `heart_look` (screenshots); chapter `ways` (the cage), room 9 (the hot
+spring); experience `tours` (the arrows), `lowbell` (the chalk arrows), the story going to Lowbell; tutorial (the
+Level 1 card). Three chapter checks and one wing check asserted the old rule that gates behind her stay open (or
+that all of the Kilnworks' frost melts with the Great Kiln) and were changed to the new rule. A tutorial check had
+a typing warning that stops the suite from compiling (`weakref()` returns a Variant). Full run, all passing:
+tutorial 173, chapter 341, presentation 111, experience 243, rune 304, wing 347 (1,519 checks).
+
+**Looked at** (screenshots): every part of the Kiln Heart (hall, shutter, bank, lake, low ledge, gallery, racks,
+Heart, burners, hoist, balcony and bell), the tour's arrows on the health and mana cards.
+
+**Needs a human playtest:** the Kiln Heart's length and difficulty (design estimate 12 to 20 minutes for a first-time
+player; the tests prove every step can be done, not how long it takes), whether Delay, Large and Up-Right Split can be
+worked out from the room and its tablets, whether the three burners can be lit by hand fast enough to skip Split (each
+burns half a second), the hop over the Shutter Cube, and the cage dropping behind her (does it read as "go on", not
+as a trap?).
+
+## The Still Water: the Cistern's first room, reworked (2026-10-04)
+
+Requested: rework the Drowned Cistern's first room completely, to take about 30 minutes like the Cold Forge, with
+a whole new theme based on freezing things.
+
+**The room** (`cistern_still_water()` in `tools/build_wings.gd`, cols 0-56; the Sluice moved east to cols 56-80).
+Everything in it is about freezing things, each kind useful in its own way, with one rule: rising water freezes
+where it first meets the cold. Water frozen into a floor (two pools: Ice, Freeze, Long); old ice melted by fire
+(a plug in the doorway, the Warden's cube behind it); a creature frozen to stone-weight through an iron grate (the
+Clock Gate on the walkway); five fountains frozen into a stair by cold laid aslant (**Down-Right** and Long, from a
+mounted cube worked at a lectern); and a tide clock stopped at the hour by cold placed just above its mark, which
+opens the Sluice Door. The chain is in `docs/STORY_PLAYTHROUGH.md`. Three ledger pages, five hint stones, three
+kindle flames, the Hush's frost that melts when the clock strikes. Teaches Ice, Freeze, Long, Down-Right (Persist
+stays in the Sluice, "the word that made the silence").
+
+**New pieces.**
+- `CisternPool` (scripts/traps/cistern_pool.gd): black water too cold to swim (a hit and back to the candle);
+  objects sink (`WindBody.sink`); its surface freezes in 16 px strips wherever the cold reaches, into ice level
+  with the banks that holds while the cold lasts and a moment after, flickering before it gives way.
+- `Fountain` (scripts/puzzle/fountain.gd): a jet that leaps, holds, falls and rests; cold reaching it holds it as a
+  pillar of ice (one-way: land on top, jump up through it). A leaping jet checks the cold a few px at a time, so it
+  freezes exactly where it meets it (a fast leap could otherwise overshoot by 17 px, too tall a step).
+- `TideClock` (scripts/puzzle/tide_clock.gd): the column, the float, the strike (only when the float is held at the
+  mark for 1.5 s; the tide only touches it in passing), the "short of the hour" message, saved.
+- `FreezeField` now asks anything in the group "freezable" each frame (`chill_from(field)`); `covers(rect)` samples
+  the shape on a 10 px grid and needs a clear line from the cube; ice (the group "ice": frozen water, ice bridges)
+  never blocks the cold, iron grates let it through.
+- Pixel sprites from `tools/generate_cistern_sprites.gd`: the water, the fountain basin, the tide clock's frame and
+  float, the Warden's carving, a bronze pipe. The water in the jets and the clock and all the ice are drawn
+  effects, like the Ice Bridge.
+
+**Found while testing.** A plain array passed where the freeze check wants a typed one stopped every fountain
+freezing (a runtime type error); a slime on the floor path would have attacked her on every pass (it lives in a
+cell under a grate now, which also made the cold-through-bars idea); 24 px pillars made the stair a matter of
+pixel-perfect jumps (now 32); from the step below the gallery, or the walkway, the gallery and steps block the cold
+(so the wrong answer to test is Large, which freezes the tide a stride short); the run-up and jump off the long ice.
+
+**Tests** (real input unless noted): wing `c1` (part by part, 46 checks, with the wrong tries: a normal freeze on
+the long pool, the stair without Long), `c1_full` (the whole room with her own feet, 16; the scripted route takes 63
+s of game time), `c1_short` (Large holds the tide short, and the room says so, 3), `c1_broken` (the gatekeeper
+killed: banner, Reset Room, 3), `c1_look` (screenshots, not run by default). Full run, all passing: tutorial 173,
+chapter 341, presentation 111, experience 243, rune 304 (the Observatory's ice runes still work with the new
+freezing), wing 405 (1,577 checks).
+
+**Looked at** (screenshots): the stair and pools, the frozen first pool, the island, the far bank and the ice plug,
+the tide clock (running, struck), the clock gallery and steps, the walkway and the Clock Gate, the fountain court
+(running and frozen into a stair), the door.
+
+**Needs a human playtest:** whether it takes about 30 minutes (the design estimate is 20 to 30; the scripted route
+is shorter than the Cold Forge's because the room has less back-and-forth), whether "rising water freezes where it
+meets the cold" can be worked out from the fountains and then used at the clock, the fountain climb's timing, and
+the switch-on-as-the-tide-rises timing at the clock.
+
+## The Great Sluice: the Cistern's second room, reworked (2026-10-05)
+
+Requested: rework the second room to take around an hour to beat. Taken to mean the Drowned Cistern's second room
+(the Sluice, after the Still Water), since the request before it was about the Cistern's first room.
+
+**The room** (`cistern_great_sluice()` in `tools/build_wings.gd`, cols 56-119, replacing the Sluice). The Warden's
+sluice works. The Tide Bell is drowned in its well; the Great Sluice that drains it is balanced on two
+counterweights, a weight of three held still on a pan and the tide held at its high mark. It teaches **Persist**
+(the cold that never lets go) and uses it four ways, then reuses the room's one free cube:
+1. *The Silence Gallery:* a slime in a cell under a grate holds a slow plate (it opens the Silence Gate only after
+   8 s held; a freeze lasts 6). Persist on the Keeper Cube (dungeon-powered).
+2. *The Tide Hall:* an 18-tile basin set with iron teeth; its tide fills, stands, empties and rests (20.5 s). The
+   Tide Lever (a mounted cube over the west doorway, worked from three lecterns, paid with her mana) freezes it:
+   switched on while the hall is dry, the rising tide freezes level with the doorways; while it is up, where it
+   stands. Persist holds it while she crosses, hops the low pier and takes the Sluice Cube.
+3. *The Weigh House:* the pan wants three weights of stone: the Ballast (Strong on the Drover Cube; a kerb by the
+   well's wall stops it on the pan) and two slimes hopping on the pan, frozen by the Sluice Cube in the socket under
+   the shelf (Ice, Freeze, Right, Persist; free on the socket).
+4. *The high mark:* up the lift to the high ledge (through the high door over the hall), where the tide's top and
+   the mark can be seen; the lever switched on as the tide stands at its top. With the pan held, two seconds of both
+   open the Great Sluice for good (saved): the well drains through the sluice gate.
+5. *The fallen span:* the High Walk to the well has a three-tile gap. The Sluice Cube, switched off and taken out of
+   its socket (the sluice stays open), set at the edge: Ice, Bridge, Right.
+6. Down into the drained well and the Tide Bell (the end of the wing).
+Optional: three ledger pages (iv on a high gallery shelf, a charged jump; v washed out past the sluice gate; vi on
+the far pier: the tide frozen on its way down from the high ledge, and the Warden's lectern on the pier brings her
+down onto the next tide frozen at the doorways). Five hint stones, two kindle flames, three candles, the Hush's frost
+melting when the well drains. The admin page's entry is now "Cistern · The Great Sluice".
+
+**New pieces.**
+- `TidePool` (scripts/traps/tide_pool.gd): a basin's tide (or a still well) that cycles; too cold to swim (a hit, and
+  back to the nearest lit candle of its list); objects sink; cold holds the whole surface as one-way ice where it
+  stands, or where the rising water first meets the cold (checked 3 px at a time); `flush_with` makes ice that forms
+  within 6 px of a doorway floor flush with it; a circuit drains it for good (saved). The deep water is translucent
+  teal with drifting light; the ice sheet is drawn over the surface sprites, which stop and pale while frozen.
+- `TideMark` (scripts/puzzle/tide_mark.gd): a power source reading a tide: BELOW (the doorway gates: open while the
+  floor is dry or frozen below them) or HELD (the high mark: frozen at or above it).
+- `PressurePlate.weight_needed` and `weight()`: a weigh pan wanting several weights at once, with a notch for each,
+  lit as they arrive. One weight (the default) behaves exactly as before.
+- `FreezeField.covers()` takes a sampling step (the long tide uses 16 px).
+
+**Found while testing** (screenshots and the play-through tests). Tall piers would have blocked the ice crossing (now
+a low pier and a floating far pier); "Long and Persist" can't both be written, there is one modifier slot (the lever
+moved down over the doorway so a normal-reach Persist freeze catches the tide at the doorways); a 4 px lip between
+ice and the doorway floor stopped her (`flush_with`); the well's west wall ended 22 px above the floor and a slime
+slipped under it; a Strong wind threw the Ballast 250 px past the pan (the kerb), and a slime could freeze 2 px short
+of the pan (the pan now starts at the socket); with the socket at the wall end a stone pushed first would have taken
+its place (it is under the shelf now); the high mark needed a wall face (the high ledge and High Walk moved up a row);
+the dry basin could be crossed with charged jumps (the iron teeth); the deep water drew as a black block, and the ice
+was hidden under the water sprites; a cube must be switched off before it can be carried (the hint says so).
+
+**Tests** (real input unless noted): wing `c2` (part by part, 56 checks, with the wrong tries: the Keeper Cube as
+written lets go before the slow plate opens, a steady wind can't shift the Ballast), `c2_full` (the whole room with
+her own feet, 49; the scripted route takes 143 s of game time, against 63 s for the Still Water), `c2_pages` (the
+charged jump to page iv; page vi with the falling tide frozen under the far pier, and back down with the pier's
+lectern), `c2_broken` (the Keeper or a pan slime killed: banner, Reset Room; after the sluice opens nothing breaks,
+6), `c2_look` (screenshots, not run by default).
+Full run (2026-10-05), all passing: tutorial 173, chapter 341, presentation 111, experience 243, rune 304 (the
+Observatory's ice runes still work with the changed freeze), wing 530 (1,702 checks). `c2_pages` is 12 checks.
+
+**Looked at** (screenshots): the gallery and the cell, the Silence Gate, the hall dry, frozen low, frozen at its top
+and filling, the low pier and the Sluice Cube, the far pier, the high ledge and the high mark, the Weigh House (pan,
+socket, shelf, kerb, slimes), the bridge over the fallen span, the Bell Well full and drained, the outflow.
+
+**Needs a human playtest:** whether it takes about an hour (design estimate 45 to 70 minutes for a first-time player:
+the scripted route is 2.3 times the Still Water's, with more to work out; the tests prove it can be done, not how
+long it takes); whether the tide rule can be read from trying; the crossing's mana (about 60 of 100 in the tests);
+the high-mark timing from the high ledge (about 4 s in each 20 s cycle); whether players think to take the Sluice
+Cube back out for the bridge; the slimes on the pan; the far pier as an optional page.
 
 ## Known limitations and decisions
 

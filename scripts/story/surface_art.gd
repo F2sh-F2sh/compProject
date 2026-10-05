@@ -35,9 +35,11 @@ const STRIPS := {
 	# Nan's cottage (tools/generate_cottage_sprites.gd)
 	"nan_seated": 3, "hearth": 3, "table": 1, "shelf_jars": 1, "cellar_door": 2,
 	# The Kilnworks (tools/generate_kiln_sprites.gd)
-	"great_kiln": 2, "kiln_chimney": 2, "lamp_fuel": 2, "lamp_air": 2, "lamp_fire": 2, "coal_cart": 1,
+	"great_kiln": 2, "kiln_chimney": 2, "lamp_fuel": 2, "lamp_air": 2, "lamp_fire": 2, "coal_cart": 1, "heart_crucible": 2,
 	"slag": 4, "slag_crust": 1, "forge_door": 2, "bellows": 1, "anvil": 1, "tool_rack": 1, "coal_heap": 1,
 	"smith_plaque": 1, "chalk_steps": 1, "chalk_route": 1, "chalk_star": 1, "frost_a": 1, "frost_b": 1, "door_frost": 1,
+	# The Drowned Cistern (tools/generate_cistern_sprites.gd)
+	"cistern_water": 4, "fountain_nozzle": 1, "tide_clock": 1, "tide_float": 1, "warden_plaque": 1, "cistern_pipe": 1,
 	# The Choir's waymarks (tools/generate_waymark_sprites.gd)
 	"waymark": 3,
 }

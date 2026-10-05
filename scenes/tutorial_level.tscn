@@ -315,7 +315,7 @@ targets = [NodePath("../Gate")]
 light_mask = 2
 z_index = 45
 position = Vector2(352, 456)
-text = "Welcome to the Novices' Way.
+text = "Level 1: the Passage.
 Use {move_left} and {move_right} to walk."
 width = 160.0
 
@@ -932,7 +932,7 @@ size = Vector2(704, 448)
 [node name="Lesson1" type="Area2D" parent="Lessons" unique_id=1718250941]
 position = Vector2(0, 534)
 script = ExtResource("61_lesson")
-eyebrow = "THE NOVICES' WAY · PHASE 1 · THE CELLAR"
+eyebrow = "LEVEL 1 · THE PASSAGE · THE CELLAR"
 title = "First Steps"
 subtitle = "Walk, and sprint"
 width = 1100.0

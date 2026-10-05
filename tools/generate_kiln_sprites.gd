@@ -76,6 +76,7 @@ func _run() -> void:
 	_save("frost_a", [_frost(64, 40, 11)])
 	_save("frost_b", [_frost(48, 56, 23)])
 	_save("door_frost", [_door_frost()])
+	_save("heart_crucible", [_heart_crucible(false), _heart_crucible(true)])
 	_save_preview()
 	print("KILN SPRITES DONE")
 	quit()
@@ -836,6 +837,87 @@ func _door_frost() -> Image:
 		var gx := rng.randi_range(x0, x1)
 		var gy := rng.randi_range(_frost_top(gx), _frost_top(gx) + 3)
 		_px(img, gx, gy, "r3")
+	return img
+
+
+## The Kiln Heart, 128x88: the Smith's great iron crucible, a heap of coal
+## mounded in its mouth, a thick riveted rim, a tapering bowl with two bands,
+## three lamp sockets (the lamps are their own sprites) and three stubby feet.
+## Cold: dark coal under rime, frost on the rim. Hot: the coal glows through
+## its cracks, the rim's lip burns orange and the bowl's foot warms.
+func _heart_crucible(hot: bool) -> Image:
+	var w := 128
+	var h := 88
+	var img := _img(w, h)
+	# The bowl, tapering toward its feet
+	for y in range(18, 81):
+		var half := 62.0 - (y - 18) * 0.3
+		for x in range(int(64 - half), int(64 + half)):
+			var t := (x - (64 - half)) / (2.0 * half)
+			_px(img, x, y, "i3" if t < 0.18 else ("i2" if t < 0.72 else "i1"))
+	_band(img, 4, 120, 32, 5)
+	_band(img, 10, 108, 64, 5)
+	# Three lamp sockets on its face (the coal lamps sit in them)
+	for lx in [36, 64, 92]:
+		for y in range(35, 50):
+			for x in range(lx - 8, lx + 8):
+				var d := Vector2(x + 0.5 - lx, y + 0.5 - 42).length()
+				if d <= 8.0:
+					_px(img, x, y, "i1" if d > 6.5 else "i0")
+		_px(img, lx - 5, 36, "i4")
+	# The Smith's flame struck into the bowl, low between the bands
+	_stamp(img, 60, 52, [
+		".. .. i4 .. .. ..",
+		".. i4 i3 i4 .. ..",
+		".. i4 i3 i3 i4 ..",
+		"i4 i3 i1 i3 i4 ..",
+		".. i4 i3 i4 .. ..",
+	])
+	# Feet
+	for fx in [18, 57, 96]:
+		_rect(img, fx, 80, 14, 8, "i1")
+		_rect(img, fx, 80, 14, 1, "i3")
+	# The rim: a thick iron lip across the whole width
+	_rect(img, 0, 8, w, 11, "i2")
+	_rect(img, 0, 8, w, 2, "i4")
+	_rect(img, 0, 17, w, 2, "i1")
+	_rivets(img, 6, w - 8, 12, 10)
+	# The coal heaped in its mouth
+	for x in range(8, w - 8):
+		var top := 2 + int(pow(absf(x - 64.0) / 56.0, 2.0) * 6.0)
+		for y in range(top, 9):
+			var k := "c1" if rng.randf() < 0.45 else ("c2" if rng.randf() < 0.7 else "c3")
+			_px(img, x, y, k)
+		if rng.randf() < 0.3:
+			_px(img, x, top, "c4")
+	if hot:
+		# Glowing cracks through the coal, a burning lip, a warm foot
+		for i in 70:
+			var x := rng.randi_range(10, w - 11)
+			var y := rng.randi_range(3, 8)
+			if _at(img, x, y).a > 0.5:
+				_px(img, x, y, "f3" if rng.randf() < 0.6 else "f4")
+		for x in range(0, w):
+			if rng.randf() < 0.7:
+				_px(img, x, 8, "f2")
+		for y in range(60, 81):
+			for x in range(0, w):
+				if _at(img, x, y) == _c("i2") and rng.randf() < 0.12:
+					_px(img, x, y, "f0")
+	else:
+		# The Hush's rime on the coal and the rim
+		for x in range(8, w - 8):
+			if rng.randf() < 0.5:
+				var top := 2 + int(pow(absf(x - 64.0) / 56.0, 2.0) * 6.0)
+				_px(img, x, top, "r1" if rng.randf() < 0.7 else "r2")
+		for x in range(0, w):
+			if rng.randf() < 0.45:
+				_px(img, x, 19, "r1")
+			if rng.randf() < 0.2:
+				var n := rng.randi_range(1, 4)
+				for k in n:
+					_px(img, x, 19 + k, "r2" if k < n - 1 else "r1")
+	_outline(img)
 	return img
 
 

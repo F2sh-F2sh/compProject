@@ -241,21 +241,22 @@ New words: Fire, Projectile, Up, Large, Burst, Delay, Explode, Split. New creatu
 | K4 The Clinker Line | A **Clinker** carries a coal along a belt; tip it with Strong wind to spill the coal on a fuse | 4 |
 | K5 The Bellows | Fire + wind: a bellows pushes flame along a channel; Explode cracks the wall; diagonal Up-Right | 5 |
 | K6 The Slag Climb | Vertical room: vents lift you, Cinders rise on the heat, Burst timing | 4 |
-| **Boss: The Kiln Heart** | Phase 1 *cold*: light three vents with one `Fire · Projectile · Up · Split`. Phase 2 *overheating*: blow its Cinders into quench puddles and crack its armour with a **delayed Explode**. Phase 3 *settle*: seal the core with a stone driven by wind. | 6 |
-Ledger (3 pages): the Smith. Wren: chalk footprints leading into the next room. Ends with the **Forge Bell**.
+| **The Kiln Heart** (built as room 2, 2026-10-03) | **Built, a long room, without the fight.** The Shutter Hall (**Delay**: a cube's bolt waits while she holds the shutter open on its plate), the Slag Lake (three always-on heat vents and the ledges between them), the Coal Racks (**Large**: one wide gust from the gallery's pedestal tips three skips of coal into the Heart), the Heart (**Split**: `Fire · Projectile · Up-Right · Split` lights its three hanging burners at once) and the hoist up to the Forge Bell. See `STORY_PLAYTHROUGH.md`. | 12–20 (estimate, needs a playtest) |
+| **Boss: The Kiln Heart** (not built) | Phase 1 *cold*: light three vents with one `Fire · Projectile · Up · Split`. Phase 2 *overheating*: blow its Cinders into quench puddles and crack its armour with a **delayed Explode**. Phase 3 *settle*: seal the core with a stone driven by wind. | 6 |
+Ledger (6 pages, three a room): the Smith. Wren: chalk footprints leading into the next room. Ends with the **Forge Bell**.
 
 ### Chapter 2 · The Drowned Cistern (Ice) — ~24 min
 *The water clocks that measured the sky. All stopped at the same minute.*
+(The ~24 min is the original plan. By request the two built rooms are long ones: about 30 minutes and about an hour,
+an estimate of 65 to 100 minutes for the wing until a playtest says otherwise.)
 New words: Ice, Freeze, Long, Persist, Down-Right. New creature: **Brine Jelly**.
 
 | Room | Idea | Time |
 |---|---|---|
-| C1 The First Pool | Freeze water into a platform (`Ice · Freeze · Down · Large`) | 3 |
-| C2 The Tide Stairs | A tide clock raises and drops the water; freeze at the right height | 4 |
+| C1 The Still Water | **Built (2026-10-04), a long room, the theme "freezing things".** Water frozen into a floor (two pools: Ice, Freeze, Long), old ice melted by fire, a slime frozen to stone-weight through an iron grate (the Clock Gate), five fountains frozen into a stair by cold laid aslant (**Down-Right**, Long), and a tide clock stopped at the hour by cold placed just above the mark (it opens the Sluice Door). Rule: rising water freezes where it first meets the cold. See `STORY_PLAYTHROUGH.md`. | 20–30 (estimate, needs a playtest) |
+| C2 The Great Sluice | **Built (2026-10-05), a long room, the theme "the cold that never lets go".** Takes in the Tide Stairs, the Frozen Weights and the Sluice. Persist learned and used four ways: a slime held on a slow plate (the Silence Gate), a tide frozen level with the doorways and held while she crosses (the Tide Lever over the doorway), two slimes held frozen on a weigh pan with the Ballast shoved onto it by a Strong wind (three weights), and the tide held at its high mark (from the high ledge) while the pan is held: the Great Sluice opens and drains the Bell Well. Then the room's one free cube, out of its socket, bridges the High Walk's fallen span (Ice, Bridge, Right). Rule: switched on while the hall is dry, the rising tide freezes at the doorways; while it is up, where it stands. See `STORY_PLAYTHROUGH.md`. | 45–70 (estimate, needs a playtest) |
 | C3 The Jellies | Jellies float at tide level; freeze one as a moving platform, or fire-pop one for a 3 s steam updraft | 4 |
 | C4 The Long Bridge | `Ice · Bridge · Right · Long` with **Persist** upkeep against your mana; budget it | 5 |
-| C5 The Frozen Weights | Freeze a slime and a crate to reach a total weight on a plate; melt a gate with a timed fire bolt | 4 |
-| C6 The Sluice | A water-clock machine: freeze its wheel at the right moment to open the sluice | 4 |
 | **Boss: Mere, the Cistern Leviathan** | Phase 1: freeze footholds before the tide takes them. Phase 2: freeze Mere mid-leap with Persist for a walkway (watch upkeep). Phase 3: span its jaws with a Long bridge, then melt its gill-seal so it coughs up the Tide Bell's clapper. | 6 |
 Ledger: the Warden of Waters. Wren is seen behind glass, drawing a star. Ends with the **Tide Bell**.
 Story beat: the word **Persist** is learned here with the line "the word that made the silence".

@@ -1089,7 +1089,7 @@ func _refresh_status() -> void:
 		_stats.text = ""
 		return
 	var mana_cap: int = player.get_mana_cap() if player.has_method("get_mana_cap") else 100
-	_stats.text = "HP %d / %d      MP %d / %d" % [player.current_health, player.MAX_HEALTH, player.current_mana, mana_cap]
+	_stats.text = "HP %d / %d      MANA %d / %d" % [player.current_health, player.MAX_HEALTH, player.current_mana, mana_cap]
 
 
 func _refresh_values() -> void:
@@ -1406,7 +1406,7 @@ class SaoRow extends Button:
 			draw_colored_polygon(PackedVector2Array([Vector2(0, h / 2.0 - 7.0), Vector2(-8, h / 2.0), Vector2(0, h / 2.0 + 7.0)]), PauseMenu.ORANGE)
 
 
-## "chapter" or "part": what the current stretch of the game is called.
+## "chapter", "level" or "wing": what the current stretch of the game is called.
 func _unit() -> String:
 	var root := _chapter_root()
 	return String(root.unit_name) if root else "chapter"

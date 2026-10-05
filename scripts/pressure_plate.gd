@@ -33,6 +33,12 @@ const ECHO_LAYER := 4
 		objects_only = value
 		queue_redraw()
 @export var light_color := Color(0.62, 0.45, 1.0)
+## How many weights it needs at once (a weigh pan: each thing heavy enough for
+## it counts one). Shown as that many notches on its face.
+@export_range(1, 6) var weight_needed := 1:
+	set(value):
+		weight_needed = value
+		queue_redraw()
 
 var is_pressed := false
 var _occupants := {}
@@ -117,12 +123,18 @@ func _still_counts(node: Node) -> bool:
 
 # Occupants are tracked either way; a heavy plate only sinks under stone
 func _any_pressing() -> bool:
+	return weight() >= weight_needed
+
+
+## How many of the things on it are heavy enough to count.
+func weight() -> int:
+	var n := 0
 	for node in _occupants:
 		if objects_only and (node is Area2D or node.is_in_group("player")):
 			continue
 		if not stone_only or node is PushableBlock or node.is_in_group("stone_weight") or node.get("is_frozen") == true:
-			return true
-	return false
+			n += 1
+	return n
 
 
 func _set_pressed(pressed: bool, silent := false) -> void:
@@ -145,6 +157,8 @@ func _process(delta: float) -> void:
 	_time += delta
 	if not _occupants.is_empty():
 		_refresh()
+	if weight_needed > 1:
+		queue_redraw()
 	var target_energy := 1.1 + 0.15 * sin(_time * 5.0) if is_pressed else 0.25 + 0.1 * sin(_time * 2.0)
 	_light.energy = lerpf(_light.energy, target_energy, minf(delta * 8.0, 1.0))
 
@@ -179,3 +193,10 @@ func _draw() -> void:
 			draw_rect(Rect2(sx, -12, 6, 7), Color("2b2442"))
 			draw_rect(Rect2(sx + 1, -11, 4, 1), rune)
 			draw_rect(Rect2(sx + 1, -8, 4, 1), rune)
+	if weight_needed > 1:
+		# A weigh pan: one notch per weight it needs, lit as each arrives
+		var have := weight() if not Engine.is_editor_hint() else 0
+		for i in weight_needed:
+			var nx := -weight_needed * 4.0 + i * 8.0 + 1.0
+			draw_rect(Rect2(nx, -16 + sink, 6, 4), Color("2b2442"))
+			draw_rect(Rect2(nx + 1, -15 + sink, 4, 2), Color(1.0, 0.85, 0.5) if i < have else Color(0.4, 0.34, 0.55))

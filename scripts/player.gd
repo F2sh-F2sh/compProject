@@ -137,6 +137,11 @@ func _ready() -> void:
 	# over her head that fills and turns gold when the jump is at full power
 	add_child(preload("res://scripts/fx/charge_breeze.gd").new())
 	add_child(preload("res://scripts/fx/charge_bar.gd").new())
+	# "[R] Kindle" over the flames that refill her mana (not wall torches)
+	var kindle_prompt := KindlePrompt.new()
+	kindle_prompt.name = "KindlePrompt"
+	kindle_prompt.player = self
+	add_child(kindle_prompt)
 
 	if hurtbox:
 		hurtbox.damage_received.connect(take_damage)
@@ -887,16 +892,33 @@ func near_kindle() -> bool:
 	return false
 
 
+## The nearest lit flame she can kindle at, within `max_dist` (null if none).
+func nearest_kindle(max_dist := INF) -> Node2D:
+	var best: Node2D = null
+	var best_d := max_dist
+	for point in get_tree().get_nodes_in_group("kindle_point"):
+		if point is Node2D and point.has_method("is_kindling") and point.is_kindling():
+			var d := (point as Node2D).global_position.distance_to(global_position)
+			if d < best_d:
+				best_d = d
+				best = point
+	return best
+
+
 var _last_kindle_hint := -10000
 
 
-## Tells her where mana comes from (not more than once in a while).
+## Tells her which flames refill her mana and which way the nearest one is
+## (not more than once in a while).
 func hint_kindle() -> void:
 	if Settings.assist_infinite_mana or Time.get_ticks_msec() - _last_kindle_hint < 4000:
 		return
 	_last_kindle_hint = Time.get_ticks_msec()
-	FloatText.spawn(get_parent(), global_position + Vector2(0, -52), "Hold %s at a lit flame to kindle your lantern" % InputLabels.primary("reload"),
-		Color(0.72, 0.9, 1.0), 20.0, 2.6)
+	var text := "No flame to kindle at here.\nHold %s beside a flame bowl, a shrine, a candle\nor a lit brazier. Wall torches won't do." % InputLabels.primary("reload")
+	var nearest := nearest_kindle()
+	if nearest:
+		text += "\nThe nearest is to your %s." % ("right" if nearest.global_position.x > global_position.x else "left")
+	FloatText.spawn(get_parent(), global_position + Vector2(0, -60), text, Color(0.72, 0.9, 1.0), 20.0, 3.6)
 
 
 func start_reload():

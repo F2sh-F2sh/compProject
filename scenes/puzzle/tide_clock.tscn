@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/tide_clock.gd" id="1_pwgvt"]
+
+[node name="TideClock" type="Node2D" unique_id=977435449]
+script = ExtResource("1_pwgvt")
