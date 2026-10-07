@@ -228,6 +228,8 @@ func _continue_target() -> String:
 		return scene
 	# Chapter 1 finished: on to Chapter 2
 	if GameState.has_flag("ch1.complete") and not GameState.has_flag("ch2.complete"):
+		if not GameState.has_flag("story.bell_echo_seen"):
+			return "res://scenes/story/bell_aftermath.tscn"
 		return CHAPTER_2
 	if GameState.has_flag("tutorial.done"):
 		return CHAPTER

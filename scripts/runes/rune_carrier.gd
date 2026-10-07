@@ -71,6 +71,9 @@ func nearest_cube() -> RuneCube:
 		if signf(cube.centre().x - me.x) != facing():
 			d += 12.0
 		if d < best_d:
+			var ray := PhysicsRayQueryParameters2D.create(me, cube.centre(), 2, [player.get_rid(), cube.body.get_rid()])
+			if not player.get_world_2d().direct_space_state.intersect_ray(ray).is_empty():
+				continue
 			best_d = d
 			best = cube
 	return best

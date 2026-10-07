@@ -225,13 +225,21 @@ func charged_jump(dir := "", hold := 2.6) -> float:
 
 
 func aim_and_shoot(world_pos: Vector2) -> void:
+	if DisplayServer.get_name() == "headless":
+		await preload("res://tests/background_aim.gd").fire(player, world_pos)
+		return
 	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	get_tree().root.warp_mouse(screen_pos)
+	var motion := InputEventMouseMotion.new()
+	motion.position = screen_pos
+	motion.global_position = screen_pos
+	get_tree().root.push_input(motion, true)
 	await frames(2)
 	await tap_action("shoot")
 
 
 func shot(file_name: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	await get_tree().process_frame
 	await get_tree().process_frame
 	get_tree().root.get_texture().get_image().save_png(ProjectSettings.globalize_path(SHOTS + file_name + ".png"))

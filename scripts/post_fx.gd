@@ -31,6 +31,9 @@ func _apply_quality() -> void:
 			if value == null:
 				# Not set on the material: the shader's own default
 				value = RenderingServer.shader_get_parameter_default(mat.shader.get_rid(), param)
+			if value == null:
+				# The headless renderer has no compiled shader defaults.
+				continue
 			_full[param] = value
 		mat.set_shader_parameter(param, _full[param] * float(Settings.quality(params[param])))
 	var level := get_parent()

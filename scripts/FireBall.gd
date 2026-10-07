@@ -18,6 +18,8 @@ var _exploded := false
 
 func _ready() -> void:
 	add_to_group("fireball")
+	# Enemies occupy layer 1; terrain may occupy only the solid layer 2.
+	collision_mask = 3
 	start_position = global_position
 
 	# The fireball lights its surroundings (and casts shadows) as it flies

@@ -36,6 +36,9 @@ func run_suite(filter: String) -> void:
 	}
 	for key in scenarios:
 		if filter == key or (filter == "" and key != "look"):
+			if DisplayServer.get_name() == "headless" and key in ["light", "post", "glow", "hazards", "look"]:
+				print("  SKIP rendered-image scenario in headless mode: ", key)
+				continue
 			await scenarios[key].call()
 	_release_all()
 	get_tree().paused = false
@@ -125,6 +128,8 @@ func region_luma(img: Image, center: Vector2, half: Vector2) -> float:
 
 
 func shot(file_name: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	var img := await screen_image()
 	img.save_png(ProjectSettings.globalize_path(SHOTS + file_name + ".png"))
 

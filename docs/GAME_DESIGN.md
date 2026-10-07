@@ -171,8 +171,12 @@ Galleries (about 60 s), the ending (about 90 s). Everything else is found:
 > animated pictures (the written sky, the Choir and the Eye, Ilse and Wren, the Last Sentence,
 > the Hush spreading, the bell, its cracking, Lowbell). Lowbell is playable up to Nan's door:
 > the camera comes down from the monastery, Echidna steps out, and villagers with glyph-gapped
-> lines line the lane. Nan's cottage (with the Echo lesson) is next; until then two narrated
-> cards bridge to the Undercroft. See `docs/IMPLEMENTATION_PROGRESS.md`.
+> lines line the lane. Nan's cottage now has a conversation and lantern handoff. The
+> pilgrim road has a bridge winch, ruined steps, the sealed Belfry door and an eastern well.
+> The well passage has two flame-sharing lamps, a light ward, safe return steps and landing
+> checkpoints before the existing tutorial. A three-picture bell aftermath connects the
+> Belfry to the Observatory. The cottage's proposed Echo lesson remains in the original
+> tutorial; the wider chapter plan below is still a design, not implemented content.
 
 The goal: an emotional hook in the first minute, the mechanic's "aha" by minute 10, a mystery by
 minute 15, and a clear goal by minute 20.

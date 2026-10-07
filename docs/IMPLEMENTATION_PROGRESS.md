@@ -1,5 +1,30 @@
 # Implementation Progress — Chapter 1: The Sealed Belfry
 
+## Story continuation — 30 September 2026
+
+Lowbell now leads into Nan's cottage, a playable pilgrim road and a descending old-well
+passage before the existing tutorial/Chapter 1. Nan's failing memory motivates the journey;
+the sealed Belfry door explains the dungeon entrance. New interactions lower a bridge and
+share Nan's lantern flame between two passage lamps. World flags and landing checkpoints
+restore progress through Continue. The original player controller, tutorial, puzzle chapters
+and rune rules are retained. Chapter 1's Continue also plays a three-picture bell aftermath
+before the Observatory: the bell buys Lowbell time, while the Eye still holds the Hush's source.
+
+Implementation: `scripts/story/witch_prologue.gd`, `story_dialogue.gd`, `bell_aftermath.gd`
+and their scenes in `scenes/story/`. These scenes use existing art and synthesized audio;
+they are built at runtime like Lowbell, not by the chapter generators.
+
+Verification: the full windowed suite passed **1,021 checks, zero failures** (tutorial 140,
+chapter 304, presentation 100, experience 136, rune 304, prologue 37). Final screenshot
+review found that a conversation started during a jump froze Echidna in midair; control
+locking now keeps gravity, and a final prologue run passed **38/38**, including that case.
+Godot import and whitespace checks passed. Rendered screenshots were inspected at normal
+and smaller window sizes. This is automated simulated-input testing and screenshot review;
+human playtesting and listening to the audio remain on `PLAYTEST_CHECKLIST.md`.
+
+The baseline and milestone entries below are historical records; their branch and
+uncommitted-status descriptions do not describe the current checkout.
+
 Living record of the puzzle-chapter work. Companion documents:
 [CHAPTER1_SOLUTIONS.md](CHAPTER1_SOLUTIONS.md) (room-by-room solutions, resets, failure
 states) and [PLAYTEST_CHECKLIST.md](PLAYTEST_CHECKLIST.md) (what a human still needs to judge).

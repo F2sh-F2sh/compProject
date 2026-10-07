@@ -10,6 +10,7 @@ const TUTORIAL := "res://scenes/tutorial_level.tscn"
 const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
 const STORY := "res://scenes/story/story_intro.tscn"
 const LOWBELL := "res://scenes/story/lowbell.tscn"
+const COTTAGE := "res://scenes/story/nan_cottage.tscn"
 const SHOTS := "user://test_shots/"
 const DT := 1.0 / 60.0
 
@@ -128,6 +129,8 @@ func press_action(action: String) -> void:
 
 
 func shot(file_name: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	await get_tree().process_frame
 	await get_tree().process_frame
 	get_tree().root.get_texture().get_image().save_png(ProjectSettings.globalize_path(SHOTS + file_name + ".png"))
@@ -151,7 +154,7 @@ func scenario_title() -> void:
 	await shot("title_intro")
 	lvl.skip()
 	check("the story leads to Lowbell", await wait_for_scene(LOWBELL))
-	check("and from Lowbell the way on is the tutorial", lvl.next_scene() == TUTORIAL)
+	check("Lowbell leads to Nan's cottage", lvl.next_scene() == COTTAGE)
 
 	# After the tutorial, Continue and New Game go straight to the chapter
 	state().clear_all()
@@ -175,8 +178,8 @@ func scenario_title() -> void:
 		and state().has_flag("tutorial.done"))
 	check("the story plays again", await wait_for_scene(STORY))
 	lvl.skip()
-	check("and after the tutorial, Lowbell's lane leads to the chapter", await wait_for_scene(LOWBELL)
-		and lvl.next_scene() == CHAPTER)
+	check("New Game still visits Nan when the tutorial is already done", await wait_for_scene(LOWBELL)
+		and lvl.next_scene() == COTTAGE)
 
 	# The Tutorial entry always replays it from the start
 	await open_scene(TITLE)
@@ -289,8 +292,14 @@ func _sounds(name: String) -> int:
 
 
 func aim_and_shoot(world_pos: Vector2) -> void:
+	if DisplayServer.get_name() == "headless":
+		await preload("res://tests/background_aim.gd").fire(lvl.get_node("Player"), world_pos)
+		return
 	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	get_tree().root.warp_mouse(screen_pos)
+	var motion := InputEventMouseMotion.new()
+	motion.position = screen_pos
+	motion.global_position = screen_pos
+	get_tree().root.push_input(motion, true)
 	await frames(2)
 	Input.action_press("shoot")
 	await frames(2)
@@ -467,6 +476,9 @@ func scenario_controls() -> void:
 		"%s vs %s" % [dir, to_slime])
 
 	# Graphics levels, Low to Elite
+	if DisplayServer.get_name() == "headless":
+		print("  SKIP compiled shader/graphics quality checks in headless mode")
+		return
 	var mat: ShaderMaterial = lvl.get_node("PostFX/Screen").material
 	var lights := func(): return lvl.find_children("*", "Light2D", true, false).filter(func(l): return l.shadow_enabled)
 	var shadowed: int = lights.call().size()
@@ -506,16 +518,16 @@ func scenario_controls() -> void:
 
 func scenario_damaged_files() -> void:
 	print("SCENARIO damaged save and settings files")
-	var path := "user://test_damaged_save.cfg"
+	var path := "res://.godot/test_damaged_save.cfg"
 	var file := ConfigFile.new()
 	file.set_value("progress", "flags", "not a dictionary")
 	file.set_value("progress", "checkpoint_scene", 42)
 	file.set_value("progress", "checkpoints", [1, 2, 3])
-	file.save(path)
+	check("damaged-save fixture was written", file.save(path) == OK)
 	state().load_game(path)
 	check("a damaged save loads as empty progress instead of crashing", state().flags is Dictionary
 		and state().flags.is_empty() and state().checkpoint_scene == "" and state().checkpoints is Dictionary)
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	# Leave this isolated fixture for inspection; never touch the real save.
 	var settings := get_tree().root.get_node("Settings")
 	check("a damaged setting falls back to its default", settings._number("loud", 0.7) == 0.7
 		and settings._number(5.0, 0.7) == 2.0)
@@ -811,7 +823,7 @@ func scenario_lowbell() -> void:
 	check("knocking starts the way on", lvl.leaving)
 	var nan_answers := func(): return lvl._nan.visible and lvl._nan_door_anim.visible
 	check("Nan opens her door, lantern in hand", await wait_until(nan_answers, 4.0))
-	check("which, before the tutorial is done, is the tutorial", await wait_for_scene(TUTORIAL, 40.0))
+	check("Nan welcomes her inside the cottage", await wait_for_scene(COTTAGE, 12.0))
 	# Coming back (Continue), the opening doesn't play again
 	await open_scene(LOWBELL)
 	await frames(5)

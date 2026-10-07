@@ -45,9 +45,9 @@ static func problem(c: RuneCube, spell: Dictionary) -> String:
 	query.exclude = RuneManager.wind_ray_exclusions(c.get_tree())
 	if not space.intersect_shape(query, 1).is_empty():
 		return "The far side of the portal would open inside solid stone."
-	if c.home_room and not c.home_room.bounds.has_point(far):
-		return "The far side of the portal would open outside this room."
 	var rect := Rect2(far - DOOR_SIZE / 2.0, DOOR_SIZE)
+	if c.home_room and not c.home_room.bounds.encloses(rect):
+		return "The far side of the portal would open outside this room."
 	for hazard in c.get_tree().get_nodes_in_group("hazard_zone"):
 		if hazard.has_method("get_hazard_rect") and hazard.get_hazard_rect().intersects(rect):
 			return "The far side of the portal would open over a hazard."
@@ -99,6 +99,24 @@ func _physics_process(delta: float) -> void:
 
 
 func _carry(body: CharacterBody2D) -> void:
+	# Gates and moving bodies can block an exit after activation. Check the
+	# traveller's full box at its translated position, including entry offset.
+	var destination := RuneManager.bounds_of(body)
+	destination.position += exit_point - entrance
+	if cube.home_room and not cube.home_room.bounds.encloses(destination):
+		return
+	var box := RectangleShape2D.new()
+	box.size = destination.size
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = box
+	query.transform = Transform2D(0.0, destination.get_center())
+	query.collision_mask = 2
+	query.exclude = [body.get_rid()]
+	if not body.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
+		return
+	for hazard in get_tree().get_nodes_in_group("hazard_zone"):
+		if hazard.has_method("get_hazard_rect") and hazard.get_hazard_rect().intersects(destination):
+			return
 	# Same place relative to the door, same velocity
 	body.global_position += exit_point - entrance
 	body.reset_physics_interpolation()

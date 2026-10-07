@@ -108,6 +108,8 @@ func _to_title() -> void:
 
 func _to(scene: String) -> void:
 	get_tree().paused = false
+	if scene == "res://scenes/chapter/chapter_2.tscn" and get_tree().current_scene.scene_file_path == "res://scenes/chapter/chapter_1.tscn" and not GameState.has_flag("story.bell_echo_seen"):
+		scene = "res://scenes/story/bell_aftermath.tscn"
 	get_tree().change_scene_to_file(scene)
 
 

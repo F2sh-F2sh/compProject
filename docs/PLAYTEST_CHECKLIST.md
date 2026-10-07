@@ -1,8 +1,28 @@
 # Chapter 1 Playtest Checklist
 
-For a human playtester. The automated suite already proves every room *can* be solved and
-that the rules hold (see "What the tests already cover" at the end); these checks are about
+For a human playtester. The automated suite checks intended room solutions and selected
+rules (see "What the tests already cover" at the end); these checks are about
 what a script can't judge: clarity, feel, sound, fairness and comfort.
+
+## New story route — human checks still needed
+
+- [ ] New Game → Lowbell → Nan: her missing name makes the stakes clear without rushing the conversation.
+- [ ] The lantern handoff, fire, portraits and camera framing look good at your normal window size.
+- [ ] Interact, Jump, controller confirm and the on-screen Continue/Skip buttons work naturally; holding Escape skips without reopening the conversation.
+- [ ] The bridge winch is easy to spot; its landing and sound feel convincing. Falling before lowering it returns you safely.
+- [ ] The sealed door makes the old-well route clear. You understand why Echidna enters the dungeon.
+- [ ] Both passage lamps are visible and the flame-sharing prompts are clear. Missing one never traps you below a landing.
+- [ ] Return to Title → Continue restores the bridge, lamps and the latest landing.
+- [ ] Completing Chapter 1 → Continue shows the bell's effect on Nan, then explains the Observatory objective.
+- [ ] Music, ignition, bridge and bell sounds feel balanced. Automated audio-state checks do not establish this.
+- [ ] Confirm the fixed unlit-lamp halos and opened ward door look right in the rendered well scene.
+- [ ] Resize Nan's cottage to wide and tall windows during dialogue and movement; inspect the framing and backdrop edges.
+- [ ] Try picking up a cube beside walls and using a portal while its exit becomes blocked; check that refusal is clear and movement feels natural.
+
+The October 7 background pass is documented in `BUG_HUNT.md`. Headless gameplay,
+physics and layout assertions are separate from the visual checks above. Rendered
+light/bloom/glow and graphics-quality checks are skipped in headless mode, and
+targeted projectile helpers bypass mouse aim, shoot input, cost and cooldown.
 
 Before starting: Title → **New Game** (press twice if there is progress), or delete
 `%APPDATA%\Godot\app_userdata\The Sealed Belfry\savegame.cfg`. (The game was renamed from

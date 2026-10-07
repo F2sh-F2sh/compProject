@@ -74,7 +74,9 @@ func thaw() -> void:
 	if not is_instance_valid(creature):
 		queue_free()
 		return
-	creature.set_physics_process(true)
+	# Death owns the disabled behaviour until a room reset revives it.
+	if creature.get("is_dead") != true:
+		creature.set_physics_process(true)
 	creature.modulate = _tint
 	if not _had_stone_weight:
 		creature.remove_from_group("stone_weight")

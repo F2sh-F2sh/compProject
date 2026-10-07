@@ -175,13 +175,22 @@ func load_game(path := SAVE_PATH) -> void:
 	# A damaged or hand-edited save must never crash the game: anything of
 	# the wrong type falls back to empty progress
 	var loaded_flags = file.get_value("progress", "flags", {})
-	flags = loaded_flags if loaded_flags is Dictionary else {}
+	flags = {}
+	if loaded_flags is Dictionary:
+		for key in loaded_flags:
+			var value = loaded_flags[key]
+			if key is String and (value is bool or value is int or (value is float and is_finite(value))):
+				flags[key] = value
 	var scene = file.get_value("progress", "checkpoint_scene", "")
 	var id = file.get_value("progress", "checkpoint_id", "")
 	checkpoint_scene = scene if scene is String else ""
 	checkpoint_id = id if id is String else ""
 	var loaded_checkpoints = file.get_value("progress", "checkpoints", {})
-	checkpoints = loaded_checkpoints if loaded_checkpoints is Dictionary else {}
+	checkpoints = {}
+	if loaded_checkpoints is Dictionary:
+		for key in loaded_checkpoints:
+			if key is String and loaded_checkpoints[key] is String:
+				checkpoints[key] = loaded_checkpoints[key]
 	# Saves from before per-scene checkpoints
 	if checkpoints.is_empty() and checkpoint_scene != "":
 		checkpoints[checkpoint_scene] = checkpoint_id

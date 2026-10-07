@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Automated gameplay tests. Run from the project folder:
 ##   godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- [suite] [scenario]
-## suite: "tutorial", "chapter", "presentation", "experience", "rune" or "all"
+## suite: "tutorial", "chapter", "presentation", "experience", "rune", "prologue", "adversarial" or "all"
 ## (default). scenario: optional filter.
 ## Suites are loaded only after the engine (and its autoloads) has started, so
 ## they may use every game class. The exit code is non-zero if anything fails.
@@ -18,6 +18,9 @@ func _process(_delta: float) -> bool:
 
 
 func _run() -> void:
+	root.size = Vector2i(1152, 648)
+	if DisplayServer.get_name() == "headless":
+		print("BACKGROUND: no desktop input or screenshots; targeted projectile helpers bypass mouse aiming, cost and cooldown.")
 	var args := OS.get_cmdline_user_args()
 	var suite_name: String = args[0] if args.size() > 0 else "all"
 	var scenario: String = args[1] if args.size() > 1 else ""
@@ -47,14 +50,21 @@ func _run() -> void:
 	# Tests check audio state, not sound; keep the speakers quiet while they run
 	AudioServer.set_bus_mute(0, true)
 
-	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune"] if suite_name == "all" else [suite_name]
+	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune", "prologue", "adversarial"] if suite_name == "all" else [suite_name]
 	var passed := 0
 	var failed := 0
 	for n in names:
 		var path := "res://tests/%s_suite.gd" % n
 		if not ResourceLoader.exists(path):
+			push_error("Unknown test suite: " + str(n))
+			failed += 1
 			continue
-		var suite: Node = load(path).new()
+		var suite_script: Script = load(path)
+		if suite_script == null or not suite_script.can_instantiate():
+			push_error("Cannot load test suite: " + str(n))
+			failed += 1
+			continue
+		var suite: Node = suite_script.new()
 		suite.process_mode = Node.PROCESS_MODE_ALWAYS
 		root.add_child(suite)
 		await suite.run_suite(scenario)

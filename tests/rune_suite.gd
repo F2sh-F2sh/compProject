@@ -178,6 +178,8 @@ func interact() -> void:
 
 
 func shot(file_name: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	await get_tree().process_frame
 	await get_tree().process_frame
 	get_tree().root.get_texture().get_image().save_png(ProjectSettings.globalize_path(SHOTS + file_name + ".png"))

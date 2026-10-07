@@ -143,8 +143,14 @@ func tap_action(action: String) -> void:
 
 ## Points the real mouse at a world position and presses the shoot action.
 func aim_and_shoot(world_pos: Vector2) -> void:
+	if DisplayServer.get_name() == "headless":
+		await preload("res://tests/background_aim.gd").fire(player, world_pos)
+		return
 	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	get_tree().root.warp_mouse(screen_pos)
+	var motion := InputEventMouseMotion.new()
+	motion.position = screen_pos
+	motion.global_position = screen_pos
+	get_tree().root.push_input(motion, true)
 	await frames(2)
 	await tap_action("shoot")
 
@@ -213,6 +219,8 @@ func _measure_rise(floor_y: float) -> float:
 
 
 func shot(file_name: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		return
 	await get_tree().process_frame
 	get_tree().root.get_texture().get_image().save_png(ProjectSettings.globalize_path(SHOTS + file_name + ".png"))
 
@@ -726,6 +734,10 @@ func scenario_slimes() -> void:
 	await seconds(1.0)
 	var home: float = slime.home_x
 	await place(slime.global_position.x - 150)
+	# Keep the drop available to inspect even when simulated shots kill at
+	# point-blank range; wounded-player attraction is checked separately below.
+	player.current_health = player.MAX_HEALTH
+	player.invulnerable_time = 20.0
 	var killed := await fight_slimes([slime], 15.0)
 	check("fireballs kill a slime", killed)
 	# (Checked at once: a hurt Echidna nearby would already be drawing it in)
@@ -741,6 +753,7 @@ func scenario_slimes() -> void:
 		player.update_health_ui()
 		await place(orb.global_position.x - 30.0)
 		var healed := await wait_until(func(): return player.current_health == 8, 3.0)
+		await frames(1) # queue_free is committed at the end of the healing frame.
 		check("the orb drifts to a hurt Echidna and heals her", healed and not is_instance_valid(orb),
 			"hp=%d" % player.current_health)
 
@@ -993,9 +1006,9 @@ func scenario_feel() -> void:
 
 func scenario_camera_aspects() -> void:
 	print("SCENARIO camera bounds at other window shapes")
-	var original := DisplayServer.window_get_size()
+	var original := get_tree().root.size
 	for size in [Vector2i(1024, 768), Vector2i(1680, 640), Vector2i(800, 800)]:
-		DisplayServer.window_set_size(size)
+		get_tree().root.set_size(size)
 		await load_level()
 		await frames(5)
 		var worst := 0.0
@@ -1012,4 +1025,4 @@ func scenario_camera_aspects() -> void:
 				worst = over
 				where = "spot=%s view=%s zoom=%s" % [spot, r, cam.zoom]
 		check("camera inside level at window %s" % size, worst <= 0.5, "%.2f %s" % [worst, where])
-	DisplayServer.window_set_size(original)
+	get_tree().root.set_size(original)
