@@ -237,11 +237,15 @@ func aim_and_shoot(world_pos: Vector2) -> void:
 		await preload("res://tests/background_aim.gd").fire(player, world_pos)
 		return
 	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	var motion := InputEventMouseMotion.new()
-	motion.position = screen_pos
-	motion.global_position = screen_pos
-	get_tree().root.push_input(motion, true)
-	await frames(2)
+	# Retain retrying aim updates using viewport events, without OS cursor control.
+	for attempt in 8:
+		var motion := InputEventMouseMotion.new()
+		motion.position = screen_pos
+		motion.global_position = screen_pos
+		get_tree().root.push_input(motion, true)
+		await frames(2)
+		if lvl.get_global_mouse_position().distance_to(world_pos) < 10.0:
+			break
 	await tap_action("shoot")
 
 

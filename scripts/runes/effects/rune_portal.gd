@@ -150,7 +150,7 @@ func _carry(body: CharacterBody2D, from: Area2D = null, to: Area2D = null) -> vo
 	for hazard in get_tree().get_nodes_in_group("hazard_zone"):
 		if hazard.has_method("get_hazard_rect") and hazard.get_hazard_rect().intersects(destination):
 			return
-	# Same place relative to the door, same velocity
+	# Same place relative to the side it went into, same velocity
 	body.global_position += to.global_position - from.global_position
 	body.reset_physics_interpolation()
 	_arrived[body] = [to, 0.0]
