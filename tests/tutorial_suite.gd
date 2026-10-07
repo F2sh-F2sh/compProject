@@ -50,6 +50,8 @@ func run_suite(filter: String) -> void:
 		await scenario_echo()
 	if only == "" or only == "legacy":
 		await scenario_legacy_level()
+	if only == "" or only == "abilities":
+		await scenario_abilities()
 	if only == "" or only == "feel":
 		await scenario_feel()
 	print("tutorial suite: passed=%d failed=%d" % [passed, failed])
@@ -340,34 +342,6 @@ func scenario_playthrough() -> void:
 		"health=%d" % player.current_health)
 	check("no hazard resets on the intended path", recoveries == 0, "resets=%d" % recoveries)
 
-	# Fireball gauntlet: stop short of the pistons, shoot the rune switch
-	var switch = lvl.get_node("Gauntlet/RuneSwitch")
-	await move_until_x(5480)
-	Input.action_release("move_right")
-	await frames(20)
-	await shot("play_06_gauntlet")
-	await aim_and_shoot(switch.global_position)
-	var hit := await wait_until(func(): return switch.is_active, 2.0)
-	check("fireball hits the rune switch", hit)
-	await frames(10)
-	await shot("play_07_switch_hit")
-	var gauntlet := lvl.get_node("Gauntlet").get_children().filter(func(n): return n.has_method("get_head_bottom"))
-	var all_raised := await wait_until(func():
-		return gauntlet.all(func(p): return p.progress <= 0.0 and not p.is_dangerous()), 3.0)
-	check("switch stops every gauntlet piston", all_raised)
-	var before_gauntlet: int = player.current_health
-	check("crossed the stopped gauntlet", await move_until_x(5800, true))
-	Input.action_release("sprint")
-	check("no damage in the stopped gauntlet", player.current_health == before_gauntlet)
-
-	# Slime arena: burn both slimes
-	await move_until_x(6060)
-	Input.action_release("move_right")
-	var slimes := lvl.get_node("Enemies").get_children()
-	var killed := await fight_slimes(slimes, 25.0)
-	check("both slimes defeated with fireballs", killed)
-	await shot("play_08_arena")
-
 	# Echo lab: record on the plate so the Echo holds the gate open
 	var plate = lvl.get_node("EchoLab/Plate")
 	var gate = lvl.get_node("EchoLab/Gate")
@@ -391,6 +365,34 @@ func scenario_playthrough() -> void:
 	Input.action_release("sprint")
 	check("plate still held by the Echo", plate.is_pressed)
 
+	# Fireball gauntlet: stop short of the pistons, shoot the rune switch
+	var switch = lvl.get_node("Gauntlet/RuneSwitch")
+	await move_until_x(6780)
+	Input.action_release("move_right")
+	await frames(20)
+	await shot("play_06_gauntlet")
+	await aim_and_shoot(switch.global_position)
+	var hit := await wait_until(func(): return switch.is_active, 2.0)
+	check("fireball hits the rune switch", hit)
+	await frames(10)
+	await shot("play_07_switch_hit")
+	var gauntlet := lvl.get_node("Gauntlet").get_children().filter(func(n): return n.has_method("get_head_bottom"))
+	var all_raised := await wait_until(func():
+		return gauntlet.all(func(p): return p.progress <= 0.0 and not p.is_dangerous()), 3.0)
+	check("switch stops every gauntlet piston", all_raised)
+	var before_gauntlet: int = player.current_health
+	check("crossed the stopped gauntlet", await move_until_x(7100, true))
+	Input.action_release("sprint")
+	check("no damage in the stopped gauntlet", player.current_health == before_gauntlet)
+
+	# Slime arena: burn both slimes
+	await move_until_x(7360)
+	Input.action_release("move_right")
+	var slimes := lvl.get_node("Enemies").get_children()
+	var killed := await fight_slimes(slimes, 25.0)
+	check("both slimes defeated with fireballs", killed)
+	await shot("play_08_arena")
+
 	# Exit door
 	var exit_x: float = lvl.get_node("LevelExit").global_position.x
 	await move_until_x(exit_x - 40)
@@ -407,8 +409,16 @@ func scenario_playthrough() -> void:
 	monitor_camera = false
 	check("camera never showed outside the level", camera_worst <= 0.5,
 		"worst overshoot=%.2f %s" % [camera_worst, camera_worst_at])
+	# The Level 1 card: her time and deaths, then Continue on into the Belfry
+	var card_up := await wait_until(func(): return is_instance_valid(exit.results_card), 8.0)
+	var labels: Array = exit.results_card.find_children("*", "Label", true, false).map(func(l): return l.text) if card_up else []
+	check("the exit shows the Level 1 card with the run's time and deaths", card_up and labels.has("Time") and labels.has("Deaths"), str(labels))
+	await seconds(1.0)
+	await shot("play_06_card")
+	if card_up:
+		exit.results_card.continue_button.pressed.emit()
 	var changed := await wait_until(func(): return get_tree().current_scene != lvl and get_tree().current_scene != null, 4.0)
-	check("exit leads into chapter 1", changed and get_tree().current_scene.scene_file_path.ends_with("chapter/chapter_1.tscn"),
+	check("its Continue leads into chapter 1", changed and get_tree().current_scene.scene_file_path.ends_with("chapter/chapter_1.tscn"),
 		str(get_tree().current_scene.scene_file_path if get_tree().current_scene else "none"))
 
 
@@ -671,7 +681,7 @@ func scenario_gauntlet() -> void:
 		player.current_health = 10
 		player.invulnerable_time = 0.0
 		release_all()
-		await place(5470)
+		await place(6770)
 		# Stagger the start across one full cycle
 		await seconds(cycle * i / runs + 0.02)
 		player.invulnerable_time = 0.0
@@ -680,8 +690,8 @@ func scenario_gauntlet() -> void:
 		Input.action_press("sprint")
 		var t := 0.0
 		var jumped := false
-		while player.global_position.x < 5720 and player.current_health == hp and t < 3.0:
-			if jump and not jumped and player.global_position.x > 5495:
+		while player.global_position.x < 7020 and player.current_health == hp and t < 3.0:
+			if jump and not jumped and player.global_position.x > 6795:
 				Input.action_press("jump")
 				await frames(2)
 				Input.action_release("jump")
@@ -691,7 +701,7 @@ func scenario_gauntlet() -> void:
 		release_all()
 		# A crush fades back to safety; let it finish before the next run
 		await wait_until(func(): return not player.hazard_recovery.is_active(), 2.0)
-		if player.current_health == hp and player.global_position.x >= 5720:
+		if player.current_health == hp and player.global_position.x >= 7020:
 			survived += 1
 			detail += " run%d(jump=%s)" % [i, jump]
 	check("running pistons cannot be crossed (%d attempts, walking/jumping)" % runs, survived == 0,
@@ -700,7 +710,7 @@ func scenario_gauntlet() -> void:
 	# Now shoot the switch and cross safely
 	player.current_health = 10
 	player.invulnerable_time = 0.0
-	await place(5470)
+	await place(6770)
 	var switch = lvl.get_node("Gauntlet/RuneSwitch")
 	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * switch.global_position
 	check("rune switch is on screen from the shooting spot",
@@ -713,7 +723,7 @@ func scenario_gauntlet() -> void:
 	await wait_until(func(): return pistons.all(func(p): return p.progress <= 0.0), 3.0)
 	check("pistons retract and stay stopped", pistons.all(func(p): return not p.running and not p.is_dangerous()))
 	var hp_before: int = player.current_health
-	await move_until_x(5800, true)
+	await move_until_x(7100, true)
 	release_all()
 	check("gauntlet crossable once stopped", player.current_health == hp_before)
 	await seconds(3.0)
@@ -738,11 +748,15 @@ func scenario_slimes() -> void:
 	# point-blank range; wounded-player attraction is checked separately below.
 	player.current_health = player.MAX_HEALTH
 	player.invulnerable_time = 20.0
+	player.update_health_ui()
 	var killed := await fight_slimes([slime], 15.0)
 	check("fireballs kill a slime", killed)
 	# (Checked at once: a hurt Echidna nearby would already be drawing it in)
+	# (The orb appears as the slime dissolves; a slow frame can be late)
+	await wait_until(func(): return get_tree().get_nodes_in_group("pickup").size() >= 1, 2.0)
 	var orbs := get_tree().get_nodes_in_group("pickup")
-	check("a defeated slime leaves a health orb", orbs.size() == 1)
+	check("a defeated slime leaves a health orb", orbs.size() == 1, "%d orbs" % orbs.size())
+	check("and a spark mote of mana", get_tree().get_nodes_in_group("mote").size() == 1)
 	player.current_health = player.MAX_HEALTH
 	await seconds(1.0)
 	check("dead slime is removed", not is_instance_valid(slime))
@@ -753,7 +767,10 @@ func scenario_slimes() -> void:
 		player.update_health_ui()
 		await place(orb.global_position.x - 30.0)
 		var healed := await wait_until(func(): return player.current_health == 8, 3.0)
-		await frames(1) # queue_free is committed at the end of the healing frame.
+		# (a collected orb is freed at the end of the frame; give a slow frame time to
+		# pass. A weak reference, so the wait doesn't hold on to a freed orb.)
+		var orb_ref: WeakRef = weakref(orb)
+		await wait_until(func(): return orb_ref.get_ref() == null, 1.0)
 		check("the orb drifts to a hurt Echidna and heals her", healed and not is_instance_valid(orb),
 			"hp=%d" % player.current_health)
 
@@ -766,6 +783,112 @@ func scenario_slimes() -> void:
 		await get_tree().physics_frame
 		max_away = maxf(max_away, absf(other.global_position.x - other.home_x))
 	check("wandering slime stays in its arena", max_away < other.home_radius + 90.0, "max %.0f px from home" % max_away)
+
+
+func scenario_abilities() -> void:
+	print("SCENARIO the Novices' Way: remembering fire, healing and Echo")
+	var gs := get_tree().root.get_node("GameState")
+	gs.clear_all()
+	gs.all_abilities = false
+	await load_level()
+	var ammo = lvl.get_node("AmmoUI")
+	check("she starts without any of her three spells", not gs.has_ability("fire") and not gs.has_ability("heal")
+		and not gs.has_ability("echo"))
+	check("so the spell slots are not shown yet", not ammo.fire_slot.visible and not ammo.heal_slot.visible)
+	var denied := []
+	player.ability_denied.connect(func(id): denied.append(id))
+	var fireballs := func() -> int: return get_tree().get_nodes_in_group("fireball").size()
+	await tap_action("shoot")
+	await tap_action("heal")
+	await tap_action("echo")
+	check("each key only sputters, and says which spell was missing", denied == ["fire", "heal", "echo"], str(denied))
+	check("no fireball, no recording", fireballs.call() == 0 and not player.get_node("EchoRecorder").is_recording)
+
+	# The order along the Passage: the Echo door first, the fire lessons last
+	# (the pistons that need fire, then the slimes); no Spring in the Passage
+	var flame: AbilityShrine = lvl.get_node("KeptFlame")
+	var stone: AbilityShrine = lvl.get_node("EchoStone")
+	check("there is no Spring in the Passage (heal comes at the end of the Belfry)", lvl.get_node_or_null("Spring") == null
+		and lvl.get_node_or_null("Signs/Heal") == null)
+	check("the Echo stone comes before the Echo lesson's plate", stone.global_position.x < lvl.get_node("EchoLab/Plate").global_position.x)
+	check("the Echo door is before the Kept Flame", lvl.get_node("EchoLab/Gate").global_position.x < flame.global_position.x)
+	check("the Kept Flame comes before the pistons that need fire",
+		flame.global_position.x < lvl.get_node("Gauntlet/GauntletPiston1").global_position.x)
+	check("the slimes come after the pistons", lvl.get_node("Enemies/Slime1").global_position.x > lvl.get_node("Gauntlet/RuneSwitch").global_position.x)
+	check("the exit is after the slimes", lvl.get_node("LevelExit").global_position.x > lvl.get_node("Enemies/Slime2").global_position.x)
+	check("the phases have their cards in order", lvl.get_node("Lessons/Lesson9").eyebrow.contains("PHASE 4 · THE ECHO DOOR")
+		and lvl.get_node("Lessons/Lesson7").eyebrow.contains("PHASE 5 · THE KEPT FLAME")
+		and lvl.get_node("Lessons/Lesson8").eyebrow.contains("PHASE 6 · THE CELLS"))
+	var zones := lvl.get_node("Lessons").get_children().filter(func(z): return z is LessonZone)
+	check("the lesson zones tile the Passage with no gap and no overlap", _zones_tile(zones))
+
+	# Echo
+	await place(stone.global_position.x - 24)
+	await frames(10)
+	check("the Echo stone can be listened to", await wait_until(func(): return stone.interactable.is_focused(), 2.0))
+	await tap_action("interact")
+	await frames(10)
+	check("it gives her Echo", gs.has_flag("ability.echo") and stone.figure.frame == 1)
+	check("a card names the word", lvl.find_children("*", "Label", true, false).any(func(l): return l.text == "ECHO"))
+	denied.clear()
+	await tap_action("echo")
+	await frames(4)
+	check("and recording works", denied.is_empty() and player.get_node("EchoRecorder").is_recording)
+	await tap_action("echo")
+	check("she still has no fire or heal", not gs.has_ability("fire") and not gs.has_ability("heal"))
+
+	# Fire
+	await place(flame.global_position.x - 24)
+	await frames(10)
+	check("the Kept Flame can be read", await wait_until(func(): return flame.interactable.is_focused(), 2.0))
+	await tap_action("interact")
+	await frames(10)
+	check("reading it gives her fire for good", gs.has_flag("ability.fire") and gs.has_ability("fire") and flame.is_remembered())
+	check("a card names the word and says what it does", lvl.find_children("*", "Label", true, false).any(func(l): return l.text == "FLAME")
+		and lvl.find_children("*", "Label", true, false).any(func(l): return l.text.contains("throw fire")))
+	check("the fire slot appears, the heal slot does not", ammo.fire_slot.visible and not ammo.heal_slot.visible)
+	denied.clear()
+	await tap_action("shoot")
+	await frames(6)
+	check("now a fireball flies", denied.is_empty() and fireballs.call() > 0)
+	await tap_action("heal")
+	check("heal is still missing, and says so", denied == ["heal"], str(denied))
+	# Mana is the lantern's flame: back only at a lit flame (the Kept Flame is one)
+	player.current_mana = 0
+	Input.action_press("reload")
+	await seconds(1.0)
+	check("at the Kept Flame, holding the kindle key starts to refill mana", player.is_reloading or player.current_mana > 0)
+	await wait_until(func(): return player.current_mana >= 100, 3.0)
+	Input.action_release("reload")
+	check("and refills it", player.current_mana == 100, str(player.current_mana))
+	await place(flame.global_position.x + 130.0)
+	player.current_mana = 0
+	Input.action_press("reload")
+	await seconds(2.0)
+	Input.action_release("reload")
+	check("anywhere else it does not", player.current_mana == 0)
+	player.current_mana = 100
+
+	# Old saves already have them all
+	gs.clear_all()
+	check("a fresh game has none", not gs.has_ability("fire"))
+	gs.set_flag("tutorial.done")
+	check("a save that finished the tutorial has all three", gs.has_ability("fire") and gs.has_ability("heal") and gs.has_ability("echo"))
+	gs.clear_all()
+	gs.set_flag("ch1.r1.solved")
+	check("so does one that is part-way through the Belfry", gs.has_ability("echo"))
+	gs.clear_all()
+	gs.grant_ability("echo")
+	gs.grant_ability("fire")
+	gs.set_flag("tutorial.done")
+	gs.set_flag("ch1.r1.solved")
+	check("but a new save that is part-way through the Belfry has no heal yet", gs.has_ability("fire") and not gs.has_ability("heal"))
+	gs.clear_all()
+	Journey.skipping_to(Journey.BELFRY)
+	check("starting a later part from the title grants them", gs.has_flag("ability.fire") and gs.has_flag("ability.heal")
+		and gs.has_flag("ability.echo"))
+	gs.clear_all()
+	gs.all_abilities = true
 
 
 func scenario_echo() -> void:
@@ -837,7 +960,7 @@ func scenario_echo() -> void:
 	recorder.clear_echoes()
 	await seconds(0.7)
 	check("clearing Echoes restores max mana", player.get_mana_cap() == 100)
-	await place(6200)
+	await place(7500)
 	await tap_action("echo")
 	await frames(10)
 	await aim_and_shoot(player.global_position + Vector2(200, -12))
@@ -1026,3 +1149,14 @@ func scenario_camera_aspects() -> void:
 				where = "spot=%s view=%s zoom=%s" % [spot, r, cam.zoom]
 		check("camera inside level at window %s" % size, worst <= 0.5, "%.2f %s" % [worst, where])
 	get_tree().root.set_size(original)
+
+
+## True when the zones, sorted by x, each begin where the last one ends.
+func _zones_tile(zones: Array) -> bool:
+	zones.sort_custom(func(a, b): return a.global_position.x < b.global_position.x)
+	for i in range(1, zones.size()):
+		var prev: LessonZone = zones[i - 1]
+		if absf(prev.global_position.x + prev.width - zones[i].global_position.x) > 2.0:
+			print("    zone gap: ", prev.name, " ends ", prev.global_position.x + prev.width, ", ", zones[i].name, " starts ", zones[i].global_position.x)
+			return false
+	return true

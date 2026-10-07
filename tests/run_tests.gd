@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Automated gameplay tests. Run from the project folder:
 ##   godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- [suite] [scenario]
-## suite: "tutorial", "chapter", "presentation", "experience", "rune", "prologue", "adversarial" or "all"
+## suite: tutorial, chapter, presentation, experience, rune, wing, prologue, adversarial or all
 ## (default). scenario: optional filter.
 ## Suites are loaded only after the engine (and its autoloads) has started, so
 ## they may use every game class. The exit code is non-zero if anything fails.
@@ -27,11 +27,21 @@ func _run() -> void:
 	# Tests must never read or overwrite a player's real save file
 	var game_state := root.get_node("GameState")
 	game_state.persist_to_disk = false
+	# Echidna has to earn her spells in the game; the tests use them from the start
+	game_state.all_abilities = true
+	# (loaded at run time: UiTour needs the autoloads, which are not up while this script compiles)
+	var ui_tour: GDScript = load("res://scripts/ui/ui_tour.gd")
+	ui_tour.set("enabled", false)
+	# The admin switch (every level open, for testing by hand) is off: the tests
+	# check the real locks
+	var journey: GDScript = load("res://scripts/story/journey.gd")
+	journey.set("admin_unlock", false)
 	game_state.clear_all()
 	var settings := root.get_node("Settings")
 	settings.persist_to_disk = false
 	# The player's own settings file must not change what the tests see
 	settings.guidance = settings.GUIDANCE_FULL
+	settings.brightness = settings.Brightness.NORMAL
 	settings.reduce_motion = false
 	# Tests press the default keys, whatever the player has rebound
 	settings.bindings.clear()
@@ -50,7 +60,7 @@ func _run() -> void:
 	# Tests check audio state, not sound; keep the speakers quiet while they run
 	AudioServer.set_bus_mute(0, true)
 
-	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune", "prologue", "adversarial"] if suite_name == "all" else [suite_name]
+	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune", "wing", "prologue", "adversarial"] if suite_name == "all" else [suite_name]
 	var passed := 0
 	var failed := 0
 	for n in names:

@@ -44,6 +44,9 @@ var _caption_tween: Tween
 ## the picture acts out what the words are saying.
 var _cues := {}
 
+## The card shown after the pictures, if any (for tests).
+var results_card: ChapterComplete
+
 
 func _ready() -> void:
 	get_tree().paused = false
@@ -52,7 +55,18 @@ func _ready() -> void:
 	# Told plainly, one idea per line: what runes are, what went wrong, why
 	# the bell matters, and what Echidna has to do. The small label above
 	# the words says when each picture happens.
-	pictures = [
+	pictures = _make_pictures()
+	_camera = Camera2D.new()
+	_camera.position = SIZE / 2.0
+	add_child(_camera)
+	_camera.make_current()
+	_build_ui()
+	_show_picture(0)
+
+
+## The pictures and their lines. (An interlude overrides this.)
+func _make_pictures() -> Array:
+	return [
 		{"era": "LONG AGO", "lines": ["Long ago, monks called the Choir lived in a monastery on this mountain.",
 				"They studied the stars, and found something amazing: the stars are words."],
 			"build": _written_sky, "zoom": [1.14, 1.0], "from": Vector2(0, -110), "to": Vector2.ZERO, "min": [4.6, 4.6]},
@@ -80,15 +94,16 @@ func _ready() -> void:
 		{"era": "TODAY", "lines": ["Now nothing holds the Hush back. It has reached the village of Lowbell.",
 				"The stars are going out, and people are forgetting words, even each other's names.",
 				"Someone has to get into the sealed Belfry and make the bell ring again.",
-				"That someone is a young witch named Echidna."],
+				"The way up is the monks' old training path, the Novices' Way, which starts in the cellar of a cottage in Lowbell.",
+				"The one to walk it is a young witch named Echidna. The Hush has already taken some of her spells."],
 			"build": _lowbell, "zoom": [1.0, 1.08], "from": Vector2(0, -30), "to": Vector2(-20, 30)},
 	]
-	_camera = Camera2D.new()
-	_camera.position = SIZE / 2.0
-	add_child(_camera)
-	_camera.make_current()
-	_build_ui()
-	_show_picture(0)
+
+
+## Where the pictures lead when they are over: out onto the surface, to
+## Lowbell's lane and Nan's cottage (whose cellar door is the way down).
+func _next_scene() -> String:
+	return Journey.LOWBELL
 
 
 func _exit_tree() -> void:
@@ -187,7 +202,20 @@ func _finish() -> void:
 	t.tween_property(_era, "modulate:a", 0.0, 0.4)
 	t.tween_property(_next_hint, "modulate:a", 0.0, 0.4)
 	t.tween_property(_fade, "color:a", 1.0, 0.9)
-	t.chain().tween_callback(func(): get_tree().change_scene_to_file(LOWBELL))
+	t.chain().tween_callback(_after_pictures)
+
+
+## When the pictures are over: the finished chapter's card if one is waiting
+## (its Continue leads on from here), otherwise straight on.
+func _after_pictures() -> void:
+	if ChapterComplete.pending.is_empty():
+		get_tree().change_scene_to_file(_next_scene())
+		return
+	var card: Dictionary = ChapterComplete.pending
+	ChapterComplete.pending = {}
+	var stats: Dictionary = card["stats"].duplicate()
+	stats["next"] = _next_scene() if _next_scene() != Journey.TITLE else ""
+	results_card = ChapterComplete.open(self, String(card["name"]), stats)
 
 
 func _process(delta: float) -> void:

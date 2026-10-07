@@ -25,8 +25,10 @@ func _ready() -> void:
 	add_child(_groove)
 	if Engine.is_editor_hint():
 		return
+	add_to_group("rune_lectern")
 	interactable = Interactable.new()
 	interactable.verb = "Inscribe"
+	interactable.use_priority = 1
 	interactable.size = Vector2(52, 60)
 	interactable.prompt_offset = Vector2(0, -66)
 	interactable.echo_can_use = false

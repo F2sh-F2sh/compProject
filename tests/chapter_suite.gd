@@ -25,6 +25,11 @@ var passed := 0
 var failed := 0
 var only := ""
 var monitor_camera := false
+## How room 9 ended: the Part Complete card (shown on the bell's pictures),
+## and whether she was alive when the level made way for them.
+var results_card: ChapterComplete
+var ended_alive := true
+var ended_hp := 0
 var camera_worst := 0.0
 var camera_worst_at := ""
 var recoveries := 0
@@ -47,8 +52,11 @@ func run_suite(filter: String) -> void:
 		"r9": scenario_room9,
 		"save": scenario_save_and_checkpoints,
 		"reset": scenario_reset_rules,
+		"stuck": scenario_stuck_block,
+		"ways": scenario_ways_back,
 		"hazards": scenario_hazard_rules,
 		"guide": scenario_guidance,
+		"flame": scenario_flame,
 		"full": scenario_full_run,
 	}
 	for key in scenarios:
@@ -452,6 +460,15 @@ func solve_r5() -> void:
 	check("R5 block pushed up against the plaque", block.global_position.x >= 6888.0, "x=%.0f" % block.global_position.x)
 	check("R5 the block shielded the player from bolts", player.current_health == start_health,
 		"hp=%d" % player.current_health)
+	# The plaque is set into the step's wall: the block can only meet it, never overlap it
+	var plaque: Node2D = node("R5/SkullPlaque")
+	var wall_face := 108.0 * 64.0
+	var block_right: float = block.global_position.x + block.block_size.x / 2.0
+	check("R5 the plaque is set into the wall, so the block cannot be pushed into it",
+		plaque.global_position.x - 32.0 >= wall_face - 0.5 and block_right <= plaque.global_position.x - 32.0 + 1.0,
+		"plaque left edge %.0f, wall %.0f, block right edge %.0f" % [plaque.global_position.x - 32.0, wall_face, block_right])
+	check("R5 its bolts start outside the wall, in the open",
+		plaque.global_position.x - plaque.muzzle < wall_face, "starts at x=%.0f" % (plaque.global_position.x - plaque.muzzle))
 	await run_across([0.0, 0.0])
 	check("R5 block used as a step to the ledge", player.global_position.y < 220.0, "y=%.0f" % player.global_position.y)
 	await walk_to(6940)
@@ -573,6 +590,12 @@ func solve_r9() -> void:
 	var recorder = player.get_node("EchoRecorder")
 	recorder.clear_echoes()
 	await frames(10)
+	# The hot spring at the foot of the stair gives back the word SPRING (heal)
+	var spring: Node2D = node("R9/HotSpring")
+	await walk_to(spring.global_position.x - 6.0)
+	await interact()
+	check("R9 drinking from the hot spring gives back SPRING (heal)", await wait_until(func(): return game_state().has_flag("ability.heal"), 3.0))
+	await shot("r9_hot_spring")
 	await walk_to(plate.global_position.x - 70.0)
 	# Record walking onto the plate; the finished Echo keeps standing on it
 	await tap_action("echo")
@@ -590,19 +613,29 @@ func solve_r9() -> void:
 	await walk_to(bell.global_position.x + bell.rope_offset.x)
 	await interact()
 	check("R9 pulling the rope rings the great bell", bell.is_rung() and player.controls_locked)
+	# (the level is freed once the pictures start)
+	ended_alive = not player.is_dead
+	ended_hp = player.current_health
+	results_card = null
 	await seconds(3.0)
 	await shot("r9_bell")
-	var card := await wait_until(func(): return _complete_card() != null, 16.0)
-	check("R9 the chapter ends with its Chapter Complete card", card and game_state().has_flag("ch1.complete"))
+	# The bell's pictures come straight after it; the Part Complete card follows them
+	var into_pictures := await wait_until(func(): return get_tree().current_scene is StoryInterlude, 20.0)
+	check("R9 the bell leads straight into its pictures", into_pictures and game_state().has_flag("ch1.complete"),
+		str(get_tree().current_scene.scene_file_path if get_tree().current_scene else "none"))
+	var story := get_tree().current_scene as StoryIntro
+	if story == null:
+		return
+	await seconds(1.0)
+	await shot("r9_pictures")
+	check("R9 no card yet while the pictures play", not is_instance_valid(story.results_card))
+	story.skip()
+	var card_up := await wait_until(func(): return is_instance_valid(story.results_card), 6.0)
+	check("R9 after the pictures, the Part Complete card", card_up)
+	if card_up:
+		results_card = story.results_card
 	await seconds(1.6)
 	await shot("chapter_complete")
-
-
-func _complete_card() -> Node:
-	for child in lvl.get_children():
-		if child is ChapterComplete:
-			return child
-	return null
 
 
 # ================================================================ scenarios
@@ -688,7 +721,9 @@ func scenario_room2() -> void:
 	await solve_r2()
 	await seconds(12.0)
 	check("slime leaves plate A after she has gone through", not plate_a.is_pressed)
-	check("a gate she has come through stays open", exit_gate.open_amount >= 1.0)
+	# (the way back is caged once she is in the next room, whatever its plates say)
+	check("a gate she has come through drops shut behind her and stays shut", exit_gate.sealed and exit_gate.is_fully_closed(),
+		"open %.2f" % exit_gate.open_amount)
 
 	# Alternative: a fireball from plate B rings the bell
 	await load_level()
@@ -751,11 +786,32 @@ func scenario_room3() -> void:
 	print("SCENARIO room 3: split flame")
 	await load_level()
 	await enter_room("R3")
-	# Puzzles never need mana you can't get back: reload refills it
+	# Mana is the lantern's flame: it comes back only at a lit flame (hold R)
+	var shrine: Node2D = null
+	for cp in get_tree().get_nodes_in_group("chapter_checkpoint"):
+		if cp.checkpoint_id == "ch1.cp.r3":
+			shrine = cp
 	player.current_mana = 0
-	await tap_action("reload")
-	check("reload refills mana for the brazier", await wait_until(func(): return player.current_mana >= 5, 3.0),
+	await place(Vector2(shrine.global_position.x + 400.0, FLOOR))
+	Input.action_press("reload")
+	await seconds(2.2)
+	Input.action_release("reload")
+	check("away from any flame, holding R does not refill mana", player.current_mana == 0 and not player.is_reloading,
 		"mana=%d" % player.current_mana)
+	await place(Vector2(shrine.global_position.x, FLOOR))
+	Input.action_press("reload")
+	await wait_until(func(): return player.current_mana >= 100, 3.0)
+	Input.action_release("reload")
+	check("held at the shrine's flame it refills the lantern", player.current_mana == 100, "mana=%d near=%s reloading=%s dist=%.0f" % [player.current_mana, player.near_kindle(), player.is_reloading, shrine.global_position.distance_to(player.global_position)])
+	player.current_mana = 40
+	await place(Vector2(shrine.global_position.x, FLOOR))
+	Input.action_press("reload")
+	await seconds(0.5)
+	Input.action_release("reload")
+	await seconds(1.5)
+	check("letting go early gets nothing (it must be held)", player.current_mana == 40, "mana=%d" % player.current_mana)
+	player.current_mana = 100
+	await enter_room("R3")
 	await solve_r3()
 
 
@@ -879,13 +935,16 @@ func scenario_room9() -> void:
 	check("R9 stepping off lowers them again", await wait_until(func(): return not node("R9/Stair1").is_solid, 2.0))
 	await enter_room("R9")
 	await solve_r9()
-	var card = _complete_card()
-	if card:
-		card.title_button.pressed.emit()
-	var changed := await wait_until(func(): return get_tree().current_scene != lvl and get_tree().current_scene != null, 5.0)
-	check("the chapter returns to the title screen", changed and get_tree().current_scene.scene_file_path.ends_with("title_screen.tscn"),
+	if results_card:
+		results_card.title_button.pressed.emit()
+	var changed := await wait_until(_on_title_screen, 5.0)
+	check("the card's Title button returns to the title screen", changed,
 		str(get_tree().current_scene.scene_file_path if get_tree().current_scene else "none"))
 	check("the game is not left paused", not get_tree().paused)
+
+
+func _on_title_screen() -> bool:
+	return get_tree().current_scene != null and get_tree().current_scene.scene_file_path.ends_with("title_screen.tscn")
 
 
 func scenario_save_and_checkpoints() -> void:
@@ -925,7 +984,9 @@ func scenario_save_and_checkpoints() -> void:
 		"pos=%s" % player.global_position.round())
 	check("respawn is in room 3", current_room_id() == "ch1.r3", current_room_id())
 	check("full health after a death", player.current_health == 10)
-	check("solved room stays solved after death", node("R1/ExitGate").open_amount >= 1.0)
+	# (solved and saved; she is two rooms on, so the way back to it is caged)
+	check("solved room stays solved after death, and the way back stays caged", game_state().has_flag("ch1.r1.solved")
+		and node("R1/ExitGate").sealed and node("R1/ExitGate").is_fully_closed(), "open %.2f" % node("R1/ExitGate").open_amount)
 	check("collected page does not come back", not lvl.has_node("R1/LorePage1"))
 	check("the room 3 shrine is lit on respawn", node("R3/Shrine").is_lit)
 	check("pages counted for the pause menu", lvl.pages_found() == 1)
@@ -976,12 +1037,14 @@ func scenario_reset_rules() -> void:
 	check("reset clears Echoes", recorder.echoes.size() == 0)
 	check("reset returns the mana cap", player.get_mana_cap() == 100, "cap=%d" % player.get_mana_cap())
 
-	# A solved (saved) puzzle survives a reset
+	# A solved (saved) puzzle survives a reset of the room she is in (room 2,
+	# with room 1's way out caged behind her: she can't go back into room 1)
 	await solve_r1()
-	await place(Vector2(700, FLOOR))
+	var block_at: Vector2 = node("R1/Block").global_position
 	lvl.reset_current_room()
 	await seconds(0.6)
-	check("saved solutions survive a reset", await wait_until(func(): return node("R1/ExitGate").open_amount >= 1.0, 2.0))
+	check("saved solutions survive a reset", current_room_id() == "ch1.r2" and game_state().has_flag("ch1.r1.solved")
+		and node("R1/Block").global_position.distance_to(block_at) < 1.0 and node("R1/ExitGate").sealed, current_room_id())
 
 	# Reset in a creature room puts the watcher back to patrolling
 	await enter_room("R4")
@@ -995,6 +1058,76 @@ func scenario_reset_rules() -> void:
 	menu._set_open(true)
 	check("Reset Room is available in the pause menu", not menu._reset_button.disabled)
 	menu._set_open(false)
+
+
+## Room 1's block shoved the wrong way, into the wall: nobody can get behind it
+## again, so the room says it can't be finished and how to reset it; Reset
+## Room puts the block back.
+func scenario_stuck_block() -> void:
+	print("SCENARIO a block pushed the wrong way, into the wall")
+	await load_level()
+	await enter_room("R1")
+	var block: PushableBlock = node("R1/Block")
+	var start_x := block.global_position.x
+	check("the room starts solvable", lvl.broken_reason == "" and node("R1").broken_reason() == "")
+	# Round to its right side, then push it left as far as it goes
+	await place(Vector2(start_x + 40.0, FLOOR))
+	await walk_to(start_x - 520.0, false, 10.0)
+	check("the block is shoved up against the wall", block.global_position.x < start_x - 300.0, "x=%.0f" % block.global_position.x)
+	check("the room says it can't be finished now", await wait_until(func(): return lvl.broken_reason.contains("against the wall"), 3.0),
+		lvl.broken_reason)
+	check("the Esc menu is told to open on Reset Room", PauseMenu.reset_suggested)
+	lvl.reset_current_room()
+	await seconds(1.2)
+	check("Reset Room puts the block back and the room is solvable again", lvl.broken_reason == "" and absf(block.global_position.x - start_x) < 2.0
+		and not PauseMenu.reset_suggested, "x=%.0f, %s" % [block.global_position.x, lvl.broken_reason])
+	# Pushed the right way, onto its plate, it is never "stuck"
+	await place(Vector2(start_x - 40.0, FLOOR))
+	await walk_to(start_x + 260.0, false, 8.0)
+	await frames(20)
+	check("on its plate against the kerb it is fine", lvl.broken_reason == "", lvl.broken_reason)
+
+
+## On into the next room, the gate drops behind her and stays down (whatever
+## its circuit says, and through Reset Room); open doorways between rooms get
+## gates of their own. Continuing from a shrine in an earlier room leaves the
+## way on open; from a shrine further on, the ways back are shut at once.
+func scenario_ways_back() -> void:
+	print("SCENARIO the way back shuts behind her")
+	await load_level()
+	game_state().set_flag("ch1.r1.solved")
+	await load_level(true)
+	await seconds(0.5)
+	var gate: PortcullisGate = node("R1/ExitGate")
+	check("Room 1's exit gate stands open (its plate was solved)", await wait_until(func(): return gate.open_amount >= 1.0, 3.0))
+	var back_gates := lvl.find_children("BackGate", "", true, false)
+	check("the open doorways between rooms have gates ready to drop", back_gates.size() >= 4
+		and back_gates.all(func(g): return g is PortcullisGate and g.open_amount >= 1.0), str(back_gates.size()))
+	# (past Room 1's block, by its open gate)
+	await place(Vector2(1180, FLOOR))
+	await walk_to(1460.0)
+	check("on into Room 2", current_room_id() == "ch1.r2", current_room_id())
+	check("the gate drops behind her", await wait_until(func(): return gate.is_fully_closed(), 3.0) and gate.sealed)
+	await walk_to(1200.0, false, 3.0)
+	check("and there is no walking back through it", player.global_position.x > gate.global_position.x + 10.0,
+		"x=%.0f" % player.global_position.x)
+	lvl.reset_current_room()
+	await seconds(1.2)
+	check("Reset Room doesn't raise it", gate.is_fully_closed())
+	await shot("ways_back_gate")
+	# Continuing from the first shrine (in Room 1): the way on is open again
+	game_state().set_checkpoint(LEVEL, "ch1.cp.start")
+	await load_level(true)
+	await seconds(0.5)
+	gate = node("R1/ExitGate")
+	check("from the first shrine, the way on into Room 2 is open", current_room_id() == "ch1.r1"
+		and gate.open_amount >= 1.0 and not gate.sealed, current_room_id())
+	# From Room 3's shrine: the ways back behind it are shut at once
+	game_state().set_checkpoint(LEVEL, "ch1.cp.r3")
+	await load_level(true)
+	await seconds(0.5)
+	check("from Room 3's shrine, the ways back are shut already and the way on is not", current_room_id() == "ch1.r3"
+		and node("R1/ExitGate").sealed and node("R2/ExitGate").sealed and not node("R3/ExitGate").sealed, current_room_id())
 
 
 func scenario_hazard_rules() -> void:
@@ -1087,11 +1220,27 @@ func scenario_guidance() -> void:
 	await seconds(0.4)
 	check("a usable thing shows a faint key cue from nearby", cue._prompt.visible and cue._prompt.modulate.a < 0.6
 		and cue._label.text.begins_with("["), "alpha %.2f '%s'" % [cue._prompt.modulate.a, cue._label.text])
-	# Nudge: after two deaths in a room its hint stone calls out
+	# Nudge: after four deaths in a room its hint stone calls out
 	var stone = node("R4/HintStone")
-	game_state().bump("deaths.ch1.r4", 2)
+	game_state().bump("deaths.ch1.r4", 4)
 	await frames(3)
-	check("two deaths in a room make its hint stone call out", stone.nudging)
+	check("four deaths in a room make its hint stone call out", stone.nudging)
+	# The first hint says where to look; arrows come only with the second
+	var arrows := func() -> int: return get_tree().current_scene.find_children("*", "Node2D", true, false) \
+		.filter(func(n): return n is HintStone.HintMarker).size()
+	stone.next_hint()
+	await frames(3)
+	check("hint 1 shows no arrows", arrows.call() == 0, str(arrows.call()))
+	stone.next_hint()
+	await frames(3)
+	check("hint 2 marks the objects with arrows", arrows.call() > 0, str(arrows.call()))
+	# The step pips are for full guidance; at Light the card is just the goal
+	check("full guidance shows the step pips", lvl._objective._pips.visible)
+	settings.guidance = settings.GUIDANCE_LIGHT
+	lvl._objective.refresh()
+	check("at Light the card shows only the goal, no pips", not lvl._objective._pips.visible and lvl._objective.visible)
+	settings.guidance = settings.GUIDANCE_FULL
+	lvl._objective.refresh()
 	# The map lists the acts and rooms, with the current one marked
 	var menu = node("PauseMenu")
 	menu._set_open(true)
@@ -1110,6 +1259,40 @@ func scenario_guidance() -> void:
 	check("with guidance off there is no objective card or link glow",
 		not lvl._objective.visible and node("R1/PlateToGate").preview == 0.0)
 	settings.guidance = settings.GUIDANCE_FULL
+
+
+func scenario_flame() -> void:
+	print("SCENARIO the Room 7 belfry flame is easy to notice")
+	await load_level()
+	var room = node("R7")
+	var flame = node("R7/BelfryFlame")
+	var torches := node("R7/Decor").get_children().filter(func(n): return String(n.name).begins_with("Torch145"))
+	check("no wall torch under the flame to hide it among", torches.is_empty(), str(torches.map(func(n): return n.name)))
+	check("its unlit light is bright enough to find", not flame.is_lit and flame._light.energy >= 0.6, "energy %.2f" % flame._light.energy)
+	check("the objective card names the flame until it is lit",
+		room.get_steps()[0].todo_label.contains("flame") and not room.get_steps()[0].done)
+	# The first time ever in the room the camera glances at it
+	var cam = player.get_node("Camera2D")
+	await enter_room("R7")
+	var peak := 0.0
+	for i in 240:
+		await get_tree().physics_frame
+		peak = maxf(peak, cam._focus_offset.length())
+	check("the first time in, the camera glances at the flame", peak > 20.0, "peak offset %.0f" % peak)
+	await enter_room("R6")
+	await seconds(1.0)
+	await enter_room("R7")
+	var peak_again := 0.0
+	for i in 240:
+		await get_tree().physics_frame
+		peak_again = maxf(peak_again, cam._focus_offset.length())
+	check("and not again on later visits", peak_again < 1.0, "peak offset %.1f" % peak_again)
+	# A card line for a step that is not done disappears once it is
+	var panel: ObjectivePanel = lvl._objective
+	check("the card shows the flame line", panel._todo.visible and panel._todo.text.contains("flame"))
+	flame.ignite()
+	await seconds(0.4)
+	check("and drops it once the flame is lit", not panel._todo.visible)
 
 
 func scenario_full_run() -> void:
@@ -1134,13 +1317,12 @@ func scenario_full_run() -> void:
 	await solve_r9()
 	monitor_camera = false
 	check("camera never showed outside the current room", camera_worst <= 0.5, "worst=%.2f %s" % [camera_worst, camera_worst_at])
-	check("full run finished alive", not player.is_dead, "hp=%d" % player.current_health)
+	check("full run finished alive", ended_alive, "hp=%d" % ended_hp)
 	print("  full run took %.0f s of real time" % ((Time.get_ticks_msec() - t0) / 1000.0))
-	var card = _complete_card()
-	check("the full run ends with the Chapter Complete card", card != null)
-	if card:
-		var labels: Array = card.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check("the full run ends with the Part Complete card, after the bell's pictures", results_card != null)
+	if results_card:
+		var labels: Array = results_card.find_children("*", "Label", true, false).map(func(l): return l.text)
 		check("the card shows the run's statistics", labels.has("Time") and labels.has("Deaths") and labels.has("Ledger pages"),
 			str(labels))
-		card._close()
+		results_card._close()
 	get_tree().paused = false

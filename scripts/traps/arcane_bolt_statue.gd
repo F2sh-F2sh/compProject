@@ -19,6 +19,9 @@ extends Node2D
 @export var bolt_speed := 170.0
 @export var damage_amount := 2
 @export var bolt_range := 900.0
+## How far in front of the statue's centre a bolt starts. A plaque set into a wall
+## uses more than the default, so its bolts begin in the open, not inside the wall.
+@export var muzzle := 20.0
 @export var active := true
 
 const PLAQUE := preload("res://assets/TileSet/walls/tiles/22_plaque_skull.png")
@@ -93,7 +96,7 @@ func _fire() -> void:
 	bolt.speed = bolt_speed
 	bolt.damage = damage_amount
 	bolt.max_distance = bolt_range
-	bolt.position = global_position + fire_direction.normalized() * 20.0
+	bolt.position = global_position + fire_direction.normalized() * muzzle
 	get_parent().add_child(bolt)
 	Sfx.play("bolt_fire", global_position, -4.0)
 

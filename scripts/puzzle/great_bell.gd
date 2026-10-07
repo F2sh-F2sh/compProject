@@ -12,6 +12,9 @@ extends Node2D
 @export var chain_length := 94.0
 @export var tolls := 3
 @export var toll_gap := 2.2
+## What the card says when it has rung (a wing's bell names itself).
+@export var announce := "The great bell rings out."
+@export var announce_sub := ""
 
 var _rung := false
 var _swing := 0.0
@@ -76,8 +79,8 @@ func ring() -> void:
 	await get_tree().create_timer(1.6).timeout
 	if root:
 		var all_pages: bool = root.pages_found() >= root.total_pages
-		TitleCard.show_card(root, "", "The great bell rings out.",
-			"Every page of the ledger is yours. It has been so quiet." if all_pages else "It has been so quiet.", 3.4)
+		TitleCard.show_card(root, "", announce,
+			announce_sub if announce_sub != "" else ("Every page of the ledger is yours. It has been so quiet." if all_pages else "It has been so quiet."), 3.4)
 	await get_tree().create_timer(4.6).timeout
 	AudioDirector.duck(0.0, 3.0)
 	if root and root.has_method("finish_chapter"):

@@ -2,7 +2,7 @@ extends Node
 
 ## Input-driven regression of the new story route; real saves are disabled
 ## by run_tests.gd. Screenshots are visual evidence, not human playtesting.
-const COTTAGE := "res://scenes/story/nan_cottage.tscn"
+const COTTAGE := "res://scenes/story/nan_lantern_cottage.tscn"
 const APPROACH := "res://scenes/story/pilgrims_path.tscn"
 const WELL := "res://scenes/story/well_descent.tscn"
 var passed := 0
@@ -197,6 +197,9 @@ func run_suite(filter: String) -> void:
 	# Test the original completion card's real Continue signal, not just
 	# opening the new cinematic by its path.
 	await open_scene("res://scenes/chapter/chapter_1.tscn")
+	# Exercise the preserved legacy completion route explicitly. The main
+	# journey's expanded interlude-before-card flow is covered by chapter_suite.
+	lvl.next_chapter = "res://scenes/chapter/chapter_2.tscn"
 	lvl.finish_chapter()
 	var card := lvl.find_children("*", "ChapterComplete", true, false)
 	check("the original completion card remains available", not card.is_empty())

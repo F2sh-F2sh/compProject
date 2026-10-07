@@ -192,7 +192,8 @@ func _draw_mana_plate(border: Color) -> void:
 
 	var bar_top := top + 5.0
 	var bar_bottom := bottom - 5.0
-	var x0 := 22.0
+	# (room for the word MANA at its left)
+	var x0 := 36.0
 	var x_end := MANA_PLATE_W - 10.0
 	var bar := PackedVector2Array([
 		Vector2(x0, bar_top), Vector2(x_end, bar_top),
@@ -209,7 +210,7 @@ func _draw_mana_plate(border: Color) -> void:
 	_fill_clipped(bar, x0, x_end, mp_ghost, COLOR_GHOST)
 	_fill_clipped(bar, x0, x_end, mp_shown, color)
 	_draw_debt(bar, x0, x_end, bar_top, bar_bottom)
-	draw_string(body_font, Vector2(4, bar_bottom + 1.0), "MP", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, border)
+	draw_string(body_font, Vector2(4, bar_bottom + 1.0), "MANA", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, border)
 	_draw_echo_indicator(bottom + 4.0, border)
 
 
@@ -276,14 +277,16 @@ func _draw_tab() -> void:
 		Vector2(_plate_edge(bottom), bottom), Vector2(TAB_X + 4.0, bottom)])
 	draw_colored_polygon(tab, COLOR_TAB)
 
-	var divider := TAB_X + 92.0
+	# Mana's number on the left, beside the mana bar; health's on the right,
+	# under the end of the health bar
+	var divider := TAB_X + 80.0
 	draw_line(Vector2(divider, top + 4.0), Vector2(divider, bottom - 3.0), COLOR_TAB_TEXT, 1.0)
 
 	var baseline := bottom - 5.0
+	var mp_text := "KINDLING" if mp_restoring else "MANA %d" % mp
+	draw_string(body_font, Vector2(TAB_X, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 10, COLOR_TAB_TEXT)
 	var hp_text := "%d / %d" % [hp, hp_max]
-	draw_string(body_font, Vector2(TAB_X, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 12, COLOR_TAB_TEXT)
-	var mp_text := "REST" if mp_restoring else "MP %d" % mp
-	draw_string(body_font, Vector2(divider + 2.0, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 10, COLOR_TAB_TEXT)
+	draw_string(body_font, Vector2(divider + 2.0, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 12, COLOR_TAB_TEXT)
 
 
 func _fill_clipped(shape: PackedVector2Array, x0: float, x_max: float, ratio: float, color: Color) -> Array:

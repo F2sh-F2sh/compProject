@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/traps/slag_pool.gd" id="1_3bm6o"]
+
+[node name="SlagPool" type="Area2D" unique_id=2052956784]
+script = ExtResource("1_3bm6o")

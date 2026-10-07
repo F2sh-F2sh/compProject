@@ -17,6 +17,10 @@ const DRIFT_RATE := 5.0
 ## Upward acceleration per unit of force, and the fastest rise.
 const LIFT_PER_FORCE := 1.0
 const MAX_RISE := 190.0
+## An updraft brakes a fall through it harder than it lifts, so at the top
+## of a column she settles a hand's width above it instead of sinking back
+## a long way (which made stepping off onto a ledge a matter of luck).
+const FALL_BRAKE_PER_FORCE := 1.0
 
 var force := Vector2.ZERO
 var drift := 0.0
@@ -52,6 +56,8 @@ func _physics_process(delta: float) -> void:
 		_player.move_and_collide(Vector2(drift * delta, 0.0))
 	if f.y < 0.0:
 		RuneJournal.note("lift")
+		if _player.velocity.y > 0.0:
+			_player.velocity.y = maxf(_player.velocity.y + f.y * FALL_BRAKE_PER_FORCE * delta, 0.0)
 		_player.velocity.y = maxf(_player.velocity.y + f.y * LIFT_PER_FORCE * delta, -MAX_RISE)
 	elif f.y > 0.0:
 		_player.velocity.y += f.y * LIFT_PER_FORCE * 0.5 * delta

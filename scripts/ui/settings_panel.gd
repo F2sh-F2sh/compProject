@@ -14,7 +14,7 @@ const CONTROLS := [
 	["Sprint (hold)", "sprint"],
 	["Fireball (aim with the mouse)", "shoot"],
 	["Heal (stand still)", "heal"],
-	["Refill mana", "reload"],
+	["Kindle (mana)", "reload"],
 	["Record an Echo (hold: let Echoes fade)", "echo"],
 	["Use / pull / ring / inscribe a cube", "interact"],
 	["Pick up / place a rune cube", "rune_carry"],
@@ -54,6 +54,14 @@ func _ready() -> void:
 	add_child(guidance)
 	add_child(_check("Reduce camera shake and flashes", Settings.reduce_motion, Settings.set_reduce_motion))
 	add_child(_check("Fullscreen (F11)", Settings.fullscreen, Settings.set_fullscreen))
+	var brightness := OptionButton.new()
+	for level_name in Settings.BRIGHTNESS_NAMES:
+		brightness.add_item("Brightness: %s" % level_name)
+	brightness.selected = Settings.brightness
+	brightness.add_theme_font_override("font", FONT)
+	brightness.add_theme_font_size_override("font_size", 14)
+	brightness.item_selected.connect(func(i): Sfx.play("ui_click"); Settings.set_brightness(i))
+	add_child(brightness)
 	var graphics := OptionButton.new()
 	for level_name in Settings.GRAPHICS_NAMES:
 		graphics.add_item("Graphics: %s" % level_name)

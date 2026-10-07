@@ -6,7 +6,7 @@ enum Stage { COTTAGE, APPROACH, WELL }
 @export var stage: Stage = Stage.COTTAGE
 
 const DIALOGUE := preload("res://scripts/story/story_dialogue.gd")
-const COTTAGE := "res://scenes/story/nan_cottage.tscn"
+const COTTAGE := "res://scenes/story/nan_lantern_cottage.tscn"
 const APPROACH := "res://scenes/story/pilgrims_path.tscn"
 const WELL := "res://scenes/story/well_descent.tscn"
 const TUTORIAL := "res://scenes/tutorial_level.tscn"

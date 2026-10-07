@@ -55,7 +55,7 @@ func _ready() -> void:
 	_sensor.add_child(sense)
 	add_child(_sensor)
 	_sensor.area_entered.connect(func(area):
-		if area.is_in_group("fireball"):
+		if not is_cleared and area.is_in_group("fireball"):
 			if area.has_method("explode"):
 				area.explode(true)
 			on_fire())

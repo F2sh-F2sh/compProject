@@ -17,6 +17,8 @@ signal power_changed(powered: bool)
 @export var light_radius := 0.0
 ## Lit braziers go out again after this many seconds (0 = burn forever).
 @export var burn_time := 0.0
+## Saved once lit (for one that burns forever and holds something open).
+@export var persist_id := ""
 ## 0 stands on the ground; -1 / 1 hangs on an iron shelf from a wall on the
 ## left / right, `bracket_length` px away (nothing solid under it, so
 ## fireballs can reach it from below).
@@ -28,8 +30,19 @@ signal power_changed(powered: bool)
 	set(value):
 		bracket_length = value
 		queue_redraw()
+## A cresset hung from the ceiling on a chain this long (0 = it stands on its
+## tripod). Nothing is solid under it, so fire can reach it from below.
+@export var hang_length := 0.0:
+	set(value):
+		hang_length = value
+		queue_redraw()
 
 const BOWL_Y := -26.0
+## Unlit: a small warm-gold pilot flame (the lit fire is blue, and so is every
+## wall torch, so a blue unlit brazier read as more decoration).
+const PILOT_GOLD := Color(1.0, 0.82, 0.42)
+const PILOT_LIGHT := Color(1.0, 0.85, 0.5)
+const LIT_LIGHT := Color(0.45, 0.65, 1.0)
 
 var is_lit := false
 var _beam: LightBeam
@@ -51,6 +64,7 @@ func _ready() -> void:
 	add_to_group("resettable")
 	# Something to shoot: a controller's aim leans toward it
 	add_to_group("aim_target")
+	add_to_group("kindle_point")
 	var catcher := Area2D.new()
 	catcher.collision_layer = 0
 	catcher.collision_mask = 1
@@ -66,7 +80,7 @@ func _ready() -> void:
 
 	_light = PointLight2D.new()
 	_light.texture = LightTextures.radial(256)
-	_light.color = Color(0.45, 0.65, 1.0)
+	_light.color = LIT_LIGHT
 	_light.position = Vector2(0, BOWL_Y - 10.0)
 	_light.shadow_enabled = true
 	_light.shadow_filter = Light2D.SHADOW_FILTER_PCF5
@@ -84,7 +98,11 @@ func _ready() -> void:
 	_embers = GlowFX.embers(Color(0.6, 0.8, 1.0), 10, 30.0, 7.0)
 	_embers.position = Vector2(0, BOWL_Y - 4.0)
 	add_child(_embers)
-	_set_lit(start_lit, true)
+	_set_lit(start_lit or _saved_lit(), true)
+
+
+func _saved_lit() -> bool:
+	return persist_id != "" and GameState.has_flag(persist_id)
 
 
 func is_powered() -> bool:
@@ -110,7 +128,7 @@ func get_light_origin() -> Vector2:
 
 
 func reset_state() -> void:
-	_set_lit(start_lit, true)
+	_set_lit(start_lit or _saved_lit(), true)
 
 
 func _on_area_entered(area: Area2D) -> void:
@@ -125,6 +143,8 @@ func _set_lit(lit: bool, silent := false) -> void:
 		return
 	is_lit = lit
 	_burn_left = burn_time
+	if lit and persist_id != "" and burn_time <= 0.0:
+		GameState.set_flag(persist_id)
 	if lit and light_radius > 0.0:
 		add_to_group(MagicLight.AURA_GROUP)
 	elif is_in_group(MagicLight.AURA_GROUP):
@@ -135,8 +155,9 @@ func _set_lit(lit: bool, silent := false) -> void:
 		_halo.visible = lit
 		_embers.emitting = lit
 	if _light:
-		_light.energy = 1.2 if lit else 0.15
-		_light.texture_scale = 1.4 if lit else 0.3
+		_light.energy = 1.2 if lit else 0.7
+		_light.color = LIT_LIGHT if lit else PILOT_LIGHT
+		_light.texture_scale = 1.4 if lit else 0.9
 	if not silent and lit:
 		Sfx.play("brazier_ignite", global_position)
 	power_changed.emit(lit)
@@ -152,13 +173,16 @@ func _process(delta: float) -> void:
 		_burn_left -= delta
 		if _burn_left <= 0.0:
 			_set_lit(false)
-	if is_lit and _light:
-		_light.energy = 1.2 + 0.1 * sin(_time * 9.0) + 0.05 * sin(_time * 23.0)
+	if _light:
+		if is_lit:
+			_light.energy = 1.2 + 0.1 * sin(_time * 9.0) + 0.05 * sin(_time * 23.0)
+		else:
+			_light.energy = 0.7 + 0.12 * sin(_time * 3.1) + 0.05 * sin(_time * 11.0)
 
 
 func _draw() -> void:
-	var iron := Color("2b2838")
-	var iron_light := Color("5b5773")
+	var iron := Color("3b3750")
+	var iron_light := Color("6e6a8c")
 	if wall_side != 0:
 		# Iron shelf from the wall, with a diagonal strut beneath
 		var wall_x := wall_side * (bracket_length + 14.0)
@@ -166,26 +190,44 @@ func _draw() -> void:
 		draw_rect(Rect2(minf(-14.0, wall_x), 0, absf(wall_x) + 14.0, 1), iron_light)
 		draw_line(Vector2(wall_x, 22), Vector2(0, 2), iron, 3.0)
 		draw_rect(Rect2(wall_x - 2.0, -4, 4, 30), Color("231d38"))
-	# Tripod legs
-	draw_line(Vector2(-10, 0), Vector2(-4, -18), iron, 3.0)
-	draw_line(Vector2(10, 0), Vector2(4, -18), iron, 3.0)
-	draw_line(Vector2(0, 0), Vector2(0, -18), iron, 2.0)
+	if hang_length > 0.0:
+		# A chain up to the ceiling and three short straps to the bowl
+		var y := BOWL_Y
+		while y > BOWL_Y - hang_length:
+			draw_rect(Rect2(-2, y - 6, 4, 5), iron)
+			draw_rect(Rect2(-1, y - 6, 1, 5), iron_light)
+			y -= 6.0
+		draw_line(Vector2(0, BOWL_Y - 8), Vector2(-12, BOWL_Y), iron, 2.0)
+		draw_line(Vector2(0, BOWL_Y - 8), Vector2(12, BOWL_Y), iron, 2.0)
+	else:
+		# Tripod legs
+		draw_line(Vector2(-10, 0), Vector2(-4, -18), iron, 3.0)
+		draw_line(Vector2(10, 0), Vector2(4, -18), iron, 3.0)
+		draw_line(Vector2(0, 0), Vector2(0, -18), iron, 2.0)
 	# Bowl
 	draw_colored_polygon(PackedVector2Array([Vector2(-14, BOWL_Y), Vector2(14, BOWL_Y),
 		Vector2(9, -17), Vector2(-9, -17)]), iron)
 	draw_line(Vector2(-14, BOWL_Y), Vector2(14, BOWL_Y), iron_light, 2.0)
 	# Rune band marks it as something you can light
-	var rune := Color(0.5, 0.7, 1.0) if is_lit else Color(0.38, 0.33, 0.55)
+	var rune := Color(0.5, 0.7, 1.0) if is_lit else PILOT_GOLD
 	for x in [-8, -3, 2, 7]:
 		draw_rect(Rect2(x, -22, 2, 2), rune)
 
 
 func _draw_flame() -> void:
 	if not is_lit:
-		# Smouldering embers invite a spark
-		var pulse := 0.4 + 0.3 * sin(_time * 2.5)
-		for x in [-6, -1, 4]:
-			_flame.draw_rect(Rect2(x, BOWL_Y - 2.0, 3, 2), Color(0.35, 0.5, 1.0, pulse))
+		# A small warm pilot flame, and a ring that opens out of it every two
+		# seconds: unmistakably something to light, even from across the room
+		var breath := 0.5 + 0.5 * sin(_time * 3.4)
+		var h := 9.0 + 3.0 * breath
+		var base := BOWL_Y
+		_flame.draw_colored_polygon(PackedVector2Array([Vector2(-5, base), Vector2(5, base),
+			Vector2(sin(_time * 5.0) * 1.5, base - h - 3.0)]), Color(PILOT_GOLD, 0.85))
+		_flame.draw_colored_polygon(PackedVector2Array([Vector2(-3, base), Vector2(3, base),
+			Vector2(0, base - h)]), Color(1.0, 0.97, 0.85, 1.0))
+		var phase := fmod(_time, 2.0) / 2.0
+		_flame.draw_arc(Vector2(0, base - 6.0), 8.0 + 22.0 * phase, 0.0, TAU, 28,
+			Color(PILOT_GOLD, 0.55 * (1.0 - phase)), 1.5)
 		return
 	for i in 4:
 		var t := _time * 7.0 + i * 1.7
@@ -195,3 +237,8 @@ func _draw_flame() -> void:
 			Color(0.6, 0.8, 1.0, 0.95), Color(0.92, 0.97, 1.0, 1.0)][i]
 		_flame.draw_colored_polygon(PackedVector2Array([Vector2(-w / 2.0, BOWL_Y), Vector2(w / 2.0, BOWL_Y),
 			Vector2(sin(t * 0.8) * 3.0, BOWL_Y - h)]), c)
+
+
+## A lit brazier is a flame she can kindle her lantern at.
+func is_kindling() -> bool:
+	return is_lit

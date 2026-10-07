@@ -28,6 +28,7 @@ func _ready() -> void:
 	collision_layer = 0
 	collision_mask = 1
 	monitoring = true
+	add_to_group("kindle_point")
 	monitorable = false
 
 	var shape := RectangleShape2D.new()
@@ -83,3 +84,8 @@ func _show_state(lit: bool) -> void:
 	glow.enabled = lit
 	glow.color = lit_glow_color
 	candle.modulate = Color.WHITE if lit else unlit_candle_tint
+
+
+## A lit flame she can kindle her lantern at (hold the kindle key).
+func is_kindling() -> bool:
+	return true

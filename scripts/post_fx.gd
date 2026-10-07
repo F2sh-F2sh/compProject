@@ -8,12 +8,97 @@ extends CanvasLayer
 
 @onready var rect: ColorRect = $Screen
 
+## Whether the Brightness setting applies here. The dungeon follows it; story
+## scenes (Lowbell, Nan's cottage) have their own look and turn this off.
+var follows_brightness := true
 var _full := {}
+var _ambient: CanvasModulate
+var _ambient_base := Color.WHITE
+## The current room's ambient (x the level's own): watcher rooms stay dark so
+## "watchers hunt in darkness" still reads in an otherwise brighter dungeon.
+var _room_ambient := 1.0
+var _ambient_tween: Tween
 
 
 func _ready() -> void:
-	Settings.changed.connect(_apply_quality)
-	_apply_quality.call_deferred()
+	Settings.changed.connect(_on_settings_changed)
+	_on_settings_changed.call_deferred()
+
+
+func _on_settings_changed() -> void:
+	_apply_quality()
+	_apply_brightness()
+
+
+## Applies the brightness level (Settings.BRIGHTNESS_TABLE): the level's
+## ambient light, the lantern's gloom and reach, the vignette, and the size of
+## the player's own light. Levels that never had a player light (the old
+## tutorial) get the same one the chapters have.
+func _apply_brightness() -> void:
+	if not follows_brightness:
+		return
+	var level := get_parent()
+	if level == null:
+		return
+	if _ambient == null:
+		_ambient = level.get_node_or_null("Darkness") as CanvasModulate
+		if _ambient:
+			_ambient_base = _ambient.color
+	if _ambient:
+		_ambient.color = _ambient_color()
+	var mat := rect.material as ShaderMaterial
+	if mat:
+		mat.set_shader_parameter("lantern_darkness", Settings.light("gloom"))
+		mat.set_shader_parameter("lantern_outer", Settings.light("reach"))
+		mat.set_shader_parameter("vignette", Settings.light("vignette"))
+		mat.set_shader_parameter("shadow_lift", Settings.light("gamma"))
+	var aura := _player_light()
+	if aura:
+		var authored: Vector2 = aura.get_meta(&"authored")
+		aura.energy = authored.x * Settings.light("light_energy")
+		aura.texture_scale = authored.y * Settings.light("light_scale")
+
+
+func _ambient_color() -> Color:
+	var k := Settings.light("ambient") * _room_ambient
+	return Color(minf(_ambient_base.r * k, 1.0), minf(_ambient_base.g * k, 1.0), minf(_ambient_base.b * k, 1.0), 1.0)
+
+
+## Eases the ambient light to a room's own level (1.0 = the level's ambient).
+func set_room_ambient(scale: float, instant := false) -> void:
+	if is_equal_approx(scale, _room_ambient):
+		return
+	if _ambient_tween:
+		_ambient_tween.kill()
+	if instant or _ambient == null:
+		_room_ambient = scale
+		if _ambient:
+			_ambient.color = _ambient_color()
+		return
+	_ambient_tween = create_tween()
+	_ambient_tween.tween_method(func(k: float):
+		_room_ambient = k
+		_ambient.color = _ambient_color(), _room_ambient, scale, 1.6)
+
+
+func _player_light() -> PointLight2D:
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return null
+	var aura := player.get_node_or_null("PlayerLight") as PointLight2D
+	if aura == null:
+		aura = PointLight2D.new()
+		aura.name = "PlayerLight"
+		aura.texture = LightTextures.radial(256)
+		aura.color = Color(0.78, 0.72, 1.0)
+		aura.energy = 1.15
+		aura.texture_scale = 1.45
+		aura.height = 40.0
+		aura.position = Vector2(0, -20)
+		player.add_child(aura)
+	if not aura.has_meta(&"authored"):
+		aura.set_meta(&"authored", Vector2(aura.energy, aura.texture_scale))
+	return aura
 
 
 ## Applies the graphics level (Settings.GRAPHICS_TABLE): bloom and grain

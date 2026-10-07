@@ -3,7 +3,8 @@ class_name HintStone
 extends Node2D
 
 ## A whispering skull that gives an optional three-stage hint:
-## 1) points at the relevant objects, 2) describes how they relate,
+## 1) says where to look, 2) describes how the objects relate and marks them
+## with arrows,
 ## 3) explains the solution. Each "Listen" reveals the next stage.
 
 @export var hints: PackedStringArray = PackedStringArray(["", "", ""])
@@ -58,7 +59,7 @@ func next_hint() -> void:
 	if root:
 		root.show_toast("%s\n%s" % [prefix, InputLabels.format(hints[stage - 1])], 6.0)
 		root.note_hint()
-	if stage == 1:
+	if stage == 2:
 		for node in focus_nodes:
 			if is_instance_valid(node) and node is Node2D:
 				_mark(node)

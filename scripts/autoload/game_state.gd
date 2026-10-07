@@ -56,6 +56,7 @@ func set_flag(id: String, value: Variant = true) -> void:
 	if id == "" or (typeof(old) == typeof(value) and old == value):
 		return
 	flags[id] = value
+	_earlier = -1
 	flag_changed.emit(id, value)
 	save_game()
 
@@ -67,6 +68,38 @@ func count_flags(prefix: String) -> int:
 		if String(id).begins_with(prefix) and value is bool and value:
 			count += 1
 	return count
+
+
+# ------------------------------------------------------------------ abilities
+# Echidna's three family spells were taken by the Hush: she remembers them one
+# at a time on the Novices' Way (see AbilityShrine). Each is a saved flag,
+# "ability.fire", "ability.heal" and "ability.echo".
+
+const ABILITIES := ["fire", "heal", "echo"]
+## Tests turn this on so they can use every spell from the first frame.
+var all_abilities := false
+var _earlier := -1
+
+
+## Whether Echidna has this spell. A save from before spells had to be earned
+## (the tutorial or a chapter already played) has them all.
+func has_ability(id: String) -> bool:
+	return all_abilities or has_flag("ability." + id) or _has_earlier_progress()
+
+
+func grant_ability(id: String) -> void:
+	set_flag("ability." + id)
+
+
+func grant_all_abilities() -> void:
+	for id in ABILITIES:
+		grant_ability(id)
+
+
+func _has_earlier_progress() -> bool:
+	if _earlier == -1:
+		_earlier = 1 if (count_flags("ability.") == 0 and (has_flag("tutorial.done") or count_flags("ch1.") > 0 or count_flags("ch2.") > 0)) else 0
+	return _earlier == 1
 
 
 func set_checkpoint(scene_path: String, id: String) -> void:
@@ -94,6 +127,7 @@ func clear_checkpoint(scene_path: String) -> void:
 
 ## Forgets all progress made in one scene (flags are prefixed with a scene key).
 func clear_progress(prefix: String) -> void:
+	_earlier = -1
 	for id in flags.keys():
 		if String(id).begins_with(prefix):
 			flags.erase(id)
@@ -108,6 +142,7 @@ func clear_progress(prefix: String) -> void:
 
 func clear_all() -> void:
 	flags.clear()
+	_earlier = -1
 	checkpoints.clear()
 	session.clear()
 	checkpoint_scene = ""
@@ -181,6 +216,7 @@ func load_game(path := SAVE_PATH) -> void:
 			var value = loaded_flags[key]
 			if key is String and (value is bool or value is int or (value is float and is_finite(value))):
 				flags[key] = value
+	_earlier = -1
 	var scene = file.get_value("progress", "checkpoint_scene", "")
 	var id = file.get_value("progress", "checkpoint_id", "")
 	checkpoint_scene = scene if scene is String else ""

@@ -5,13 +5,15 @@ extends Node2D
 ## The camera comes down from the silent belfry on the mountain to her door;
 ## she steps out, sees the wind chimes swinging without a sound, and takes the
 ## lane to Nan's cottage. The villagers she passes have lost words to the
-## Hush. Knocking at Nan's door leads into her cottage, then the pilgrim
-## road and the old well before the original Undercroft.
+## Hush. Knocking at Nan's door leads inside, to her cottage (NanCottage).
 ## Everything is built from the surface and town pixel-art packs (SurfaceArt),
 ## drawn at 1.5x; the people are the story's pixel sprites.
 
 const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
 const PUDDLE := preload("res://scenes/fx/puddle.tscn")
+const WAYMARK := preload("res://scenes/puzzle/waymark.tscn")
+## Chalk arrows low on the walls along the lane, pointing on to Nan's door.
+const ARROWS_AT := [742.0, 962.0, 1640.0]
 const SELF_PATH := "res://scenes/story/lowbell.tscn"
 
 const FLOOR_Y := 534.0
@@ -231,6 +233,11 @@ func _build_street() -> void:
 	SurfaceArt.sprite(street, "tree_big", Vector2(1968, FLOOR_Y + 2))
 	SurfaceArt.sprite(street, "fence", Vector2(1934, FLOOR_Y + 1))
 	SurfaceArt.sprite(street, "fence_broken", Vector2(1985, FLOOR_Y + 1))
+	# Chalk arrows on the walls: the way to Nan's
+	for x in ARROWS_AT:
+		var mark: Node2D = WAYMARK.instantiate()
+		mark.position = Vector2(x, FLOOR_Y - 44)
+		add_child(mark)
 	# Puddles in the lane
 	for spec in [[562.0, 60.0], [1350.0, 84.0]]:
 		var puddle: Node2D = PUDDLE.instantiate()
@@ -442,6 +449,7 @@ func _build_post_and_menu() -> void:
 	post.name = "PostFX"
 	post.layer = 1
 	post.set_script(load("res://scripts/post_fx.gd"))
+	post.set("follows_brightness", false)
 	var screen := ColorRect.new()
 	screen.name = "Screen"
 	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -451,6 +459,7 @@ func _build_post_and_menu() -> void:
 	# Out under the sky: little lantern gloom, a grey mist, and the colour
 	# already draining out of everything (the Hush)
 	mat.set_shader_parameter("fog_floor_y", FLOOR_Y)
+	mat.set_shader_parameter("lantern_outer", 440.0)
 	mat.set_shader_parameter("lantern_darkness", 0.14)
 	mat.set_shader_parameter("fog_strength", 0.14)
 	mat.set_shader_parameter("fog_color", Color(0.46, 0.47, 0.56))
@@ -515,6 +524,8 @@ func _build_ui() -> void:
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(_fade)
+
+
 
 func _start_wind() -> void:
 	var stream := load("res://assets/audio/sfx/wind_loop.wav") as AudioStreamWAV
@@ -679,7 +690,7 @@ func _update_hints() -> void:
 # ------------------------------------------------------------------ leaving
 
 func next_scene() -> String:
-	return "res://scenes/story/nan_cottage.tscn"
+	return Journey.COTTAGE
 
 
 ## Knocking at Nan's door: she answers, and the story moves on.

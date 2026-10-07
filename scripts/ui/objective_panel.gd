@@ -14,6 +14,7 @@ const CLEAR_COLOR := Color(0.6, 0.95, 0.75)
 var _goal: Label
 var _pips: Control
 var _status: Label
+var _todo: Label
 var _steps: Array = []
 var _status_tween: Tween
 var _pulse := 0.0
@@ -49,6 +50,10 @@ func _ready() -> void:
 	_pips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pips.draw.connect(_draw_pips)
 	box.add_child(_pips)
+	_todo = _label(12, Color("f1d58c"))
+	_todo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_todo.visible = false
+	box.add_child(_todo)
 	_status = _label(12, DONE_COLOR)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.modulate.a = 0.0
@@ -78,7 +83,7 @@ func show_room(goal: String, steps: Array) -> void:
 	tween.tween_property(self, "modulate:a", 1.0, 0.5)
 	if is_cleared():
 		_show_status("Clear", CLEAR_COLOR, 0.0)
-	_pips.queue_redraw()
+	_update_extras()
 	_fit.call_deferred()
 
 
@@ -89,7 +94,7 @@ func _fit() -> void:
 
 func step_done(step: Node) -> void:
 	_pulse = 1.0
-	_pips.queue_redraw()
+	_update_extras()
 	if is_cleared():
 		_show_status("✓ %s\nThe way on is open." % step.label, CLEAR_COLOR, 5.0)
 	else:
@@ -102,7 +107,7 @@ func is_cleared() -> bool:
 
 
 func refresh() -> void:
-	_pips.queue_redraw()
+	_update_extras()
 
 
 func _show_status(text: String, color: Color, hold: float) -> void:
@@ -149,3 +154,19 @@ func _draw_pips() -> void:
 		x += 16.0
 	if _pulse > 0.0:
 		_pips.draw_rect(Rect2(0, 0, x, 12), Color(DONE_COLOR, 0.12 * _pulse))
+
+
+## The pips (one per step) show only with full guidance: at Light the card is
+## just the goal. A step may add one line to follow until it is done (the
+## belfry flame in Chapter 1 Room 7).
+func _update_extras() -> void:
+	_pips.visible = Settings.guidance >= Settings.GUIDANCE_FULL
+	_pips.queue_redraw()
+	var line := ""
+	for step in _steps:
+		if is_instance_valid(step) and not step.done and String(step.todo_label) != "":
+			line = "▸ " + String(step.todo_label)
+			break
+	_todo.text = line
+	_todo.visible = line != ""
+	_fit.call_deferred()

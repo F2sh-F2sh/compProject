@@ -1,828 +1,539 @@
-# THE UNWRITTEN SKY — Game Design Document
+# THE UNWRITTEN SKY — the whole game in two hours (v2)
 
-*Working title. "The Sealed Belfry" stays as the name of the first region.*
-
-*Written 29 Sep 2026. The rune mechanics are as built (`scripts/runes/`, `docs/RUNE_SYSTEM_PROGRESS.md`);
-every sentence named here is one the game accepts today, except the optional secret essence in §12.
-Plan for a 2-person team submitting to the Congressional App Contest on 20 Oct 2026 (§13).*
+*Working title; "The Sealed Belfry" stays the name of Part 2 of the tutorial.*
 
 ## 0. One page
 
-**Logline.** Beneath a village that is going quiet, a young witch learns the forgotten language the
-world is written in, and must decide what to do with the last sentence anyone ever wrote in it.
+**Logline.** The Hush is taking Lowbell's names and words. A young witch, who has lost her own spells
+too, climbs the monks' old training path to win her words back, learns the language the stars are
+written in, and has to decide what to do with the last spell ever written.
 
-**Central identity.** *Learn a forgotten magical language and use it to manipulate reality.*
+**What changed from v1:** v1 was a 6–7 hour game with an Orrery voice, a masked rival, a hub,
+Primer pages, Rune Memories and a secret sixth essence. This version is plainer and shorter, because
+the story was too confusing and the new playtime is ~2 hours after the tutorial.
 
-**The grammar (unchanged).** A rune cube holds one sentence of four words:
+**Length (first-time player)**
 
-| Slot | Grammar role | Words (33) |
+| Part | What | Counts toward 2 h? | Time |
+|---|---|---|---|
+| Prologue | Story pictures (Lowbell and the cottage are cut from the flow) | no | ~3 min |
+| **The Novices' Way** (tutorial section) | Passage (7 phases) → Belfry (9 rooms) → Observatory (8 rooms) | **no** | testers ~10–15 min; first-timers 25–40 |
+| **Chapter 1 · The Kilnworks** | Fire | yes | ~24 min |
+| **Chapter 2 · The Drowned Cistern** | Ice | yes | ~24 min |
+| **Chapter 3 · The Lampworks** | Light | yes | ~26 min |
+| **Chapter 4 · The Folded Galleries** | Space, everything combined | yes | ~26 min |
+| **Chapter 5 · The Eye** | The finale and the ending | yes | ~20 min |
+| **Total counted** | 21 puzzle rooms, 4 bosses, 1 finale | | **~120 min** |
+
+**Honest scope note.** 120 minutes of tuned puzzles is a lot for two people by 20 Oct. The plan is
+built so the game is *complete* after each chapter and the build order (§14) puts the ending in
+before the last wing. The 20 Oct submission is realistically ~80–90 minutes of new content
+(Chapters 1, 2, 3 and the Eye); the Galleries and extra rooms follow after submitting.
+
+**The grammar (unchanged).** A rune cube holds one four-word spell:
+
+| Slot | Role | Words (33) |
 |---|---|---|
-| Essence | the noun: what substance | Wind, Fire, Ice, Light, Space |
-| Action (called *Form* in the build) | the verb: what it does | Push, Lift, Burst, Projectile, Freeze, Bridge, Beam, Glow, Portal |
+| Essence | what substance | Wind, Fire, Ice, Light, Space |
+| Action | what it does | Push, Lift, Burst, Projectile, Freeze, Bridge, Beam, Glow, Portal |
 | Direction | where | Right, Left, Up, Down, Up-Right, Up-Left, Down-Right, Down-Left, Self |
 | Modifier | how | Normal, Strong, Long, Large, Persist, Delay, Repeat, Bounce, Split, Explode |
 
-Written here as `Wind · Push · Right · Strong`.
-
-**Pillars.**
-1. **The language is the game.** Every room, enemy, boss, secret and story beat is expressed as a sentence.
-2. **Knowledge opens doors, not keys.** The world grows more readable as you learn; the right sentence is always the key.
-3. **One new word, one new idea.** A room teaches one thing alone, then combines it with what you know.
-4. **Kind to experiment.** Resets are instant, mana never soft-locks, a wrong sentence is refused with a reason and costs nothing.
-5. **Silence is the enemy.** The antagonist force is literal quiet; sound, light and names are life.
-
-**Where the touchstones show.**
-
-| Game | What we take |
-|---|---|
-| Portal | Clean test rooms, one idea each; a friendly voice that turns out to have an agenda; momentum through portals (already built). |
-| The Talos Principle | A voice from above guiding you to "collect everything"; a mysterious other traveller leaving messages; an ending that is a choice about the rules themselves. |
-| Tunic | An in-world instruction manual written in a script you can't read yet; words translate on screen as you learn them. |
-| Outer Wilds | Some doors are gated by understanding, not items: deduce a sentence from murals and you can open it early. |
-| Zelda dungeons | Themed regions, each with a new essence, a mini-boss and a boss that tests it; a hub that grows. |
-
-**Length.** Full game about 6–7 hours (9–10 for everything). Contest build about 60–75 minutes (§13).
+**Pillars.** (1) The language is the game: rooms, creatures and the ending are all sentences.
+(2) One new idea per room, then combine it. (3) Combat is a puzzle with a monster in it. (4) Kind to
+experiment: a wrong sentence costs nothing, Reset Room is instant, mana can never soft-lock.
+(5) Fewer hints, clearer rooms: the room should explain itself.
 
 ---
 
-## 1. Core narrative
+## 1. The story in plain words
 
-### The world
-**Lowbell** is a small valley village of bells and wind-chimes. Beneath it, cut into the mountain,
-lies **Aster Deep**: the monastery, forges, cisterns, reading halls and observatory of the
-**Choir of Aster**.
+### 1.1 What the player already knows (from the nine story pictures)
+Long ago the Choir, monks on a mountain, found that **stars are words**. Four star-words make a spell.
+The Choir carved spells into **rune cubes**. Sixty years ago the Choir's leader **Ilse** carved the
+strongest spell, **ICE · FREEZE · SELF · PERSIST** ("freeze this moment and never let it end") so her
+sick daughter **Wren** could not die. The spell never stopped. Its stillness spread as **the Hush**:
+sound, colour, memories, then names. The great **bell** pushed it back for sixty years, until it
+cracked nine years ago. The monks sealed the **Belfry** and left. Now the Hush has reached the village
+of **Lowbell**, and a young witch, **Echidna**, has to get into the Belfry and make the bell ring.
 
-### What the rune language is
-The Choir discovered that the night sky is a **text**. Every star is a word in the **First Tongue**;
-every constellation is a sentence that keeps one of the world's laws running. The east wind blows
-because `Wind · Push · Right · Large` is written in the eastern sky. Rivers freeze in winter because
-a winter constellation says so.
+### 1.2 What the player learns next, in order
+1. **Nan can't remember Echidna's name, and the Hush took Echidna's spells too.** (Nan's cottage)
+2. **Words are not gone: the monks carved them in stone.** Find the old words and they come back.
+   (The Passage: Fire, Water-heal and Echo come back, one at a time.)
+3. **The bell can only hold the Hush back; it can't end it.** (End of the Belfry)
+4. **The Hush is a spell that is still running, and it is written in the sky.** The stars show a dark
+   gap spelling ICE · FREEZE · SELF · PERSIST. Under the mountain, the great cube carved with that
+   spell is still running. (End of the Observatory)
+5. **The way to the cube is four wings, each ending in a bell.** Ring all four and the Eye opens.
+   (The Long Stair)
+6. **The Watchers are the monks, half-frozen.** (Chapter 3)
+7. **The little girl leaving chalk stars is Wren,** still inside the stopped moment, and she wants it
+   to end. (Chapter 4)
+8. **Ilse can't let go.** Echidna has to rewrite the spell. (Chapter 5)
 
-The Choir read the sky through the **Eye**, a great lens at the bottom of Aster Deep, and learned to
-write small, *local* sentences of their own, carved in stone: **verse-stones**, the rune cubes. A
-sentence only takes effect when all four words are present and it is given **breath** (mana),
-either the writer's own or the dungeon's, carried through violet **breath-lines** (the channels and
-pedestals already in the game).
+No twist is hidden from the player for long: the intro already names Wren and Ilse, so seeing a girl
+with a chalk star is dramatic irony, not a puzzle.
 
-The metaphor players will feel without being told: runes are **instructions**. Well-formed ones
-run; malformed ones are refused; a loop with no way out runs forever.
+### 1.3 The cast (six names, no more)
+| Who | What they are | Job in the story |
+|---|---|---|
+| **Echidna** (she/her) | A witch of Lowbell | The player. Kind, stubborn. |
+| **Nan** | Her grandmother, a hedge-witch | The reason. Forgets Echidna's name; says it again in the ending. |
+| **Wren** | Ilse's daughter, frozen for 60 years | A small girl who leaves chalk stars (hints), shows up ahead, speaks in Chapter 4. |
+| **Ilse** | The Choir's leader | Frozen beside Wren in the Eye. Asks Echidna not to let go. |
+| **The Choir** | The monks | Their ledgers explain each wing. The Watchers are the Choir. |
+| **The Hush** | A spell still running | Not a person. Creatures made of silence. |
 
-### Who built it, and what they built
-The Choir was founded by **High Cantor Ilse Aster**, astronomer and linguist. Each wing of Aster
-Deep served the language:
-- **The Belfry**: bells ring the *Waking Tone*; sound keeps words awake.
-- **The Kilnworks**: forges where verse-stones were fired.
-- **The Drowned Cistern**: water clocks that measured the turning sky.
-- **The Lampworks**: reading halls, mirrors and lamplighters (the wisps) that carried light to readers.
-- **The Folded Galleries**: rooms stored inside rooms with Space, where the Choir kept its archive.
-- **The Eye**: the observatory, where the sky was read and the greatest sentences written.
+The ledger writers are unnamed: the Bellkeeper, the Smith, the Warden of Waters, the Lamplighter,
+the Archivist. Brother Aldous stays only as a name in an existing ledger page.
 
-### The Last Sentence (the secret at the centre)
-Ilse's daughter **Wren** fell gravely ill. Ilse carved one sentence on the great cube beneath the
-Eye and fed it the breath of the whole dungeon:
+### 1.4 The story by part
+| Part | What happens | Words / spells returned |
+|---|---|---|
+| Prologue | Intro pictures, Lowbell, **Nan's cottage** | none; Echidna learns her fire spell has gone |
+| Novices' Way 1 · Passage | The monks' training path from Nan's cellar. Echidna regains her three family spells | **Flame** (fireball), **Spring** (heal), **Echo** |
+| Novices' Way 2 · Belfry | Ledger pages; rings the great bell. One clear toll; Lowbell's chimes sound for a moment; the crack makes it thin. A chalk star appears at the top of the stair | none |
+| Novices' Way 3 · Observatory | Learns the First Tongue's first words. Opens the dome: stars, the dark gap, the floor lens showing the frozen room below | Right, Lift, Strong, Bridge, Down, Up-Right |
+| **Ch 1 · Kilnworks** | The Smith's furnaces froze. Ledger: why the wings were split. First bell: the Forge Bell | Fire, Projectile, Up, Large, Burst, Delay, Explode, Split |
+| **Ch 2 · Cistern** | The water clocks all stopped at one minute. Wren glimpsed behind glass. Learns **Persist** and what it did | Ice, Freeze, Long, Persist, Down-Right |
+| **Ch 3 · Lampworks** | The Watchers are the monks; light turns them to stone, not harm. The Prior's memory shows who froze Wren | Light, Beam, Glow, Self, Bounce, Up-Left |
+| **Ch 4 · Galleries** | Wren speaks: "Mum won't let go. Please." She sets the last test | Space, Portal, Repeat, Down-Left |
+| **Ch 5 · The Eye** | Ilse, the choice, the ending | no new words; she writes one sentence |
 
-> **`Ice · Freeze · Self · Persist`**: hold this moment still, around itself, for as long as it is given breath.
+### 1.5 The ending
+Echidna writes on the great cube. Two sentences "answer"; any other says "that isn't enough":
+- **The Stillness** (`Ice · Freeze · Self · Large`): do as Ilse asks, hold everyone still forever. The
+  world goes silent; credits in silence with no stars. It is a real ending, but the game says "That
+  is not the only sentence" and returns Echidna to the cube.
+- **The Rewritten Sky** (`Light · Beam · Up · Long`): the held moment becomes light sent up into the
+  empty sky. Wren becomes a new star, Ilse lets go, the Hush thaws. Cut to Lowbell: colour, chimes,
+  and Nan on her porch says **"Echidna."** The last shot is the sky with one new star.
 
-It worked. Wren did not die. Nothing in the Eye did. But the dungeon's breath never runs out, so
-the sentence never stops, and a moment held forever is a moment no one ever speaks of again. The
-stillness began, very slowly, to **forget**. It spread outward as **the Hush**: first sound, then
-colour, then words, then names.
+The clues: Wren's chalk drawings (a star, an arrow up, a long line), the Observatory mural "what can't
+be kept can be sent", and every word of the answer has been learned by the end of Chapter 3.
 
-The Choristers caught at its edge were half-held. They became the **Watchers**: they move in
-darkness, walking their last task, and turn to stone the moment holy light "reads" them (exactly
-how they already behave in the game).
-
-### Why the dungeon was sealed
-The survivors, the **Bell Order** led by the young glasswright **Brother Aldous**, learned that the
-great bell's Waking Tone pushes the Hush back. They did three things:
-1. They rang the bell every day, for sixty years.
-2. They broke the First Tongue into fragments and hid them in trials across Aster Deep, so no one
-   could reach the great cube and change the sentence, whether to finish it or unmake it. They
-   feared both.
-3. They sealed the Eye, and later the Belfry.
-
-Nine years ago the last Bellkeeper, **Tobiah Rook**, rang the bell a final time and it cracked. The
-monks sealed the Belfry and fled (the existing intro and Ledger pages still hold true). Since then
-the Hush has crept upward.
-
-### What happened to the civilisation
-- The Choir's **voice** survived in Lowbell: its families became the village witches, who kept one
-  spell, **Echo** (hear your own voice return). Echidna's grandmother **Nan Morrow** is one of them.
-- The Choir's **ink** became the Bellbound slimes: living ink escaped from the scriptorium vats. It
-  follows bells because the Choir wrote to their ringing ("Some say they think the bell is their
-  mother": Ledger ii).
-- The Choir's **lamplighters** became the Lantern Wisps: still doing their job, still not liking to
-  be hurried (Ledger vi).
-- The **Choristers** are the Watchers.
-
-### Why the player enters
-The Hush has reached Lowbell. The chimes are silent, the colours are going grey, and people are
-losing words. In the opening minute Nan, Echidna's grandmother and teacher, cannot remember
-Echidna's name. She presses her lantern into Echidna's hands:
-*"The bell. Somebody has to ring the bell."*
-
-### The final mystery (asked early, answered late)
-1. **What is the Hush?** A sentence that is still running.
-2. **Who is the Masked Scribe**, the girl in the paper mask who is always one room ahead,
-   stealing fragments and leaving chalk messages? **Wren**, still inside her mother's sentence: an
-   echo who cannot end. She has been testing Echidna, making her strong enough to change it.
-3. **Whose is the warm voice in the Orrery** that praises Echidna and urges her to "gather every
-   word"? **Ilse**, frozen at the heart of the Eye. She needs a living witch's breath to widen the
-   sentence from `Persist` to **`Large`**, so the stillness covers the whole world and no one ever
-   loses anyone again.
-
-### What the ending reveals
-The language is not a set of commands; it is a **conversation**. The sky is a sentence everyone
-keeps saying together. Echidna doesn't delete the Last Sentence; she **rewrites** it, word by word,
-into `Light · Beam · Up · Long`: the held moment becomes light sent up into the empty sky, and Wren
-becomes the **first new star in sixty years**. Ilse lets go. The Hush thaws. Names come back. In the
-last shot, Nan says Echidna's name.
-
-### Themes
-- **Learning a language is gaining agency.** Every new word is a new verb for the player.
-- **Grief and letting go.** `Persist` is love refusing change; `Long` is love that reaches.
-- **Instructions have consequences.** A perfect sentence with the wrong intent is a loop with no exit.
-- **Memory.** Echo is Echidna's inheritance: the Choir could write; only its descendants can remember.
-
-### How the story is told (almost no cutscenes)
-Only three short in-engine moments: the opening with Nan (about 40 s), the reveal in the Folded
-Galleries (about 60 s), the ending (about 90 s). Everything else is found:
-- **Inscriptions** that translate as you learn words.
-- **Rune Memories:** ghostly replays of the Choir's last days (built on the Echo replay tech).
-- **Primer pages** (the Choir's illustrated handbook) and the **Bellkeeper's Ledger**.
-- **NPC dialogue with gaps:** Hushed words show as glyphs until you learn them.
-- The **Scribe's chalk messages**.
-
-### Timeline
-
-| When | Event |
-|---|---|
-| ~300 years ago | The Choir of Aster reads the sky through the Eye |
-| 60 years ago | Ilse writes the Last Sentence; the Hush begins; the Bell Order seals the Eye |
-| 60–9 years ago | The Bellkeepers ring the Waking Tone daily |
-| 9 years ago | The bell cracks; the Belfry is sealed; the monks flee |
-| Now | The Hush reaches Lowbell; Nan forgets Echidna's name |
+### 1.6 Themes and how the story is told
+Learning a language is gaining power. Love that won't let go versus love that lets someone go. Almost
+no cutscenes: the Nan scene (~3 min), the two glue moments after the bell and the dome, the Landing
+beats, and the ending. Everything else is **ledger pages** (3 per wing, using the existing page
+reader), **Wren's chalk marks**, and **signs only in the Novices' Way**.
 
 ---
 
-## 2. Opening sequence (the first 15–20 minutes)
+## 2. The grandma scene (Nan's cottage) — what to build
 
-> **Built so far (30 Sep):** before Lowbell, New Game plays an illustrated story in nine
-> animated pictures (the written sky, the Choir and the Eye, Ilse and Wren, the Last Sentence,
-> the Hush spreading, the bell, its cracking, Lowbell). Lowbell is playable up to Nan's door:
-> the camera comes down from the monastery, Echidna steps out, and villagers with glyph-gapped
-> lines line the lane. Nan's cottage now has a conversation and lantern handoff. The
-> pilgrim road has a bridge winch, ruined steps, the sealed Belfry door and an eastern well.
-> The well passage has two flame-sharing lamps, a light ward, safe return steps and landing
-> checkpoints before the existing tutorial. A three-picture bell aftermath connects the
-> Belfry to the Observatory. The cottage's proposed Echo lesson remains in the original
-> tutorial; the wider chapter plan below is still a design, not implemented content.
+An interactive interior two screens wide, grey except the hearth (pack bricks and wood, pixel props,
+Nan's existing sprite). About 3 minutes. It replaces the three BRIDGE cards.
 
-The goal: an emotional hook in the first minute, the mechanic's "aha" by minute 10, a mystery by
-minute 15, and a clear goal by minute 20.
+> Merge compatibility: the earlier lantern, pilgrim-road and well route is preserved
+> as `scenes/story/nan_lantern_cottage.tscn`, `pilgrims_path.tscn` and
+> `well_descent.tscn` with `witch_prologue.gd`. The main journey uses the cottage
+> and Novices' Way described below. The earlier bell aftermath remains playable
+> directly; the main journey uses its expanded story interludes.
 
-| Time | Where | What happens | Hook |
+1. Echidna goes in. Nan sits by a low fire. *"Oh, a visitor! Come in, dear. Mind the step."*
+   Thought: *"She doesn't know me."*
+2. **Talk to Nan.** *"Nan, it's me."* → *"Of course it is. Of course. You're my… you're…"* Her bubble
+   shows four empty rune boxes where the name should be. *"It was right here. I'm sorry, love."*
+3. **Try your fire spell** (the on-screen prompt shows the Fire key). A spark, a fizzle. Thought: *"I did
+   this yesterday. The word is gone."* This is the player's first feel of "my spells are missing".
+4. Nan: *"The Hush takes names first, then the little spells, then everything else. It took my knitting
+   word this morning. But words don't die, love. The monks carved theirs in stone. They'll still be
+   up there."* → *"The bell kept the Hush away for sixty years. Somebody has to ring it again."*
+5. She points at the cellar door at the back. *"The Novices' Way starts in my cellar. Your grandfather
+   used it to sneak up the mountain."* Then: *"Take my lantern, love. It's the only thing in this house that still
+   burns properly."* The lantern leaves the table, comes to Echidna, and her own light grows.
+6. *"I'll bring your words back, Nan. And I'll tell you my name as many times as it takes."* →
+   *"That's kind. Go on. And mind the step."*
+7. **Use the cellar door** (it opens on the stair down; the screen fades). Title card on arrival:
+   **THE NOVICES' WAY · PHASE 1 · THE CELLAR.**
+
+Nan hums four notes while Echidna leaves; the same notes sound again at the Echo Door.
+
+**Built (2026-10-01):** `scenes/story/nan_cottage.tscn` and `scripts/story/nan_cottage.gd`. The final
+lines are in the script (a few are split or reworded from the beats above). The Echo-door hum is not built.
+
+---
+
+## 3. Getting into the dungeon: the Novices' Way (the tutorial section)
+
+**Why it exists in the story:** the Choir trained novices on a walking path from the village to the
+monastery, with plaques and traps that taught the body first, then the spells. That is why the
+beginning has signs and later wings don't: the plaques are the monks' training notes.
+
+**Part 1 · The Passage** (today's tutorial, reordered, plus two new stops):
+
+| Phase | Name | Today's lesson | What happens |
 |---|---|---|---|
-| 0:00 | Title | A night sky with no stars; one star flickers and goes out. *New Game*. | Mystery |
-| 0:30 | **Lowbell at dusk** | A grey village. The chimes swing without a sound. Villagers' speech bubbles have glyph-shaped gaps ("Have you seen my ▢▢▢?"). Walk and jump over a fence. | The Hush is visible |
-| 1:30 | **Nan's cottage** | Nan by the fire: *"There you are, my... my... I know it."* Three lines, no cutscene. She gives Echidna her lantern. | Emotional hook |
-| 2:30 | **Nan's garden** | Nan teaches **Echo** ("our family's voice"): record yourself holding the garden gate's lever, then walk through while your Echo holds it. | First "I did it" |
-| 3:30 | **The Belfry door** | Sealed with a rune seal Echidna can't read yet. The only way in is down the old well. | Curiosity |
-| 4:00–10:00 | **The Undercroft** (5 short rooms, today's tutorial compressed) | Lantern; sprint; charged jump; spikes and candles; fireball lights a brazier; a Watcher glimpsed in the dark, frozen in a shaft of light; the first Ledger page. **Wick** the wisp flees, then follows once Echidna lights its perch. | Wick (warmth) |
-| 10:00 | **The Broken Inscription** (today's Ch2 R1) | **First rune discovery.** A cube reads `Wind · Push · ▢ · Normal`; its direction is broken. Reading the tablet plays the **Glyph Bloom**: every *Right* glyph on screen lights up and translates. Write *Right*: the wind slides a crate onto a plate. | The core "aha" |
-| 13:00 | **Too Heavy for One** (today's Ch2 R2) | **First real puzzle:** two winds add up. On a far ledge, **the Masked Scribe** takes a tablet before Echidna can reach it and leaves chalk: "▢▢▢ ▢▢▢" (it later reads "TOO SLOW"). | The rival |
-| 16:00 | **The Scriptorium gate** | **First NPC: Brother Aldous**, half his words lost: *"The ▢▢▢ must be... rung. Four... four bells."* He gives the **Reading Lamp** (inscriptions near you translate the words you know) and the first goal. | Clear goal |
-| 18:00 | **The Scriptorium** (hub) | Dark, silent, safe. Objective card: **Ring the Great Bell.** | Home base |
+| 1 | The Cellar | L1 First Steps, L2 Jumping | Walk, sprint, jump. Lantern only. |
+| 2 | The Broken Stair | L3 Sprint Jumps, L4 High Jumps | Gap and wall. |
+| 3 | The Novices' Traps | L5 Spikes, L6 Pistons | Hazards and rhythm. |
+| 4 | **The Kept Flame** | L7 Fire (re-framed) | **Earn Flame (fireball).** See below. |
+| 5 | **The Spring** | new, small | **Earn Spring (heal).** See below. |
+| 6 | The Cells | L8 Slimes | First fight with finite mana; learn to Kindle. |
+| 7 | **The Echo Door** | L9 Echoes | **Earn Echo.** Nan's four notes open the door. |
 
-Rules for the opening: no text box longer than two lines, the first rune by minute 10 (by
-minute 5 in the contest build), and never more than 90 seconds without Echidna doing something new.
+**Earning Fire.** The monks kept one flame burning for sixty years in a small shrine so the Hush
+could not take the word. The shrine carves FLAME in the First Tongue. As Echidna reads it the word
+returns "like a name on the tip of the tongue". Toast: *"You remember a word: FLAME. Click to throw
+fire. It costs flame (mana). Hold R at a lit shrine to kindle your lantern."* She lights the next
+dead brazier at once (a fireball lights braziers), and the existing 3-piston course is now stopped
+with the fireball switch.
+
+**Earning Heal.** Water still runs in the old washing spring. *"Running water is the one thing the
+Hush has never managed to hold still."* She cups it; the word SPRING returns. Toast: *"Stand still and
+press Q to heal. It costs flame."* Slimes come next, so she has a way to recover.
+
+**Earning Echo.** The Echo Door answers whatever is said to it, as the novices learned to listen to
+themselves. The word ECHO returns; the existing Echo lesson follows. The door opens on **the Belfry's
+cellar**, which is the first room of Part 2 ("The Forgotten Entrance"), so Part 1 flows straight into
+Part 2 with a fade and the card **PART 2 · THE BELFRY**.
+
+**Gating for old saves.** If a save has `tutorial.done` or any `ch1.*`/`ch2.*` flag, the three abilities
+are granted automatically so nobody loses a skill they already used.
+
+**Part 2 · The Belfry** (Chapter 1 today, 9 rooms, rings the great bell) and **Part 3 · The
+Observatory** (Chapter 2 today, 8 rooms) keep their rooms and puzzles. Changes: less text, the glue
+moments (§1.4), brighter lighting, and the Room 7 flame. Part 3 ends with the dome opening, the
+dark-gap constellation, and the floor lens that shows the frozen room. Echidna descends **the Long
+Stair**.
 
 ---
 
-## 3. World structure
+## 4. Structure, flow and naming
 
 ```
-                 LOWBELL (surface, prologue and interludes)
-                        |
-          THE BELFRY · the Sounding Stair (Region 1, Wind)
-                        |
-                THE SCRIPTORIUM (hub)
-             /          |           \
-   THE KILNWORKS   (either order)   THE DROWNED CISTERN
-      (Fire)                           (Ice)
-             \                      /
-              THE LAMPWORKS (Light) -- needs a Fire+Ice sentence to enter
-                        |
-          THE FOLDED GALLERIES (Space)
-                        |
-          THE EYE OF ASTER (finale)
+ Intro pictures → Lowbell → Nan's cottage → [cellar door]
+   THE NOVICES' WAY (tutorial)  Part 1 Passage → Part 2 Belfry → Part 3 Observatory
+     → THE LONG STAIR (the Landing: four doors, a kindling flame)
+         Chapter 1  The Kilnworks     (Fire)   → Forge Bell
+         Chapter 2  The Drowned Cistern (Ice)  → Tide Bell
+         Chapter 3  The Lampworks      (Light)  → Lamp Bell
+         Chapter 4  The Folded Galleries (Space) → Fold Bell
+     → Chapter 5  The Eye (all four bells rung) → the choice → the ending
 ```
 
-**Progression: semi-linear, hub and spoke, with knowledge gates.**
-- **Linear:** Prologue, then Region 1, then the hub. This teaches the grammar without choices getting in the way.
-- **Branch:** the Kilnworks and the Cistern open together; play either first. Each ends with a bell.
-- **Converge:** the Lampworks door needs a Fire Explode and an Ice Bridge together, so it tests both regions.
-- **Linear finale:** the Galleries, then the Eye.
-- **Metroidvania-lite:** every region shows optional places you can't reach yet (a frozen waterfall in
-  Region 1 needs Fire; a mirror alcove in the Kilnworks needs Light; portal ledges everywhere need
-  Space). They are optional, never required.
-- **Outer Wilds-style shortcuts:** some gates can be opened early by a player who deduces the
-  sentence from murals and already knows the words.
-- **Travel:** one-way shortcut gates inside each region (as in today's Room 5/6), and **Bell Shrines**
-  for fast travel from the hub's Orrery.
+- **Linear on purpose.** The wings open in order; each starts easier and ends harder, and each depends
+  on the last. Later (optional): let wings 1 and 2 be played in either order.
+- **The Landing** (`scenes/story/long_stair.tscn`, ~1 min each visit) is a small walkable ledge: four doors,
+  four bell-lights showing progress, a kindling flame, one chalk star. It is the "hub-lite": no shops, no
+  upgrades. It brightens a little with each bell (colour returning).
+- **Names.** Displayed names are labels in one ordered list, not baked into scenes. Internal ids stay
+  stable: `tutorial`, `ch1`, `ch2` for the old content, and new wings use `kiln`, `cistern`, `lamps`,
+  `folds`, `eye`, so nothing collides.
+- **One ordered list.** New `scripts/story/journey.gd` holds the order (scene, flag, display title) and
+  replaces the four hard-coded jumps (`lowbell.gd:15-16,708-709`, `title_screen.gd:10-13,225-234`, the
+  tutorial `LevelExit`, Chapter 1's `next_chapter`). Title Continue and chapter select read from it.
 
-| Region | Essence | Look and sound | Introduces | Reuses today's |
+---
+
+## 5. The five chapters
+
+Common shape of a wing: *start easy (1 idea) → add a twist → combine with an earlier essence → a
+creature set-piece → the boss*. No signs; carved pictures and Wren's chalk instead. Every room has a
+Kindle point at its entrance (§7). Words learned are listed per chapter; **all sentences named below
+will be checked against `RuneBook.SUPPORTED` when the room's solve test is written**.
+
+### Chapter 1 · The Kilnworks (Fire) — ~24 min
+*The furnaces that fired the rune cubes. The Hush froze them mid-burn; some wall-metal is still glowing.*
+New words: Fire, Projectile, Up, Large, Burst, Delay, Explode, Split. New creatures: **Cinder**, **Clinker**.
+
+| Room | Idea | Time |
+|---|---|---|
+| K1 The Cold Forge | **Built (2026-10-02), a long room.** Relight the Great Kiln: coal (push the cart off the loft onto a bridge, then into the fuel bay), air (a cube on the perch's pedestal blows into the kiln's pipe) and a bursting flame (`Fire · Projectile · Right · Explode` rides the bellows shaft up, then the perch's current, into the pipe). Teaches Fire, Projectile, Up, Burst, Explode; fire rides wind; a gust strikes where a steady wind only leans. See `STORY_PLAYTHROUGH.md`. | 22–35 (estimate, needs a playtest) |
+| K2 The Fuse Row | Bramble fuses burn along a rail; use **Delay** so a bolt lands as a moving gate opens | 4 |
+| K3 The Cinder Hall | **Cinders** are fire-proof sparks; steer them with wind into the bramble gate, or snuff them in puddles | 4 |
+| K4 The Clinker Line | A **Clinker** carries a coal along a belt; tip it with Strong wind to spill the coal on a fuse | 4 |
+| K5 The Bellows | Fire + wind: a bellows pushes flame along a channel; Explode cracks the wall; diagonal Up-Right | 5 |
+| K6 The Slag Climb | Vertical room: vents lift you, Cinders rise on the heat, Burst timing | 4 |
+| **The Kiln Heart** (built as room 2, 2026-10-03) | **Built, a long room, without the fight.** The Shutter Hall (**Delay**: a cube's bolt waits while she holds the shutter open on its plate), the Slag Lake (three always-on heat vents and the ledges between them), the Coal Racks (**Large**: one wide gust from the gallery's pedestal tips three skips of coal into the Heart), the Heart (**Split**: `Fire · Projectile · Up-Right · Split` lights its three hanging burners at once) and the hoist up to the Forge Bell. See `STORY_PLAYTHROUGH.md`. | 12–20 (estimate, needs a playtest) |
+| **Boss: The Kiln Heart** (not built) | Phase 1 *cold*: light three vents with one `Fire · Projectile · Up · Split`. Phase 2 *overheating*: blow its Cinders into quench puddles and crack its armour with a **delayed Explode**. Phase 3 *settle*: seal the core with a stone driven by wind. | 6 |
+Ledger (6 pages, three a room): the Smith. Wren: chalk footprints leading into the next room. Ends with the **Forge Bell**.
+
+### Chapter 2 · The Drowned Cistern (Ice) — ~24 min
+*The water clocks that measured the sky. All stopped at the same minute.*
+(The ~24 min is the original plan. By request the two built rooms are long ones: about 30 minutes and about an hour,
+an estimate of 65 to 100 minutes for the wing until a playtest says otherwise.)
+New words: Ice, Freeze, Long, Persist, Down-Right. New creature: **Brine Jelly**.
+
+| Room | Idea | Time |
+|---|---|---|
+| C1 The Still Water | **Built (2026-10-04), a long room, the theme "freezing things".** Water frozen into a floor (two pools: Ice, Freeze, Long), old ice melted by fire, a slime frozen to stone-weight through an iron grate (the Clock Gate), five fountains frozen into a stair by cold laid aslant (**Down-Right**, Long), and a tide clock stopped at the hour by cold placed just above the mark (it opens the Sluice Door). Rule: rising water freezes where it first meets the cold. See `STORY_PLAYTHROUGH.md`. | 20–30 (estimate, needs a playtest) |
+| C2 The Great Sluice | **Built (2026-10-05), a long room, the theme "the cold that never lets go".** Takes in the Tide Stairs, the Frozen Weights and the Sluice. Persist learned and used four ways: a slime held on a slow plate (the Silence Gate), a tide frozen level with the doorways and held while she crosses (the Tide Lever over the doorway), two slimes held frozen on a weigh pan with the Ballast shoved onto it by a Strong wind (three weights), and the tide held at its high mark (from the high ledge) while the pan is held: the Great Sluice opens and drains the Bell Well. Then the room's one free cube, out of its socket, bridges the High Walk's fallen span (Ice, Bridge, Right). Rule: switched on while the hall is dry, the rising tide freezes at the doorways; while it is up, where it stands. See `STORY_PLAYTHROUGH.md`. | 45–70 (estimate, needs a playtest) |
+| C3 The Jellies | Jellies float at tide level; freeze one as a moving platform, or fire-pop one for a 3 s steam updraft | 4 |
+| C4 The Long Bridge | `Ice · Bridge · Right · Long` with **Persist** upkeep against your mana; budget it | 5 |
+| **Boss: Mere, the Cistern Leviathan** | Phase 1: freeze footholds before the tide takes them. Phase 2: freeze Mere mid-leap with Persist for a walkway (watch upkeep). Phase 3: span its jaws with a Long bridge, then melt its gill-seal so it coughs up the Tide Bell's clapper. | 6 |
+Ledger: the Warden of Waters. Wren is seen behind glass, drawing a star. Ends with the **Tide Bell**.
+Story beat: the word **Persist** is learned here with the line "the word that made the silence".
+
+### Chapter 3 · The Lampworks (Light) — ~26 min
+*Reading halls and mirrors. The Watchers walk here: they are the monks.*
+New words: Light, Beam, Glow, Self, Bounce, Up-Left. New creatures: **Mirror Knight**, **Lampmoth**.
+
+| Room | Idea | Time |
+|---|---|---|
+| L1 The Dark Reading Room | Beams, Glow; a watcher you can't hurt but can calm | 3 |
+| L2 The Mirror Walk | A Mirror Knight reflects fireballs and beams; reflect your own fireball at a wall switch | 4 |
+| L3 The Moth Garden | Lampmoths fly to the brightest light and snuff braziers; protect yours with a Glow decoy | 4 |
+| L4 The Carousel | A rotating mirror deck; `Wind · Burst · Self · Repeat` spins it on a beat; Bounce beams | 5 |
+| L5 Two Watchers | Freeze them to stone in the right order and use them as steps and weights | 5 |
+| L6 The Lamp Stair | Hidden platforms are solid only in light; climb in the dark with a wisp | 4 |
+| **Boss: The Unblinking** (the Prior) | Phase 1: Bounce a beam into each eye from the side it isn't watching. Phase 2: it breaks the low mirrors; Glow cubes and the wisp light the high ones. Phase 3: a Repeat carousel sweeps a beam across its closing eyes. Finish: `Light · Glow · Self · Large` and it turns to stone, freed. | 6 |
+Ledger: the Lamplighter. The Prior's memory shows Ilse freezing Wren. Ends with the **Lamp Bell**.
+
+### Chapter 4 · The Folded Galleries (Space) — ~26 min
+*Rooms stored inside rooms, where the Choir kept its archive.*
+New words: Space, Portal, Repeat, Down-Left. New creatures: **Hushling** (first appears), Scribe-mite (stretch).
+
+| Room | Idea | Time |
+|---|---|---|
+| F1 The First Door | Portals keep your momentum; fling across a gap | 3 |
+| F2 Two Rooms | Echo through a portal: one you in one room, one Echo in the other, both holding things | 5 |
+| F3 The Archive | Hushlings blank one word on a cube; light dissolves them; keep your sentence intact | 5 |
+| F4 Carry the Flame | Send fire and a beam through a portal to reach the unreachable | 4 |
+| F5 The Sorting Hall | Five essences, four small tasks, one room (the first true "everything" room) | 5 |
+| F6 The Folded Room | A room that is also its own lock: solve it from inside and outside at once | 4 |
+| **Boss: Wren's Test** | Not a fight. Wren writes half a sentence on each of four lock cubes; you finish each (opposites, borrowed words, portals, Echo). At the end she takes Echidna's hand: *"Mum won't let go. Please."* | 6 |
+Ledger: the Archivist. Wren speaks for the first time. Ends with the **Fold Bell**.
+
+### Chapter 5 · The Eye — ~20 min
+*A dome frozen in a moment: snow hanging in the air, a bell note visible as a ring.*
+No new words. Three approach rooms with Hush zones (mana drains unless a Glow runs), Hushlings, and
+**Stone Choristers** (Watchers that sing; light turns them into platforms). Then the finale (§12).
+
+---
+
+## 6. Words: where all 33 are learned
+
+| Where | Words |
+|---|---|
+| Start | Wind, Push, Left, Normal |
+| Observatory (built) | Right, Lift, Strong, Bridge, Down, Up-Right |
+| Ch 1 Kilnworks | Fire, Projectile, Up, Large, Burst, Delay, Explode, Split |
+| Ch 2 Cistern | Ice, Freeze, Long, Persist, Down-Right |
+| Ch 3 Lampworks | Light, Beam, Glow, Self, Bounce, Up-Left |
+| Ch 4 Galleries | Space, Portal, Repeat, Down-Left |
+
+4 + 6 + 8 + 5 + 6 + 4 = 33 (Split moved to the Kilnworks when the Observatory's optional fire alcove was removed). Both ending sentences use words learned by the end of Chapter 3, so
+the game can end even if the Galleries are cut. Sources: carved tablets (clear), words you work out from
+a mural, words you discover by doing it, and the boss rewards (Explode, Repeat).
+
+---
+
+## 7. Mana: finite, and something you do
+
+Mana is **flame**: the lantern's fire. 100 at full, as now; the existing rules (fireball 5, heal 20, each
+Echo −10 to the cap, ward circles, pedestals, "runes drawing your mana", upkeep) stay.
+
+**Removed:** the free R refill anywhere, and the automatic refill at 0.
+
+**How you get it back:**
+| Source | Rule | Why |
+|---|---|---|
+| **Kindle points** (lit shrines and a per-region flame: forge, basin, lamp, star pool) | Stand at one and **hold R** (1.5 s) to refill fully | Visible, safe, place-bound. Every room has one at its entrance. |
+| **Spark Motes** | Defeated creatures drop +6 each; breakable spark pods in fight rooms | Rewards fighting well |
+| **Echo** | An Echo re-casts your recorded fireballs **for free** | A clever way to stretch mana (already built) |
+| **Trickle** | Up to 25% of the cap comes back at 4/s when no rune is running | A floor so no one is stuck at 0 |
+
+**Laws that prevent soft-locks** (never break these): (1) every room's solution fits a full bar plus its
+own Kindle point; (2) running dry never destroys anything; (3) Reset Room returns you to the entrance
+(a Kindle point) with the mana you entered with; (4) mana never blocks the way out; (5) a refused
+spell costs nothing and says why ("needs 16 in hand"); (6) **Assist: unlimited mana** stays, plus a
+"gentle" option (Kindle in half the time).
+
+Controls: R is labelled **Kindle**; the action keeps its internal name so rebinds survive.
+
+---
+
+## 8. The combat rework: combat is a puzzle with a monster in it
+
+**Player toolkit.** Movement is unchanged. Fireball (tap = 5 mana, the same as now). **Charged flame**:
+hold the shoot button 0.7 s for a 12-mana bolt that pierces one enemy, staggers armour and lights
+braziers from further. Spring heal (20 mana, +2 HP, still a 1.2 s channel). Echo: a free fireball
+turret and a decoy. Rune cubes: wind and ice and light bend the room around the monster.
+
+**Rules.**
+1. **Tells.** Every attack has a visible 0.4–0.6 s windup (slime and watcher already do).
+2. **Weak points.** Armoured creatures show a glowing weak point after they act; a hit then staggers them
+   for 1.2 s and does double damage.
+3. **Statuses.** *Burn* (fire, 1 damage/s for 3 s), *Chill* (ice, existing), *Stone* (light, watchers,
+   existing), *Hushed* (touching a Hushling blanks a rune word until you rewrite it).
+4. **Fire-proof things.** Some creatures ignore fireballs, so you can't spam: you have to use the room.
+5. **Fight rooms.** A gate closes until the creatures are cleared *or* the puzzle is solved (a Clinker
+   tipped into spikes counts). Combat music plays (existing `Room.combat`).
+6. **No sponges, no grind.** Creatures don't respawn except in puzzle rooms (and on Reset Room).
+7. **Drops.** Spark Motes (+6 mana) and hearts (+1 HP, existing).
+8. **Bosses have no health bars.** They change the room in phases; Reset Room is the only penalty.
+
+### Creatures
+| Creature | Where | Behaviour | Fireball | Real answer |
 |---|---|---|---|---|
-| Lowbell | none | Grey dusk village; colour returns bell by bell | Walking, Echo, the Hush | New (small) |
-| The Undercroft | none | Dark cells, candles | Movement, hazards, fireball, wisps | Tutorial lessons |
-| **1 · The Sounding Stair** | Wind | Bronze, rope, cold blue; hollow bell tones | Wind physics, updrafts, bursts, pedestals, bells and slimes, Echo with runes | Ch1 R1, R2, R8, R9; Ch2 R1–R3 |
-| Scriptorium (hub) | none | Candlelit cloister, card-catalogue stacks | Journal, practice, upgrades | New (one room first) |
-| **2 · The Kilnworks** | Fire | Forge amber, chains, soot; bellows rhythm | Bolts, splitting, timing, explosions, burning | Ch1 R5, Ch2 R4, Ch2 R8 |
-| **3 · The Drowned Cistern** | Ice | Teal water halls, water clocks, puddles | Freezing water and creatures, bridges, Persist upkeep, tides | Ch2 R5; puddle tech |
-| **4 · The Lampworks** | Light | Gold and violet reading halls, mirrors | Beams, bounce, glow, self, watchers as tools | Ch1 R3, R4, R6, R7; Ch2 R6 |
-| **5 · The Folded Galleries** | Space | Impossible galleries, star-painted walls | Portals with momentum, combining everything | Ch2 R7, R8 |
-| **The Eye of Aster** | all | A dome frozen mid-moment: snow hanging in the air, a bell note visible as a ring | Editing the world's sentence | Ch2 observatory seal (reworked) |
+| **Bellbound Slime** (built) | Passage, Belfry | Hears bells and sits under them | Kills (12 HP) | Wind pushes it; Freeze makes it heavy; Portal moves it |
+| **Watcher** (built) | Belfry, Lampworks | Walks in darkness, stone in light | Splashes off | Beam or Glow turns it to stone: platform or weight |
+| **Lantern Wisp** (built, friendly) | Belfry, Lampworks | Goes where you call it | none | Its light makes hidden platforms solid |
+| **Cinder** (new) | Kilnworks | A spark that runs toward warmth and ignites what it touches | **Immune** | Wind steers it; puddles snuff it (drops a Spark Mote) |
+| **Clinker** (new) | Kilnworks | Slow kiln golem with a burning coal | Bounces off the shell; the back vent is the weak point | Strong wind tips it and spills the coal on a fuse |
+| **Brine Jelly** (new) | Cistern | Floats up and down with the tide, stings | Pops into a 3 s steam updraft | Freeze = a moving platform (Persist keeps it) |
+| **Mirror Knight** (new) | Lampworks | Patrols with a reflecting shield | Reflected back at you | Hit it from behind; reflect your own bolt into a switch |
+| **Lampmoth** (new) | Lampworks | Flies to the brightest light and snuffs it | Dies in one hit | Glow decoy; keep your braziers lit |
+| **Hushling** (new) | Galleries, Eye | A drifting patch of silence that blanks a rune word | Passes through | Light dissolves it; bells scatter it |
+| **Stone Chorister** (new) | Eye | A watcher that sings; each beat pushes you | Splashes off | Light turns it to stone; time beams to its beat |
+| Scribe-mite (stretch) | Galleries | Carries a word from cube to cube | Dies in one hit | Freeze it to get the word back |
 
-**How areas teach.** Every region runs the same arc:
-(1) the essence's first action alone → (2) its second action → (3) its modifiers →
-(4) combinations with earlier essences → (5) a mini-boss using one trick → (6) the boss testing all of it.
+HP and damage (starting values, to tune by playtest): Cinder 6, Clinker 24, Jelly 10, Knight 18
+(back ×2), Moth 4, Hushling 8; contact damage 1–2 like today; i-frames and knockback unchanged.
 
----
-
-## 4. Chapter breakdown
-
-### Prologue — *The Quiet* (15–20 min)
-- **Theme:** things are being forgotten.
-- **Goal:** get into Aster Deep and reach the Scriptorium.
-- **Words:** Wind, Push, Left, Normal (already carved on the first cube); **Right** (tablet).
-- **Mechanics:** movement, lantern, fireball, heal, Echo, Reading Lamp, the rune screen, mana basics.
-- **Enemies:** Bellbound slimes (harmless in their cells); one Watcher glimpsed.
-- **Puzzles:** Echo holds a gate; the broken inscription; two winds add up.
-- **Revelations:** the Hush takes names; someone else is down here.
-- **Mini-boss / boss:** none. The prologue is about wonder.
-
-### Chapter 1 — *The Sounding Stair* (Wind, 45–60 min)
-- **Theme:** breath and voice.
-- **Goal:** ring the Great Bell.
-- **Words:** Lift, Up, Burst, Strong, Large.
-- **Mechanics:**
-  - Wind physics: mass, breakaway force, adding winds together.
-  - Riding updrafts; single-shove bursts.
-  - Carrying cubes; pedestals and breath-lines.
-  - Bells call slimes; slimes weigh down plates.
-  - Echo working with runes (your Echo stands on a plate while your wind runs).
-- **Enemies:** Bellbound slimes (living weights; wind moves them); **Tollers** (bats nesting in bells that scatter at gusts, shaking loose ropes).
-- **Puzzle concepts:**
-  - Stacking forces; weight classes (crate, stone, statue).
-  - Updraft routes; herding slimes with bells.
-  - Burst timing against swinging weights; "your Echo writes half the sentence".
-- **Revelations:** the Ledger (Tobiah rang for years; the bell cracked nine years ago); the Hush pools inside the bell.
-- **Mini-boss:** *Mother Ink*, a huge bell-slime squatting on the master plate. Ring side bells to pull her off and wind-herd her into the vat.
-- **Boss:** *The Cracked Bell* (§9).
-
-### Chapter 2 — *The Kilnworks* (Fire, 50–70 min)
-- **Theme:** making, and the heat that comes with it.
-- **Goal:** relight the Kiln Heart and ring the Forge Bell.
-- **Words:** Fire, Projectile, Up-Right, Down-Right, Delay, Split, Explode.
-- **Mechanics:**
-  - Fire bolts; braziers; bramble fuses that burn in chains.
-  - Cracked walls: Explode, or momentum from a wind-driven stone (already built).
-  - Pistons and conveyors carrying cubes; puddles that put fire out; heat zones.
-- **Enemies:** **Emberlings** (living sparks); **Clinkers** (small kiln golems carrying coals).
-- **Puzzle concepts:**
-  - One bolt, three targets (Split).
-  - Delayed shots timed to moving targets; the order things are destroyed in.
-  - Chain reactions; fire carried on the wind.
-- **Revelations:**
-  - Aldous's Rune Memory: he ground the Eye's lens.
-  - The **Orrery voice** speaks for the first time ("You write beautifully").
-- **Mini-boss:** *The Great Bellows*, a construct that blows your fires out. Turn its own draught with Wind, then burn its intake.
-- **Boss:** *The Kiln Heart* (§9).
-
-### Chapter 3 — *The Drowned Cistern* (Ice, 50–70 min)
-- **Theme:** time and stillness (the water clocks).
-- **Goal:** calm the flood and ring the Tide Bell.
-- **Words:** Ice, Freeze, Bridge, Down, Long, Persist.
-- **Mechanics:**
-  - Water surfaces freeze into platforms; tides rise and fall on a clock.
-  - Ice bridges; frozen creatures weigh as much as stone (already built).
-  - Fire melts ice; crates slide far on ice.
-  - **Persist** upkeep against your mana.
-- **Enemies:** **Brine Jellies** (float on the tide); drowned Watchers.
-- **Puzzle concepts:**
-  - Tide timing; persistence versus budget.
-  - Sliding physics; freeze a creature to carry its weight; melt at the right moment.
-- **Revelations:**
-  - Every water clock stopped at the same minute.
-  - A Rune Memory shows a little girl in the cistern gardens wearing a paper mask she made.
-- **Mini-boss:** *The Clockwork Weir*, a sluice machine. Freeze its wheel at the right tide.
-- **Boss:** *Mere, the Cistern Leviathan* (§9).
-
-### Chapter 4 — *The Lampworks* (Light, 60–80 min)
-- **Theme:** seeing and being seen.
-- **Goal:** relight the Great Reading Lamp and ring the Lamp Bell.
-- **Words:** Light, Beam, Glow, Up-Left, Down-Left, Self, Bounce, Repeat.
-- **Mechanics:**
-  - Beams, mirrors, crystals and lenses (built); Bounce off mirrors.
-  - Glow auras; Self-centred effects; Repeat pulses (with Burst and Projectile).
-  - Holy light turns Watchers to stone (built); wisp light makes platforms solid (built).
-  - **Wick grows** and can light braziers.
-- **Enemies:** Watchers at full use; **Mirror Knights**; **Lampmoths**.
-- **Puzzle concepts:**
-  - Routing light; herding Watchers and freezing them as platforms or weights.
-  - Routes through darkness; pulse timing; mirrors that move.
-- **Revelations:**
-  - The Watchers are the Choir.
-  - The Prior's memory reveals the exact Last Sentence: `Ice · Freeze · Self · Persist`.
-- **Mini-boss:** *The Twin Watchers*: two that move only while the other is lit.
-- **Boss:** *The Unblinking* (§9).
-
-### Chapter 5 — *The Folded Galleries* (Space, 50–70 min)
-- **Theme:** distance, perspective, identity.
-- **Goal:** open the Eye's four locks.
-- **Words:** Space, Portal. (This is a combination chapter: few new words, many new sentences.)
-- **Mechanics:**
-  - Portals keep your momentum (built).
-  - Wind through portals; beams and fire through portals; Echo through portals.
-  - Galleries whose doors lead elsewhere depending on which portal reach is running.
-- **Enemies:** **Scribe-mites** (carry words between cubes); **Hushlings** in numbers.
-- **Puzzle concepts:** momentum flings; carrying a sentence's effect elsewhere; archive rooms that need the whole vocabulary.
-- **Revelations:**
-  - The Scribe is **Wren**.
-  - The Orrery voice is **Ilse**, and she wants `Large`.
-- **Mini-boss:** *The Folded Room*: a room that is also its own lock. Solve it from inside and outside at once, with Echo.
-- **Boss:** *The Scrivener's Duel* (§9).
-
-### Chapter 6 — *The Eye of Aster* (finale, 40–60 min)
-- **Theme:** letting go.
-- **Goal:** rewrite the Last Sentence.
-- **Words:** no new ones. The secret essence, *Echo*, is optional (§12).
-- **Mechanics:**
-  - Hush zones (mana drains unless a Glow runs).
-  - Hushlings that blank out words on your cubes.
-  - Editing the great locked cube.
-- **Enemies:** Hushlings; singing Stone Choristers.
-- **Boss:** *The Last Sentence* (§9, §12).
-
-### Progression curve
-
-| Chapter | New words | Words known | New mechanics | Steps per main puzzle | Rooms |
-|---|---|---|---|---|---|
-| Prologue | 5 | 5 | 6 | 1–2 | 8 |
-| 1 Wind | 5 | 10 | 5 | 2–3 | 10 + boss |
-| 2 Fire | 7 | 17 | 4 | 3–4 | 10 + boss |
-| 3 Ice | 6 | 23 | 4 | 3–4 | 10 + boss |
-| 4 Light | 8 | 31 | 5 | 4–5 | 12 + boss |
-| 5 Space | 2 | 33 | 3 | 5–6 | 10 + boss |
-| 6 Eye | 0 (+1 secret) | 33 (34) | 2 | 6+ | 4 + boss |
-
-The shape: a steep start (learn the grammar), a plateau in each region (master one essence), then
-the curve turns from *learning words* to *writing sentences* in Chapters 5–6.
+Implementation shape: a shared base class `scripts/creatures/creature.gd` for the new creatures (HP,
+`take_damage`, burn and chill, drops, reset, plate weight, camera-safety `is_threatening`), written to
+the existing contract (group `enemy`, `DamageArea`). The slime and watcher stay as they are.
 
 ---
 
-## 5. NPCs
+## 9. Puzzle idea bank (thirty-two ideas, with a solution sketch)
 
-### Brother Aldous — the guide
-- **Appearance:** a very old glasswright with round spectacles (one lens silvered), a patched robe, and a small mirror strapped to his back like a shield.
-- **Personality:** gentle, stubborn, funny about his own forgetting, and guilty.
-- **Purpose:** guide, hints, the Reading Lamp and its upgrades.
-- **Story arc:**
-  1. He stayed behind when the Order fled and is half-Hushed: he has lost most nouns.
-  2. As Echidna learns words, his old lines become readable (the journal keeps them, re-translated).
-  3. In Chapter 2, his Rune Memory shows he ground the Eye's lens.
-  4. By Chapter 4 he admits it made the Last Sentence possible.
-  5. In the finale he holds the lens steady while Echidna writes.
-- **Dialogue style:** warm, short, full of gaps ("Mind the ▢▢▢, child; it bites."). Never a lecture.
-- **Gameplay:** optional three-tier hints (gentle → specific → solution), matching today's hint stones; Reading Lamp upgrades.
-
-### Sister Vell — the archivist
-- **Appearance:** middle-aged, ink to the elbows, a cloak sewn from index cards that rustles like moth wings.
-- **Personality:** brisk, precise, dry wit, secretly terrified of the language.
-- **Purpose:** keeps the Rune Journal, translates Primer pages, runs the Sentence Catalogue.
-- **Story arc:**
-  1. She has hidden in the archive for nine years and refuses to cast ("Words did this").
-  2. She warms to Echidna's care with language.
-  3. When the Hush attacks the hub, she writes her first sentence (`Light · Glow · Self · Large`) to protect the children's shelves.
-- **Dialogue style:** footnotes, corrections, lists ("Three things. One: you're dripping on my floor.").
-- **Gameplay:** collectible turn-ins (Primer pages → translations and hints), upgrades (Echo length, saved sentences), the catalogue of every valid sentence discovered.
-
-### Wick — the friendly creature
-- **Appearance:** a thumb-sized flame inside a glass bell, with moth wings; its glow changes colour with its mood.
-- **Personality:** curious, skittish, loves bells, hates being rushed (Ledger vi).
-- **Purpose:** companion light and quiet guide.
-- **Story arc:**
-  - Wick is the last lamplighter, looking for the Great Reading Lamp.
-  - When it is relit in Chapter 4, Wick grows and can carry flame.
-  - In the true ending, Wick lights the first lamp of the new constellation.
-- **Dialogue style:** no words; a small bubble with one rune glyph (Light when happy, the Hush symbol when afraid).
-- **Gameplay:**
-  - Sent to wisp perches (built); its light makes hidden platforms solid (built).
-  - It chirps near secrets and dims when the Hush is close, as a danger warning.
-
-### The Masked Scribe (Wren) — the rival and mystery
-- **Appearance:** a slight girl in a white paper mask painted with the *Persist* glyph, an ink-black cloak that frays into static, and a stylus as tall as she is.
-- **Personality:** playful, cryptic, competitive, lonely.
-- **Purpose:** the recurring rival who is always one room ahead.
-- **Story arc:**
-  1. She steals fragments first, so you must find another source (her chalk copy, a Rune Memory, a deduction).
-  2. She solves rooms her own way and leaves the cubes behind as hints.
-  3. She taunts, then helps.
-  4. At the Chapter 5 reveal: she is Wren, held inside the sentence, testing Echidna.
-  5. She asks to be let go.
-- **Dialogue style:** chalk messages in rune script, often rhymes and riddles ("Two winds, one stone. Can't lift alone."). She never says her name until the reveal.
-- **Gameplay:** race rooms, the duel boss, a few secret hints, and her mask (needed for the secret ending).
-
-### The Orrery voice / High Cantor Ilse Aster — the late reveal
-- **Appearance:** first only a warm voice from the brass orrery in the hub. In the finale, a tall woman of stone and starlight, half-frozen, with constellations on her robes and her face behind a lens.
-- **Personality:** brilliant, grieving, persuasive; never cruel.
-- **Purpose:** mentor turned antagonist (think Portal and Talos).
-- **Story arc:**
-  - She encourages you to gather every word and unlocks fast travel.
-  - Her praise gradually becomes possessive ("Every word. Bring them all to me.").
-  - Revealed in Chapter 5; faced in Chapter 6; she lets go in the true ending.
-- **Dialogue style:** formal and complete. She is the language's greatest writer, the only character who never has gaps in her speech.
-- **Gameplay:** fast travel, lore, and the pressure of the final choice.
-
-### Nan Morrow — the anchor
-- **Appearance:** a small, sharp-eyed hedge-witch with ash on her sleeves.
-- **Purpose:** the emotional stakes.
-- **Story arc:** after each bell, a letter from Nan arrives in the hub, each with more of her words back. In the ending she says Echidna's name.
-- **Dialogue style:** teasing, practical, loving.
-
-### Tobiah Rook, the last Bellkeeper (appears only in memories)
-Heard through the seven Ledger pages and one Rune Memory: the man who rang the bell until it cracked.
+**Fire.** (1) *Fuse chain*: light braziers in the order the fuse burns. (2) *Delay relay*: shots timed to
+a moving gate. (3) *Cinder courier*: lead a Cinder to the far brazier. (4) *Spill the coal*: tip a
+Clinker to ignite a fuse. (5) *Bellows lane*: wind carries fire along a channel. (6) *Crack and burn*:
+Explode a wall, then burn the brambles behind it.
+**Ice.** (7) *Tide stairs*: freeze at the right height. (8) *Jelly lift*: freeze a Jelly as a platform.
+(9) *Weight classes*: freeze a slime and add crates to reach 3 weights. (10) *Persist budget*: a bridge
+that lasts as long as your mana. (11) *Slide crate*: ice friction. (12) *Melt gate*: fire at the right
+moment.
+**Light.** (13) *Beam router*: mirrors and crystals. (14) *Watcher steps*: stone them in order. (15) *Knight
+rebound*: reflect your own bolt. (16) *Moth decoy*: Glow protects a brazier. (17) *Hidden platforms*: solid
+only in light. (18) *Carousel*: rotating mirrors on a Repeat beat.
+**Space.** (19) *Momentum fling*. (20) *Two-room sync*: Echo in one room, you in the other. (21) *Carry the
+flame*: send fire through a portal. (22) *Archive sort*: move words between cubes. (23) *Folded door*: the
+lock is in the room you can't reach.
+**Combined.** (24) *Mana budget*: a ward room with free pedestals and costly spells. (25) *Echo relay*:
+your Echo does half the sentence. (26) *Word theft*: a Hushling blanks a word; rewrite under pressure.
+(27) *Constellation lock*: a star pattern seen earlier is a door's code. (28) *One sentence, three jobs*:
+Split plus Bounce. (29) *Reflected shot*. (30) *Steam and updraft*: pop a Jelly to cross a gap.
+(31) *Silence crystal*: freeze a Hushling to mute a bell. (32) *Order of operations*: the same four rooms
+solved in the wrong order lock the door (Reset fixes it).
 
 ---
 
-## 6. Mana system design
+## 10. Hints and guidance
 
-### Kept as it is (already built and tested)
-- 100 mana. Fireball 5, heal 20. Each Echo lowers the cap by 10.
-- Refill with R over 2 s; refused while any of your runes draws on you.
-- Regeneration of 20/s starts 1.2 s after you stop, only while none of your runes runs.
-- A sustained rune needs its start cost plus 2 s of upkeep in hand.
-- Running dry switches off every rune you power.
-- Pedestals and breath-lines feed cubes for free; ward circles cap your mana in a room.
-- Reset Room gives back the mana you entered with; leaving a room stops your runes.
+- Default guidance **Light**. Full stays in settings for players who want it.
+- Signs only in the Novices' Way, and only for something new. New chapters teach by design, with
+  carved pictures and **Wren's chalk marks** instead of skull hints: one chalk drawing per room, stage 1
+  only (a picture, no words); a second smudge if you are stuck for five minutes.
+- Auto-nudge at 5 minutes or 4 deaths, Full guidance only.
+- No arrows or glowing markers outside Full.
 
-### Additions
-| System | Rule | Why |
+---
+
+## 11. Lighting and look
+
+Brightness first (B1): Normal is about twice as bright, and each region sets its own colour:
+Kilnworks amber, Cistern teal, Lampworks gold and violet, Galleries star-blue, the Eye white-blue.
+Darkness stays as a *local* puzzle ingredient (watcher rooms, the Lamp Stair), never the default.
+The packs have no forge, cistern or lamp pieces, so new props and creatures are made as pixel
+sprites by a generator tool (like `tools/generate_story_sprites.gd`), in the packs' palette, never as
+drawn shapes.
+
+---
+
+## 12. The Eye and the ending
+
+*Chapter 5, about 20 min.* Three approach rooms (Hush zones, Hushlings, Choristers) lead to the dome.
+Ilse stands frozen beside Wren's bed; the great cube floats between them reading
+`Ice · Freeze · Self · Persist`. Mana ward: cap 30, pedestals ring the dome.
+
+1. **The Hush Storm.** Hushlings pour in and blank your words. Keep a `Light · Glow · Self · Large`
+   running while you reroute the dome's breath-lines to wake four lock pedestals. (Unlocks the Modifier slot.)
+2. **The Choir.** Ilse wakes the Stone Choristers; turn them to stone as platforms and open the shutters
+   with a Bounce beam. (Unlocks Direction.)
+3. **The Tug of Words.** Ilse rewrites the cube every few seconds; record an Echo editing one slot while
+   you edit another. (Unlocks Essence and Action.)
+4. **The Choice.** The rune screen opens on the great cube: write the sentence (§1.5).
+
+---
+
+## 13. Difficulty and pacing
+
+Testers finished the first two chapters in about ten minutes with every hint on, so the new chapters
+should feel clearly harder: steps per main puzzle go 2–3 (Kilnworks), 3–4 (Cistern), 4–5 (Lampworks),
+5–6 (Galleries), 6+ (Eye). Targets for a first-time player: 3–5 minutes per room, 6 per boss. The existing
+playtest log (`user://playtest_log.csv`) records time per room: use it after each chapter and tune
+rooms that take under 90 s (too easy) or over 8 min (too hard). Assist options stay.
+
+---
+
+## 14. Build plan (30 Sep – 20 Oct 2026; two people, Claude building the rooms)
+
+Milestones; the game is playable end to end after each one.
+
+| When | What | Milestone |
 |---|---|---|
-| **Starwells** | A basin of starlight. Standing in one refills you instantly; a cube on its rim is fed like a pedestal. Some are dry until you solve something (light the brazier above, thaw the pipe). | A visible, fair "recharge here", and a puzzle object. |
-| **Breath-line capacity** | Each breath-line carries a set amount of upkeep (shown as notches on the groove). Overload it and every cube on it goes out. | Budgeting puzzles: which cube runs on the dungeon and which on you. |
-| **Resonance** | Ringing a bell doubles regeneration for 8 s and removes the refill wait. | Ties bells (voice) to breath; rewards thinking about sound. |
-| **Star Charts** | Five hidden charts, each +10 to the cap at the hub Starwell (max 150). | An exploration reward that widens experimentation. |
-| **Hush zones** (Chapters 5–6) | Regeneration stops and 1/s drains, unless a Glow runs nearby. | Late-game pressure that is still readable and has an answer. |
-| **Saved Sentences** (QoL) | Up to four remembered sentences can be written onto a cube in one step. | Less menu time late in the game. |
+| **30 Sep – 1 Oct** | The document and the quick fixes (this pass) | Brighter, clearer, fewer hints |
+| **2 – 5 Oct** | Nan's cottage; `journey.gd` wiring; the Passage reorder and Kept Flame / Spring / Echo shrines; ability gating (old saves auto-granted); Kindle points and finite mana; chapter-select labels; the glue moments (§1.4) | **M1: title to the end of the tutorial section, abilities earned** |
+| **6 – 10 Oct** | Combat core (creature base, burn, charged flame, Spark Motes, stagger), Cinder and Clinker, **Chapter 1 Kilnworks** and the Landing | **M2: first new chapter** |
+| **11 – 14 Oct** | **Chapter 2 Cistern** (Jelly). Feature freeze for new systems on 14 Oct | M3 |
+| **15 – 17 Oct** | **Chapter 3 Lampworks** (Knight, Moth) and a short **Eye** with the ending | **M4: title to ending** |
+| **18 – 19 Oct** | Playtest with 5+ new players, fixes, the demo video | |
+| **20 Oct** | Submit early in the day | |
+| After | Chapter 4 Galleries, extra rooms, the Scribe-mite, the Stillness ending polish | The full ~2 hour game |
 
-### Puzzle mana management
-- Early rooms teach the costs; each has a Starwell next to its door.
-- Mid-game rooms mix free and personal power (today's Room 7, *The Limited Circuit*, is the model).
-- Bosses force a split: part of the solution on pedestals, part on you, and timing to regenerate
-  between bursts.
+**Status of milestone 1 (2026-10-01).** Built and tested: Nan's cottage (replaces the three bridge cards),
+`journey.gd` (one place for the order of scenes; Lowbell, the title screen and the cottage use it), earned
+Fire, Heal and Echo (saved flags; old saves are given them; starting a later part from the title gives
+them), the three shrines (Kept Flame, Spring, Echo stone) and the seven Passage phase cards, and the
+tutorial's signs trimmed to match. **Still to do in M1:** finite mana and Kindle points, the glue moments
+after the bell and the dome, a chapter-select list that reads from `journey.gd`, and the four-note hum at
+the Echo Door.
 
-### Laws that prevent soft-locks (the design team never breaks these)
-1. The intended solution fits in the room's cap using its own free sources plus regeneration.
-2. Running dry never destroys an object or undoes progress.
-3. Reset Room always returns the room and your entry mana.
-4. Any room with a ward has a pedestal, breath-line or Starwell.
-5. Mana never blocks the way *out* of a room.
-6. Refusing an unaffordable rune costs nothing and says what it needs ("needs 16 in hand").
-7. Assist: unlimited mana (built) and a "gentle mana" option (double regeneration).
+**Rough loop built (2026-10-02).** The Landing, four two-room wings, the Eye and both endings now exist in the game (see IMPLEMENTATION_PROGRESS.md); they are a rough, tested skeleton of chapters 1 to 5 and the ending below, not the designed rooms.
 
----
+**Changes to the plan after playtest feedback (2026-10-01).** (1) The story now goes from the nine pictures
+straight into the Passage; Nan's cottage and Lowbell are no longer in the flow (their files stay). (2) The
+Passage order is Echo Door first, then the Kept Flame (fire) and the Cells; it ends with fire. The Spring is
+no longer in the Passage: **heal returns after the great bell rings, with the third bell picture**, so the
+Observatory is the first part with heal. (3) A one-time UI tour explains health, the Esc menu, mana, the
+spell slots, the Echo tag and the goal card; Observatory room 1 explains the rune cubes (locked words, Tab).
+(4) Every Belfry and Observatory room has a Kindle flame by its entrance, so mana can no longer strand the
+player. New chapters (§5) must keep this rule: a Kindle flame at every room entrance.
 
-## 7. Rune discovery system
+If behind on 14 Oct, cut in this order: Lampworks to 4 rooms; Cistern to 5; the Mirror Knight; the
+Lampmoth; the Stillness ending. Never cut: the Passage, the earned abilities, one boss per chapter,
+the Eye, the ending.
 
-### Sources of new words (each should feel different)
-| Source | How it feels | Example |
-|---|---|---|
-| **Tablet** | Clear and taught: read it, learn it. | *Right*, *Lift*, *Fire* |
-| **Rune Memory** | Watch a ghost of the Choir cast; reproduce the sentence once to own the word. | *Burst* (a monk shoving the bell), *Bridge* (Wren crossing) |
-| **Deduction** | A mural or constellation depicts a sentence; work out the word, write it at the "word altar" to claim it. | *Up-Right* from the forge's spark diagrams |
-| **Discovered by doing** | Do the thing, and the journal names it. | Stack two winds on one stone → "the Choir called this **Strong**". Watch a beam turn off a mirror → **Bounce**. |
-| **Mini-boss reward** | Earned by a climax, just before the boss needs it. | *Explode* (Kilnworks), *Repeat* (Lampworks) |
-| **Chalk copy** | The Scribe stole the tablet but left a copy, sometimes half wrong. | *Lift* in Chapter 1 |
+**Art to make** (pixel sprites in the packs' palette): seven new creatures (3–6 frames each), Wren,
+Ilse (frozen), the Kept Flame shrine, the Spring, five Kindle points, forge, anvil, belt, basin, lamp
+props, Nan's interior props, and per-region mood tints on the existing far and mid backdrops.
 
-### The Glyph Bloom (the signature moment)
-When you learn a word, every inscription on screen containing it lights up and **translates in
-place**: murals, door lintels, the Primer, Aldous's old dialogue. The world becomes readable one
-word at a time. This is the single most important feel feature in the game.
-
-### Word unlock table (all 33)
-| Chapter | Critical | How |
-|---|---|---|
-| Prologue | Wind, Push, Left, Normal | Carved on the first cube |
-| Prologue | Right | Tablet |
-| 1 | Lift, Up | Scribe's chalk copy; tablet |
-| 1 | Burst | Rune Memory |
-| 1 | Strong | Discovered (stack two winds), tablet as backup |
-| 1 | Large | Deduction ("the eastern wind is wide" mural) |
-| 2 | Fire, Projectile | Tablet at the Kiln gate |
-| 2 | Up-Right, Down-Right | Deduction (spark diagrams) |
-| 2 | Delay | Discovered (light a fuse and wait) |
-| 2 | Split | Rune Memory |
-| 2 | Explode | Mini-boss |
-| 3 | Ice, Freeze | Tablet |
-| 3 | Down | Deduction (every water clock points down) |
-| 3 | Bridge | Rune Memory (Wren crossing) |
-| 3 | Long | Deduction (a bridge that falls short beside a mural of a longer one) |
-| 3 | Persist | Tablet in the Cistern's deepest hall, framed as "the word that made the silence" |
-| 4 | Light, Beam | Tablet |
-| 4 | Glow | Wick grows and teaches it |
-| 4 | Up-Left, Down-Left | Deduction (mirror angles) |
-| 4 | Self | Rune Memory (the Prior) |
-| 4 | Bounce | Discovered |
-| 4 | Repeat | Mini-boss |
-| 5 | Space, Portal | Tablet |
-| Secret | **Echo** (sixth essence) | All 12 Rune Memories + Wren's mask (§12) |
-
-### Hidden rooms, optional secrets, rewards
-- **Word altars** in hidden rooms let a player claim a deduced word early (Outer Wilds-style),
-  skipping part of a region.
-- Every region has 3 optional rooms: 1 Echo Trial, 1 Riddle Door, 1 knowledge-gated alcove.
-- **Rewards:** Primer pages, Star Charts, Rune Memories, Hymn Cylinders, lantern colours,
-  Sentence Catalogue milestones (discover 20 / 40 / 60 valid sentences → hub upgrades).
+**Technical changes** (representative files): `scripts/player.gd` (ability flags, charged flame, Kindle),
+`scripts/player/heal_channel.gd`, `scripts/MagicUI.gd` and the pause/settings strings that repeat the
+costs; new `scripts/puzzle/ability_shrine.gd` (modelled on `rune_tablet.gd`), `kindle_point.gd`, mana
+pickup (copy of `pickup.gd`); new `scripts/creatures/creature.gd`; `scripts/story/journey.gd`;
+builders `tools/build_kilnworks.gd` etc. extending `tools/build_chapter.gd` (new files, so existing
+rooms don't shift); tests `tests/kiln_suite.gd` etc. (each room gets a `solve_rN`), and a helper that
+grants all abilities for the tests that assume them (66 fireball references today).
 
 ---
 
-## 8. Enemy ecosystem
+## 15. Risks and open decisions
 
-Every creature is a noun the language can act on. None is only a damage sponge.
-
-| Creature | Behaviour | Weakness | Rune interactions | Puzzle uses |
-|---|---|---|---|---|
-| **Bellbound Slime** (ink; built) | Wanders; hears bells and sits under them for 12 s | Fire | Wind pushes it; Freeze makes it weigh as much as stone; Portal carries it | Living plate weights; herding |
-| **Watcher** (Chorister; built) | Walks in darkness, strikes up close; stone in holy light | Light | Beam or Glow freezes it into a platform or heavy weight; too heavy for Wind once stone | Stepping stones, weights, beam blockers |
-| **Toller** (Chapter 1) | A bat that roosts inside bells; a gust scatters the flock, which shakes loose ropes and chains | Fire | Burst scatters them (dropping ropes you need); Glow keeps them roosting | Timing gusts to drop ropes; quiet routes past a roost |
-| **Lantern Wisp** (lamplighter; built, neutral) | Goes to called perches; its light makes hidden platforms solid | none | Wind blows it along; Glow draws it; the Hush dims it | A moving light source |
-| **Hushling** | A drifting patch of silence, drawn to sound and light; touching a cube **blanks one word** (Modifier first) | Light (Glow dissolves it), bells scatter it | Wind passes through it; Freeze makes a *silence crystal* | Protect your sentence; carry silence crystals to mute a bell |
-| **Emberling** | A spark that seeks warmth and ignites what it touches | Water puddles | Wind blows it (light, so easy to steer); Freeze makes a warm coal block that melts ice it rests on | Living fuses; delivering fire |
-| **Clinker** | A little kiln golem hauling a coal; walks set routes | Ice | Freeze stops it; Strong wind tips it over, spilling coal | Moving heat source; a timed obstacle |
-| **Brine Jelly** | Floats, rising and falling with the tide; stings on contact | Fire (turns to steam) | Freeze makes a floating platform (Persist keeps it); steam acts as a short updraft | Moving platforms; a lift |
-| **Mirror Knight** | Patrols with a mirror shield that reflects beams and fireballs | From behind | A Bounce beam reflects off its shield; Burst turns it around; Portal gets you behind it | A walking mirror |
-| **Scribe-mite** | Tiny ink creature that moves a word from one cube to another | Freeze (catch it, get the word back) | Drawn to running cubes | Lure it to bring you the word locked in another cube |
-| **Stone Chorister** (finale) | A Watcher that sings; each beat turns nearby cubes' directions | Silence it with Ice; stone it with Light | Its rotation can aim your beams for you | Timing beams to the beat |
-
----
-
-## 9. Boss design (puzzles first, combat second)
-
-Each boss: three phases, one per idea, then a finish that uses all of them. You never deplete a
-health bar with fireballs; you **change the situation**.
-
-### The Cracked Bell (Chapter 1, Wind)
-- **Lore:** Tobiah's bell, cracked nine years ago. The Hush pooled inside it and it swallows sound.
-- **Arena:** the belfry shaft, a tall vertical room. The bell hangs in the middle; ledges hold wind cubes on pedestals; slime cells lie below.
-- **Mechanic:** the bell sends out rings of silence that knock the *Direction* word off any cube they touch, so you have to rewrite it.
-- **Phases:**
-  1. *Stir.* Stack winds to push counterweight crates onto the bell's rope cradle, tilting the bell to expose the clapper.
-  2. *Swing.* Use Burst in time with the bell's swing, like pushing a swing. Bells call slimes; herd them onto the brake plates to hold each gain.
-  3. *Toll.* Record an Echo running an updraft (`Wind · Lift · Up · Strong`) while you ride it to the clapper. At the top of the swing, strike it with a fireball.
-- **Finish:** the bell rings. The Hush bursts out of it, sound floods back, and colour returns to Lowbell's banners.
-- **Tests:** adding forces, mass, timing, Echo with runes, rewriting under pressure.
-
-### The Kiln Heart (Chapter 2, Fire)
-- **Lore:** the furnace golem that kept the kilns lit. The Hush chilled it; now it lurches between cold and overheating.
-- **Arena:** a forge hall with three vents at different heights, conveyor pistons and cracked plates.
-- **Phases:**
-  1. *Cold.* Light all three vents at once with one mounted cube: `Fire · Projectile · Up · Split`.
-  2. *Overheating.* Emberlings feed it. Blow them into quench puddles instead; crack its armour with a delayed Explode timed to its patrol.
-  3. *Settle.* Its core drops into the floor socket. Seal it with a stone driven by `Wind · Push · Right · Strong`.
-- **Finish:** the golem calms and becomes the hub Kiln (the Saved Sentences upgrade).
-- **Tests:** Split, Delay, Explode, Fire with Wind, sequencing.
-
-### Mere, the Cistern Leviathan (Chapter 3, Ice)
-- **Lore:** an eel that kept the cistern clean. The Hush made it hungry for sound, and it swallowed the Tide Bell's clapper.
-- **Arena:** a flooding vertical chamber; the tide rises and falls on a clock.
-- **Phases:**
-  1. *Rising water.* Freeze the surface into footholds (`Ice · Freeze · Down · Large`) before the tide takes them.
-  2. *The leap.* When Mere jumps, freeze its body mid-arc (Freeze with Persist) to make a walkway, and manage the upkeep.
-  3. *The throat.* Span the gap to its head with `Ice · Bridge · Right · Long`, then melt the frozen gill-seal with fire so it coughs up the clapper.
-- **Finish:** Mere, freed of the Hush, sinks peacefully; the Tide Bell rings.
-- **Tests:** freezing, Persist budget, bridges, Fire against Ice, tide timing.
-
-### The Unblinking (Chapter 4, Light)
-- **Lore:** the Prior of the Lampworks, the largest Watcher, now nothing but eyes. Where it looks, your runes stall.
-- **Arena:** a mirror cathedral with rotating mirrors, crystals, hidden platforms and Wick.
-- **Phases:**
-  1. *Three eyes.* Route `Light · Beam · Up-Left · Bounce` through mirrors to strike each eye from the side it isn't watching.
-  2. *Shattered mirrors.* It breaks the low mirrors. Send Wick and Glow cubes up to light hidden platforms and reach the high ones.
-  3. *The carousel.* `Wind · Burst · Self · Repeat` spins a mirror carousel every few seconds, sweeping a beam across its closing eyes on the beat.
-- **Finish:** `Light · Glow · Self · Large` on the cube it clutches. It turns fully to stone, and is freed; its memory shows the Last Sentence.
-- **Tests:** light routing, Self, Repeat, Wick, working in darkness.
-
-### The Scrivener's Duel (Chapter 5, Space)
-- **Lore:** Wren guards the Eye's four locks, and she wants to see whether Echidna can out-write her.
-- **Arena:** a folded gallery. Four rooms are joined by portals, and each has a lock cube you and Wren both write on.
-- **Mechanic:** a duel of words, not blows. Wren rewrites your cubes; you answer. Portals carry effects between the rooms.
-- **Phases:**
-  1. *Mirror me.* Answer each of her sentences with its opposite (her wind pushes left, yours pushes right).
-  2. *Borrowed words.* Her Scribe-mites carry words between locks. Freeze them to take the words back.
-  3. *Fold.* Power all four locks at once, using Echo in one room and portals to carry a beam, a wind and a fire into the others.
-- **Finish:** Wren takes off her mask. The reveal (60 s).
-- **Tests:** everything, especially Space combined with the rest.
-
-### The Last Sentence (finale) — see §12.
-
-**Mini-bosses** (one trick each): Mother Ink, the Great Bellows, the Clockwork Weir, the Twin
-Watchers, the Folded Room.
-
----
-
-## 10. Collectibles and secrets
-
-| Collectible | Count | Where | Reward |
-|---|---|---|---|
-| **Primer pages** | 24 | Everywhere, often hidden | Tunic-style handbook pages in rune script that translate as you learn. Hints, maps, the secret ending's clues. |
-| **Rune Memories** | 12 | One or two per region, hidden or behind puzzles | Ghostly replays of the Choir's last days; lore, some words, and Choristers' names. All 12 are needed for the secret ending. |
-| **Star Charts** | 5 | Optional rooms | +10 maximum mana each |
-| **Bellkeeper's Ledger** | 7 | Region 1 (exists) | Tobiah's story |
-| **Hymn Cylinders** | 6 | One per region | Restore a layer of the hub's music; all 6 play the Choir's hymn in the ending |
-| **Choristers' Names** | 12 | Watchers' plinths and memories | Secret ending: the Watchers wake as people |
-
-**Secret puzzles**
-- **Riddle Doors:** the lintel reads half a sentence ("Fire that ▢▢▢ reaches three ways"); write the rest.
-- **Constellation Locks:** a star pattern seen in one region is the sentence that opens a door in another.
-- **Echo Trials:** one per region, co-op puzzles with your own Echoes (today's Choir Loft is the model).
-- **Unwritten Rooms:** rooms with no floor, where you build the way across from ice and portals.
-- **Word altars:** claim a deduced word early.
-
-**Incentives:** the map marks rooms with unfound secrets (built), the journal shows *x / y* per
-region, the Sentence Catalogue fills in, the hub changes visibly, and the secret ending exists.
-
----
-
-## 11. Hub: the Scriptorium
-
-**Purpose:** safety, understanding, progress, and a sense of home that changes as you succeed.
-
-| Place | Function |
+| Risk | Plan |
 |---|---|
-| **Great Lectern** | The Rune Journal: words, sentences found, notes, memories, translations |
-| **Practice Hall** | A free sandbox: every known sentence on crates, stones, mirrors and dummies, costing no mana. Invaluable for experimenting. |
-| **Starwell** | Refills mana; turn in Star Charts |
-| **The Orrery** | Fast travel between Bell Shrines; Ilse's voice |
-| **Vell's Archive** | Primer translations, collectible turn-ins, the Sentence Catalogue, Echo upgrades |
-| **Aldous's Workshop** | Hints, Reading Lamp upgrades |
-| **The Kiln** (after Chapter 2) | Saved Sentences |
-| **Bell rope to Lowbell** | Visit Nan; see the village change |
+| 120 minutes of tuned rooms is a lot | Ending-first build order; cut lines above; honest 80–90 min for 20 Oct |
+| New art for every region | Pixel-sprite generator; per-region tint first, props second |
+| Rooms too easy again | Targets per room; use the playtest log; add a step before removing hints |
+| Changing mana breaks Chapter 2's rune rooms | A Kindle point at every room entrance; run the rune suite after every step |
+| Save compatibility | Keep flag names; auto-grant abilities to old saves |
+| Test churn | One grant-all-abilities helper; update tests in the same step |
 
-**Upgrades**
-| Upgrade | Levels | Source |
-|---|---|---|
-| Reading Lamp | Translate nearby → reveal hidden inscriptions → hint an unknown word's kind by colour | Aldous, Chapters 1, 2, 4 |
-| Echo | 8 s → 10 s; 2 Echoes → 3 | Vell (Primer pages); all Echo Trials |
-| Mana cap | 100 → 150 | Star Charts |
-| Saved Sentences | 2 → 4 slots | The Kiln; catalogue milestones |
-
-**How it changes over the game**
-| After | The hub |
-|---|---|
-| Prologue | Dark, silent; only Aldous |
-| Bell 1 | Banners regain colour; Vell emerges; first music layer; Nan's first letter |
-| Kilnworks | The Kiln burns; Clinkers carry books |
-| Cistern | Fountains run; a water clock ticks |
-| Lampworks | Freed Choristers sing (music layers); the Orrery lights up |
-| Galleries | **The Hush attacks the hub:** a defence set-piece; Vell writes her first sentence |
-| Ending | It becomes a school where Lowbell's children learn the First Tongue |
+**Open, for you to decide later** (none blocks the quick fixes): (1) rename the game to "The Unwritten
+Sky"? (needs a save-folder migration, as the earlier rename did); (2) should Echo also be earned (planned
+yes)? (3) restyle the code-drawn puzzle machinery (braziers, mirrors, grates) into pixel art, or only
+new creatures and NPCs? (4) the packs' source and licence for `CREDITS.md`.
 
 ---
 
-## 12. Final act
-
-### The region: the Eye of Aster
-Three approach rooms combining everything, with Hush zones and Hushlings, lead to **the Dome**:
-snow hangs motionless in the air, a bell note is visible as a frozen ring, and at the centre floats
-the great cube reading `Ice · Freeze · Self · Persist`, bound to Ilse.
-
-### Revelations, in order
-1. Aldous confesses the lens.
-2. Ilse speaks face to face: she asks for `Large`, to hold the whole world still ("No one will ever lose anyone again").
-3. Wren asks to be let go.
-4. The Hymn (if you found every cylinder) plays as Echidna writes.
-
-### Final boss: the Last Sentence (mana ward: cap 30, pedestals ring the dome)
-1. **The Hush Storm.** Hushlings pour in and blank out your cubes' words. Keep a
-   `Light · Glow · Self · Large` running on a pedestal while you reroute the dome's breath-lines,
-   within their capacity, to wake four lock pedestals. **Unlocks the Modifier quadrant.**
-2. **The Choir.** Ilse wakes the Stone Choristers. Turn them to stone with beams to make
-   platforms and heavy weights, and open the Eye's shutters with `Light · Beam · Up-Right · Bounce`.
-   **Unlocks the Direction quadrant.**
-3. **The Tug of Words.** Ilse rewrites the cube every few seconds. Record an Echo editing one
-   quadrant while you edit another; your Echo repeats your inscription. **Unlocks the Essence and
-   Action quadrants.**
-4. **The Choice.** The giant rune screen opens (today's rune screen at full scale). You write the
-   sentence. Any other valid sentence "answers, but isn't enough": Wren's hint, then a retry.
-
-### Endings
-| Ending | Sentence | What happens |
-|---|---|---|
-| **The Stillness** | `Ice · Freeze · Self · Large` (do as Ilse asks) | The whole world holds still. The credits roll in silence, with no stars. A deliberate, haunting "wrong" ending. |
-| **The Rewritten Sky** (true) | `Light · Beam · Up · Long` | The held moment becomes light sent into the empty sky. Wren becomes the first new star; Wick lights the first lamp of her constellation; Ilse lets go; the Hush thaws; Nan says Echidna's name. |
-| **The Remembered** (secret) | `Echo · Beam · Up · Long` | Needs the secret sixth essence **Echo**: all 12 Rune Memories plus Wren's mask, turned in at a hidden altar in the Galleries. Everyone Hushed remembers: the Watchers wake as the Choir (their names spoken), Ilse and Wren rise together, and the stars return all at once. The credits are written in runes you can now read completely. |
-
-The secret essence is an **addition**. It accepts only this one sentence, plus a couple of
-cosmetic ones in the Practice Hall.
-
-**Epilogue.** Lowbell in full colour and full sound. The Scriptorium is a school. A new
-constellation shaped like a girl with a stylus. The post-game offers the Sentence Catalogue,
-missed secrets and the other endings.
-
----
-
-## 13. Congressional App Contest focus (submission 20 Oct 2026, 2 people, 3 weeks)
-
-> Check the current official rules (video length, submission form, platform notes) on the contest
-> site before building the submission. Judges often form their view from the **demo video and the
-> first few minutes**, so those carry the most weight.
-
-### 13.1 What will impress judges most
-1. **An idea they understand in 30 seconds:** "write a sentence, and the world obeys it". Show one
-   wind changing direction in the first minute of the video.
-2. **A complete story arc** (beginning, middle, end), even if short.
-3. **Polish and feel** (already a strength: the menu, the lighting, the water, the sound, the
-   controller support).
-4. **Depth from a small system:** 33 words, thousands of sentences, emergent combinations.
-5. **Craft behind the scenes:** 943 automated gameplay tests, generated levels and sound, graphics
-   levels from Low to Elite, rebinding and assists. Say this in the submission text.
-6. **Accessibility:** assists, reduce motion, rebinding, symbols as well as colours, and a
-   no-soft-lock design.
-
-### 13.2 Essential systems (contest build)
-| System | Status now | Contest work |
-|---|---|---|
-| Rune cubes, rune screen, 5 essences, journal, mana laws | **Built and tested** | Reuse |
-| Existing rooms (tutorial, Ch1, Ch2) | Built | **Reorder** into one continuous game |
-| Prologue: Lowbell and Nan (grey village, 3 lines, Echo lesson) | New, small | Build (code-drawn village, reuse tiles and props) |
-| Dialogue box with glyph gaps | New, small | Build |
-| **Glyph Bloom** translation effect | New, high impact | Build |
-| Hub-lite: one Scriptorium room with Aldous and Vell, the Starwell and the journal | New | Build (one room, no upgrades) |
-| The Cracked Bell boss | Great Bell room exists | Rework into 3 phases |
-| The Last Sentence finale plus the true ending | Observatory seal and locked slots exist | Build one dome room; the Choice uses the existing rune screen on a locked cube |
-| Scribe appearances (3, scripted) | New | Build |
-| Ending card, credits, title | Built | Re-skin with the new story |
-
-### 13.3 Optional (after the contest)
-Full Kilnworks, Cistern and Lampworks regions; bosses 2–5; mini-bosses; Hushlings; new creatures
-(Emberlings, Jellies, Mirror Knights, Scribe-mites); Starwells and breath-line capacity; Star
-Charts; Primer pages beyond a handful; Rune Memories; hub upgrades and fast travel; hub evolution;
-the Stillness and Remembered endings; the Echo essence; Nan's letters.
-
-### 13.4 What to cut first if time runs short (in this order)
-1. The Scribe's third appearance.
-2. Vell (Aldous alone runs the hub).
-3. Phase 2 of the bell boss (keep Stir and Toll).
-4. Lowbell as a walkable village (use a painted title-card scene with Nan's three lines instead).
-5. The Glyph Bloom animation (keep the instant translation).
-
-**Never cut:** the opening hook, the first rune by minute 5, one boss, the finale choice, the ending.
-
-### 13.5 The minimum version that still feels complete: *"The Unwritten Sky: First Verse"* (60–75 min)
-Lowbell (90 s) → the Undercroft (3 rooms) → **the Broken Inscription (first rune by minute 5)**
-→ the Sounding Stair (wind and bell rooms) → **the Cracked Bell** → the Scriptorium (hub-lite)
-→ three short wings built from existing rooms (Fire and Ice; Light and Watchers; Space)
-→ the Eye (the Last Sentence choice) → the true ending.
-The story is complete in miniature: Nan forgets; the Scribe appears three times; the voice speaks
-only in the Eye; Wren's reveal and the choice happen in the finale.
-
-### 13.6 Reusing what exists
-| Today | Becomes |
-|---|---|
-| Tutorial lessons 1–6 | The Undercroft (compressed to 3–5 rooms) |
-| Ch1 R1 (block and plate), R2 (bell, slime, plates) | Sounding Stair, rooms 1–2 |
-| Ch2 R1 (Broken Inscription), R2 (Too Heavy), R3 (Across the Teeth) | First rune, the Scribe's first theft, updrafts |
-| Ch1 R8 (Choir Loft, Echo levers), R9 (Great Bell) | Echo Trial; the Cracked Bell boss |
-| Ch1 R5 (machinery), Ch2 R4 (cracked wall), Ch2 R8 fire alcove | Fire wing |
-| Ch2 R5 (Frozen Crossing), the puddles | Ice wing |
-| Ch1 R3 (split flame), R4 (watcher), R6 (wisp crossing), R7 (belfry seal); Ch2 R6 | Light wing |
-| Ch2 R7 (limited circuit), R8 (portal balcony, observatory seal) | Space wing; the doorway to the Eye |
-| Ledger pages i–vii | Unchanged, in the Sounding Stair |
-| New menu, graphics levels, puddles | Unchanged |
-
-### 13.7 Three-week schedule (A = content and writing, B = systems, UI and build)
-| Dates | A | B | Milestone |
-|---|---|---|---|
-| 30 Sep – 6 Oct | Lock the script (≤ 1 page per character); reorder rooms in the builders; Lowbell layout | Dialogue box with glyph gaps; Glyph Bloom; hub-lite room | **6 Oct:** play from the title to the hub |
-| 7 – 13 Oct | Bell boss phases; wing signage and text; the Scribe's 3 scenes | The Eye dome and the Choice; ending sequence; the Orrery voice | **13 Oct:** feature complete; full playthrough |
-| 14 – 20 Oct | **Feature freeze 14 Oct.** Playtest with 5+ new players; fix | Performance on a weak laptop (Low graphics); Windows export; bug fixes | **17–18 Oct:** record the demo video. **19 Oct:** final build and text. **20 Oct:** submit early in the day |
-
-**Every day:** keep a playable build, run the automated suites each night, and add a
-`solve_rN()` test for every new or changed room.
-
-### 13.8 Risks
-| Risk | Mitigation |
-|---|---|
-| Too much story text | A 1-page script limit; glyph gaps do half the storytelling |
-| Boss complexity | Three simple phases built from existing pieces; cut phase 2 if late |
-| Late bugs | Feature freeze on 14 Oct; nightly tests; the reset rules already prevent soft-locks |
-| Judges don't reach the good part | First rune by minute 5; the video opens on a wind changing direction |
-
-### 13.9 Technical direction (for the team)
-- **Levels** stay generated by the builders (`tools/build_chapter*.gd`); regions become builder files.
-- **Dialogue and inscriptions** go in data files. Gaps are words the player doesn't know yet
-  (`RuneManager.knows()` already answers that).
-- **The Last Sentence** is a mounted rune cube with `locked_slots` (already supported), unlocking one quadrant per phase.
-- **Save flags** keep today's scheme (`region.room.solved`, `rune.frag.*`, `rune.note.*`, `rune.cast.*`).
-- **Performance** budget: 160 fps on the development PC on High, smooth on Low on a weak laptop.
+## What was dropped from the 6–7 hour version, and why
+The Orrery voice and the masked rival (too much to follow), Sister Vell, Aldous as a hub guide, the
+Scriptorium hub (the Landing replaces it), Primer pages, Rune Memories, Hymn Cylinders, the secret sixth
+essence and third ending (can return after the contest), and the full six-region length.

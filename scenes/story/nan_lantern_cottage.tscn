@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/story/witch_prologue.gd" id="1_prologue"]
+
+[node name="NanLanternCottage" type="Node2D"]
+script = ExtResource("1_prologue")
+stage = 0

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="1_kindle"]
+
+[node name="KindleFlame" type="Node2D"]
+script = ExtResource("1_kindle")

@@ -25,7 +25,10 @@ signal exhausted
 
 ## Seconds after the last upkeep before mana starts coming back, and how fast.
 const REGEN_DELAY := 1.2
-const REGEN_RATE := 20.0
+const REGEN_RATE := 4.0
+## Waiting only brings mana back up to this share of the cap (a floor so no one
+## is stuck at 0); the rest needs a lit flame.
+const TRICKLE_SHARE := 0.25
 const LOW_MANA := 15
 
 var cubes: Array[RuneCube] = []
@@ -147,9 +150,13 @@ func room_cubes() -> Array[RuneCube]:
 	return cubes.filter(func(c): return c.is_carried or room.contains(c.global_position + Vector2(0, -8)))
 
 
+## Switches every running rune off (the dungeon's own machinery keeps running,
+## unless a reset puts everything back).
 func deactivate_all(reason := "") -> int:
 	var n := 0
 	for cube in active_cubes():
+		if cube.is_machinery() and reason != "reset":
+			continue
 		cube.deactivate(reason)
 		n += 1
 	return n
@@ -228,14 +235,14 @@ func _update_mana(delta: float) -> void:
 		return
 	_drain = 0.0
 	_since_upkeep += delta
-	if _since_upkeep < REGEN_DELAY or player.is_reloading or player.current_mana >= mana_cap():
+	if _since_upkeep < REGEN_DELAY or player.is_reloading or player.current_mana >= int(mana_cap() * TRICKLE_SHARE):
 		_regen = 0.0
 		return
 	_regen += REGEN_RATE * delta
 	var gain := int(_regen)
 	if gain > 0:
 		_regen -= gain
-		player.current_mana = mini(player.current_mana + gain, mana_cap())
+		player.current_mana = mini(player.current_mana + gain, int(mana_cap() * TRICKLE_SHARE))
 		player.update_mana_ui()
 
 

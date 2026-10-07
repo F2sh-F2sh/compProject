@@ -21,7 +21,9 @@
   and the town buildings (`assets/town/`: houses, modular parts, silhouettes, town strip).
   *Source to be recorded here* (please add where they came from and their licence).
 - The story's people, rune cubes, bells, chimes and candle (`assets/sprites/story/`):
-  pixel sprites drawn for this game in the packs' palette by `tools/generate_story_sprites.gd`
+  pixel sprites drawn for this game in the packs' palette by `tools/generate_story_sprites.gd`,
+  `tools/generate_cottage_sprites.gd` (Nan's cottage: Nan seated, the hearth, table, jar shelf, cellar door)
+  and `tools/generate_shrine_sprites.gd` (the Novices' Way: Kept Flame, Spring, Echo stone)
   (no third-party art), plus open-door frames cut from the town pack's own houses.
 
 ## Audio

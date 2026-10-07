@@ -34,6 +34,7 @@ func setup(owner_cube: RuneCube, spell: Dictionary) -> void:
 	collision_mask = 0
 	add_to_group("world")
 	add_to_group("ice_bridge")
+	add_to_group("ice")
 	var start := start_point(cube, direction)
 	length = measure(cube, direction, span)
 	global_position = start

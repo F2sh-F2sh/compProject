@@ -28,6 +28,11 @@ static func show_card(host: Node, overline: String, title: String, subtitle := "
 	return card
 
 
+## True while a card is on screen.
+static func is_showing() -> bool:
+	return is_instance_valid(_current)
+
+
 func _build(overline: String, title: String, subtitle: String) -> void:
 	layer = 4
 	var root := Control.new()

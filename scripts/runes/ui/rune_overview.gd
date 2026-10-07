@@ -1,21 +1,29 @@
 class_name RuneOverview
 extends CanvasLayer
 
-## Tab (Back on a controller): every cube in this room at a glance, its rune,
-## whether it is on, what it costs, with a "Switch off" per running cube and
-## "Deactivate All Runes". Pauses the game while open. Cubes can be
-## switched off from here (remotely) but only switched on at the cube.
+## Tab (Back on a controller): your runes. Every cube in this room at a
+## glance: its rune, whether it is on, what it costs and which of its words are
+## locked. A running cube can be switched off from here, from anywhere in the
+## room; the cube you are standing at (or at whose lectern you stand) can be
+## inscribed from here too. The rules for changing words are written at the
+## top, so this screen always answers "can I edit this, and how?".
+## Pauses the game while open. Cubes are only switched on at the cube.
 
 const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
 const INK := Color("e4ddf2")
 const DIM := Color("9c92b8")
+const LOCK := Color(0.78, 0.72, 0.95)
+const WARN := Color("ffc070")
 
 var is_open := false
 var _root: Control
+var _rules: Label
 var _list: VBoxContainer
 var _summary: Label
 var _all: Button
 var _done: Button
+## cube -> its Inscribe button, for tests.
+var inscribe_buttons := {}
 
 
 func _ready() -> void:
@@ -68,9 +76,28 @@ func deactivate_all() -> void:
 	_refresh()
 
 
+## Whether she can inscribe this cube now: standing at it, or at its lectern.
+static func in_reach(cube: RuneCube) -> bool:
+	if cube.interactable and cube.interactable.enabled and cube.interactable.in_reach():
+		return true
+	for node in cube.get_tree().get_nodes_in_group("rune_lectern"):
+		if node.get("cube") == cube and node.interactable and node.interactable.in_reach():
+			return true
+	return false
+
+
+## Opens a cube's inscribe screen from this list.
+func inscribe(cube: RuneCube) -> void:
+	if not in_reach(cube):
+		return
+	close()
+	_manager().assembly.open(cube)
+
+
 func _refresh() -> void:
 	for child in _list.get_children():
 		child.queue_free()
+	inscribe_buttons.clear()
 	var m := _manager()
 	var cubes := m.room_cubes()
 	var first: Button = null
@@ -95,10 +122,22 @@ func _refresh() -> void:
 		var status := "ON" if c.is_active else ("carried" if c.is_carried else "off")
 		var cost := "dungeon-powered" if c.fed_by_dungeon() else ("%s mana/s" % RuneBook._num(c.upkeep()) if c.is_active and c.upkeep() > 0.0 else "your mana")
 		text.add_child(_label("%s  ·  %s" % [status, cost], 12, Color("a8e0ff") if c.is_active else DIM))
+		text.add_child(_label(edit_line(c), 11, WARN if c.is_active else LOCK))
 		row.add_child(text)
+		var edit := Button.new()
+		edit.text = "Inscribe"
+		edit.disabled = not in_reach(c) or c.is_carried
+		edit.tooltip_text = "Stand at this cube (or its lectern) to inscribe it."
+		edit.custom_minimum_size = Vector2(120, 36)
+		_style(edit)
+		edit.pressed.connect(inscribe.bind(c))
+		row.add_child(edit)
+		inscribe_buttons[c] = edit
 		var off := Button.new()
-		off.text = "Switch off"
-		off.disabled = not c.is_active
+		off.text = "Always on" if c.is_machinery() else "Switch off"
+		off.disabled = not c.is_active or c.is_machinery()
+		if c.is_machinery():
+			off.tooltip_text = "Part of the dungeon's machinery: it keeps running."
 		off.custom_minimum_size = Vector2(130, 36)
 		_style(off)
 		off.pressed.connect(func():
@@ -106,18 +145,36 @@ func _refresh() -> void:
 			_refresh())
 		row.add_child(off)
 		_list.add_child(row)
+		if first == null and not edit.disabled:
+			first = edit
 		if first == null and not off.disabled:
 			first = off
 	var upkeep := m.total_upkeep
 	_summary.text = "Your runes cost %s mana per second.  Mana %d / %d" % [RuneBook._num(upkeep), m.mana(), m.player.get_mana_cap() if m.player else 0] \
 		if upkeep > 0.0 else "None of your runes is drawing mana.  Mana %d / %d" % [m.mana(), m.player.get_mana_cap() if m.player else 0]
-	_all.disabled = m.active_cubes().is_empty()
+	_all.disabled = not m.active_cubes().any(func(c): return not c.is_machinery())
 	if first:
 		first.grab_focus()
 	elif not _all.disabled:
 		_all.grab_focus()
 	else:
 		_done.grab_focus()
+
+
+## One line on what can be changed on this cube, and what it takes.
+static func edit_line(c: RuneCube) -> String:
+	var locked := PackedStringArray()
+	for kind in 4:
+		if c.is_slot_locked(kind):
+			locked.append(RuneFragments.KIND_NAMES[kind])
+	var lock_text := "Locked: %s" % ", ".join(locked) if not locked.is_empty() else "No locked words"
+	if locked.size() == 4:
+		return "Every word is LOCKED: it can only be switched on and off."
+	if c.is_active:
+		return "RUNNING: switch it off to change its words.  ·  %s" % lock_text
+	if c.is_carried:
+		return "Set it down to inscribe it.  ·  %s" % lock_text
+	return "Can be inscribed while off.  ·  %s" % lock_text
 
 
 func _build() -> void:
@@ -146,9 +203,27 @@ func _build() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
 	panel.add_child(col)
-	var heading := _label("RUNES IN THIS ROOM", 20, Color("cbbdf2"))
+	var heading := _label("YOUR RUNES  ·  THIS ROOM", 20, Color("cbbdf2"))
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(heading)
+	# The rules for changing words, always in view here
+	var rules_box := PanelContainer.new()
+	var rb := StyleBoxFlat.new()
+	rb.bg_color = Color(0.09, 0.07, 0.15, 0.95)
+	rb.border_color = Color(0.36, 0.3, 0.55, 0.9)
+	rb.set_border_width_all(1)
+	rb.set_corner_radius_all(3)
+	rb.content_margin_left = 12
+	rb.content_margin_right = 12
+	rb.content_margin_top = 8
+	rb.content_margin_bottom = 8
+	rules_box.add_theme_stylebox_override("panel", rb)
+	col.add_child(rules_box)
+	_rules = _label("", 12, Color("d8cff0"))
+	_rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_rules.custom_minimum_size = Vector2(760, 0)
+	_rules.text = rules_text()
+	rules_box.add_child(_rules)
 	_list = VBoxContainer.new()
 	_list.add_theme_constant_override("separation", 8)
 	col.add_child(_list)
@@ -170,6 +245,13 @@ func _build() -> void:
 	_style(_done)
 	_done.pressed.connect(close)
 	buttons.add_child(_done)
+
+
+## How editing works, in three short lines (key names filled in).
+static func rules_text() -> String:
+	return InputLabels.format("CHANGE A CUBE'S WORDS: stand at it and press {interact}, or press Inscribe here while you stand at it.\n"
+		+ "ONLY WHILE IT IS OFF: a running cube's words can't change. Switch it off here (from anywhere in the room) or at the cube.\n"
+		+ "LOCKED WORDS NEVER CHANGE: a padlock means that word is carved into the stone. Only the other words can be picked.")
 
 
 func _label(text: String, size: int, color: Color) -> Label:

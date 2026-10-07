@@ -32,11 +32,13 @@ var reduce_motion := false
 
 ## How much the game helps players find their way: the objective card and
 ## step pips (Light), plus links shown near switches, "you can use this"
-## cues and hint stones that call out when you seem stuck (Full).
+## cues and hint stones that call out when you seem stuck (Full). New players
+## start on Light: the room should explain itself, and Full stays one click
+## away. (Anyone who already saved a choice keeps it.)
 const GUIDANCE_OFF := 0
 const GUIDANCE_LIGHT := 1
 const GUIDANCE_FULL := 2
-var guidance := GUIDANCE_FULL
+var guidance := GUIDANCE_LIGHT
 var fullscreen := false
 
 ## Graphics quality. Low suits weak graphics cards (no bloom, grain, shadows,
@@ -57,6 +59,20 @@ const GRAPHICS_TABLE := [
 	{"bloom": 1.3, "grain": 1.0, "shadows": true, "filter": 2, "atlas": 8192, "particles": 1.7, "reflections": true, "shafts": true, "ripples": 8},
 ]
 var graphics: int = Graphics.HIGH
+
+## How bright the dungeon is. Dim is the original gloomy look; Normal is the
+## default; Bright lifts the shadows further. Per level: the ambient light
+## (x the level's own), the player's lantern energy and size (x as authored),
+## the post pass's gloom beyond the lantern, how far the lantern's falloff
+## reaches (world px), and the edge vignette.
+enum Brightness { DIM, NORMAL, BRIGHT }
+const BRIGHTNESS_NAMES := ["Dim", "Normal", "Bright"]
+const BRIGHTNESS_TABLE := [
+	{"ambient": 0.4, "light_energy": 0.83, "light_scale": 0.69, "gloom": 0.42, "reach": 440.0, "vignette": 0.34, "gamma": 1.0},
+	{"ambient": 1.0, "light_energy": 1.0, "light_scale": 1.0, "gloom": 0.22, "reach": 620.0, "vignette": 0.24, "gamma": 0.78},
+	{"ambient": 1.3, "light_energy": 1.1, "light_scale": 1.2, "gloom": 0.12, "reach": 760.0, "vignette": 0.18, "gamma": 0.66},
+]
+var brightness: int = Brightness.NORMAL
 ## A small frames-per-second readout in the corner of the screen.
 var show_fps := false
 var _fps_layer: CanvasLayer
@@ -94,6 +110,17 @@ func quality(key: String) -> Variant:
 func set_graphics(value: int) -> void:
 	graphics = clampi(value, Graphics.LOW, Graphics.ELITE)
 	_apply_graphics_globals()
+	changed.emit()
+	_save()
+
+
+## The value of one brightness setting at the current level (see BRIGHTNESS_TABLE).
+func light(key: String) -> float:
+	return BRIGHTNESS_TABLE[brightness][key]
+
+
+func set_brightness(value: int) -> void:
+	brightness = clampi(value, Brightness.DIM, Brightness.BRIGHT)
 	changed.emit()
 	_save()
 
@@ -371,6 +398,7 @@ func _save() -> void:
 	file.set_value("accessibility", "guidance", guidance)
 	file.set_value("display", "fullscreen", fullscreen)
 	file.set_value("display", "graphics", int(graphics))
+	file.set_value("display", "brightness", int(brightness))
 	file.set_value("display", "show_fps", show_fps)
 	file.set_value("controls", "bindings", bindings)
 	for key in ASSIST_KEYS:
@@ -396,6 +424,8 @@ func _load() -> void:
 	var fallback: int = Graphics.LOW if file.get_value("display", "effects_low", false) == true else Graphics.HIGH
 	var level = file.get_value("display", "graphics", fallback)
 	graphics = clampi(int(level), Graphics.LOW, Graphics.ELITE) if level is int else fallback
+	var bright = file.get_value("display", "brightness", Brightness.NORMAL)
+	brightness = clampi(int(bright), Brightness.DIM, Brightness.BRIGHT) if bright is int else Brightness.NORMAL
 	var fps = file.get_value("display", "show_fps", false)
 	show_fps = fps if fps is bool else false
 	var saved = file.get_value("controls", "bindings", {})

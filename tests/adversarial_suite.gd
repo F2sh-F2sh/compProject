@@ -31,7 +31,7 @@ func open_scene(path: String) -> void:
 	await frames(20)
 
 func run_suite(_filter: String) -> void:
-	await open_scene("res://scenes/story/nan_cottage.tscn")
+	await open_scene("res://scenes/story/nan_lantern_cottage.tscn")
 	var has_pause := false
 	for child in lvl.get_children():
 		if child is PauseMenu:

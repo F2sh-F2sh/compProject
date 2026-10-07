@@ -22,6 +22,9 @@ extends Node2D
 @export var start_open := false
 
 var open_amount := 0.0
+## Shut for good behind her: once she has gone on into the next room the way
+## back stays closed, whatever its circuit says (ChapterRoot seals it).
+var sealed := false
 var _want_open := false
 var _close_timer := 0.0
 # Until the first physics frame, commands restore saved state instantly
@@ -71,7 +74,24 @@ func _settle() -> void:
 	_settled = true
 
 
+## Drops behind her and stays down (see `sealed`); instant when restoring a save.
+func seal(instant := false) -> void:
+	if sealed:
+		return
+	if instant or not _settled:
+		sealed = true
+		_want_open = false
+		open_amount = 0.0
+		_update_collision()
+		queue_redraw()
+		return
+	set_open(false)
+	sealed = true
+
+
 func set_open(open: bool) -> void:
+	if sealed and open:
+		return
 	if not _settled:
 		# A gate that was already open (a saved shortcut) is simply open on load
 		_want_open = open
@@ -92,8 +112,8 @@ func set_powered(powered: bool) -> void:
 
 
 func reset_state() -> void:
-	_want_open = start_open
-	open_amount = 1.0 if start_open else 0.0
+	_want_open = start_open and not sealed
+	open_amount = 1.0 if _want_open else 0.0
 	_close_timer = 0.0
 	_update_collision()
 	queue_redraw()

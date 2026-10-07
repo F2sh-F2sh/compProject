@@ -17,6 +17,8 @@ const OUT_PATH_2 := "res://scenes/chapter/chapter_2.tscn"
 const RUNES := "res://scenes/runes/"
 const PREFIX := "ch2"
 
+## The watcher room keeps its dark (see MOOD_AMBIENT in build_chapter.gd).
+const MOOD_AMBIENT_2 := {"R6": 0.5}
 const MOODS_2 := {
 	"R1": [Color(0.98, 1.03, 1.1), Color(0.25, 0.34, 0.5)],
 	"R2": [Color(1.0, 1.03, 1.08), Color(0.26, 0.35, 0.48)],
@@ -71,6 +73,10 @@ func build_level() -> void:
 	level.set_script(load("res://scripts/puzzle/chapter_root.gd"))
 	level.set("chapter_id", PREFIX)
 	level.set("chapter_title", "The Sealed Observatory")
+	level.set("unit_name", "level")
+	level.set("complete_heading", "LEVEL 3 COMPLETE")
+	level.set("next_chapter", "res://scenes/story/interlude_dome.tscn")
+	level.set("next_label", "Continue: the way down")
 	level.set("total_pages", 0)
 
 	var ambient := CanvasModulate.new()
@@ -78,9 +84,9 @@ func build_level() -> void:
 	ambient.color = AMBIENT
 	add_owned(level, ambient)
 
-	background = tile_layer("Background", Vector2(0, 22), Color(0.8, 0.78, 0.9), -10, false, false)
-	back_decor = tile_layer("BackDecor", Vector2(0, 22), Color(0.95, 0.95, 1.0), -9, false, false)
-	earth = tile_layer("Earth", Vector2.ZERO, Color(0.66, 0.63, 0.76))
+	background = tile_layer("Background", Vector2(0, 22), Color(0.88, 0.86, 0.99), -10, false, false)
+	back_decor = tile_layer("BackDecor", Vector2(0, 22), Color(1.0, 1.0, 1.0), -9, false, false)
+	earth = tile_layer("Earth", Vector2.ZERO, Color(0.73, 0.69, 0.84))
 	ceiling = tile_layer("Ceiling", Vector2(0, -4))
 	ground = tile_layer("Ground")
 	ground_half = tile_layer("GroundHalf", Vector2(0, 32))
@@ -131,6 +137,7 @@ func make_room_2(id: String, title: String, x0: int, x1: int, ceil_row: int, ent
 		"entry_spawn": entry,
 		"mood_highlight": MOODS_2[id][0],
 		"mood_fog": MOODS_2[id][1],
+		"mood_ambient": MOOD_AMBIENT_2.get(id, 1.0),
 	})
 	rooms[id] = room
 	var zone := Area2D.new()
@@ -187,6 +194,7 @@ func room_1_broken_inscription() -> void:
 	shell(0, 18, LOW_CEIL, true, false)
 	curb(13)
 	var room := make_room_2("R1", "The Broken Inscription", 0, 18, LOW_CEIL, Vector2(cx(2), 530))
+	waymarks(room, 0, 18)
 
 	inst(PUZZLE + "chapter_checkpoint.tscn", room, "Shrine", Vector2(cx(2), FLOOR_Y), {"checkpoint_id": "ch2.cp.start"})
 	var tab := tablet(room, "right", cx(4), "The wind obeys the arrow carved beside it.")
@@ -197,7 +205,8 @@ func room_1_broken_inscription() -> void:
 	var exit_gate := gate(room, "ExitGate", 18)
 	circuit(room, "PlateToGate", [p], [exit_gate],
 		{"reveal_target": true, "persist_id": "ch2.r1.solved", "channel_y": 440.0, "symbol": 0})
-	guide(room, "Open the gate at the far end.", "I", "The Wind", "Chapter 2  ·  The Sealed Observatory")
+	guide(room, "Open the gate at the far end.", "I", "The Wind", "The Novices' Way  ·  Level 3  ·  The Sealed Observatory")
+	room.set("explainer", "runes")
 	step(room, "A new fragment learned", Cond.FLAG, null, {"flag": "rune.frag.right"})
 	step(room, "The mended rune blows", Cond.POWERED, c)
 	step(room, "The crate on the plate: the gate opens", Cond.OPEN, exit_gate)
@@ -210,7 +219,6 @@ func room_1_broken_inscription() -> void:
 
 	var signs := group(room, "Signs")
 	add_sign(signs, "Cube", 5, "Rune cubes: {interact} to read and inscribe the rune.", FLOOR_Y, 180.0)
-	add_sign(signs, "Plate", 11, "Plates marked with a crate feel only loose objects.", FLOOR_Y, 170.0)
 
 	var deco := group(room, "Decor")
 	for col in [3, 10, 16]:
@@ -234,6 +242,8 @@ func room_2_too_heavy() -> void:
 	shell(18, 40, LOW_CEIL)
 	curb(30)
 	var room := make_room_2("R2", "Too Heavy for One", 18, 40, LOW_CEIL, Vector2(cx(19), 530))
+	waymarks(room, 18, 40)
+	kindle_flame(room, cx(20))
 
 	var fixed := cube(room, "Fixed Cube", cx(22), "wind/push/right/normal",
 		{"dungeon_powered": true, "carryable": false, "locked_slots": 15})
@@ -254,7 +264,6 @@ func room_2_too_heavy() -> void:
 	], [fixed, block, loose])
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Heavy", 23.5, "Stone is heavy. Winds that overlap push together.", FLOOR_Y, 170.0)
 	add_sign(signs, "Carry", 33, "{rune_carry}: pick up a cube that is off, and set it down where its outline shows.", FLOOR_Y, 190.0)
 
 	var deco := group(room, "Decor")
@@ -289,6 +298,8 @@ func room_3_across_the_teeth() -> void:
 			solid(x, y)
 		floor_tile(x, 4)
 	var room := make_room_2("R3", "Across the Teeth", 40, 58, HIGH_CEIL, Vector2(cx(41), 530))
+	waymarks(room, 40, 58)
+	kindle_flame(room, cx(42))
 	var pit_floor := 598.0
 	var candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleEdge", Vector2(cx(44), FLOOR_Y))
 	inst("res://scenes/spike_trap.tscn", room, "PitSpikesL", Vector2(cx(46) + 32, pit_floor),
@@ -331,32 +342,32 @@ func room_3_across_the_teeth() -> void:
 # The Fractured Seal. A cracked wall closes the room. Only a heavy thing
 # moving fast breaks it: the stone block, driven by a Strong wind (a normal
 # wind can't even start it) along a run-up. This is the first cube with no
-# channel under it: it runs on the player's own mana. From where it starts,
-# its wind lets go of the stone too soon; carried right behind the stone,
-# it drives it all the way into the wall.
+# channel under it: it runs on the player's own mana. The cube stands right
+# behind the stone, so as soon as it is switched on with Strong its wind drives
+# the stone the whole way into the wall: no carrying it closer first.
 
 func room_4_fractured_seal() -> void:
 	shell(58, 78, LOW_CEIL)
 	var room := make_room_2("R4", "The Fractured Seal", 58, 78, LOW_CEIL, Vector2(cx(59), 530))
+	waymarks(room, 58, 78)
 	inst(PUZZLE + "chapter_checkpoint.tscn", room, "Shrine", Vector2(cx(60), FLOOR_Y), {"checkpoint_id": "ch2.cp.r4"})
 	var tab := tablet(room, "strong", cx(61) + 16, "Twice the breath, twice the cost.")
-	var c := cube(room, "Loose Cube", cx(63), "wind/push/right/normal")
+	var c := cube(room, "Loose Cube", cx(65), "wind/push/right/normal")
 	var block := stone(room, "Stone", cx(66))
 	var wall := inst(RUNES + "cracked_wall.tscn", room, "CrackedWall", Vector2(cx(71), FLOOR_Y),
-		{"size": Vector2(32, 262), "break_momentum": 800.0, "persist_id": "ch2.r4.wall"})
-	guide(room, "Break through the cracked wall.", "II", "Stone and Frost", "Chapter 2  ·  The Sealed Observatory")
+		{"size": Vector2(32, 262), "break_momentum": 640.0, "persist_id": "ch2.r4.wall"})
+	guide(room, "Break through the cracked wall.", "II", "Stone and Frost", "The Novices' Way  ·  Level 3  ·  The Sealed Observatory")
 	step(room, "Strong learned", Cond.FLAG, null, {"flag": "rune.frag.strong"})
 	step(room, "The cracked wall gives way", Cond.OPEN, wall)
 
 	hint(room, Vector2(cx(59) + 20, FLOOR_Y), [
 		"The wall is cracked. Something heavy, moving fast, would break it.",
 		"A normal wind can't even shift the stone. The tablet teaches Strong.",
-		"Carry the cube right behind the stone so its wind drives the stone all the way to the wall. If the stone stops short, blow it back Left and try again.",
+		"Inscribe Strong on the cube and switch it on: its wind drives the stone along the floor into the wall. If the stone ever stops short, carry the cube right behind it and try again.",
 	], [wall, block, c, tab])
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Mana", 64.5, "No channel under this cube: it draws on your own mana while it runs.", FLOOR_Y, 180.0)
-	add_sign(signs, "Cracked", 69.5, "Cracked stone gives way to a heavy blow.", FLOOR_Y, 160.0)
+	add_sign(signs, "Mana", 63.0, "No channel under this cube: it draws on your own mana while it runs.", FLOOR_Y, 180.0)
 
 	var deco := group(room, "Decor")
 	for col in [62, 68, 74]:
@@ -378,6 +389,8 @@ func room_5_frozen_crossing() -> void:
 	shell(78, 100, LOW_CEIL)
 	pit(86, 90)
 	var room := make_room_2("R5", "The Frozen Crossing", 78, 100, LOW_CEIL, Vector2(cx(79), 530), true)
+	waymarks(room, 78, 100)
+	kindle_flame(room, cx(80))
 	var candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleEdge", Vector2(cx(84), FLOOR_Y))
 	inst("res://scenes/spike_trap.tscn", room, "PitSpikes", Vector2(5680, 598.0),
 		{"spike_count": 9, "recovery_checkpoint": candle})
@@ -397,7 +410,6 @@ func room_5_frozen_crossing() -> void:
 	], [c, tab])
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Edge", 83, "A cube is set into the pit's edge. Stand on it to inscribe it.", FLOOR_Y, 170.0)
 
 	var deco := group(room, "Decor")
 	for col in [80, 85, 92, 97]:
@@ -420,6 +432,7 @@ func room_6_watchers_lock() -> void:
 	shell(100, 122, LOW_CEIL)
 	curb(118)
 	var room := make_room_2("R6", "The Watcher's Lock", 100, 122, LOW_CEIL, Vector2(cx(101), 530))
+	waymarks(room, 100, 122)
 	inst(PUZZLE + "chapter_checkpoint.tscn", room, "Shrine", Vector2(cx(101) + 24, FLOOR_Y), {"checkpoint_id": "ch2.cp.r6"})
 	var tab := tablet(room, "down", cx(103) + 24, "What falls from above finds what walks below.")
 	var beam_cube := cube(room, "Ceiling Cube", 6912.0, "light/beam/-/normal",
@@ -436,7 +449,7 @@ func room_6_watchers_lock() -> void:
 	var exit_gate := gate(room, "ExitGate", 122)
 	circuit(room, "PlatesToGate", [plate_a, plate_b], [exit_gate],
 		{"hold_time": 0.5, "reveal_target": true, "persist_id": "ch2.r6.solved", "channel_y": 440.0, "symbol": 2})
-	guide(room, "Hold both heavy plates at once.", "III", "Light and Space", "Chapter 2  ·  The Sealed Observatory")
+	guide(room, "Hold both heavy plates at once.", "III", "Light and Space", "The Novices' Way  ·  Level 3  ·  The Sealed Observatory")
 	step(room, "Down learned", Cond.FLAG, null, {"flag": "rune.frag.down"})
 	step(room, "The watcher turns to stone on the plate", Cond.POWERED, plate_a)
 	step(room, "Both plates held: the gate opens", Cond.OPEN, exit_gate)
@@ -448,7 +461,6 @@ func room_6_watchers_lock() -> void:
 	], [beam_cube, plate_a, watcher, block, c, tab])
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Watcher", 105.3, "Watchers are stone in magic light, and stone is heavy.", FLOOR_Y, 150.0)
 
 	var deco := group(room, "Decor")
 	for col in [102, 109, 115, 120]:
@@ -471,6 +483,8 @@ func room_7_limited_circuit() -> void:
 	shell(122, 144, LOW_CEIL)
 	curb(137)
 	var room := make_room_2("R7", "The Limited Circuit", 122, 144, LOW_CEIL, Vector2(cx(123), 530))
+	waymarks(room, 122, 144)
+	kindle_flame(room, cx(123))
 	room.set("mana_limit", 10)
 	var strong_cube := cube(room, "Strong Cube", cx(124), "wind/push/right/strong", {"locked_slots": 15})
 	var normal_cube := cube(room, "Normal Cube", cx(126), "wind/push/right/normal", {"locked_slots": 15})
@@ -509,8 +523,7 @@ func room_7_limited_circuit() -> void:
 # Up-Right and its doorway (just off the cube's upper-right corner) opens
 # 253 px up and 253 px right. From where the cube starts, the far side opens
 # in empty air; carried close to the balcony wall, it opens onto the
-# balcony. Optional: a fire cube can burn the brambles over an alcove with a
-# tablet (Split).
+# balcony.
 
 func room_8_sealed_observatory() -> void:
 	shell(144, 166, HIGH_CEIL, false, true)
@@ -520,20 +533,16 @@ func room_8_sealed_observatory() -> void:
 			solid(x, y)
 		floor_tile(x, 4)
 	var room := make_room_2("R8", "The Sealed Observatory", 144, 166, HIGH_CEIL, Vector2(cx(145), 530))
+	waymarks(room, 144, 166, false)
 	inst(PUZZLE + "chapter_checkpoint.tscn", room, "Shrine", Vector2(cx(146), FLOOR_Y), {"checkpoint_id": "ch2.cp.r8"})
 	var tab := tablet(room, "up_right", cx(147) + 16, "Space folds where the arrow points.")
 	var portal := cube(room, "Portal Cube", cx(149), "space/portal/-/long",
 		{"locked_slots": LOCK_ESSENCE | LOCK_FORM | LOCK_MODIFIER})
-	# Optional: brambles over an alcove, and the fire to burn them
-	cube(room, "Fire Cube", cx(148), "fire/projectile/right/normal", {"dungeon_powered": true, "locked_slots": 15})
-	var brambles := inst(RUNES + "burnable.tscn", room, "Brambles", Vector2(cx(153), FLOOR_Y), {"size": Vector2(32, 160)})
-	tablet(room, "split", cx(154), "Fire that breaks apart reaches three ways.")
 	var seal := inst(RUNES + "observatory_seal.tscn", room, "Seal", Vector2(cx(160), 278.0))
 	guide(room, "Reach the seal on the balcony.")
 	step(room, "Up-Right learned", Cond.FLAG, null, {"flag": "rune.frag.up_right"})
 	step(room, "Onto the balcony", Cond.REACHED, null, {"area": Rect2(155 * T, 180, 11 * T, 110)})
 	step(room, "The seal opens", Cond.POWERED, seal)
-	step(room, "The brambles burn", Cond.OPEN, brambles, {"optional": true})
 
 	hint(room, Vector2(cx(145) + 20, FLOOR_Y), [
 		"The balcony is far out of reach. The cube near the entrance holds a portal with no direction.",
@@ -542,7 +551,6 @@ func room_8_sealed_observatory() -> void:
 	], [portal, tab, seal])
 
 	var signs := group(room, "Signs")
-	add_sign(signs, "Portal", 150, "A portal carries you and loose things through stone, moving as you were.", FLOOR_Y, 190.0)
 
 	var deco := group(room, "Decor")
 	for col in [146, 150]:

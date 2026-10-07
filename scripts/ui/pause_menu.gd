@@ -10,10 +10,10 @@ extends CanvasLayer
 ##
 ##   Resume
 ##   Echidna   Spells, Abilities, Runes      -> the card describes each one
-##   Map       Chapter Map, Reset Room
+##   Map       Room Map, Reset Room
 ##   Journal   The Bellkeeper's Ledger, Rune Journal
 ##   Settings  Graphics, Controls, Audio, Gameplay -> every option
-##   System    Restart Chapter, Return to Title, Quit Game
+##   System    Restart, Return to Title, Quit Game
 ##
 ## Keys: up/down move, right or confirm goes in (or does it), left or Esc
 ## backs out one step; Esc on the icons closes the menu. Left/right change a
@@ -54,7 +54,7 @@ const SLOTS := 12
 const CONTROLS := [
 	["Walk left", "move_left"], ["Walk right", "move_right"], ["Jump", "jump"],
 	["Crouch / charge", "crouch"], ["Sprint", "sprint"], ["Fireball", "shoot"],
-	["Heal", "heal"], ["Refill mana", "reload"], ["Echo", "echo"],
+	["Heal", "heal"], ["Kindle (mana)", "reload"], ["Echo", "echo"],
 	["Use / inscribe", "interact"], ["Carry a cube", "rune_carry"],
 	["Rune overview", "rune_overview"], ["Pause", "pause"],
 ]
@@ -67,6 +67,10 @@ const GRAPHICS_INFO := [
 ]
 
 var is_open := false
+## Set while the room can't be finished: opening the menu goes straight to
+## Map -> Reset Room, with the reason on the card.
+static var reset_suggested := false
+static var reset_reason := ""
 var played := {}
 
 var _dim: ColorRect
@@ -190,7 +194,7 @@ func _set_open(open: bool) -> void:
 	_frame.visible = open
 	get_tree().paused = open
 	_restart_armed = false
-	_restart_button.text = "Restart Chapter"
+	_restart_button.text = "Restart"
 	_waiting_action = ""
 	_show(_menu_box)
 	if open:
@@ -202,6 +206,8 @@ func _set_open(open: bool) -> void:
 		_row1 = -1
 		_row2 = -1
 		_focus_icon(_first_icon(), false, false)
+		if reset_suggested and not _reset_button.disabled:
+			focus_reset_room()
 		_play("open")
 		_animate_open()
 	else:
@@ -260,7 +266,7 @@ func _on_restart() -> void:
 	if not _restart_armed:
 		_restart_armed = true
 		_restart_button.text = "Press again to confirm"
-		_set_info("Restart Chapter", "Press again to erase this chapter's saved progress and start it over. This cannot be undone.", "reset", 6)
+		_set_info("Restart", "Press again to erase this %s's saved progress and start it over. This cannot be undone." % _unit(), "reset", 6)
 		return
 	var root := _chapter_root()
 	if root == null:
@@ -335,7 +341,7 @@ func _build() -> void:
 		_row("Abilities", "jump", _ability_list()),
 		_runes_row(),
 	])
-	_map_button = _row("Chapter Map", "list", null, func(): _play("select"); _show(_map_box))
+	_map_button = _row("Room Map", "list", null, func(): _play("select"); _show(_map_box))
 	_reset_button = _row("Reset Room", "reset", null, _on_reset)
 	_icon("map", "map", "Map", [_map_button, _reset_button])
 	_ledger_button = _row("The Ledger", "book", null, func(): _play("select"); _show(_ledger_box))
@@ -347,7 +353,7 @@ func _build() -> void:
 		_row("Audio", "speaker", _audio_list()),
 		_row("Gameplay", "sliders", _gameplay_list()),
 	])
-	_restart_button = _row("Restart Chapter", "reset", null, _on_restart)
+	_restart_button = _row("Restart", "reset", null, _on_restart)
 	_icon("system", "power", "System", [
 		_restart_button,
 		_row("Return to Title", "door", null, _on_title),
@@ -564,9 +570,9 @@ func _make_list2(rows: Array) -> VBoxContainer:
 
 func _spell_list() -> VBoxContainer:
 	return _make_list2([
-		["Fireball", "flame", "Fireball", "Hurls a bolt of magic fire where you aim. Burns slimes, lights braziers, rings bells and wakes crystals. Costs 5 mana.", null, func(): return "5 MP", 8],
-		["Heal", "plus", "Heal", "Stand still and channel for a moment: restores 2 health. A hit breaks it. Costs 20 mana.", null, func(): return "20 MP", 9],
-		["Echo", "echo", "Echo", "Record up to 8 seconds of yourself; your Echo repeats it: holding plates, pulling levers, ringing bells. Two at once; each lowers your mana cap by 10.", null, func(): return "8 s", 10],
+		["Fireball", "flame", "Fireball", "Hurls a bolt of magic fire where you aim. Burns slimes, lights braziers, rings bells and wakes crystals. Costs 5 mana. (The Hush took this word; she remembers it at the Kept Flame, at the end of the Passage.)", null, func(): return "5 MP" if GameState.has_ability("fire") else "forgotten", 8],
+		["Heal", "plus", "Heal", "Stand still and channel for a moment: restores 2 health. A hit breaks it. Costs 20 mana. (Another word the Hush took; the spring under the Belfry gives it back once the great bell has rung.)", null, func(): return "20 MP" if GameState.has_ability("heal") else "forgotten", 9],
+		["Echo", "echo", "Echo", "Record up to 8 seconds of yourself; your Echo repeats it: holding plates, pulling levers, ringing bells. Two at once; each lowers your mana cap by 10. (Her family's own word; she remembers it at the Echo Door, early in the Passage.)", null, func(): return "8 s" if GameState.has_ability("echo") else "forgotten", 10],
 	])
 
 
@@ -594,6 +600,13 @@ func _fill_runes() -> void:
 		_runes_list.remove_child(child)
 	if not _runes_button.visible:
 		return
+	# First the rules again: the rune tour, replayed on request
+	var how := SaoRow.new("How rune cubes work", "book", false, SUB2_W)
+	how.value_text = "Replay"
+	how.set_meta(&"info", ["How rune cubes work", InputLabels.format("Words change only while a cube is OFF. LOCKED words never change. {rune_overview} lists every rune in the room. Choose this to see the rune tour again.")])
+	how.set_meta(&"action", _replay_rune_tour)
+	how.set_meta(&"slot", -1)
+	_add_row(_runes_list, how, 2)
 	var n := 0
 	for kind in 4:
 		for id in RuneFragments.of_kind(kind):
@@ -607,6 +620,12 @@ func _fill_runes() -> void:
 				n += 1
 
 
+## Echidna, Runes, How rune cubes work: closes the menu and plays the rune tour again.
+func _replay_rune_tour() -> void:
+	_set_open(false)
+	UiTour.play(get_tree().current_scene, "runes", true)
+
+
 func _graphics_list() -> VBoxContainer:
 	var rows := []
 	for i in Settings.GRAPHICS_NAMES.size():
@@ -618,6 +637,9 @@ func _graphics_list() -> VBoxContainer:
 		func(): Settings.set_show_fps(not Settings.show_fps), func(): return "On" if Settings.show_fps else "Off", 9])
 	rows.append(["Fullscreen", "monitor", "Fullscreen", "Fill the whole screen (also F11).",
 		func(): Settings.set_fullscreen(not Settings.fullscreen), func(): return "On" if Settings.fullscreen else "Off", 10])
+	rows.append(["Brightness", "sliders", "Brightness", "How bright the dungeon is. Dim is the original gloom, Normal the default, Bright lifts the shadows more.",
+		func(): Settings.set_brightness((Settings.brightness + 1) % Settings.BRIGHTNESS_NAMES.size()),
+		func(): return Settings.BRIGHTNESS_NAMES[Settings.brightness], -1])
 	return _make_list2(rows)
 
 
@@ -706,7 +728,7 @@ func _describe_rows() -> void:
 		"Spells": "Her spells, their cost in mana and what they can do.",
 		"Abilities": "How she moves.",
 		"Runes": "The rune fragments she has learned.",
-		"Chapter Map": "The acts and rooms of this chapter: where you are, what's cleared, and the lore pages found.",
+		"Room Map": "The acts and rooms of this %s: where you are, what's cleared, and the lore pages found." % _unit(),
 		"Reset Room": "Put this room's puzzle back to its start. Health is kept.",
 		"The Ledger": "The Bellkeeper's Ledger: every page you have found, to read again.",
 		"Rune Journal": "Fragments you know, what you have seen runes do, and the runes you have cast.",
@@ -714,7 +736,7 @@ func _describe_rows() -> void:
 		"Controls": "Change any key.",
 		"Audio": "Volumes for music, ambience and effects.",
 		"Gameplay": "Guidance and assists.",
-		"Restart Chapter": "Erase this chapter's saved progress and start again (asks twice).",
+		"Restart": "Erase this %s's saved progress and start again (asks twice)." % _unit(),
 		"Return to Title": "Leave for the title screen. Progress is saved at shrines.",
 		"Quit Game": "Close the game.",
 	}
@@ -1067,7 +1089,7 @@ func _refresh_status() -> void:
 		_stats.text = ""
 		return
 	var mana_cap: int = player.get_mana_cap() if player.has_method("get_mana_cap") else 100
-	_stats.text = "HP %d / %d      MP %d / %d" % [player.current_health, player.MAX_HEALTH, player.current_mana, mana_cap]
+	_stats.text = "HP %d / %d      MANA %d / %d" % [player.current_health, player.MAX_HEALTH, player.current_mana, mana_cap]
 
 
 func _refresh_values() -> void:
@@ -1382,3 +1404,24 @@ class SaoRow extends Button:
 		if active:
 			# A notch on the left edge, pointing back at what opened this list
 			draw_colored_polygon(PackedVector2Array([Vector2(0, h / 2.0 - 7.0), Vector2(-8, h / 2.0), Vector2(0, h / 2.0 + 7.0)]), PauseMenu.ORANGE)
+
+
+## "chapter", "level" or "wing": what the current stretch of the game is called.
+func _unit() -> String:
+	var root := _chapter_root()
+	return String(root.unit_name) if root else "chapter"
+
+
+## Puts the selection on Map -> Reset Room (the room can't be finished, so
+## that is almost certainly what she opened the menu for).
+func focus_reset_room() -> void:
+	var map_icon: SaoIcon = _icon_by_id.get("map")
+	if map_icon == null or not map_icon.visible:
+		return
+	_focus_icon(_icons.find(map_icon), false, false)
+	var rows := _visible_rows(_list1)
+	var index := rows.find(_reset_button)
+	if index < 0:
+		return
+	_focus_row1(index, false)
+	_set_info("Reset Room", "This room can't be finished now. %s\nChoose Reset Room to put the room back as it was. Your health is kept." % reset_reason, "reset", -1)

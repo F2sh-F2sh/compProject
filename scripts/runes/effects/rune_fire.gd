@@ -32,6 +32,7 @@ func setup(owner_cube: RuneCube, spell: Dictionary) -> void:
 		bolts.append(bolt)
 		var radius: float = spell["explode_radius"]
 		if radius > 0.0:
+			bolt.set_meta(&"explode_radius", radius)
 			bolt.tree_exiting.connect(_blast.bind(bolt, radius))
 	Sfx.play("spell_cast", cube.centre(), -4.0)
 	RuneJournal.note("fire")

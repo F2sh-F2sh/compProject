@@ -44,9 +44,8 @@ states) and [PLAYTEST_CHECKLIST.md](PLAYTEST_CHECKLIST.md) (what a human still n
 
 ## Status: all milestones implemented and passing automated tests
 
-Last full run (2026-09-29, after the enjoyment pass): `tutorial suite: passed=140 failed=0`,
-`chapter suite: passed=274 failed=0`, `presentation suite: passed=88 failed=0`,
-`experience suite: passed=59 failed=0` (`RESULT passed=561 failed=0`).
+Last full run (2026-10-05, after the Great Sluice): tutorial 173, chapter 341, presentation 111, experience 243,
+rune 304, wing 530, all passing (1,702 checks). The first full run (2026-09-29) was 561 checks in four suites.
 
 | Milestone | Status |
 |---|---|
@@ -61,14 +60,28 @@ Last full run (2026-09-29, after the enjoyment pass): `tutorial suite: passed=14
 ## How to run
 - Play: run the project (F5): the title screen, then the tutorial and the chapter. To jump
   straight in, open `res://scenes/chapter/chapter_1.tscn` and press F6.
+- **Admin switch (temporary, on as of 2026-10-04):** `Journey.admin_unlock` at the top of
+  `scripts/story/journey.gd`. While it is true every door on the Long Stair is open, and the title's
+  Choose a Level has "Admin: any wing, any room", which starts any wing's room or the Eye directly with the
+  spells and words of everything before it (nothing is marked finished). Set it to false before release.
+  The tests always turn it off (`tests/run_tests.gd`); wing `admin` tests it.
 - Rebuild the chapter after changing the builder:
   `godot --headless --path . --script res://tools/build_chapter.gd`
   (this **overwrites** `scenes/chapter/chapter_1.tscn` and the component scenes in
   `scenes/puzzle`, `scenes/creatures`, `scenes/traps`).
 - Tests (need a window, not `--headless`, because they take screenshots and aim the mouse):
-  `godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- [tutorial|chapter|presentation|experience|all] [scenario]`
-  Chapter scenarios: `r1`…`r9`, `save`, `reset`, `hazards`, `guide`, `full`, and `look`
-  (screenshots of every room into `user://test_shots/`, not run by default).
+  `godot --path . --fixed-fps 60 --disable-vsync --script res://tests/run_tests.gd -- [tutorial|chapter|presentation|experience|rune|wing|all] [scenario]`
+  `--disable-vsync` is optional but recommended: the game time is the same, the run is several times faster, and
+  with vsync on a long run can stall while the screen is asleep. Run one test process at a time (the presentation
+  audio check measures the real sound output).
+  Chapter scenarios: `r1`…`r9`, `save`, `reset`, `stuck`, `ways`, `hazards`, `guide`, `full`, and `look`
+  (screenshots of every room into `user://test_shots/`, not run by default). Wing scenarios include `k1`,
+  `forge_full`, `forge_broken`, `forge_page3`, `k2`, `heart_full`, `heart_broken`, `c1`, `c1_full`, `c1_short`,
+  `c1_broken`, `c2`, `c2_full`, `c2_pages`, `c2_broken`, and `forge_look`, `heart_look`, `c1_look` and `c2_look`
+  (screenshots, not run by default).
+- Rebuild the Long Stair and its wings after changing `tools/build_wings.gd`:
+  `godot --headless --path . --script res://tools/build_wings.gd`, then
+  `git checkout -- scenes/puzzle scenes/runes scenes/traps scenes/creatures` to drop the builder's noise.
 - Regenerate the sound effects: `godot --headless --path . --script res://tools/generate_sfx.gd`
   then let the editor import them.
 
@@ -515,6 +528,571 @@ from `story_paint.gd` and `story_nodes.gd`.
 packs' art, how the lane feels to walk, and whether the story pictures read at a glance.
 **To record:** where the two packs came from and their licence (`CREDITS.md` has a
 placeholder).
+
+## The game plan v2, a brighter dungeon, the Room 7 flame, fewer hints (2026-09-30)
+
+**The plan.** `docs/GAME_DESIGN.md` is now the v2 plan (about two hours of new game after a
+tutorial section; the old 6 to 7 hour version is kept unchanged as `GAME_DESIGN_v1_long.md`).
+The early game becomes one tutorial section, "The Novices' Way" (Part 1 The Passage, Part 2
+The Sealed Belfry, Part 3 The Sealed Observatory), followed by five new chapters. It covers the
+story, the grandma scene, earned fireball/heal/Echo, finite mana, the combat rework, new
+creatures, 32 puzzle ideas, the ending and a dated build plan. None of that gameplay is built
+yet except the four fixes below.
+
+**Built in this pass**
+- **Brightness** (`Settings.brightness`: Dim / Normal / Bright, saved; title-screen settings
+  and the pause menu's Graphics list). `PostFX` applies it: the level's ambient light, the
+  lantern's gloom and reach, the vignette, a new `shadow_lift` gamma in
+  `assets/shaders/dungeon_post.gdshader`, and the player's light. **Dim is the old look**,
+  Normal is the default. The builders' ambient went from (0.2, 0.18, 0.3) to (0.5, 0.48, 0.64),
+  tile tints and torches are brighter, and the tutorial (hand-built) was brightened by an
+  idempotent step in `tools/patch_tutorial.gd`. `Room.mood_ambient` keeps the three watcher
+  rooms darker (Belfry 4 and 7, Observatory 6). Lowbell was meant to keep its own look but did not until the 2026-10-01 fix below (`PostFX.follows_brightness`).
+- **Room 7 flame.** Every unlit brazier is now a small warm-gold pilot flame with a ring that
+  opens every two seconds and a gold light (energy 0.7, was 0.15); the lit fire is still blue.
+  The decorative torch under the flame was removed; the first time ever in Room 7 the camera
+  glances at it (`Room.glance_at`, `ChapterRoot._glance_at`); the objective card shows one line
+  ("Light the flame by the door", `ObjectiveStep.todo_label`) until it is lit.
+- **Fewer hints.** Guidance now defaults to Light for new settings files (anyone who already
+  saved a choice keeps it); the step pips show only at Full; the skull's first hint is text
+  only and the arrows come with the second; the auto-nudge waits 300 s or 4 deaths (was 90 s
+  and 2); Chapter 1 has 9 signs (was 23) and Chapter 2 has 6 (was 12).
+- **Tutorial-section wording.** The title screen's Tutorial opens a list (Part 1, 2, 3) and the
+  separate "Chapter 2" button is gone; progress reads "The Novices' Way ..."; the end cards say
+  "Part 1 Complete", "PART 2 COMPLETE" and "TUTORIAL COMPLETE" (new `ChapterRoot` exports
+  `complete_heading`, `next_label`, `closing_line`, `unit_name`); act subtitles read "The
+  Novices' Way · Part N · ..."; the pause menu says Restart and Room Map. Save flags and ids
+  (`tutorial.done`, `ch1.*`, `ch2.*`) are unchanged, so old saves still work.
+
+**Checks (2026-09-30)**
+- Automated (windowed, full `all` run): **1008 passed, 0 failed** (tutorial 140, chapter 315,
+  presentation 111, experience 138, rune 304). New checks: presentation `brightness` (11: the
+  three levels, Dim equals the old gloom, Normal at least 40% brighter on screen, the watcher
+  room darker and recovering, the tutorial's lantern, the unlit brazier's glow and colour),
+  chapter `flame` (7) and extra `guide` checks (hint arrows, pips at Light), and the title test
+  for the Tutorial list. The `post` scenario now measures the lantern falloff with the original
+  gloom and no shadow lift, so it keeps testing the shader rather than the setting.
+- Measured: mean screen luminance, Normal vs Dim, is +60% to +80% in the tutorial, Belfry
+  rooms 1, 4, 7 and Observatory room 6 (for example Belfry room 1: 0.094 to 0.161); Bright
+  is about +130%.
+- Visually inspected: screenshots of Dim, Normal and Bright in the tutorial and several rooms,
+  Room 7 after the glance, and the title screen's Tutorial list.
+- **Needs a human:** whether Normal is the right amount of light (and Bright too bright), how
+  the gold flame reads in a real playthrough, whether the rooms are still solvable with the
+  smaller hint set, and whether any removed sign is missed. All listed in
+  `docs/PLAYTEST_CHECKLIST.md`.
+
+**Notes.** Rebuilding the chapters rewrites many unrelated scenes with noise (stripped uids,
+new node ids); only `scenes/chapter/*.tscn`, `scenes/torch_light.tscn` and
+`scenes/tutorial_level.tscn` were kept. `chapter_1.tscn` and `chapter_2.tscn` lost their scene
+uids in the rebuild (nothing refers to them by uid). In headless runs `PostFX._apply_quality`
+prints an old, harmless Nil*float error (no shader defaults without a renderer). Nothing is
+committed.
+
+## Milestone 1: Nan's cottage and the earned spells (2026-10-01)
+
+Part of milestone 1 of `docs/GAME_DESIGN.md` §14. Built: the grandma scene, one place for the scene
+order, and Fire, Heal and Echo as spells Echidna has to earn. **Not built (still M1):** finite mana
+and Kindle points, the glue moments after the bell and the dome, a chapter-select list driven by
+`Journey`, and the four-note hum at the Echo Door.
+
+**What changed**
+- **Nan's cottage** (`scenes/story/nan_cottage.tscn`, `scripts/story/nan_cottage.gd`). Knocking at
+  Nan's door now leads in (the three bridge cards are gone). Echidna walks in, Nan (seated, by the
+  hearth) does not know her, her name is four glyph gaps, she tries her fire spell for the fire and it
+  only sputters, Nan explains the Hush, the bell and the monks' words, gives her the lantern (it flies
+  to her and her light grows), and she goes down the cellar door to the Passage. The scene runs as one
+  coroutine and `stage` says where it is. A save that already has her spells skips the fire beat.
+  The room and Nan are pixel art: `tools/generate_cottage_sprites.gd` makes Nan seated, the hearth, the
+  table, the jar shelf and the cellar door in the packs' palette; the wall, floor, window, door, barrel,
+  crate, lantern and candles are pack sprites. The scene has no drawn shapes (tested).
+- **Earned spells.** `GameState.has_ability("fire" | "heal" | "echo")`: saved flags `ability.*`; a save
+  that has done the tutorial or any of Chapters 1 and 2 has all three; `Journey.skipping_to()` grants
+  them when a later part is started from the title list; tests set `GameState.all_abilities`.
+  `Player` refuses an unearned spell with a faint sputter and an `ability_denied` signal (the cottage
+  listens for it); the fire/heal slots on the HUD appear when the spell is remembered; the Crosshair
+  stays dim; the pause menu's Spells list says "forgotten" until then.
+- **The Passage.** `scripts/puzzle/ability_shrine.gd` is a place where she remembers a word: the Kept
+  Flame (fire, phase 4, before the pistons that need it), the Spring (heal, phase 5, after them) and the
+  Echo stone (echo, phase 7, before the Echo lesson). Using one grants the spell, flares a ring of
+  light, floats "+ FLAME" and shows a card ("YOU REMEMBER A WORD / FLAME" and what it does). Their
+  pixel sprites come from `tools/generate_shrine_sprites.gd`. The lesson cards now read "PHASE n · name"
+  (a new `LessonZone.eyebrow`; a new phase-5 zone, id `lesson.10`). All done in `tools/patch_tutorial.gd`
+  (idempotent); the pistons, Echo and Slimes signs were shortened or removed because the cards say it.
+- **`scripts/story/journey.gd`** holds the scene order (`LOWBELL`, `COTTAGE`, `PASSAGE`, `BELFRY`,
+  `OBSERVATORY`, `after_cottage()`, `next_after()`, `skipping_to()`); Lowbell, the title screen and the
+  cottage use it. The tutorial's `LevelExit` and Chapter 1's `next_chapter` still hold the same paths as
+  literals (a hand-built scene and a generated one).
+- **A correction to the brightness pass.** `PostFX` now has `follows_brightness`; Lowbell and the
+  cottage turn it off. Before this, the Brightness setting would also have changed Lowbell's own look
+  (its gloom, vignette and a new shadow lift); a test now checks Lowbell's values.
+
+**Checks (2026-10-01)**
+- Automated (windowed): full `all` run: **1056 passed, 1 failed** (tutorial 163/1, chapter 315, presentation 111, experience 163, rune 304). The one failure, "both slimes defeated with fireballs", passes when the slimes scenario is run alone (it fights with the real mouse and a time limit). Two earlier full runs the same day had more fireball-aim failures (4 and 53, mostly chapter room 2/3 and a cascade from them); each suite passed when re-run alone, your Godot editor was open and in use during those runs, and the aim helpers now retry until the cursor is where it should be (see below). Not proven to be the cause.
+  New: tutorial `abilities` (24: starts without the spells, each key sputters, the order along the
+  Passage, the three phase cards, reading each shrine grants its spell and shows its card and slot, the
+  spells work afterwards, old saves and the title's jump-ahead have all three); experience `cottage`
+  (24: no drawn shapes, the whole conversation line by line, Nan's name as gaps, the sputtering fire
+  spell, the lantern, the cellar door leads on, the fire beat is skipped for a save that has the spell)
+  and a Lowbell look check.
+- Test changes: every suite starts with all spells (`GameState.all_abilities`); the three `aim_and_shoot` helpers retry the mouse warp until the cursor is on target; the Lowbell and title
+  scenarios expect the cottage; the glow test now aims its fireball itself, and the slime-orb test waits
+  for the orb to be freed, because both depended on the real mouse and frame timing.
+- Visually inspected: the cottage at every stage (greeting, talk, the fire prompt, the lantern, the
+  cellar door), the three shrines before and after, and the cards.
+- **Known flake:** fireball checks that aim with the real mouse (and the chapter room 2 fireball
+  checks) can fail when the machine is slow or the mouse moves; they pass when re-run alone.
+- **Needs a human:** whether the cottage conversation reads well and feels right, whether the seated Nan
+  sprite is clear, how the fire beat and the three "you remember a word" cards feel, and whether the
+  Passage still teaches enough with fewer signs. Listed in `docs/PLAYTEST_CHECKLIST.md`.
+
+## Three playtest fixes (2026-10-01)
+
+Reported while playing; each has a test.
+- **Chapter 1 Room 5 (Broken Machinery), the skull plaque.** The plaque was drawn 44 px out in front
+  of the step's wall with no collision, so the pushable block slid into it. It is now set into the wall
+  (its left edge flush with the wall face), so the block can only meet it. Bolts start just outside
+  the wall (`ArcaneBoltStatue.muzzle`, 38 for this plaque). The block against the wall still shields
+  the bolts. (The report said Room 7; the block-and-plaque step is Room 5.) Test: chapter `r5` (2 new
+  checks: the plaque is flush, the bolts start in the open).
+- **Chapter 2 Room 4 (The Fractured Seal), the strong wind.** The cube started too far back: its wind
+  let go of the stone about 17 px short of the wall, so you had to carry the cube closer first. The
+  cube now stands right behind the stone, and the wall needs 640 momentum (was 800; the stone arrives
+  with about 937). Switching Strong on breaks the wall at once, with no carrying. Test: rune `r4` no
+  longer carries the cube and checks the hit has at least 1.3 times the momentum needed.
+- **Chapter 2 Room 8 (The Sealed Observatory), the fire cube.** The optional fire cube, the brambles it
+  burned and the Split tablet behind them are gone (they were one optional nook with no use in the
+  room). Split is now taught in the Kilnworks (`docs/GAME_DESIGN.md`). The rune suite's fire effect
+  test makes its own brambles. Test: rune `r8` and `effects`.
+- Rebuilding Chapter 1 and 2 regenerated both scenes (`scenes/chapter/chapter_1.tscn`, `chapter_2.tscn`).
+- Full run after these fixes: chapter 319, presentation 111, experience 163 and rune 302 all passed; the tutorial suite had two slime-orb failures, a timing flake in that test (it now heals her first and waits for the orb), passing 4 of 4 runs since.
+
+## Finite mana and Kindle points (2026-10-01)
+
+Mana is now the lantern's flame and no longer refills for free (`docs/GAME_DESIGN.md` §7).
+- **Kindle:** R refills mana only while *held* (1.5 s) near a lit flame (`Player.near_kindle()`, group
+  `kindle_point`): chapter shrines, candle checkpoints (`HazardCheckpoint`), lit braziers and the Kept
+  Flame once remembered. Away from a flame R only floats "Hold R at a lit flame to kindle your lantern".
+  Letting go or walking off cancels. The automatic refill at 0 mana is gone. "Assist: unlimited mana"
+  still bypasses all of it. A rune drawing on her mana still blocks it.
+- **Spark motes:** a defeated slime leaves a +6 mana mote beside its health orb (`Pickup.drop_mote`,
+  group `mote`).
+- **Trickle:** rune levels' passive regen is 4/s and stops at 25% of the cap (was 20/s to full).
+- **Echo** re-casting fireballs for free was already so.
+- (Fixed later the same day: every room now has a Kindle flame, see the opening and teaching pass.) Earlier note: Kindle points in every Chapter 2 room (only rooms with a shrine or lit brazier had one:
+  rooms 4, 6 and 8 and the start; others rely on the 25% floor and Reset Room), per-region flames, the
+  mana-bar "out of flame" prompt art.
+- Tests: chapter `r3` (no refill away from a flame, held at a shrine refills, early release gets
+  nothing), rune `mana` (trickle floor) and `r8` (kindles first), tutorial `abilities` (Kept Flame
+  refills, elsewhere does not) and `slime` (spark mote).
+
+## The glue moments (2026-10-01)
+
+Two short runs of story pictures now sit between the parts of the Novices' Way (`scripts/story/story_interlude.gd`, a `StoryIntro` subclass built from the same pixel art; scenes `interlude_bell.tscn`, `interlude_dome.tscn`; hold Esc skips).
+- **After the great bell (Part 2 to 3):** the Part 2 end card now leads here. Lowbell grey at night, the chimes swinging, the colour coming back for a moment and Nan lifting her head ("Someone is ringing..."); then the cracked bell, its tone thin, and a chalk star on the stair that was not there before. Then Part 3.
+- **After the dome opens (end of Part 3):** the Observatory's card (now "Continue: the way down") leads to the stars with four dark ones, ICE · FREEZE · SELF · PERSIST, then the lens in the floor showing a frozen room far below. It ends at the title (the Long Stair is not built).
+- `Journey` lists both. `StoryIntro` got `_make_pictures()` and `_next_scene()` so it can be reused.
+- Test: experience `interludes` (the chapters lead to them; no drawn shapes; each plays through and leads on).
+- Needs a human: pacing and wording; the "lens" is a window sprite scaled up, and the chalk star is a pack spark.
+
+## Opening, spells and teaching pass (2026-10-01)
+
+Requested: start the story with the Passage; explain every part of the screen; explain the rune system
+in Part 3; hand over fire at the end of one part and heal at the end of the next, each with a reason and
+a short explanation; and stop mana from ever stranding the player.
+
+- **New Game flow.** Title -> the nine story pictures -> the Passage (the Belfry if the Passage is already
+  done). The last picture now mentions the Novices' Way and that the Hush took some of her spells.
+  Lowbell and Nan's cottage are no longer in the flow (their scenes and tests remain; nothing else
+  was deleted). `Journey.after_story()` replaces `after_cottage()`.
+- **The Passage is reordered** (`tools/patch_tutorial.gd`, step `_fire_last`): 1 The Cellar, 2 The Broken
+  Stair, 3 The Novices' Traps, **4 The Echo Door** (Echo stone, plate, gate), **5 The Kept Flame** (fireball
+  and the pistons that need it), **6 The Cells** (slimes), then the exit. The Passage ends with fire. The
+  Spring and its lesson are gone from the Passage.
+- **Heal** now comes back with the third bell picture ("The Spring"): the great bell's ring shakes an old
+  spring under the Belfry loose; running water is the one thing the Hush never held still; she cups it and
+  remembers SPRING; the last line says what it does (stand still, press Q, 2 health for 20 mana, a hit
+  breaks it). It is granted when the pictures end, or when Esc skips them.
+- **Save compatibility:** the "old save gets every spell" rule now applies only to saves with progress
+  and *no* `ability.*` flag, so a new save part-way through the Belfry does not get heal early.
+- **UI tours** (`scripts/ui/ui_tour.gd`, once per save, flag `ui.tour.<id>`; the game pauses; Space/click
+  next, Esc closes): `basics` (health bar, the Esc menu) a few seconds into the Passage; `fire` (mana bar,
+  spell slots) and `echo` (the Echo tag) after the Kept Flame and the Echo stone; `objective` (the goal card)
+  on first entering Belfry room 1; `runes` on first entering Observatory room 1 (four cards: four words per
+  cube and W to inscribe; locked words cannot be changed, this room's cube has three locked; Tab shows every
+  cube, a running cube must be switched off first; running runes use mana). Rooms use the new `Room.explainer`,
+  shrines `AbilityShrine.TOURS`, lessons `LessonZone.tour`.
+- **Mana soft-lock fix:** a new pixel-sprite `KindleFlame` (the Kept Flame's pedestal, always lit, a kindle
+  point, not a checkpoint) now stands by the entrance of every room that had none: Belfry rooms 2, 4, 8, 9
+  and Observatory rooms 2, 3, 5, 7. Every room of both parts now has a flame to kindle at.
+- Tests: tutorial `abilities` (Echo before fire, no Spring/heal, zones tile, no early heal for new saves),
+  tutorial `play` walks the new order, experience `story`/`title` (pictures lead to the Passage), `interludes`
+  (three bell pictures, heal granted), new `tours` and `kindle`. Tours are switched off in all other suites.
+- Needs a human: the pacing of the first tour (3.6 s after the first card), whether the rune cards are too
+  long, the spring picture, and whether the extra flames feel natural.
+
+## macOS export (2026-10-01)
+
+- The `macOS` preset in `export_presets.cfg` is set up: universal (Intel and Apple Silicon), bundle id
+  `com.sealedbelfry.game`, version 1.0.0, output `../../Videogames/Gahh/TheSealedBelfry-macOS.zip`
+  (a zip of `The Sealed Belfry.app`). Run it with
+  `godot --headless --path . --export-release "macOS"` (the 4.7.2 macOS export template is installed).
+- Apple Silicon needs ETC2/ASTC textures, so `textures/vram_compression/import_etc2_astc=true` was added to
+  `project.godot` (the project re-imports once; the Windows preset is unaffected).
+- Built from Windows, so the app is **not notarized and has no Apple Developer signature** (Godot added its
+  own signature only). Verified: the export finishes, the zip holds the .app with Info.plist, icon, .pck and
+  _CodeSignature. **Not run on a Mac.** On first launch macOS will block it: right-click the app, choose
+  Open, then Open again (or `xattr -dr com.apple.quarantine "The Sealed Belfry.app"`). Public distribution needs
+  an Apple Developer ID and notarization.
+
+## Waymarks: arrows that show the way on (2026-10-01)
+
+Requested: make the map easier to understand with arrows that fit the game.
+- **The Choir's waymarks** (`scripts/puzzle/waymark.gd`, `scenes/puzzle/waymark.tscn`): a small carved stone slab
+  with a softly glowing arrow, pixel art from `tools/generate_waymark_sprites.gd` (`waymark.png`, 3 frames, in the
+  packs' palette), a dim blue light that breathes, behind the player (z -1), no collision. In the story the monks
+  cut them for novices, so they are part of the dungeon, not the interface. `direction` is right, left, up or down.
+- **Where:** 11 along the Passage (`tools/patch_tutorial.gd`, step `_waymarks`) and, in every Belfry and
+  Observatory room, one soon after the way in, one in the middle of a long room and one before the way out
+  (`waymarks()` in `tools/build_chapter.gd`, used by both builders). 26 in the Belfry, 21 in the Observatory.
+  They are hidden when guidance is off. New chapters should use the same helper.
+- Test: experience `waymarks` (each is a pixel sprite with a known direction, none drawn from shapes, hidden with
+  guidance off) and a contact sheet of every arrow in context (`user://test_shots/waymarks_*.png`).
+- Looked at: every arrow in context on contact sheets. Arrows are all right-pointing for now; the rooms that go
+  up (Belfry R5 lift, R9 stairs) have only right arrows, and a few arrows sit close to a "[W]" prompt.
+- Needs a human: whether they are too bright or too frequent, and whether up arrows are wanted at the lift and the
+  great bell's stairs.
+
+## The rough game loop after the Novices' Way (2026-10-02)
+
+Requested: "make a rough game loop of this in game". The Observatory now leads on, in the game, all the way to
+two endings. It is deliberately rough: playable and tested end to end, but the puzzles are not tuned.
+
+- **Order** (`scripts/story/journey.gd`): Observatory -> dome pictures -> **the Landing** (the foot of the Long
+  Stair: five doors, a bell-light over each, a Kindle flame, a shrine) -> **four wings**, each two rooms ending
+  in a bell, each followed by two or three story pictures and back to the Landing -> when all four bells have
+  rung, the fifth door opens the pictures that lead to **the Eye** -> the great cube and **two endings**.
+- **Built by** `tools/build_wings.gd` (extends the Chapter 2 builder; run it to regenerate): `landing.tscn`,
+  `wing_kiln.tscn`, `wing_cistern.tscn`, `wing_lamps.tscn`, `wing_galleries.tscn`, `eye.tscn` in
+  `scenes/chapter/`. Flags: `kiln.`, `cistern.`, `lamps.`, `galleries.`, `eye.`, and `game.complete`.
+- **Rooms** (rough versions of docs/STORY_PLAYTHROUGH.md; all solved by the tests with real input):
+  - Kilnworks: *The Cold Forge* (this rough version has since been replaced by the finished room: see the next
+    section) and *The Kiln Heart* (a Strong wind drives a stone onto a heavy plate, burn the brambles, ring the
+    Forge Bell).
+  - Drowned Cistern: *The First Pool* (a slime stands on a stone-only plate; a Long chill freezes it, and a frozen
+    creature is heavy as stone) and *The Sluice* (two slimes, two plates, one cube; the Tide Bell).
+  - Lampworks: *The Dark Reading Room* (a beam across a pit lights a crystal, which raises a bridge) and
+    *The Lamp Stair* (carry a glow cube under a high crystal; a Large glow reaches it; the Lamp Bell).
+  - Folded Galleries: *The First Door* (carry a portal cube, Up-Right and Long, to doorway over a stone wall) and
+    *The Fold Bell* (an Echo holds a plate, faint stairs rise to the Fold Bell).
+  - The Eye: the great cube (fed by the dungeon, fully editable). `Light · Beam · Up · Long` is the Rewritten Sky;
+    `Ice · Freeze · Self · Large` is the Stillness (a real ending that leads back: "that is not the only
+    sentence"); anything else is "not enough". Ilse and Wren's bed are pixel sprites (`RoomSprite`).
+- **Words:** each bell teaches its wing's words when it rings (`ChapterRoot.grants_words`), so skipping an optional
+  tablet can never make the ending unwritable; every word of both endings is taught by the end of the Lampworks.
+- **Pictures** (`StoryInterlude` kinds `kiln`, `cistern`, `lamps`, `galleries`, `eye`, `stillness`, `sky`): reuse
+  the existing pixel-art picture builders plus a Landing picture (five doors, bell-lights lit by progress), a
+  silent snowy world and a new star. The dome pictures now lead to the Landing, not the title.
+- **Other changes:** `Burnable` no longer eats fireballs after it has been cleared (a cleared bramble curtain used
+  to swallow a second bolt; found by the Forge test). `Interactable` guards a freed player. Title screen:
+  "The Long Stair" entry in the parts list, Continue leads to the Landing once the Observatory is done, and
+  the line under the menu counts the bells. Pause-menu words for the new scenes use the existing chapter plumbing.
+- **Tests:** new `tests/wing_suite.gd` (`-- wing`: journey, smoke, landing, k1, k2, c1, c2, l1, l2, g1, g2, eye,
+  loop) and experience `longstair`. Checked by eye: screenshots of every room, the Landing doors, and the
+  bridge, portal and frozen-slime moments.
+- **Rough edges, on purpose:** each wing has two rooms, not six and a boss; no new creatures (the Cistern uses
+  slimes, the Kiln uses brambles); the puzzles are a notch above the Novices' Way, not the planned difficulty;
+  the Eye has no Hush storm or tug of words; the pictures reuse existing art. The player's own fireball
+  makes some fire puzzles easier than the rune solution (the Cold Forge is the exception: the brazier is out of its range).
+- Needs a human: whether the loop reads, the Landing's doors (they are dark; bell-lights show progress), how hard
+  each room is, the pictures' wording, and the two endings' feel.
+
+## The Cold Forge finished, and four playtest fixes (2026-10-02/03)
+
+Requested (the playtest notes, in short): when something a room needs is lost and the room can't be finished,
+say so and say how to reset (the example: a slime that had to hold a door open died); choosing Title at the end
+of a part skipped the pictures (show the pictures first, then the card with Continue, Title and the run's
+numbers); portals only worked one way; nothing said that Tab lists your runes, or when words can and can't be
+changed. And: fully make and polish the first room of the Kilnworks, give a good reason to go into that hallway,
+and make it take at least 30 minutes.
+
+**1. A room that can't be finished says so.** Anything a puzzle needs that can be destroyed or wedged joins the
+group `puzzle_critical` and answers `lost_reason()`; `Room.broken_reason()` asks them. `ChapterRoot` then shows a
+red banner (THIS ROOM CAN'T BE FINISHED NOW / why / "Reset the room: press Esc, choose Map, then Reset Room")
+once the act card and the room's name have cleared, and the Esc menu opens straight on Map, Reset Room until it is
+fixed. In the game: the Cistern's slimes (`Slime.required`), the Cold Forge's coal cart (burned in slag) and bench
+stone (`WindBody.required_area`: if it ever came off the bench before breaking the plug), and the Belfry's two push
+blocks (`PushableBlock.needed_dir`: shoved the wrong way up against a wall, nobody can get behind them). The
+Belfry's bell slimes are warded (they can't be killed), so they never strand a room. **Rule for new rooms:**
+anything needed that can be lost or wedged joins `puzzle_critical`.
+
+**2. The end of a part.** A finished part's card waits (`ChapterComplete.pending`) for its story pictures: the
+pictures play first, then the card (time, deaths, and resets, hints and pages where counted; Continue and Return to
+Title). The Passage's exit shows a Part 1 card the same way (time and deaths under `tutorial.stat.*`). The last
+ending shows THE END with the whole run's time and deaths and "Thank you for playing." A card left waiting by a
+level that was quit is cleared when a level or the title starts.
+
+**3. Portals work both ways.** Walk into either side and come out of the other, moving as before. A side that has
+just let something out won't take it back until it has stepped clear (no bouncing), and a side only carries a
+body that is really inside it: an engine area can still list a body for a frame after it was carried away, which
+sent Echidna through twice, into the ceiling of the Galleries.
+
+**4. Rune editing explained.** The rune tour (five cards: four words in a cube; words change only while the cube is
+OFF; LOCKED words never change; Tab lists your runes; running runes use mana) plays the first time she reaches any
+rune cube, wherever she came in, and Esc › Echidna › Runes › "How rune cubes work" plays it again. The inscription
+screen marks LOCKED slots with a padlock and RUNNING ones while the cube is on, says why a word was refused, and
+carries the rules on its bottom line. The Tab list repeats the rules and has an Inscribe button for the cube she
+stands at. A running cube's prompt reads "Running: switch off to edit". Cubes and lecterns win the use key over a
+hint stone beside them (`Interactable.use_priority`).
+
+**5. The Cold Forge (Kilnworks room 1), finished.** The chain, the story and the numbers are in
+`docs/STORY_PLAYTHROUGH.md`; in short: relight the Great Kiln with coal, air and a bursting flame, all at once.
+- **Why she goes in:** the dome's third picture (THE LONG STAIR: rimed doors, warm light under one), the Choir's
+  note on the Landing ("Ring the Forge Bell first: its heat runs in the pipes behind every door and thaws the
+  next"), frost on the sealed Landing doors and warm light spilling from under the open one.
+- **The room:** 45 columns on two levels (the hearth and a slag pit; the hall with the Smith's bench and alcove, a
+  perch, the bellows shaft, the Great Kiln, the coal loft and its lift, a cell above it; the Forge Door). Built by
+  `kiln_cold_forge()` in `tools/build_wings.gd`; the Kiln Heart moved east (columns 44-68, its cube is "Heart Cube").
+- **New pieces:** `GreatKiln` (scripts/puzzle/great_kiln.gd: fuel bay, pipe inlet, firebox, three lamps, feedback
+  when a try fails, the roar: light, sound, camera, the hall warms, the frost melts, a kindle spot on its roof),
+  `SlagPool` (scripts/traps/slag_pool.gd), `ForgeDoor`, `MeltingFrost`, `RevealTrigger`; `WindBody` sprites,
+  burning and the kiln taking its coal; hanging braziers; `CrackedWall` sprites; fire rides wind (`FireBall`: a
+  bolt that enters a running current turns with it and its range starts again). All new art is pixel sprites from
+  `tools/generate_kiln_sprites.gd`. Five hint stones (three stages each) and three ledger pages.
+
+**Fixes found while playing it through with real input.** An updraft now brakes a fall through it
+(`PlayerWind.FALL_BRAKE_PER_FORCE`): at the top of a column she settles within about 35 px instead of bobbing about
+100, so stepping off onto a ledge no longer needs luck (every lift in the game). The kiln is 260 px tall so its roof
+is flush with the ledges beside it (a 4 px lip stopped her). The loft is flat where the lift docks (a rounded cap
+tile caught her). The slag no longer burns an object the frame after a reset puts it back (the same stale-area
+problem as the portal). "YOUR RUN" sits above the numbers on the card. The red banner no longer covers the act
+card. The Landing's warm door now glows from underneath (a light alone barely showed on blue stone), its frost is a
+rime crust (it looked like static), and the door names sit above the bell-lights (the floor's grass hid them).
+
+**Tests** (real input unless noted): wing `forge_full` (the whole Cold Forge, 50 checks; the scripted route alone
+takes 113 s of game time when it knows every answer), `k1` (part by part, 43), `forge_broken` (12, the stone check by placing it),
+`forge_page3` (7), `g1` (both ways through the portal), `eye` (THE END card), `landing`; chapter `stuck` (6) and room
+9 (pictures, then the card); tutorial `play` (the Part 1 card, then Continue); experience `tours` (the rune tour on
+first reaching a cube, the menu replay) and `interludes` (three dome pictures). Full run of all six suites, all
+passing: tutorial 173, chapter 331, presentation 111, experience 241, rune 304, wing 282 (1,442 checks). Two
+suites first stalled overnight with vsync on (frames wait for the screen, which was asleep) and were rerun with
+`--disable-vsync`, which also makes a run several times faster; the presentation audio check fails only when
+another Godot process is running at the same time.
+
+**Looked at** (screenshots): the Cold Forge (hearth, shaft, kiln roof, loft, alcove, cell, the banner), the
+Landing (warm door, sealed door), THE END card.
+
+**Needs a human playtest:** whether the Cold Forge takes 30 minutes. The design estimate for a first-time player is
+22 to 35 minutes; the tests only prove every step can be done. Also: whether each step reads without hints, the
+shaft and lift feel, the roar, the rune tour's length (five cards), the banner's wording, and the Galleries'
+portal now that it works both ways (walking under its far side on top of the wall sends you back down, which is
+right but may surprise).
+
+## The Kiln Heart rebuilt, and the second playtest list (2026-10-03)
+
+Requested: make the Kilnworks' second room "a lot longer and complicated like room 1", and eight fixes from the
+user's playtest list: say which flame refills mana (not "a torch"); arrows that blend into the background; cage the
+old room behind her when she enters a new one; the hot spring that gives heal at the end of its part, not in the
+pictures; at the end of each part only the title or the next part; after the opening pictures, walk on the surface
+to Nan's house instead of dropping straight into the dungeon; call the tutorial "Level 1"; and the interface tour
+should point arrows at what it explains (the health bar, then the mana bar and its number), with "MP" renamed MANA
+and moved to the left (health to the right).
+
+**1. The Kiln Heart (Kilnworks room 2), rebuilt.** 59 columns (44-102, the old room was 25), five parts, three new
+words; the chain and the numbers are in `docs/STORY_PLAYTHROUGH.md`. In short: the Shutter Hall (**Delay**: the
+Shutter Cube's bolt waits two seconds while she stands on the plate that holds the shutter open, and lights the Ash
+Lamp beyond it, which holds the shutter for good); the Slag Lake (three heat vents, mounted dungeon cubes that run
+from the start, and ledges a hand's width from each column); the Coal Racks (**Large**: from the pedestal at the end
+of the gallery, a normal gust tips the middle skip of coal into the Heart, a Large one all three); the Heart (**Split**:
+`Fire · Projectile · Up-Right · Split` from the pedestal beside it lights its three hanging burners together; each
+burns only half a second, so one at a time does nothing); the hoist, the only way up to the Forge Bell. Built by
+`kiln_heart()` in `tools/build_wings.gd`.
+- **New pieces:** `HeartCrucible` (scripts/puzzle/heart_crucible.gd: coal in its mouth, three lamps, "it's cold: n of 3
+  skips" when the burners flare over an empty Heart, the beat: light, sound, camera, a title card, the frost melting,
+  its burners burning steady, a kindle point; saved); its pixel sprite (`_heart_crucible` in
+  tools/generate_kiln_sprites.gd). `WindBody.persist_id` (a skip the Heart took stays taken), `Brazier.persist_id`
+  (the Ash Lamp stays lit), a frost patch can melt on any flag. **Iron grates now let wind through** (their bars join
+  `wind_permeable`, which WindField's rays already skipped, but nothing had joined it): without it a gust from the
+  gallery could never reach the top rack's skip. Running "machinery" cubes (the vents and the Cold Forge's shaft:
+  fed by the dungeon, every word carved, on from the start) show "Always on" in the Tab list, and Deactivate All
+  leaves them running.
+- **Found while testing:** a gap in the first ledge over the lake (the low ledge with the fifth page was unreachable:
+  walking off the ledge's end, the second vent's column catches her first); the burners first hung where the zoomed
+  camera couldn't see them from the pedestal (now lower, and the camera glances at them the first time she reaches
+  the tower floor); after the beat the burners went dark again (they now burn steady).
+
+**2. Which flame.** `KindlePrompt` (scripts/ui/kindle_prompt.gd) floats over the nearest flame she can kindle at
+whenever her mana isn't full: a faint "[R]" from 220 px, "[R] Kindle" in reach. Pressing R away from one says which
+kinds work (a flame bowl, a shrine, a candle, a lit brazier; "Wall torches won't do") and which side the nearest is
+on; the interface tour's mana card says the same.
+
+**3. Arrows that blend in.** Waymarks are chalk now (a pale 24×12 pixel arrow, the faintest light; Wren's chalk in
+the lore), and Lowbell has three on the way to Nan's door.
+
+**4. The cage behind her.** Going into a room further on than ever drops the gate or door at its way in for good
+(`PortcullisGate.seal()`, `ForgeDoor.seal()`; `ChapterRoot._enter`); doorways with nothing to close them get a raised
+"BackGate" at load. On a reload (Continue, or a death) the ways back are shut up to the room she starts in, never
+the way out of it, so she can't be shut in.
+
+**5. The hot spring.** At the end of Part 2 (the Belfry's room 9, after the great bell): an `AbilityShrine` showing
+the spring (sprite at 2x, steam), "Drink"; it gives heal. The bell's pictures no longer have the spring picture
+(they still give heal if the spring was somehow missed).
+
+**6. The end of a part.** The end card has Continue and Return to Title only (the "explore" button is gone).
+
+**7. Walking to Nan's.** After the opening pictures the game goes to Lowbell (`story_intro._next_scene()` returns
+`Journey.LOWBELL`): she walks through the village to Nan's door, then the cottage, then the cellar.
+
+**8. Levels.** "Choose a Level" on the title: Level 1 · The Passage (tutorial), Level 2 · The Belfry, Level 3 · The
+Observatory; the Passage's first sign and phase card say Level 1; the end cards say LEVEL n COMPLETE ("Continue to
+Level 2: The Belfry", "Continue to Level 3: The Observatory"). Internal ids and save flags are unchanged.
+
+**9. The HUD and its tour.** MANA (the bar and "MANA n") on the left, health ("n / max") on the right; the pause menu
+says MANA. The interface tour draws gold arrows (numbered when there are two) at the health bar and its number, and
+at the mana bar and its number.
+
+**Tests** (real input unless noted): wing `k2` (the Kiln Heart part by part, 51 checks, including the wrong tries: her
+own fire from the plate, the cube's bolt on the shut shutter, a normal gust, a burner lit by hand, the burners over an
+empty Heart), `heart_full` (the whole room from the Forge Door to the bell with her own feet and no teleports, 19;
+the scripted route takes 73 s of game time when it knows every answer), `heart_broken` (a skip on the tower floor or
+in the slag; the banner; Reset Room, 5), `heart_look` (screenshots); chapter `ways` (the cage), room 9 (the hot
+spring); experience `tours` (the arrows), `lowbell` (the chalk arrows), the story going to Lowbell; tutorial (the
+Level 1 card). Three chapter checks and one wing check asserted the old rule that gates behind her stay open (or
+that all of the Kilnworks' frost melts with the Great Kiln) and were changed to the new rule. A tutorial check had
+a typing warning that stops the suite from compiling (`weakref()` returns a Variant). Full run, all passing:
+tutorial 173, chapter 341, presentation 111, experience 243, rune 304, wing 347 (1,519 checks).
+
+**Looked at** (screenshots): every part of the Kiln Heart (hall, shutter, bank, lake, low ledge, gallery, racks,
+Heart, burners, hoist, balcony and bell), the tour's arrows on the health and mana cards.
+
+**Needs a human playtest:** the Kiln Heart's length and difficulty (design estimate 12 to 20 minutes for a first-time
+player; the tests prove every step can be done, not how long it takes), whether Delay, Large and Up-Right Split can be
+worked out from the room and its tablets, whether the three burners can be lit by hand fast enough to skip Split (each
+burns half a second), the hop over the Shutter Cube, and the cage dropping behind her (does it read as "go on", not
+as a trap?).
+
+## The Still Water: the Cistern's first room, reworked (2026-10-04)
+
+Requested: rework the Drowned Cistern's first room completely, to take about 30 minutes like the Cold Forge, with
+a whole new theme based on freezing things.
+
+**The room** (`cistern_still_water()` in `tools/build_wings.gd`, cols 0-56; the Sluice moved east to cols 56-80).
+Everything in it is about freezing things, each kind useful in its own way, with one rule: rising water freezes
+where it first meets the cold. Water frozen into a floor (two pools: Ice, Freeze, Long); old ice melted by fire
+(a plug in the doorway, the Warden's cube behind it); a creature frozen to stone-weight through an iron grate (the
+Clock Gate on the walkway); five fountains frozen into a stair by cold laid aslant (**Down-Right** and Long, from a
+mounted cube worked at a lectern); and a tide clock stopped at the hour by cold placed just above its mark, which
+opens the Sluice Door. The chain is in `docs/STORY_PLAYTHROUGH.md`. Three ledger pages, five hint stones, three
+kindle flames, the Hush's frost that melts when the clock strikes. Teaches Ice, Freeze, Long, Down-Right (Persist
+stays in the Sluice, "the word that made the silence").
+
+**New pieces.**
+- `CisternPool` (scripts/traps/cistern_pool.gd): black water too cold to swim (a hit and back to the candle);
+  objects sink (`WindBody.sink`); its surface freezes in 16 px strips wherever the cold reaches, into ice level
+  with the banks that holds while the cold lasts and a moment after, flickering before it gives way.
+- `Fountain` (scripts/puzzle/fountain.gd): a jet that leaps, holds, falls and rests; cold reaching it holds it as a
+  pillar of ice (one-way: land on top, jump up through it). A leaping jet checks the cold a few px at a time, so it
+  freezes exactly where it meets it (a fast leap could otherwise overshoot by 17 px, too tall a step).
+- `TideClock` (scripts/puzzle/tide_clock.gd): the column, the float, the strike (only when the float is held at the
+  mark for 1.5 s; the tide only touches it in passing), the "short of the hour" message, saved.
+- `FreezeField` now asks anything in the group "freezable" each frame (`chill_from(field)`); `covers(rect)` samples
+  the shape on a 10 px grid and needs a clear line from the cube; ice (the group "ice": frozen water, ice bridges)
+  never blocks the cold, iron grates let it through.
+- Pixel sprites from `tools/generate_cistern_sprites.gd`: the water, the fountain basin, the tide clock's frame and
+  float, the Warden's carving, a bronze pipe. The water in the jets and the clock and all the ice are drawn
+  effects, like the Ice Bridge.
+
+**Found while testing.** A plain array passed where the freeze check wants a typed one stopped every fountain
+freezing (a runtime type error); a slime on the floor path would have attacked her on every pass (it lives in a
+cell under a grate now, which also made the cold-through-bars idea); 24 px pillars made the stair a matter of
+pixel-perfect jumps (now 32); from the step below the gallery, or the walkway, the gallery and steps block the cold
+(so the wrong answer to test is Large, which freezes the tide a stride short); the run-up and jump off the long ice.
+
+**Tests** (real input unless noted): wing `c1` (part by part, 46 checks, with the wrong tries: a normal freeze on
+the long pool, the stair without Long), `c1_full` (the whole room with her own feet, 16; the scripted route takes 63
+s of game time), `c1_short` (Large holds the tide short, and the room says so, 3), `c1_broken` (the gatekeeper
+killed: banner, Reset Room, 3), `c1_look` (screenshots, not run by default). Full run, all passing: tutorial 173,
+chapter 341, presentation 111, experience 243, rune 304 (the Observatory's ice runes still work with the new
+freezing), wing 405 (1,577 checks).
+
+**Looked at** (screenshots): the stair and pools, the frozen first pool, the island, the far bank and the ice plug,
+the tide clock (running, struck), the clock gallery and steps, the walkway and the Clock Gate, the fountain court
+(running and frozen into a stair), the door.
+
+**Needs a human playtest:** whether it takes about 30 minutes (the design estimate is 20 to 30; the scripted route
+is shorter than the Cold Forge's because the room has less back-and-forth), whether "rising water freezes where it
+meets the cold" can be worked out from the fountains and then used at the clock, the fountain climb's timing, and
+the switch-on-as-the-tide-rises timing at the clock.
+
+## The Great Sluice: the Cistern's second room, reworked (2026-10-05)
+
+Requested: rework the second room to take around an hour to beat. Taken to mean the Drowned Cistern's second room
+(the Sluice, after the Still Water), since the request before it was about the Cistern's first room.
+
+**The room** (`cistern_great_sluice()` in `tools/build_wings.gd`, cols 56-119, replacing the Sluice). The Warden's
+sluice works. The Tide Bell is drowned in its well; the Great Sluice that drains it is balanced on two
+counterweights, a weight of three held still on a pan and the tide held at its high mark. It teaches **Persist**
+(the cold that never lets go) and uses it four ways, then reuses the room's one free cube:
+1. *The Silence Gallery:* a slime in a cell under a grate holds a slow plate (it opens the Silence Gate only after
+   8 s held; a freeze lasts 6). Persist on the Keeper Cube (dungeon-powered).
+2. *The Tide Hall:* an 18-tile basin set with iron teeth; its tide fills, stands, empties and rests (20.5 s). The
+   Tide Lever (a mounted cube over the west doorway, worked from three lecterns, paid with her mana) freezes it:
+   switched on while the hall is dry, the rising tide freezes level with the doorways; while it is up, where it
+   stands. Persist holds it while she crosses, hops the low pier and takes the Sluice Cube.
+3. *The Weigh House:* the pan wants three weights of stone: the Ballast (Strong on the Drover Cube; a kerb by the
+   well's wall stops it on the pan) and two slimes hopping on the pan, frozen by the Sluice Cube in the socket under
+   the shelf (Ice, Freeze, Right, Persist; free on the socket).
+4. *The high mark:* up the lift to the high ledge (through the high door over the hall), where the tide's top and
+   the mark can be seen; the lever switched on as the tide stands at its top. With the pan held, two seconds of both
+   open the Great Sluice for good (saved): the well drains through the sluice gate.
+5. *The fallen span:* the High Walk to the well has a three-tile gap. The Sluice Cube, switched off and taken out of
+   its socket (the sluice stays open), set at the edge: Ice, Bridge, Right.
+6. Down into the drained well and the Tide Bell (the end of the wing).
+Optional: three ledger pages (iv on a high gallery shelf, a charged jump; v washed out past the sluice gate; vi on
+the far pier: the tide frozen on its way down from the high ledge, and the Warden's lectern on the pier brings her
+down onto the next tide frozen at the doorways). Five hint stones, two kindle flames, three candles, the Hush's frost
+melting when the well drains. The admin page's entry is now "Cistern · The Great Sluice".
+
+**New pieces.**
+- `TidePool` (scripts/traps/tide_pool.gd): a basin's tide (or a still well) that cycles; too cold to swim (a hit, and
+  back to the nearest lit candle of its list); objects sink; cold holds the whole surface as one-way ice where it
+  stands, or where the rising water first meets the cold (checked 3 px at a time); `flush_with` makes ice that forms
+  within 6 px of a doorway floor flush with it; a circuit drains it for good (saved). The deep water is translucent
+  teal with drifting light; the ice sheet is drawn over the surface sprites, which stop and pale while frozen.
+- `TideMark` (scripts/puzzle/tide_mark.gd): a power source reading a tide: BELOW (the doorway gates: open while the
+  floor is dry or frozen below them) or HELD (the high mark: frozen at or above it).
+- `PressurePlate.weight_needed` and `weight()`: a weigh pan wanting several weights at once, with a notch for each,
+  lit as they arrive. One weight (the default) behaves exactly as before.
+- `FreezeField.covers()` takes a sampling step (the long tide uses 16 px).
+
+**Found while testing** (screenshots and the play-through tests). Tall piers would have blocked the ice crossing (now
+a low pier and a floating far pier); "Long and Persist" can't both be written, there is one modifier slot (the lever
+moved down over the doorway so a normal-reach Persist freeze catches the tide at the doorways); a 4 px lip between
+ice and the doorway floor stopped her (`flush_with`); the well's west wall ended 22 px above the floor and a slime
+slipped under it; a Strong wind threw the Ballast 250 px past the pan (the kerb), and a slime could freeze 2 px short
+of the pan (the pan now starts at the socket); with the socket at the wall end a stone pushed first would have taken
+its place (it is under the shelf now); the high mark needed a wall face (the high ledge and High Walk moved up a row);
+the dry basin could be crossed with charged jumps (the iron teeth); the deep water drew as a black block, and the ice
+was hidden under the water sprites; a cube must be switched off before it can be carried (the hint says so).
+
+**Tests** (real input unless noted): wing `c2` (part by part, 56 checks, with the wrong tries: the Keeper Cube as
+written lets go before the slow plate opens, a steady wind can't shift the Ballast), `c2_full` (the whole room with
+her own feet, 49; the scripted route takes 143 s of game time, against 63 s for the Still Water), `c2_pages` (the
+charged jump to page iv; page vi with the falling tide frozen under the far pier, and back down with the pier's
+lectern), `c2_broken` (the Keeper or a pan slime killed: banner, Reset Room; after the sluice opens nothing breaks,
+6), `c2_look` (screenshots, not run by default).
+Full run (2026-10-05), all passing: tutorial 173, chapter 341, presentation 111, experience 243, rune 304 (the
+Observatory's ice runes still work with the changed freeze), wing 530 (1,702 checks). `c2_pages` is 12 checks.
+
+**Looked at** (screenshots): the gallery and the cell, the Silence Gate, the hall dry, frozen low, frozen at its top
+and filling, the low pier and the Sluice Cube, the far pier, the high ledge and the high mark, the Weigh House (pan,
+socket, shelf, kerb, slimes), the bridge over the fallen span, the Bell Well full and drained, the outflow.
+
+**Needs a human playtest:** whether it takes about an hour (design estimate 45 to 70 minutes for a first-time player:
+the scripted route is 2.3 times the Still Water's, with more to work out; the tests prove it can be done, not how
+long it takes); whether the tide rule can be read from trying; the crossing's mana (about 60 of 100 in the tests);
+the high-mark timing from the high ledge (about 4 s in each 20 s cycle); whether players think to take the Sluice
+Cube back out for the bridge; the slimes on the pan; the far pier as an optional page.
 
 ## Known limitations and decisions
 
