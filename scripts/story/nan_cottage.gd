@@ -4,11 +4,11 @@ extends Node2D
 ## Nan's cottage, the grandma scene (told with portraits, DialogueBox). Echidna knocks, Nan lets her in, and does
 ## not know her. She tries her fire spell for the fire in the hearth and it
 ## will not come (the Hush took the word, and Nan says why), Nan sends her to
-## the old Novices' Way under the house, gives her the lantern, and she goes
-## down the cellar door.
+## the old pilgrim road, gives her the lantern, and she leaves through
+## the garden door for the Belfry's maintenance well.
 ##
 ## Everything here is pixel art: the room from the surface and town packs
-## (SurfaceArt), Nan, the hearth, the table, the jar shelf and the cellar door
+## (SurfaceArt), Nan, the hearth, the table, the jar shelf and the garden door
 ## from tools/generate_cottage_sprites.gd. It is walked with the real player,
 ## in a room two screens wide; the story runs as one coroutine (`_story`), and
 ## `stage` says where it is, for the tests and the hints.
@@ -64,6 +64,7 @@ var _waiting := false
 var _cooldown := 0.0
 var _time := 0.0
 var _fire_denied := false
+var _mouse_advance := false
 
 
 func _ready() -> void:
@@ -108,6 +109,9 @@ func _build_room() -> void:
 	var wall := SurfaceArt.tile_block(room, Vector2(0, FLOOR_Y - 11.0 * 16.0 * S), 48, 11, ["bricks_a", "bricks_b"], S, 5)
 	wall.name = "Wall"
 	wall.modulate = Color(0.78, 0.78, 0.92)
+	var interior := preload("res://scripts/story/cottage_interior.gd").new()
+	interior.z_index = 1
+	room.add_child(interior)
 	var planks: Array = ["plank_l"]
 	for i in 46:
 		planks.append("plank_m")
@@ -163,10 +167,23 @@ func _build_room() -> void:
 	SurfaceArt.sprite(props, "door_small", Vector2(DOOR_X, FLOOR_Y))
 	SurfaceArt.sprite(props, "barrel", Vector2(DOOR_X + 78, FLOOR_Y))
 	SurfaceArt.sprite(props, "crate", Vector2(DOOR_X + 112, FLOOR_Y))
+	# Everyday belongings occupy distinct floor bays; cups and books sit
+	# on furniture, rather than being scattered at unrelated world heights.
+	SurfaceArt.sprite(props, "bookshelf", Vector2(292, FLOOR_Y), 0.8)
+	SurfaceArt.sprite(props, "table", Vector2(430, FLOOR_Y), S)
+	SurfaceArt.sprite(props, "scroll_rack", Vector2(430, FLOOR_Y - SurfaceArt.size_of("table").y * S + 9), 0.65)
+	SurfaceArt.sprite(props, "bush", Vector2(650, FLOOR_Y), 1.2)
+	SurfaceArt.sprite(props, "barrel", Vector2(996, FLOOR_Y), S)
+	var household := preload("res://scripts/story/cottage_details.gd").new()
+	household.position = Vector2(0, FLOOR_Y)
+	props.add_child(household)
 	SurfaceArt.sprite(props, "shelf_jars", Vector2(SHELF_X, FLOOR_Y - 64))
-	SurfaceArt.sprite(props, "win_arch_lit", Vector2(WINDOW_X, FLOOR_Y - 74), S * 1.4)
+	SurfaceArt.sprite(props, "win_arch_lit", Vector2(WINDOW_X, FLOOR_Y - 74), S * 2.8)
+	SurfaceArt.sprite(props, "win_arch_lit", Vector2(240, FLOOR_Y - 74), S * 2.8)
 	SurfaceArt.sprite(props, "table", Vector2(TABLE_X, FLOOR_Y))
-	_lantern = SurfaceArt.sprite(props, "lantern", Vector2(TABLE_X, FLOOR_Y - 31.0))
+	var tabletop := FLOOR_Y - SurfaceArt.size_of("table").y * S + 6.0 * S
+	household.tabletop = tabletop - FLOOR_Y
+	_lantern = SurfaceArt.sprite(props, "wall_lantern", Vector2(TABLE_X - 24.0, tabletop), 0.85)
 	_lantern.z_as_relative = false
 	_lantern.z_index = 3
 	_lantern_light = _light(_lantern.position + Vector2(0, -22), COLD, 0.6, 1.1)
@@ -174,24 +191,24 @@ func _build_room() -> void:
 	# Herbs hung to dry from the beam, candles for warmth
 	for hx in [506.0, 531.0, 556.0]:
 		SurfaceArt.sprite(props, "vine_short", Vector2(hx, FLOOR_Y - 11.0 * 16.0 * S + 56.0))
-	var candle_a := SurfaceArt.animated(props, "candle", Vector2(TABLE_X + 14.0, FLOOR_Y - 31.0), 6.0, S)
+	var candle_a := SurfaceArt.animated(props, "candle", Vector2(TABLE_X + 22.0, tabletop), 6.0, 0.85)
 	candle_a.z_index = 1
 	var candle_b := SurfaceArt.animated(props, "candle", Vector2(NAN_X - 62.0, FLOOR_Y), 6.0, S)
 	candle_b.z_index = -2
 	props.add_child(_light(candle_b.position + Vector2(0, -16), COLD, 0.45, 0.9))
 	# Nan, in her armchair by the fire, facing the door
-	nan = SurfaceArt.animated(props, "nan_seated", Vector2(NAN_X, FLOOR_Y), 0.0, S, true)
+	nan = SurfaceArt.animated(props, "nan_seated", Vector2(NAN_X, FLOOR_Y), 0.0, 64.0 / SurfaceArt.size_of("nan_seated").y, true)
 	nan.name = "Nan"
 	nan.stop()
 	nan.z_index = -1
 	_hearth = SurfaceArt.animated(props, "hearth", Vector2(HEARTH_X, FLOOR_Y), 5.0, S)
 	_hearth.name = "Hearth"
-	_fire_light = _light(Vector2(HEARTH_X, FLOOR_Y - 34), COLD, 1.3, 3.6)
+	_fire_light = _light(Vector2(HEARTH_X, FLOOR_Y - 34), Color(1.0, 0.76, 0.48), 1.3, 3.6)
 	props.add_child(_fire_light)
-	_door_sprite = SurfaceArt.animated(props, "cellar_door", Vector2(CELLAR_X, FLOOR_Y), 0.0, S)
-	_door_sprite.name = "CellarDoor"
+	_door_sprite = SurfaceArt.animated(props, "door_nan", Vector2(CELLAR_X, FLOOR_Y), 0.0, S)
+	_door_sprite.name = "GardenDoor"
 	_door_sprite.stop()
-	# Nan, to talk to; the cellar door, to go down (not yet)
+	# Nan, to talk to; the garden door, to leave after the conversation
 	nan_talk = Interactable.new()
 	nan_talk.name = "TalkToNan"
 	nan_talk.verb = "Talk"
@@ -202,7 +219,7 @@ func _build_room() -> void:
 	add_child(nan_talk)
 	cellar_door = Interactable.new()
 	cellar_door.name = "CellarDoorUse"
-	cellar_door.verb = "Go down"
+	cellar_door.verb = "Leave for the pilgrim road"
 	cellar_door.echo_can_use = false
 	cellar_door.size = Vector2(56, 64)
 	cellar_door.position = Vector2(CELLAR_X, FLOOR_Y)
@@ -376,8 +393,8 @@ func _story() -> void:
 	await _say(nan, "Find the old words, and yours will come home.", false, "bright")
 	await _say(nan, "And the bell. The big bell kept the Hush away for sixty years. It rang the tune I'm always humming.", false, "warm")
 	await _say(player, "Then I'll ring it again. But the road up the mountain has been frozen shut for nine winters.", false, "determined")
-	await _say(nan, "Not the road, love. This cottage was the Choir's gatehouse, and I was their last novice, when I was your age.", false, "bright")
-	await _say(nan, "The Novices' Way starts right under our feet, in the cellar, and climbs up through the inside of the mountain.", false, "warm")
+	await _say(nan, "The summit road, yes. But the old pilgrim path past my garden still reaches the Belfry's outer gate. I walked it when I was a novice.", false, "bright")
+	await _say(nan, "If the gate is sealed, find the well to its east. The bellkeepers used that maintenance passage to reach the tower in winter. Take the lantern; the wards still recognise its light.", false, "warm")
 	stage = "lantern"
 	await _say(nan, "Take my lantern. It's the only thing in this house that still burns properly.", false, "warm")
 	await _give_lantern()
@@ -389,7 +406,7 @@ func _story() -> void:
 	player.unlock_controls()
 	cellar_door.enabled = true
 	cellar_door.interacted.connect(func(_who): _go_down(), CONNECT_ONE_SHOT)
-	_set_hint("%s  go down the cellar door" % InputLabels.primary("interact"))
+	_set_hint("%s  leave through the garden door" % InputLabels.primary("interact"))
 
 
 ## Echidna tries to light the fire for Nan and the spell will not come.
@@ -435,7 +452,7 @@ func _give_lantern() -> void:
 	await glow.finished
 
 
-## The cellar door opens on the stair, and the screen goes dark.
+## The garden door opens onto the road, and the screen fades.
 func _go_down() -> void:
 	if stage == "leaving":
 		return
@@ -446,6 +463,7 @@ func _go_down() -> void:
 	Sfx.play("door_creak", Vector2(CELLAR_X, FLOOR_Y - 20), -4.0, 0.05)
 	_door_sprite.frame = 1
 	GameState.set_flag("cottage.done")
+	GameState.set_flag("story.nan_lantern")
 	var t := create_tween()
 	t.tween_interval(0.8)
 	t.tween_property(_fade, "color:a", 1.0, 1.4)
@@ -454,7 +472,7 @@ func _go_down() -> void:
 
 
 func next_scene() -> String:
-	return Journey.after_story()
+	return "res://scenes/story/pilgrims_path.tscn"
 
 
 # ------------------------------------------------------------------ talking
@@ -474,7 +492,7 @@ func _wait_press() -> void:
 	if dialogue.is_typing:
 		await dialogue.typed
 	_cooldown = 0.35
-	_set_hint("%s  ▸" % InputLabels.primary("interact"))
+	_set_hint("Click or %s  ▸" % InputLabels.primary("interact"))
 	_waiting = true
 	await advanced
 	_waiting = false
@@ -495,11 +513,18 @@ func _physics_process(delta: float) -> void:
 	elif _waiting and _cooldown <= 0.0 and _pressed():
 		_waiting = false
 		advanced.emit()
+	_mouse_advance = false
+
+
+func _input(event: InputEvent) -> void:
+	if dialogue and dialogue.showing and not get_tree().paused and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_mouse_advance = true
+		get_viewport().set_input_as_handled()
 
 
 func _pressed() -> bool:
 	return Input.is_action_just_pressed("interact") or Input.is_action_just_pressed("jump") \
-		or Input.is_action_just_pressed("ui_accept")
+		or Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("shoot") or _mouse_advance
 
 
 func _process(delta: float) -> void:

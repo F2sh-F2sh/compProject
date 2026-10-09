@@ -2,13 +2,13 @@
 
 [ext_resource type="Texture2D" path="res://assets/ui/banner.png" id="1_h6353"]
 [ext_resource type="FontFile" path="res://assets/fonts/im_fell_english/IMFellEnglish-Regular.ttf" id="2_yopyk"]
-[ext_resource type="FontFile" path="res://assets/fonts/silkscreen/Silkscreen-Regular.ttf" id="3_geeam"]
+[ext_resource type="FontFile" path="res://assets/fonts/patrick_hand/PatrickHand-Regular.ttf" id="3_geeam"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_disabled.png" id="4_u3x1u"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_focus.png" id="5_cvj3y"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_hover.png" id="6_71yf6"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_pressed.png" id="7_4jsdf"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_idle.png" id="8_xaha7"]
-[ext_resource type="FontFile" path="res://assets/fonts/pixelify_sans/PixelifySans.ttf" id="9_xbbgl"]
+[ext_resource type="FontFile" path="res://assets/fonts/patrick_hand/PatrickHand-Regular.ttf" id="9_xbbgl"]
 [ext_resource type="Texture2D" path="res://assets/ui/check_on.png" id="10_hivbn"]
 [ext_resource type="Texture2D" path="res://assets/ui/check_off.png" id="11_vxf3k"]
 [ext_resource type="Texture2D" path="res://assets/ui/scroll_grabber.png" id="12_fkqrh"]
@@ -18,7 +18,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/slider_grabber_hi.png" id="16_w4h6p"]
 [ext_resource type="Texture2D" path="res://assets/ui/slider_fill.png" id="17_kyf2a"]
 [ext_resource type="Texture2D" path="res://assets/ui/slider_track.png" id="18_lg6d1"]
-[ext_resource type="FontFile" path="res://assets/fonts/jacquard12/Jacquard12-Regular.ttf" id="19_tisfe"]
+[ext_resource type="FontFile" path="res://assets/fonts/im_fell_english/IMFellEnglish-Regular.ttf" id="19_tisfe"]
 [ext_resource type="Texture2D" path="res://assets/ui/panel_lite.png" id="20_7al2g"]
 [ext_resource type="Texture2D" path="res://assets/ui/nameplate.png" id="21_lberr"]
 [ext_resource type="Texture2D" path="res://assets/ui/panel.png" id="22_x8ho0"]
@@ -391,7 +391,7 @@ axis_stretch_vertical = 2
 
 [resource]
 default_font = ExtResource("9_xbbgl")
-default_font_size = 16
+default_font_size = 20
 BannerPanel/base_type = &"PanelContainer"
 BannerPanel/styles/panel = SubResource("StyleBoxTexture_txmvu")
 BookLabel/base_type = &"Label"
@@ -404,7 +404,7 @@ Button/colors/font_focus_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
 Button/colors/font_hover_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
 Button/colors/font_hover_pressed_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
 Button/colors/font_pressed_color = Color(0.7882353, 0.63529414, 0.2901961, 1)
-Button/font_sizes/font_size = 16
+Button/font_sizes/font_size = 20
 Button/fonts/font = ExtResource("3_geeam")
 Button/styles/disabled = SubResource("StyleBoxTexture_t7lvm")
 Button/styles/focus = SubResource("StyleBoxTexture_4jsf5")
@@ -414,7 +414,7 @@ Button/styles/normal = SubResource("StyleBoxTexture_nml1u")
 Button/styles/pressed = SubResource("StyleBoxTexture_y0v6r")
 CapsLabel/base_type = &"Label"
 CapsLabel/colors/font_color = Color(0.7882353, 0.63529414, 0.2901961, 1)
-CapsLabel/font_sizes/font_size = 16
+CapsLabel/font_sizes/font_size = 20
 CapsLabel/fonts/font = ExtResource("3_geeam")
 CheckBox/colors/font_color = Color(0.9098039, 0.8627451, 0.7529412, 1)
 CheckBox/colors/font_focus_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
@@ -464,7 +464,7 @@ LitePanel/styles/panel = SubResource("StyleBoxTexture_mvlav")
 MenuButton/colors/font_color = Color(0.9098039, 0.8627451, 0.7529412, 1)
 MenuButton/colors/font_focus_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
 MenuButton/colors/font_hover_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
-MenuButton/font_sizes/font_size = 16
+MenuButton/font_sizes/font_size = 20
 MenuButton/fonts/font = ExtResource("3_geeam")
 MenuButton/styles/disabled = SubResource("StyleBoxTexture_t7lvm")
 MenuButton/styles/focus = SubResource("StyleBoxTexture_4jsf5")
@@ -476,7 +476,7 @@ NamePlate/styles/panel = SubResource("StyleBoxTexture_6ktjh")
 OptionButton/colors/font_color = Color(0.9098039, 0.8627451, 0.7529412, 1)
 OptionButton/colors/font_focus_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
 OptionButton/colors/font_hover_color = Color(0.9411765, 0.8235294, 0.47843137, 1)
-OptionButton/font_sizes/font_size = 16
+OptionButton/font_sizes/font_size = 20
 OptionButton/fonts/font = ExtResource("3_geeam")
 OptionButton/styles/disabled = SubResource("StyleBoxTexture_t7lvm")
 OptionButton/styles/focus = SubResource("StyleBoxTexture_4jsf5")

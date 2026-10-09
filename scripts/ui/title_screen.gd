@@ -138,10 +138,11 @@ func _build_art() -> void:
 	halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(halo)
 	_portrait = TextureRect.new()
-	_portrait.texture = DialogueBox.portrait("echidna", "neutral")
+	_portrait.texture = FRAMES.get_frame_texture("idle", 0)
 	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_portrait.size = DialogueBox.ART_SIZE * 4.0
-	_portrait.position = Vector2(0, 648 - DialogueBox.ART_SIZE.y * 4.0 + 64.0)
+	_portrait.size = Vector2(320, 320)
+	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait.position = Vector2(60, 250)
 	_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_portrait)
@@ -286,7 +287,7 @@ func _label(text: String, font: Font, size: int, color: Color) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font)
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", maxi(size, 18))
 	l.add_theme_color_override("font_color", color)
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	l.add_theme_constant_override("outline_size", 4)
@@ -298,7 +299,7 @@ func _button(text: String, on_press: Callable) -> Button:
 	b.text = text
 	b.custom_minimum_size = Vector2(340, 46)
 	b.add_theme_font_override("font", FONT)
-	b.add_theme_font_size_override("font_size", 16)
+	b.add_theme_font_size_override("font_size", 18)
 	b.pressed.connect(func(): Sfx.play("ui_click"); on_press.call())
 	return b
 
@@ -351,6 +352,8 @@ func _continue_target() -> String:
 		return CHAPTER_2
 	if GameState.has_flag("tutorial.done"):
 		return CHAPTER
+	if GameState.has_flag("story.movement_done"):
+		return TUTORIAL
 	return ""
 
 
@@ -360,18 +363,15 @@ func _on_continue() -> void:
 		_start(target)
 
 
-## Starts over (chapter progress is wiped; a finished tutorial stays
-## finished). Asks for a second press if there is progress to lose.
+## Starts over with cleared story, chapter, tutorial and spell progress.
+## Asks for a second press if there is progress to lose.
 func _on_new_game() -> void:
 	var has_progress := GameState.checkpoint_scene != "" or GameState.count_flags("ch1.") > 0
 	if has_progress and not _new_armed:
 		_new_armed = true
 		new_button.text = "Press again: start over"
 		return
-	var tutorial_done := GameState.has_flag("tutorial.done")
 	GameState.clear_all()
-	if tutorial_done:
-		GameState.set_flag("tutorial.done")
 	# The story, then Lowbell; the village leads on to the tutorial (or the
 	# chapter, once the tutorial is done)
 	_start(STORY)
@@ -392,8 +392,12 @@ func _show_parts(show: bool) -> void:
 
 ## Part 1 always replays from its start.
 func _on_part_1() -> void:
+	GameState.clear_progress("ability.")
+	GameState.clear_progress("tutorial.")
+	GameState.set_flag("story.movement_done", false)
 	GameState.clear_checkpoint(TUTORIAL)
-	_start(TUTORIAL)
+	GameState.clear_checkpoint(Journey.MOVEMENT)
+	_start(Journey.MOVEMENT)
 
 
 ## Starting a later part straight from the list: Echidna has the spells she
@@ -430,7 +434,7 @@ func _build_admin(column: VBoxContainer) -> void:
 	for spec in ADMIN_ROOMS:
 		var b := _button(spec[0], _admin_jump.bind(spec[1], spec[2]))
 		b.custom_minimum_size = Vector2(290, 36)
-		b.add_theme_font_size_override("font_size", 14)
+		b.add_theme_font_size_override("font_size", 18)
 		grid.add_child(b)
 	_admin.add_child(_button("Back", func(): _show_admin(false)))
 

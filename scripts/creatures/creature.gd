@@ -28,7 +28,7 @@ const GRAVITY := 900.0
 
 ## kind: how it moves, health, speeds, sight, contact damage, and its traits.
 const KINDS := {
-	"bat": {"move": "flyer", "health": 8, "speed": 60.0, "rush": 170.0, "sight": 170.0, "damage": 1, "frames": 2, "puff": Color(0.55, 0.4, 0.75)},
+	"bat": {"move": "flyer", "health": 8, "speed": 80.0, "rush": 170.0, "sight": 260.0, "damage": 1, "frames": 2, "puff": Color(0.55, 0.4, 0.75)},
 	"moth": {"move": "flyer", "health": 10, "speed": 45.0, "rush": 120.0, "sight": 210.0, "damage": 1, "frames": 2, "puff": Color(1.0, 0.9, 0.6)},
 	"jelly": {"move": "drifter", "health": 12, "speed": 22.0, "sight": 150.0, "damage": 1, "frames": 2, "puff": Color(0.5, 0.9, 0.95)},
 	"hushling": {"move": "drifter", "health": 10, "speed": 32.0, "sight": 190.0, "damage": 0, "drain": 14.0, "frames": 2, "puff": Color(0.2, 0.2, 0.3)},
@@ -86,11 +86,12 @@ func _build() -> void:
 		frames.add_frame(&"default", atlas)
 	frames.set_animation_speed(&"default", 6.0 if spec["move"] == "flyer" else 4.0)
 	sprite.sprite_frames = frames
-	sprite.scale = Vector2.ONE * DRAW_SCALE
+	var draw_scale := 64.0 / maxf(w, strip.get_height()) if kind == "bat" else DRAW_SCALE
+	sprite.scale = Vector2.ONE * draw_scale
 	sprite.offset = Vector2(0, -strip.get_height() / 2.0)
 	sprite.play(&"default")
 	add_child(sprite)
-	var size := Vector2(w, strip.get_height()) * DRAW_SCALE
+	var size := Vector2(w, strip.get_height()) * draw_scale
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
 	rect.size = size * 0.6
@@ -158,6 +159,24 @@ func _target() -> Node2D:
 
 func _fly(delta: float) -> void:
 	var target := _target()
+	if kind == "bat" and target:
+		# Briefly wheel above the player, then swoop again. A bat only
+		# returns home after losing sight, not after every attack.
+		if _state == "idle" or _state == "climb":
+			_set_state("rush")
+		if _state == "rush" and _state_time > 1.25:
+			_set_state("circle")
+		elif _state == "circle" and _state_time > 0.45:
+			_set_state("rush")
+		var aim := target.global_position + Vector2(0, -16)
+		if _state == "circle":
+			aim += Vector2(54.0 * facing, -72.0)
+		var desired := (aim - global_position).normalized() * float(spec["rush"])
+		velocity = velocity.lerp(desired, 1.0 - exp(-6.0 * delta))
+		move_and_slide()
+		return
+	if _state == "circle":
+		_set_state("climb")
 	match _state:
 		"idle":
 			var hover := home + Vector2(sin(_time * 0.7) * 40.0, sin(_time * 1.6) * 10.0)

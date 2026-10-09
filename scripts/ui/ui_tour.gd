@@ -67,13 +67,15 @@ static func play(host: Node, tour_id: String, force := false) -> UiTour:
 static func play_later(host: Node, tour_id: String, seconds: float) -> void:
 	if not enabled or GameState.has_flag("ui.tour." + tour_id) or host == null or not host.is_inside_tree():
 		return
+	var reference: WeakRef = weakref(host)
 	host.get_tree().create_timer(seconds).timeout.connect(func():
-		if is_instance_valid(host) and host.is_inside_tree():
-			var player := host.get_tree().get_first_node_in_group("player")
+		var target := reference.get_ref() as Node
+		if target and target.is_inside_tree():
+			var player := target.get_tree().get_first_node_in_group("player")
 			if player != null and (player.get("is_dead") or player.get("controls_locked")):
-				play_later(host, tour_id, 2.0)
+				play_later(target, tour_id, 2.0)
 			else:
-				play(host, tour_id))
+				play(target, tour_id))
 
 
 ## Where things are on the screen (offsets from the top-left corner): the
@@ -103,7 +105,7 @@ static func steps_for(tour_id: String) -> Array:
 			return [
 				{"corner": "tl", "rect": Rect2(16, 52, 270, 26), "eyebrow": "THE SCREEN · MANA", "title": "Mana is your flame",
 					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
-					"text": InputLabels.format("(1) This bar is your mana, your lantern's flame. Spells draw on it, and it does not fill by itself. (2) The same, in numbers. To fill it again, hold {reload} beside a flame bowl like this one (one burns at the way into most rooms), a shrine, a candle or a lit brazier. Wall torches won't do. Beaten slimes drop sparks that give some back.")},
+					"text": InputLabels.format("(1) This bar is your mana, your lantern's flame. Spells draw on it, and it does not fill by itself. (2) The same, in numbers. To restore it, hold {reload} anywhere. You can keep moving while you reload. Beaten slimes drop sparks that give some back.")},
 				{"corner": "br", "rect": Rect2(-176, -104, 160, 88), "eyebrow": "THE SCREEN · SPELLS", "title": "Your spells",
 					"text": "Each spell has a slot here: its key on top and its mana cost below. A slot goes dim when you don't have enough mana for it. New spells appear here as you remember them."},
 			]
@@ -129,7 +131,7 @@ static func steps_for(tour_id: String) -> Array:
 					"text": InputLabels.format("Press {rune_overview} at any time to see every cube in the room: what each one does, whether it is on, what it costs and which words are locked. Switch any running cube off from there, from anywhere in the room, or press Inscribe on the cube you are standing at.")},
 				{"corner": "tl", "rect": Rect2(16, 52, 270, 26), "eyebrow": "RUNE CUBES · 5 OF 5", "title": "Running runes use mana",
 					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
-					"text": "A rune you power drains your mana (1) while it runs (2), and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. When you run low, kindle at a flame bowl, a shrine, a candle or a lit brazier (not a wall torch)."},
+					"text": "A rune you power drains your mana (1) while it runs (2), and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. When you run low, hold R to reload. Stop powering a rune first if it is drawing your mana."},
 			]
 	return []
 

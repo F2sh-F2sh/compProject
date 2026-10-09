@@ -99,7 +99,7 @@ the Archivist. Brother Aldous stays only as a name in an existing ledger page.
 | Part | What happens | Words / spells returned |
 |---|---|---|
 | Prologue | Intro pictures, Lowbell, **Nan's cottage** | none; Echidna learns her fire spell has gone |
-| Novices' Way 1 · Passage | The monks' training path from Nan's cellar. Echidna regains her three family spells | **Flame** (fireball), **Spring** (heal), **Echo** |
+| Novices' Way 1 · Passage | Movement lessons outside the abbey; Echo and Fire return in its entry passage, Heal at the Belfry spring | **Flame** (fireball), **Spring** (heal), **Echo** |
 | Novices' Way 2 · Belfry | Ledger pages; rings the great bell. One clear toll; Lowbell's chimes sound for a moment; the crack makes it thin. A chalk star appears at the top of the stair | none |
 | Novices' Way 3 · Observatory | Learns the First Tongue's first words. Opens the dome: stars, the dark gap, the floor lens showing the frozen room below | Right, Lift, Strong, Bridge, Down, Up-Right |
 | **Ch 1 · Kilnworks** | The Smith's furnaces froze. Ledger: why the wings were split. First bell: the Forge Bell | Fire, Projectile, Up, Large, Burst, Delay, Explode, Split |
@@ -155,13 +155,13 @@ Nan's existing sprite). About 3 minutes. It replaces the three BRIDGE cards.
 4. Nan: *"The Hush takes names first, then the little spells, then everything else. It took my knitting
    word this morning. But words don't die, love. The monks carved theirs in stone. They'll still be
    up there."* → *"The bell kept the Hush away for sixty years. Somebody has to ring it again."*
-5. She points at the cellar door at the back. *"The Novices' Way starts in my cellar. Your grandfather
-   used it to sneak up the mountain."* Then: *"Take my lantern, love. It's the only thing in this house that still
+5. Nan sends Echidna along the pilgrim road outside her garden. If the Belfry's gate is sealed,
+   its bellkeepers' maintenance well lies to the east. Then: *"Take my lantern, love. It's the only thing in this house that still
    burns properly."* The lantern leaves the table, comes to Echidna, and her own light grows.
 6. *"I'll bring your words back, Nan. And I'll tell you my name as many times as it takes."* →
    *"That's kind. Go on. And mind the step."*
-7. **Use the cellar door** (it opens on the stair down; the screen fades). Title card on arrival:
-   **THE NOVICES' WAY · PHASE 1 · THE CELLAR.**
+7. **Leave through the garden door.** Cross the pilgrim road, read the sealed gate, and enter
+   the maintenance well. Its lamps lead to the movement tutorial; spell shrines come after it.
 
 Nan hums four notes while Echidna leaves; the same notes sound again at the Echo Door.
 
@@ -176,36 +176,32 @@ lines are in the script (a few are split or reworded from the beats above). The 
 monastery, with plaques and traps that taught the body first, then the spells. That is why the
 beginning has signs and later wings don't: the plaques are the monks' training notes.
 
-**Part 1 · The Passage** (today's tutorial, reordered, plus two new stops):
+**Movement tutorial:** six lessons, with a lantern and no spells or spell shrines.
 
-| Phase | Name | Today's lesson | What happens |
+| Phase | Name | Lessons | What happens |
 |---|---|---|---|
-| 1 | The Cellar | L1 First Steps, L2 Jumping | Walk, sprint, jump. Lantern only. |
-| 2 | The Broken Stair | L3 Sprint Jumps, L4 High Jumps | Gap and wall. |
-| 3 | The Novices' Traps | L5 Spikes, L6 Pistons | Hazards and rhythm. |
-| 4 | **The Kept Flame** | L7 Fire (re-framed) | **Earn Flame (fireball).** See below. |
-| 5 | **The Spring** | new, small | **Earn Spring (heal).** See below. |
-| 6 | The Cells | L8 Slimes | First fight with finite mana; learn to Kindle. |
-| 7 | **The Echo Door** | L9 Echoes | **Earn Echo.** Nan's four notes open the door. |
+| 1 | The Pilgrim Passage | First Steps, Jumping | Walk, sprint and jump. |
+| 2 | The Broken Stair | Sprint Jumps, High Jumps | Cross gaps and climb a wall. |
+| 3 | The Novices' Traps | Spikes, Pistons | Learn hazard timing and finish the tutorial. |
 
-**Earning Fire.** The monks kept one flame burning for sixty years in a small shrine so the Hush
-could not take the word. The shrine carves FLAME in the First Tongue. As Echidna reads it the word
-returns "like a name on the tip of the tongue". Toast: *"You remember a word: FLAME. Click to throw
-fire. It costs flame (mana). Hold R at a lit shrine to kindle your lantern."* She lights the next
-dead brazier at once (a fireball lights braziers), and the existing 3-piston course is now stopped
-with the fireball switch.
+The separate **abbey entry passage** begins at the Echo inscription. It restores Echo,
+then Fire, and tests those learned spells before the Belfry's first room. The inscriptions
+explain what the Hush took and why the preserved words can return.
 
-**Earning Heal.** Water still runs in the old washing spring. *"Running water is the one thing the
-Hush has never managed to hold still."* She cups it; the word SPRING returns. Toast: *"Stand still and
-press Q to heal. It costs flame."* Slimes come next, so she has a way to recover.
+**Earning Echo.** The Choir carved the family's Echo into stone. Echidna forgot the word,
+but the inscription remembers. Reading it restores Echo before the plate-and-gate lesson.
 
-**Earning Echo.** The Echo Door answers whatever is said to it, as the novices learned to listen to
-themselves. The word ECHO returns; the existing Echo lesson follows. The door opens on **the Belfry's
-cellar**, which is the first room of Part 2 ("The Forgotten Entrance"), so Part 1 flows straight into
-Part 2 with a fade and the card **PART 2 · THE BELFRY**.
+**Earning Fire.** The monks kept a flame alight so the Hush could not erase its word.
+Reading it restores Fire before the fire-switch course. Fire costs mana; holding R restores
+mana anywhere, without a refill flame.
 
-**Gating for old saves.** If a save has `tutorial.done` or any `ch1.*`/`ch2.*` flag, the three abilities
-are granted automatically so nobody loses a skill they already used.
+**Earning Heal.** Heal returns at the hot spring at the end of the Belfry, after the nine
+rooms. Running water escaped the Hush's stillness. Drinking restores the healing word while
+preserving learned Fire and Echo. Stand still and press Q: 2 health for 20 mana; a hit interrupts it.
+
+**Old saves.** Loading a genuinely old save with completed tutorial/chapter progress and
+no explicit ability entries migrates its previously available spells once. Explicit locked
+abilities are respected. Ordinary room flags never grant spells during play.
 
 **Part 2 · The Belfry** (Chapter 1 today, 9 rooms, rings the great bell) and **Part 3 · The
 Observatory** (Chapter 2 today, 8 rooms) keep their rooms and puzzles. Changes: less text, the glue
@@ -218,9 +214,9 @@ Stair**.
 ## 4. Structure, flow and naming
 
 ```
- Intro pictures → Lowbell → Nan's cottage → [cellar door]
+ Intro pictures → Lowbell → Nan's cottage → pilgrim road → maintenance well
    THE NOVICES' WAY (tutorial)  Part 1 Passage → Part 2 Belfry → Part 3 Observatory
-     → THE LONG STAIR (the Landing: four doors, a kindling flame)
+     → THE LONG STAIR (the Landing: four doors, safe resting space)
          Chapter 1  The Kilnworks     (Fire)   → Forge Bell
          Chapter 2  The Drowned Cistern (Ice)  → Tide Bell
          Chapter 3  The Lampworks      (Light)  → Lamp Bell
@@ -231,7 +227,7 @@ Stair**.
 - **Linear on purpose.** The wings open in order; each starts easier and ends harder, and each depends
   on the last. Later (optional): let wings 1 and 2 be played in either order.
 - **The Landing** (`scenes/story/long_stair.tscn`, ~1 min each visit) is a small walkable ledge: four doors,
-  four bell-lights showing progress, a kindling flame, one chalk star. It is the "hub-lite": no shops, no
+  four bell-lights showing progress, one chalk star. It is the "hub-lite": no shops, no
   upgrades. It brightens a little with each bell (colour returning).
 - **Names.** Displayed names are labels in one ordered list, not baked into scenes. Internal ids stay
   stable: `tutorial`, `ch1`, `ch2` for the old content, and new wings use `kiln`, `cistern`, `lamps`,
@@ -341,12 +337,13 @@ a mural, words you discover by doing it, and the boss rewards (Explode, Repeat).
 Mana is **flame**: the lantern's fire. 100 at full, as now; the existing rules (fireball 5, heal 20, each
 Echo −10 to the cap, ward circles, pedestals, "runes drawing your mana", upkeep) stay.
 
-**Removed:** the free R refill anywhere, and the automatic refill at 0.
+**Mana restoration:** hold R anywhere for 1.5 seconds. There is no automatic refill at zero.
+Active runes drawing upkeep must be switched off first; Echo capacity debt still applies.
 
 **How you get it back:**
 | Source | Rule | Why |
 |---|---|---|
-| **Kindle points** (lit shrines and a per-region flame: forge, basin, lamp, star pool) | Stand at one and **hold R** (1.5 s) to refill fully | Visible, safe, place-bound. Every room has one at its entrance. |
+| **Reload** | **Hold R anywhere** for 1.5 seconds | No flame dependency or backtracking; refill posts are hidden. |
 | **Spark Motes** | Defeated creatures drop +6 each; breakable spark pods in fight rooms | Rewards fighting well |
 | **Echo** | An Echo re-casts your recorded fireballs **for free** | A clever way to stretch mana (already built) |
 | **Trickle** | Up to 25% of the cap comes back at 4/s when no rune is running | A floor so no one is stuck at 0 |
@@ -446,8 +443,8 @@ solved in the wrong order lock the door (Reset fixes it).
 - No arrows or glowing markers outside Full, with one exception (2026-10-09, asked for in the polish pass):
   any target a rune, beam or bolt must reach that is off the screen gets a small gold pip at the screen's
   edge (Light and Full guidance), so no target is found by guessing.
-- The hint skulls listen before they speak (2026-10-09): the first hint after about a minute in the room, the
-  second 2.5 minutes after that, the solution 4 minutes after that. "Hints without waiting" (an assist) skips it.
+- Hint skulls answer immediately. Repeated interaction reveals direction, explanation, then the solution.
+  There is no wait timer or associated assist setting in the interface.
 
 ---
 

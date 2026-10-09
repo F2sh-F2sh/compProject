@@ -116,6 +116,8 @@ const STEP_SOUND_MIN_SPEED := 40.0
 var _plants_heard := 0
 var _last_step_variant := 0
 var _moving_time := 0.0
+var is_pushing := false
+var _push_hands: Node2D
 
 func _ready() -> void:
 	add_to_group("player")
@@ -138,15 +140,21 @@ func _ready() -> void:
 		var c := Color(1.0, 0.7, 0.4, 0.85)
 		_aim_marker.draw_polyline(PackedVector2Array([Vector2(-4, -5), Vector2(3, 0), Vector2(-4, 5)]), c, 1.5))
 	add_child(_aim_marker)
+	_push_hands = Node2D.new()
+	_push_hands.z_index = 3
+	_push_hands.draw.connect(func():
+		if not is_pushing:
+			return
+		var direction := -1.0 if animated_sprite.flip_h else 1.0
+		for y in [-23.0, -17.0]:
+			_push_hands.draw_line(Vector2(direction * 6, y + 3), Vector2(direction * 19, y), Color("54416f"), 5.0)
+			_push_hands.draw_rect(Rect2(direction * 19 - 2, y - 2, 4, 4), Color("a699ba")))
+	add_child(_push_hands)
 	# While she charges a jump: a light breeze at her feet, and a small bar
 	# over her head that fills and turns gold when the jump is at full power
 	add_child(preload("res://scripts/fx/charge_breeze.gd").new())
 	add_child(preload("res://scripts/fx/charge_bar.gd").new())
 	# "[R] Kindle" over the flames that refill her mana (not wall torches)
-	var kindle_prompt := KindlePrompt.new()
-	kindle_prompt.name = "KindlePrompt"
-	kindle_prompt.player = self
-	add_child(kindle_prompt)
 
 	if hurtbox:
 		hurtbox.damage_received.connect(take_damage)
@@ -362,13 +370,19 @@ func _clear_motion_state() -> void:
 
 ## Walking into a pushable block while standing shoves it along.
 func _push_blocks() -> void:
+	is_pushing = false
+	_push_hands.queue_redraw()
 	if not is_on_floor():
 		return
+	var direction := Input.get_axis("move_left", "move_right")
 	for i in get_slide_collision_count():
 		var collision := get_slide_collision(i)
 		var body := collision.get_collider()
 		if body is PushableBlock and absf(collision.get_normal().x) > 0.7:
-			body.push(-collision.get_normal().x)
+			if direction * collision.get_normal().x < -0.1:
+				body.push(direction)
+				is_pushing = true
+	_push_hands.queue_redraw()
 
 
 func _flash_hit() -> void:
@@ -465,7 +479,7 @@ func _physics_process(delta: float) -> void:
 		heal_player()
 		
 	# Kindling lasts only while the key is held and she stays at the flame
-	if is_reloading and (not Input.is_action_pressed("reload") or not (Settings.assist_infinite_mana or near_kindle())):
+	if is_reloading and not Input.is_action_pressed("reload"):
 		is_reloading = false
 		reload_progress = 0.0
 		update_mana_ui()
@@ -719,6 +733,9 @@ func _standing_on_group(group_name: StringName) -> bool:
 
 
 func update_animation(delta: float) -> void:
+	if is_pushing and is_on_floor():
+		play_anim(&"push")
+		return
 	var current := animated_sprite.animation
 	var desired: StringName
 
@@ -923,10 +940,7 @@ func hint_kindle() -> void:
 	if Settings.assist_infinite_mana or Time.get_ticks_msec() - _last_kindle_hint < 4000:
 		return
 	_last_kindle_hint = Time.get_ticks_msec()
-	var text := "No flame to kindle at here.\nHold %s beside a flame bowl, a shrine, a candle\nor a lit brazier. Wall torches won't do." % InputLabels.primary("reload")
-	var nearest := nearest_kindle()
-	if nearest:
-		text += "\nThe nearest is to your %s." % ("right" if nearest.global_position.x > global_position.x else "left")
+	var text := "Hold %s to restore mana." % InputLabels.primary("reload")
 	FloatText.spawn(get_parent(), global_position + Vector2(0, -60), text, Color(0.72, 0.9, 1.0), 20.0, 3.6)
 
 
@@ -941,11 +955,6 @@ func start_reload():
 
 	if current_mana >= get_mana_cap():
 		return
-	# Mana is the lantern's flame: it only comes back at a lit flame
-	if not Settings.assist_infinite_mana and not near_kindle():
-		hint_kindle()
-		return
-
 	is_reloading = true
 	reload_progress = 0.0
 	Sfx.play("reload_start", global_position, -6.0)

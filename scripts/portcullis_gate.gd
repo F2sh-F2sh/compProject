@@ -68,6 +68,8 @@ func _ready() -> void:
 
 
 func _settle() -> void:
+	if not is_inside_tree():
+		return
 	# Two frames: circuits fed by saved levers switch on during the first
 	await get_tree().physics_frame
 	await get_tree().physics_frame

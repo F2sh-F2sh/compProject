@@ -149,5 +149,6 @@ func run_suite(_filter: String) -> void:
 	var state := get_tree().root.get_node("GameState")
 	state.load_game(path)
 	check("corrupt nested checkpoint entries are rejected", state.checkpoints == {"valid": "ch1.r1"})
-	check("corrupt nested flags are rejected without losing valid progress", state.flags == {"tutorial.done": true, "ch1.stat.time": 12.0})
+	check("corrupt flags are rejected while old spell progress migrates", state.has_flag("tutorial.done") and state.get_stat("ch1.stat.time") == 12.0
+		and not state.flags.has("bad.stat") and not state.flags.has(7) and state.has_flag("ability.fire") and state.has_flag("ability.echo"))
 	state.clear_all()

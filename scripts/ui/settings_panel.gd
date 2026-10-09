@@ -49,7 +49,7 @@ func _ready() -> void:
 	# Items run Full, Light, Off; the setting counts the other way
 	guidance.selected = Settings.GUIDANCE_FULL - Settings.guidance
 	guidance.add_theme_font_override("font", FONT)
-	guidance.add_theme_font_size_override("font_size", 14)
+	guidance.add_theme_font_size_override("font_size", 18)
 	guidance.item_selected.connect(func(i): Sfx.play("ui_click"); Settings.set_guidance(Settings.GUIDANCE_FULL - i))
 	add_child(guidance)
 	add_child(_check("Reduce camera shake and flashes", Settings.reduce_motion, Settings.set_reduce_motion))
@@ -59,7 +59,7 @@ func _ready() -> void:
 		brightness.add_item("Brightness: %s" % level_name)
 	brightness.selected = Settings.brightness
 	brightness.add_theme_font_override("font", FONT)
-	brightness.add_theme_font_size_override("font_size", 14)
+	brightness.add_theme_font_size_override("font_size", 18)
 	brightness.item_selected.connect(func(i): Sfx.play("ui_click"); Settings.set_brightness(i))
 	add_child(brightness)
 	var graphics := OptionButton.new()
@@ -67,7 +67,7 @@ func _ready() -> void:
 		graphics.add_item("Graphics: %s" % level_name)
 	graphics.selected = Settings.graphics
 	graphics.add_theme_font_override("font", FONT)
-	graphics.add_theme_font_size_override("font_size", 14)
+	graphics.add_theme_font_size_override("font_size", 18)
 	graphics.item_selected.connect(func(i): Sfx.play("ui_click"); Settings.set_graphics(i))
 	add_child(graphics)
 	add_child(_check("Show FPS", Settings.show_fps, Settings.set_show_fps))
@@ -79,7 +79,7 @@ func _ready() -> void:
 		damage.add_item("Damage taken: %d%%" % int(level * 100.0))
 	damage.selected = maxi(levels.find(Settings.assist_damage), 0)
 	damage.add_theme_font_override("font", FONT)
-	damage.add_theme_font_size_override("font_size", 14)
+	damage.add_theme_font_size_override("font_size", 18)
 	damage.item_selected.connect(func(i): Sfx.play("ui_click"); Settings.set_assist("assist_damage", levels[i]))
 	add_child(damage)
 	add_child(_check("Unlimited mana", Settings.assist_infinite_mana,
@@ -88,13 +88,11 @@ func _ready() -> void:
 		func(on): Settings.set_assist("assist_auto_sprint", on)))
 	add_child(_check("Crouch toggles (press once, no holding)", Settings.assist_toggle_crouch,
 		func(on): Settings.set_assist("assist_toggle_crouch", on)))
-	add_child(_check("Hints without waiting (the skulls speak at once)", Settings.assist_instant_hints,
-		func(on): Settings.set_assist("assist_instant_hints", on)))
 	var controls := Button.new()
 	controls.text = "Show controls"
 	controls.toggle_mode = true
 	controls.add_theme_font_override("font", FONT)
-	controls.add_theme_font_size_override("font_size", 14)
+	controls.add_theme_font_size_override("font_size", 18)
 	add_child(controls)
 	var grid := _controls_grid()
 	grid.visible = false
@@ -121,7 +119,7 @@ func _controls_grid() -> VBoxContainer:
 		var key := Button.new()
 		key.custom_minimum_size = Vector2(130, 24)
 		key.add_theme_font_override("font", FONT)
-		key.add_theme_font_size_override("font_size", 14)
+		key.add_theme_font_size_override("font_size", 18)
 		key.add_theme_color_override("font_color", Color("f0d890"))
 		key.pressed.connect(_begin_rebind.bind(row[1]))
 		grid.add_child(key)
@@ -130,7 +128,7 @@ func _controls_grid() -> VBoxContainer:
 	var reset := Button.new()
 	reset.text = "Reset controls"
 	reset.add_theme_font_override("font", FONT)
-	reset.add_theme_font_size_override("font_size", 14)
+	reset.add_theme_font_size_override("font_size", 18)
 	reset.pressed.connect(func():
 		Sfx.play("ui_click")
 		_waiting = ""
@@ -175,7 +173,7 @@ func _label(text: String, size: int, color: Color) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", FONT)
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", maxi(size, 18))
 	l.add_theme_color_override("font_color", color)
 	return l
 
@@ -185,7 +183,7 @@ func _check(text: String, value: bool, on_change: Callable) -> CheckBox:
 	box.text = text
 	box.button_pressed = value
 	box.add_theme_font_override("font", FONT)
-	box.add_theme_font_size_override("font_size", 16)
+	box.add_theme_font_size_override("font_size", 18)
 	box.toggled.connect(func(on): Sfx.play("ui_click"); on_change.call(on))
 	return box
 

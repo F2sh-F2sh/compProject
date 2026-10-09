@@ -468,7 +468,7 @@ func _undercroft_story() -> void:
 		["Echidna", "The bell is above us, but its stairs begin down here. All right. Together."],
 		["The Undercroft", "Beyond the passage are the abbey's forgotten trials. Learn its paths, wake its mechanisms, and reach the bell before Lowbell falls silent."]], func():
 		GameState.set_flag("story.undercroft_entered")
-		_transition(CHAPTER if GameState.has_flag("tutorial.done") else TUTORIAL)
+		_transition(Journey.after_story())
 	)
 
 func _transition(path: String) -> void:

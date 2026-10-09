@@ -151,7 +151,7 @@ func run_suite(filter: String) -> void:
 	await press("interact")
 	await shot("07_undercroft")
 	await finish_dialogue()
-	check("new players enter the unchanged tutorial", await wait_for("res://scenes/tutorial_level.tscn"))
+	check("new players enter the movement-only tutorial", await wait_for("res://scenes/tutorial_movement.tscn"))
 	# Continue restores world changes, and experienced players keep their
 	# tutorial completion and take the same story route into Chapter 1.
 	state.set_flag("tutorial.done")

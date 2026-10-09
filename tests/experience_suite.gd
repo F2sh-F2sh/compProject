@@ -180,12 +180,12 @@ func scenario_title() -> void:
 	check("New Game asks again before erasing progress", scene_is(TITLE) and state().has_flag("ch1.r1.solved"))
 	lvl.new_button.pressed.emit()
 	await frames(5)
-	check("the second press starts over but keeps the finished tutorial", not state().has_flag("ch1.r1.solved")
-		and state().has_flag("tutorial.done"))
+	check("a fresh game resets tutorial and spell progress", not state().has_flag("ch1.r1.solved")
+		and not state().has_flag("tutorial.done") and not state().has_flag("ability.fire"))
 	check("the story plays again", await wait_for_scene(STORY))
 	lvl.skip()
 	check("it leads out onto Lowbell's lane again", await wait_for_scene(LOWBELL))
-	check("and after the tutorial, Nan's cellar door leads on to the Belfry", Journey.after_story() == CHAPTER)
+	check("a new journey starts with movement lessons", Journey.after_story() == Journey.MOVEMENT)
 	check("New Game still visits Nan when the tutorial is already done", lvl.next_scene() == COTTAGE)
 
 	# Choose a Level lists the levels; Level 1 (the tutorial) always replays from the start
@@ -197,7 +197,7 @@ func scenario_title() -> void:
 		and lvl.part_2_button.text.begins_with("Level 2") and lvl.part_3_button.text.begins_with("Level 3"),
 		"%s / %s / %s" % [lvl.part_1_button.text, lvl.part_2_button.text, lvl.part_3_button.text])
 	lvl.part_1_button.pressed.emit()
-	check("Level 1 opens the tutorial", await wait_for_scene(TUTORIAL))
+	check("Level 1 opens the movement-only tutorial", await wait_for_scene(Journey.MOVEMENT))
 	await open_scene(TITLE)
 	lvl.tutorial_button.pressed.emit()
 	await frames(3)
@@ -930,10 +930,12 @@ func scenario_cottage() -> void:
 	check("the cellar door can be used", await wait_until(func(): return lvl.cellar_door.is_focused(), 2.0))
 	await press_action("interact")
 	check("going down marks the scene done", lvl.stage == "leaving" and state().has_flag("cottage.done"))
-	check("and leads to the Passage", await wait_for_scene(TUTORIAL, 10.0))
+	check("and leads outside to the pilgrim road", await wait_for_scene("res://scenes/story/pilgrims_path.tscn", 10.0))
 	# Anyone who already has her spells skips the fire beat, and goes on to the Belfry
 	state().clear_all()
 	state().set_flag("tutorial.done")
+	state().grant_ability("fire")
+	state().grant_ability("echo")
 	state().all_abilities = false
 	check("a finished tutorial leads on to the Belfry", Journey.after_story() == CHAPTER)
 	await open_scene(COTTAGE)
@@ -1240,7 +1242,7 @@ func scenario_layers() -> void:
 	var front_z: int = front[0].z_index if not front.is_empty() else 40
 	check("slimes draw above props, grates and the thorn frame", slime.z_index > front_z, "%d vs %d" % [slime.z_index, front_z])
 	var signs := lvl.find_children("*", "Node2D", true, false).filter(func(n): return n is TutorialSign)
-	check("signs draw above light shafts and the vines", not signs.is_empty() and signs.all(func(s): return s.z_index > front_z))
+	check("sign text uses a screen layer and leaves the playfield clear", not signs.is_empty() and signs.all(func(s): return s._ui.layer == 2 and s.z_index < front_z))
 	var number: Node2D = load("res://scenes/damage_number.tscn").instantiate()
 	lvl.add_child(number)
 	number.setup(3, false)

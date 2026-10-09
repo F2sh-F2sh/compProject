@@ -2,18 +2,8 @@
 class_name HintStone
 extends Node2D
 
-## A whispering skull that gives an optional three-stage hint:
-## 1) says where to look, 2) describes how the objects relate and marks them
-## with arrows,
-## 3) explains the solution. Each "Listen" reveals the next stage, but only
-## once she has spent a while in the room trying it herself: the first hint
-## after about a minute, the second 2.5 minutes after that, the solution 4
-## minutes after that (a gold ring fills round the skull while it listens).
-## The wait counts time in the skull's room and survives deaths and resets;
-## the "Hints without waiting" assist (Settings) skips it.
-
-## Seconds in the room before each stage can be heard (counted from the start).
-const UNLOCK_AT := [60.0, 210.0, 450.0]
+## Three optional hints, available immediately: direction, explanation,
+## then the solution. Listen again to advance; no timers gate assistance.
 
 @export var hints: PackedStringArray = PackedStringArray(["", "", ""])
 ## Objects highlighted by the first hint.
@@ -70,33 +60,14 @@ func _wait_key() -> String:
 
 ## Whether the next stage can be heard yet.
 func is_ready() -> bool:
-	return stage >= hints.size() or Settings.assist_instant_hints or waited >= UNLOCK_AT[mini(stage, UNLOCK_AT.size() - 1)]
+	return true
 
-
-## How far the skull is through listening for the next stage (0..1).
 func listening() -> float:
-	if is_ready():
-		return 1.0
-	var start: float = UNLOCK_AT[stage - 1] if stage > 0 else 0.0
-	var end: float = UNLOCK_AT[stage]
-	return clampf((waited - start) / (end - start), 0.0, 1.0)
+	return 1.0
 
-
-## "Listen": the next stage if it's ready, otherwise how long it will be.
 func listen() -> void:
-	if is_ready():
-		next_hint()
-		return
-	var left: float = UNLOCK_AT[stage] - waited
-	Sfx.play("hint_whisper", global_position, -14.0, 0.1)
-	var root := get_tree().get_first_node_in_group("chapter_root")
-	if root:
-		var when := "in a moment" if left < 20.0 else "in about a minute" if left < 90.0 else "in a few minutes"
-		root.show_toast("The skull is still listening to the room. Try it yourself a while;\nit will speak %s." % when, 4.0)
+	next_hint()
 
-
-## Draws attention to the stone once, when the player seems stuck (or as
-## soon as its next stage is ready, if it isn't yet).
 func nudge() -> void:
 	if nudging or stage >= hints.size():
 		return
@@ -113,6 +84,8 @@ func nudge() -> void:
 
 
 func next_hint() -> void:
+	if hints.is_empty():
+		return
 	nudging = false
 	stage = mini(stage + 1, hints.size())
 	Sfx.play("hint", global_position)
@@ -174,23 +147,6 @@ func _draw_eyes() -> void:
 	var color := Color(0.5, 0.75, 1.0, glow)
 	_eyes.draw_rect(Rect2(-3, -19, 1, 1), color)
 	_eyes.draw_rect(Rect2(2, -19, 1, 1), color)
-	if _near and stage < hints.size() and not Engine.is_editor_hint():
-		# The listening ring: dim stone while it waits, filling gold
-		var k := listening()
-		var centre := Vector2(0, -16)
-		_eyes.draw_arc(centre, 15.0, 0.0, TAU, 40, Color(0.2, 0.17, 0.12, 0.55), 2.0)
-		if k < 1.0:
-			_eyes.draw_arc(centre, 15.0, -PI / 2.0, -PI / 2.0 + TAU * k, 40, Color(0.79, 0.64, 0.29, 0.85), 2.0)
-		else:
-			_eyes.draw_arc(centre, 15.0, 0.0, TAU, 40, Color(0.94, 0.82, 0.48, 0.55 + 0.35 * glow), 2.0)
-	if nudging:
-		# Brighter eyes and slow rings of whispering light
-		_eyes.draw_rect(Rect2(-4, -20, 3, 3), Color(0.6, 0.85, 1.0, 0.5 * glow))
-		_eyes.draw_rect(Rect2(1, -20, 3, 3), Color(0.6, 0.85, 1.0, 0.5 * glow))
-		for i in 2:
-			var k := fposmod(_time * 0.6 + i * 0.5, 1.0)
-			_eyes.draw_arc(Vector2(0, -18), 8.0 + k * 34.0, 0.0, TAU, 32, Color(0.55, 0.8, 1.0, (1.0 - k) * 0.45), 1.0)
-
 
 ## A bobbing arrow that fades after a few seconds.
 class HintMarker extends Node2D:

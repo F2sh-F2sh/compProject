@@ -66,7 +66,7 @@ func _ready() -> void:
 	row.add_child(words)
 	_speaker = Label.new()
 	_speaker.add_theme_font_override("font", StoryPaint.label_font())
-	_speaker.add_theme_font_size_override("font_size", 13)
+	_speaker.add_theme_font_size_override("font_size", 20)
 	_speaker.add_theme_color_override("font_color", Color("e8c48b"))
 	words.add_child(_speaker)
 	_body = Label.new()
@@ -83,7 +83,8 @@ func _ready() -> void:
 	_counter = Label.new()
 	_counter.clip_text = true
 	_counter.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_counter.add_theme_font_size_override("font_size", 12)
+	_counter.add_theme_font_override("font", Fonts.UI)
+	_counter.add_theme_font_size_override("font_size", 18)
 	_counter.add_theme_color_override("font_color", Color("a99cb9"))
 	footer.add_child(_counter)
 	_skip = Button.new()
@@ -126,7 +127,7 @@ func advance() -> void:
 	_body.text = page[1]
 	_counter.text = "%d / %d  ·  %s / %s to continue · hold %s to skip" % [index + 1, lines.size(), InputLabels.primary("interact"), InputLabels.primary("jump"), InputLabels.primary("pause")]
 	_next.text = "Continue" if index < lines.size() - 1 else "Go on"
-	_portrait.texture = SurfaceArt.tex("nan") if page[0] == "Nan" else preload("res://assets/sprites/Echidna/echidna_frames.tres").get_frame_texture("idle", 0)
+	_portrait.texture = DialogueBox.portrait("nan", "warm") if page[0] == "Nan" else DialogueBox.portrait("echidna", "neutral")
 	_portrait.visible = page[0] in ["Nan", "Echidna"] and get_viewport().get_visible_rect().size.x >= 900
 	_next.grab_focus()
 	line_shown.emit(index)
@@ -151,6 +152,6 @@ func _input(event: InputEvent) -> void:
 		return
 	if event.is_action_pressed("pause"):
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed("interact") or event.is_action_pressed("jump") or event.is_action_pressed("ui_accept"):
+	elif event.is_action_pressed("interact") or event.is_action_pressed("jump") or event.is_action_pressed("ui_accept") or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		get_viewport().set_input_as_handled()
 		advance()

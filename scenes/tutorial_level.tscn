@@ -49,6 +49,8 @@
 [ext_resource type="PackedScene" path="res://scenes/puzzle/waymark.tscn" id="63_waymark"]
 [ext_resource type="PackedScene" path="res://scenes/fx/puddle.tscn" id="99_puddle"]
 
+[ext_resource type="Script" path="res://scripts/passage_route.gd" id="polish_route"]
+
 [sub_resource type="Gradient" id="Gradient_fpcko"]
 offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.15, 1, 1, 1, 0)
@@ -110,6 +112,7 @@ shader_parameter/vignette_softness = 0.7
 shader_parameter/grain = 0.022
 
 [node name="TutorialLevel" type="Node2D" unique_id=1911568307]
+script = ExtResource("polish_route")
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=1928645671]
 color = Color(0.5, 0.48, 0.64, 1)
@@ -932,7 +935,7 @@ size = Vector2(704, 448)
 [node name="Lesson1" type="Area2D" parent="Lessons" unique_id=1718250941]
 position = Vector2(0, 534)
 script = ExtResource("61_lesson")
-eyebrow = "LEVEL 1 · THE PASSAGE · THE CELLAR"
+eyebrow = "LEVEL 1 · THE PASSAGE · THE PILGRIM PASSAGE"
 title = "First Steps"
 subtitle = "Walk, and sprint"
 width = 1100.0
@@ -943,7 +946,7 @@ tour = "basics"
 position = Vector2(1100, 534)
 script = ExtResource("61_lesson")
 number = 2
-eyebrow = "PHASE 1 · THE CELLAR"
+eyebrow = "PHASE 1 · THE PILGRIM PASSAGE"
 title = "Jumping"
 subtitle = "Hop up onto ledges"
 width = 660.0
@@ -1040,7 +1043,7 @@ z_index = -1
 position = Vector2(6630, 534)
 script = ExtResource("62_shrine")
 story = "The monks kept this flame alight so the Hush could not take the word.
-Press {shoot} to throw fire (aim with the mouse). It costs mana: hold {reload} at a lit flame like this one to kindle your lantern."
+Press {shoot} to throw fire (aim with the mouse). It costs mana: hold {reload} anywhere to restore it."
 
 [node name="EchoStone" type="Node2D" parent="." unique_id=1718250954]
 z_index = -1
@@ -1050,7 +1053,7 @@ ability = "echo"
 sprite_name = "echo_stone"
 word = "ECHO"
 verb = "Listen"
-story = "Her family's own word: say it, and it answers.
+story = "The Choir carved your family's Echo into this stone. The Hush stole your memory of it, but the stone still remembers. Listen, and the word returns.
 Press {echo} to record yourself, and again to stop. Your Echo repeats it."
 glow_color = Color(0.62, 0.5, 1, 1)
 

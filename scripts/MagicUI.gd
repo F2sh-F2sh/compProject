@@ -55,7 +55,7 @@ func _dungeon_skin() -> void:
 		slot.add_theme_stylebox_override("panel", DungeonUI.style("panel_lite", 8, Vector4(8, 6, 8, 6)))
 		for label in slot.find_children("*", "Label", true, false):
 			label.add_theme_font_override("font", Fonts.UI)
-			label.add_theme_font_size_override("font_size", 8)
+			label.add_theme_font_size_override("font_size", 16)
 			if label.name == "Key":
 				label.add_theme_stylebox_override("normal", DungeonUI.style("nameplate", 8, Vector4(6, 1, 6, 1)))
 				label.add_theme_color_override("font_color", DungeonUI.INK_DARK)

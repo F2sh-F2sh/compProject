@@ -124,7 +124,7 @@ func _make_pictures() -> Array:
 
 
 ## Where the pictures lead when they are over: out onto the surface, to
-## Lowbell's lane and Nan's cottage (whose cellar door is the way down).
+## Lowbell's lane and Nan's cottage, then the pilgrim road to the abbey.
 func _next_scene() -> String:
 	return Journey.LOWBELL
 
@@ -461,8 +461,8 @@ func _build_ui() -> void:
 	_skip_hint.offset_bottom = BAR / 2.0 + 6
 	_skip_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_skip_hint.add_theme_font_override("font", small)
-	_skip_hint.add_theme_font_size_override("font_size", 10)
-	_skip_hint.add_theme_color_override("font_color", Color("5d5675"))
+	_skip_hint.add_theme_font_size_override("font_size", 18)
+	_skip_hint.add_theme_color_override("font_color", Color("aaa0ba"))
 	ui.add_child(_skip_hint)
 	_skip_bar = ColorRect.new()
 	_skip_bar.color = Color("b3a9cf")
@@ -793,28 +793,15 @@ func _ilse_writes(p: Node2D) -> void:
 		freeze.tween_property(flash, "modulate:a", 0.45, 1.5)
 
 
-## The mountain at night: behind it the held moment grows into a moth as big
-## as the sky, and the stars go out round it.
+## The mountain at night: the Hush spreads as the stars go out.
 func _the_moth_unfolds(p: Node2D) -> void:
 	var sky := _mountain_night(p, false, false)
 	var stars: StoryNodes.Stars = sky["stars"]
-	var behind := StoryStage.layer(p, 0.3, "Moth")
-	p.move_child(behind, p.get_node("Sky").get_index() + 1)
-	var moth := StoryStage.Moth.new()
-	moth.art_scale = 4.4
-	moth.position = Vector2(576, 560)
-	moth.modulate = Color(0.8, 0.88, 1.0, 0.0)
-	behind.add_child(moth)
-	var t := p.create_tween().set_parallel().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	t.tween_property(moth, "position:y", 250.0, 9.0).set_delay(0.6)
-	t.tween_property(moth, "modulate:a", 0.62, 6.0).set_delay(0.6)
-	t.tween_property(stars, "fade", 0.6, 11.0).set_delay(2.0)
+	# The Hush reads as a spreading absence of stars, rather than a giant insect.
+	var t := p.create_tween().set_parallel()
+	t.tween_property(stars, "fade", 0.15, 9.0).set_delay(1.0)
 	t.tween_callback(Sfx.play.bind("power_down", null, -12.0, 0.0)).set_delay(1.0)
 
-
-## The great bell in its frame, high on the mountain: it rings the four notes
-## (the peal plays with the picture), and with each the grey Hush is pushed
-## back from it.
 func _the_bell_sings(p: Node2D) -> void:
 	var far := StoryStage.layer(p, 0.2, "Sky")
 	StoryStage.fill(far, SKY_TOP)

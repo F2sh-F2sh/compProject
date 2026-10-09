@@ -173,8 +173,8 @@ func _brighten() -> bool:
 # after them) and Echo at the Echo stone (phase 7, before the Echo lesson).
 const PHASES := [
 	# lesson node, card line, title, subtitle
-	["Lesson1", "THE NOVICES' WAY · PHASE 1 · THE CELLAR", "First Steps", "Walk, and sprint"],
-	["Lesson2", "PHASE 1 · THE CELLAR", "Jumping", "Hop up onto ledges"],
+	["Lesson1", "THE NOVICES' WAY · PHASE 1 · THE PILGRIM PASSAGE", "First Steps", "Walk, and sprint"],
+	["Lesson2", "PHASE 1 · THE PILGRIM PASSAGE", "Jumping", "Hop up onto ledges"],
 	["Lesson3", "PHASE 2 · THE BROKEN STAIR", "Sprint Jumps", "Carry your speed across wide gaps"],
 	["Lesson4", "PHASE 2 · THE BROKEN STAIR", "High Jumps", "Crouch to gather power"],
 	["Lesson5", "PHASE 3 · THE NOVICES' TRAPS", "Spikes", "Candles mark where you return"],
@@ -194,7 +194,7 @@ ability = "fire"
 sprite_name = "kept_flame"
 word = "FLAME"
 verb = "Read"
-story = "The monks kept this flame alight so the Hush could not take the word.\nPress {shoot} to throw fire (aim with the mouse). It costs mana: hold {reload} at a lit flame like this one to kindle your lantern."
+story = "The monks kept this flame alight so the Hush could not take the word.\nPress {shoot} to throw fire (aim with the mouse). It costs mana: hold {reload} anywhere to restore it."
 glow_color = Color(0.45, 0.65, 1, 1)
 
 [node name="Spring" type="Node2D" parent="." unique_id=1718250953]
@@ -216,7 +216,7 @@ ability = "echo"
 sprite_name = "echo_stone"
 word = "ECHO"
 verb = "Listen"
-story = "Her family's own word: say it, and it answers.\nPress {echo} to record yourself, and again to stop. Your Echo repeats it."
+story = "The Choir carved your family's Echo into this stone. The Hush stole your memory of it, but the stone still remembers. Listen, and the word returns.\nPress {echo} to record yourself, and again to stop. Your Echo repeats it."
 glow_color = Color(0.62, 0.5, 1, 1)
 
 [node name="Lesson10" type="Area2D" parent="Lessons" unique_id=1718250951]
@@ -389,7 +389,7 @@ func _level_one() -> bool:
 	if _text.contains("LEVEL 1 · THE PASSAGE"):
 		print("level one: already applied")
 		return false
-	_set_props('name="Lesson1" type="Area2D" parent="Lessons"', {"eyebrow": '"LEVEL 1 · THE PASSAGE · THE CELLAR"'})
+	_set_props('name="Lesson1" type="Area2D" parent="Lessons"', {"eyebrow": '"LEVEL 1 · THE PASSAGE · THE PILGRIM PASSAGE"'})
 	_replace_text("Welcome to the Novices' Way.\nUse {move_left}", "Level 1: the Passage.\nUse {move_left}")
 	print("level one: applied")
 	return true

@@ -25,7 +25,7 @@ extends RefCounted
 ## title's "Choose a Level" adds a page that starts any wing's room or the Eye
 ## directly (with the spells and words of everything before it). Set this to
 ## false to turn it all off. The automated tests always turn it off.
-static var admin_unlock := true
+static var admin_unlock := false
 ## The room a level starts in ("R2"), set by that admin page; used once.
 static var admin_start_room := ""
 
@@ -34,6 +34,7 @@ const STORY := "res://scenes/story/story_intro.tscn"
 const LOWBELL := "res://scenes/story/lowbell.tscn"
 const COTTAGE := "res://scenes/story/nan_cottage.tscn"
 const PASSAGE := "res://scenes/tutorial_level.tscn"
+const MOVEMENT := "res://scenes/tutorial_movement.tscn"
 const BELFRY := "res://scenes/chapter/chapter_1.tscn"
 const OBSERVATORY := "res://scenes/chapter/chapter_2.tscn"
 ## Story pictures after the bell rings (before Part 3) and after the dome opens.
@@ -92,11 +93,11 @@ const STOPS := [
 ]
 
 
-## Where Nan's cellar door leads (after the story pictures, Lowbell and her
-## cottage): the Passage, or straight to the Belfry for anyone who has
+## Where the bellkeepers' well leads, after Lowbell, Nan's cottage
+## and the pilgrim road: the Passage, or straight to the Belfry for anyone who has
 ## already walked it.
 static func after_story() -> String:
-	return BELFRY if GameState.has_flag("tutorial.done") else PASSAGE
+	return BELFRY if GameState.has_flag("tutorial.done") else (PASSAGE if GameState.has_flag("story.movement_done") else MOVEMENT)
 
 
 ## The stop after a scene, or "" if it is the last (or not a stop).
@@ -190,8 +191,12 @@ static func skipping_to(scene_path: String) -> void:
 	var later := [BELFRY, OBSERVATORY, LANDING, KILN, CISTERN, LAMPS, GALLERIES, EYE]
 	if not later.has(scene_path):
 		return
-	GameState.grant_all_abilities()
-	if scene_path == BELFRY or scene_path == OBSERVATORY:
+	GameState.grant_ability("echo")
+	GameState.grant_ability("fire")
+	if scene_path == BELFRY:
+		return
+	GameState.grant_ability("heal")
+	if scene_path == OBSERVATORY:
 		return
 	teach_words(OBSERVATORY_WORDS)
 	GameState.set_flag("ch1.complete")

@@ -21,6 +21,7 @@ var _ambient_tween: Tween
 
 
 func _ready() -> void:
+	preload("res://scripts/fx/world_layout.gd").settle.call_deferred(get_parent())
 	# each level its own palette, mist and air (LevelTheme)
 	LevelTheme.apply.call_deferred(get_parent())
 	Settings.changed.connect(_on_settings_changed)

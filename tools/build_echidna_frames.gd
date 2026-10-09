@@ -39,6 +39,8 @@ const SHEETS := {
 
 ## name: [sheet, loop, [[source frame, ticks], ...]]
 const CLIPS := {
+	# A low, planted stance while bracing against a stone.
+	&"push": [&"air", true, [[0, 15], [1, 15]]],
 	# Breathing with eased holds, and a quick blink (frames 5-8)
 	&"idle": [&"idle", true, [[0, 10], [1, 7], [2, 9], [1, 6], [4, 8], [5, 3], [6, 2], [7, 4], [8, 3],
 		[2, 8], [10, 12], [4, 8], [13, 16], [16, 12]]],

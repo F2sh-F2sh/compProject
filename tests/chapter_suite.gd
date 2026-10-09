@@ -802,7 +802,7 @@ func scenario_room3() -> void:
 	Input.action_press("reload")
 	await seconds(2.2)
 	Input.action_release("reload")
-	check("away from any flame, holding R does not refill mana", player.current_mana == 0 and not player.is_reloading,
+	check("holding R restores mana away from flames", player.current_mana == 100 and not player.is_reloading,
 		"mana=%d" % player.current_mana)
 	await place(Vector2(shrine.global_position.x, FLOOR))
 	Input.action_press("reload")

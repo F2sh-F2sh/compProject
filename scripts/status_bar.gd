@@ -8,9 +8,9 @@ const SLOPE := 0.7
 const PLATE_W := 372.0
 const PLATE_H := 40.0
 const TAB_X := 186.0
-const TAB_H := 20.0
+const TAB_H := 26.0
 const MANA_PLATE_W := 176.0
-const MANA_PLATE_H := 16.0
+const MANA_PLATE_H := 24.0
 
 const COLOR_PLATE := Color(0.086, 0.075, 0.1, 0.94)
 const COLOR_BORDER := Color("c9a24a")
@@ -62,6 +62,8 @@ var time := 0.0
 
 
 func _ready() -> void:
+	name_font = Fonts.TITLE
+	body_font = Fonts.UI
 	custom_minimum_size = Vector2(PLATE_W, PLATE_H + TAB_H)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -193,7 +195,7 @@ func _draw_mana_plate(border: Color) -> void:
 	var bar_top := top + 5.0
 	var bar_bottom := bottom - 5.0
 	# (room for the word MANA at its left)
-	var x0 := 36.0
+	var x0 := 46.0
 	var x_end := MANA_PLATE_W - 10.0
 	var bar := PackedVector2Array([
 		Vector2(x0, bar_top), Vector2(x_end, bar_top),
@@ -210,7 +212,7 @@ func _draw_mana_plate(border: Color) -> void:
 	_fill_clipped(bar, x0, x_end, mp_ghost, COLOR_GHOST)
 	_fill_clipped(bar, x0, x_end, mp_shown, color)
 	_draw_debt(bar, x0, x_end, bar_top, bar_bottom)
-	draw_string(body_font, Vector2(4, bar_bottom + 1.0), "MANA", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, border)
+	draw_string(body_font, Vector2(5, bar_bottom + 1.0), "Mana", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, border)
 	_draw_echo_indicator(bottom + 4.0, border)
 
 
@@ -237,8 +239,8 @@ func _draw_debt(bar: PackedVector2Array, x0: float, x_end: float, bar_top: float
 func _draw_echo_indicator(top: float, border: Color) -> void:
 	if not echo_recording and echo_count <= 0:
 		return
-	var w := 132.0
-	var h := 16.0
+	var w := 164.0
+	var h := 24.0
 	var plate := PackedVector2Array([Vector2(0, top), Vector2(w, top), Vector2(w - SLOPE * h, top + h), Vector2(0, top + h)])
 	draw_colored_polygon(plate, COLOR_PLATE)
 	_outline(plate, border, 1.5)
@@ -246,7 +248,7 @@ func _draw_echo_indicator(top: float, border: Color) -> void:
 	if echo_recording:
 		var pulse := 0.5 + 0.5 * sin(time * 8.0)
 		draw_circle(Vector2(10, top + h / 2.0), 3.5, COLOR_REC.lerp(Color.WHITE, 0.3 * pulse))
-		draw_string(body_font, Vector2(18, baseline), "REC", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, COLOR_REC)
+		draw_string(body_font, Vector2(18, baseline), "REC", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COLOR_REC)
 		var bar := Rect2(46, top + 6.0, 48, 4)
 		draw_rect(bar, COLOR_TRACK)
 		# The last seconds flash white so running out is never a surprise
@@ -254,10 +256,10 @@ func _draw_echo_indicator(top: float, border: Color) -> void:
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * echo_remaining, bar.size.y)),
 			COLOR_REC.lerp(Color.WHITE, 0.6) if urgent else COLOR_REC)
 		if echo_seconds >= 0.0:
-			draw_string(body_font, Vector2(98, baseline), "%.1fs" % echo_seconds, HORIZONTAL_ALIGNMENT_LEFT, -1, 8,
+			draw_string(body_font, Vector2(98, baseline), "%.1fs" % echo_seconds, HORIZONTAL_ALIGNMENT_LEFT, -1, 16,
 				Color.WHITE if urgent else COLOR_REC)
 	else:
-		draw_string(body_font, Vector2(8, baseline), "ECHO", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, COLOR_ECHO)
+		draw_string(body_font, Vector2(8, baseline), "ECHO", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COLOR_ECHO)
 		for i in echo_max:
 			var center := Vector2(56 + i * 14, top + h / 2.0)
 			var diamond := PackedVector2Array([center + Vector2(0, -4), center + Vector2(4, 0),
@@ -283,10 +285,10 @@ func _draw_tab() -> void:
 	draw_line(Vector2(divider, top + 4.0), Vector2(divider, bottom - 3.0), COLOR_TAB_TEXT, 1.0)
 
 	var baseline := bottom - 5.0
-	var mp_text := "KINDLING" if mp_restoring else "MANA %d" % mp
-	draw_string(body_font, Vector2(TAB_X, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 8, COLOR_TAB_TEXT)
+	var mp_text := "Reloading" if mp_restoring else "Mana %d" % mp
+	draw_string(body_font, Vector2(TAB_X, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 18, COLOR_TAB_TEXT)
 	var hp_text := "%d / %d" % [hp, hp_max]
-	draw_string(body_font, Vector2(divider + 2.0, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 8, COLOR_TAB_TEXT)
+	draw_string(body_font, Vector2(divider + 2.0, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 18, COLOR_TAB_TEXT)
 
 
 func _fill_clipped(shape: PackedVector2Array, x0: float, x_max: float, ratio: float, color: Color) -> Array:

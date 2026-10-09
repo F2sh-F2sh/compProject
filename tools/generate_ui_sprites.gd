@@ -30,10 +30,10 @@ const C := {
 	"r0": "3a0d14", "r1": "6a1824", "r2": "9e2a3a", "r3": "d24a5a", "r4": "ffb0a0",
 	"p0": "3b2f22", "p1": "7d6747", "p2": "b9a27a", "p3": "d8c59c", "p4": "eee0bc",
 }
-const FONT_UI := "res://assets/fonts/silkscreen/Silkscreen-Regular.ttf"
-const FONT_UI_BOLD := "res://assets/fonts/silkscreen/Silkscreen-Bold.ttf"
-const FONT_STORY := "res://assets/fonts/pixelify_sans/PixelifySans.ttf"
-const FONT_TITLE := "res://assets/fonts/jacquard12/Jacquard12-Regular.ttf"
+const FONT_UI := "res://assets/fonts/patrick_hand/PatrickHand-Regular.ttf"
+const FONT_UI_BOLD := "res://assets/fonts/patrick_hand/PatrickHand-Regular.ttf"
+const FONT_STORY := "res://assets/fonts/patrick_hand/PatrickHand-Regular.ttf"
+const FONT_TITLE := "res://assets/fonts/im_fell_english/IMFellEnglish-Regular.ttf"
 const FONT_BOOK := "res://assets/fonts/im_fell_english/IMFellEnglish-Regular.ttf"
 
 var rng := RandomNumberGenerator.new()
@@ -539,7 +539,7 @@ func _build_theme() -> void:
 	var dim := Color("7d7286")
 	var t := Theme.new()
 	t.default_font = load(FONT_STORY)
-	t.default_font_size = 16
+	t.default_font_size = 20
 	t.set_color("font_color", "Label", ink)
 	t.set_color("font_shadow_color", "Label", Color(0, 0, 0, 0.0))
 	var panel := _box("panel", 12, Vector4(28, 24, 28, 24))
@@ -554,7 +554,7 @@ func _build_theme() -> void:
 	t.set_stylebox("focus", "Button", _box("button_focus", 5, button_content, false))
 	t.set_stylebox("hover_pressed", "Button", _box("button_pressed", 5, button_content))
 	t.set_font("font", "Button", load(FONT_UI))
-	t.set_font_size("font_size", "Button", 16)
+	t.set_font_size("font_size", "Button", 20)
 	t.set_color("font_color", "Button", ink)
 	t.set_color("font_hover_color", "Button", gold)
 	t.set_color("font_focus_color", "Button", gold)
@@ -565,7 +565,7 @@ func _build_theme() -> void:
 		for st in ["normal", "hover", "pressed", "disabled", "focus"]:
 			t.set_stylebox(st, type, t.get_stylebox(st, "Button"))
 		t.set_font("font", type, load(FONT_UI))
-		t.set_font_size("font_size", type, 16)
+		t.set_font_size("font_size", type, 20)
 		t.set_color("font_color", type, ink)
 		t.set_color("font_hover_color", type, gold)
 		t.set_color("font_focus_color", type, gold)

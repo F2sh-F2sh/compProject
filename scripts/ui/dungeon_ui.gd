@@ -64,7 +64,7 @@ static func label(text: String, font: Font, size: int, color := INK) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font)
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", maxi(size, 18))
 	l.add_theme_color_override("font_color", color)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l

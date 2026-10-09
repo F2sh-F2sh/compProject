@@ -27,6 +27,7 @@ var _t := 0.0
 var _dir := 1.0
 var _pause := 0.0
 var _powered := false
+var _safe_fraction := 1.0
 
 
 func _ready() -> void:
@@ -44,6 +45,27 @@ func _ready() -> void:
 	shape.one_way_collision = true
 	add_child(shape)
 	_start = global_position
+	_check_clearance.call_deferred()
+
+
+func _check_clearance() -> void:
+	await get_tree().physics_frame
+	if not is_inside_tree() or travel.is_zero_approx():
+		return
+	_safe_fraction = 1.0
+	# Sweep the complete visible slab against masonry. Its bottom must
+	# stop before the floor, even though the ride collider is thinner.
+	var slab := RectangleShape2D.new()
+	slab.size = Vector2(width_tiles * 64.0 - 4.0, 25.0)
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = slab
+	query.transform = Transform2D(0, _start + Vector2(width_tiles * 32.0, TILE_TOP + 12.5))
+	query.motion = travel
+	query.collision_mask = 2
+	query.exclude = [get_rid()]
+	var result := get_world_2d().direct_space_state.cast_motion(query)
+	if result.size() == 2 and result[0] < 1.0:
+		_safe_fraction = maxf(0.0, result[0] - 3.0 / maxf(travel.length(), 1.0))
 
 
 func set_powered(powered: bool) -> void:
@@ -65,14 +87,14 @@ func _physics_process(delta: float) -> void:
 	if _pause > 0.0:
 		_pause -= delta
 		return
-	var length := maxf(travel.length(), 1.0)
+	var length := maxf(travel.length() * _safe_fraction, 1.0)
 	_t = clampf(_t + _dir * speed * delta / length, 0.0, 1.0)
 	if _t <= 0.0 or _t >= 1.0:
 		_dir = -_dir
 		_pause = end_pause
 	# Ease in and out at the ends so riding it feels steady
 	var eased := 0.5 - 0.5 * cos(_t * PI)
-	global_position = _start + travel * eased
+	global_position = _start + travel * eased * _safe_fraction
 
 
 func _draw() -> void:

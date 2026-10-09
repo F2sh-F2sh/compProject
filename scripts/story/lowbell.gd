@@ -727,7 +727,7 @@ func _leave() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	var press: bool = event.is_action_pressed("jump") or event.is_action_pressed("interact") or event.is_action_pressed("ui_accept")
+	var press: bool = event.is_action_pressed("jump") or event.is_action_pressed("interact") or event.is_action_pressed("ui_accept") or (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT)
 	if not press:
 		return
 	if intro_running:

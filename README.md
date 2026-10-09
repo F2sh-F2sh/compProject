@@ -3,8 +3,8 @@
 A 2D puzzle-platformer about Echidna, a young witch, going down into a sealed abbey to ring
 its great bell. Built with **Godot 4.7.2** (Forward+).
 
-- **Tutorial**: nine short lessons (moving, jumping, sprint jumps, high jumps, spikes,
-  pistons, fire, slimes, Echoes).
+- **Movement tutorial**: six lessons, with no spells or spell shrines. The abbey entry
+  passage then restores Echo and Fire through explained inscriptions; Heal returns at the Belfry spring.
 - **Chapter 1 · The Sealed Belfry**: nine puzzle rooms in four acts, ending at the great
   bell. Seven pages of the Bellkeeper's Ledger are hidden along the way.
 - **Chapter 2 · The Sealed Observatory**: eight rooms built around **rune cubes**: stone
@@ -18,8 +18,8 @@ its great bell. Built with **Godot 4.7.2** (Forward+).
   Chapter 1 to the Observatory and shows why the journey continues.
 
 New Game follows this route. Players who already finished the tutorial proceed from the
-well to Chapter 1; everyone else enters the existing tutorial. The separate Tutorial and
-Chapter 2 menu entries remain available. Conversations use the bound Interact or Jump key,
+well to Chapter 1; everyone else enters the movement-only tutorial. The separate Tutorial and
+Chapter 2 menu entries remain available. Conversations use a left mouse click, the bound Interact or Jump key,
 Enter, or the Continue button. Hold Escape or use Skip to finish a conversation immediately.
 Skipping still grants the lantern and advances the story. Continue restores the bridge,
 passage lamps, and the last well landing.
@@ -36,7 +36,7 @@ Open the project in Godot 4.7.2 and press **F5** (the title screen is the main s
 | Sprint | hold Shift | LT / LB |
 | Fireball | left click (aims at the mouse) | RT (aims with the right stick) |
 | Heal (stand still) | Q | X |
-| Kindle the lantern (refill mana: hold at a lit flame) | R | Y |
+| Reload mana (hold anywhere) | R | Y |
 | Record an Echo / hold to let Echoes fade | E | B |
 | Use, pull, ring, inscribe a rune cube | W / Up | D-pad up |
 | Pick up / set down a rune cube | F | R3 |
@@ -68,7 +68,7 @@ For the windowed suite and screenshot capture:
 
 Suites: `tutorial`, `chapter`, `presentation`, `experience`, `rune` (Chapter 2 and the rune
 cubes), `wing` (the expanded journey), `prologue` (the preserved lantern route and bell aftermath), `adversarial` (targeted
-bug reproductions), or `all` (the default).
+bug reproductions), `polish` (spell progression, reload, pushing, hints and bats), or `all` (the default).
 Screenshots go to `user://test_shots/`. Tests never touch a real save or settings file.
 The prologue suite saves its screenshots in `.godot/prologue_shots/`. Its checks simulate
 input and inspect state; screenshot inspection and human playtesting are separate checks.
@@ -104,8 +104,13 @@ After a fresh clone, or after adding scripts with a `class_name`, run
 - `CREDITS.md`: fonts, art and audio sources.
 
 The main journey uses `scenes/story/nan_cottage.tscn` and `scripts/story/nan_cottage.gd`
-for Nan's cellar route. The earlier lantern route is preserved separately in
-`scenes/story/nan_lantern_cottage.tscn`, `pilgrims_path.tscn`, and `well_descent.tscn`,
-authored by `scripts/story/witch_prologue.gd`. Its dialogue and alternate bell aftermath
+for Nan's conversation and garden exit. It continues through `pilgrims_path.tscn`
+and `well_descent.tscn`, authored by `scripts/story/witch_prologue.gd`. The alternate
+`scenes/story/nan_lantern_cottage.tscn` remains available. Its dialogue and alternate bell aftermath
 remain in `story_dialogue.gd` and `bell_aftermath.gd`. The main journey uses the expanded
 interludes defined by `Journey`; the two cottage scenes each contain one root and one script resource.
+
+Shared layout checks in `scripts/fx/world_layout.gd` ground cosmetic floor props, keep
+them clear of shrines and hint skulls, and recess the floor beneath legacy hoists.
+Newly generated hoists get the same wells from `tools/build_chapter.gd`. Signs use
+a single nearest-sign caption at the screen edge, hidden while notifications are shown.

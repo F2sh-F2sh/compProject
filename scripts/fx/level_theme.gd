@@ -55,7 +55,7 @@ const BY_CHAPTER := {"ch1": "belfry", "ch2": "observatory", "landing": "landing"
 static func id_for(level: Node) -> String:
 	if level == null:
 		return ""
-	if level.scene_file_path.ends_with("tutorial_level.tscn"):
+	if level.scene_file_path.ends_with("tutorial_level.tscn") or level.scene_file_path.ends_with("tutorial_movement.tscn"):
 		return "passage"
 	if "chapter_id" in level:
 		return String(BY_CHAPTER.get(String(level.get("chapter_id")), ""))

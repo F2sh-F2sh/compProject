@@ -3557,68 +3557,22 @@ func scenario_sounds() -> void:
 ## outside the room doesn't count, a reload keeps the wait, and a nudge
 ## waits until there's something to say.
 func scenario_hint_wait() -> void:
-	print("SCENARIO the hint skull listens first")
+	print("SCENARIO progressive hints answer immediately")
 	var settings := get_tree().root.get_node("Settings")
 	settings.assist_instant_hints = false
 	await load_scene(Journey.KILN)
-	var skull: HintStone = null
-	for n in lvl.find_children("*", "HintStone", true, false):
-		skull = n
-		break
-	check("the Kilnworks has a hint skull", skull != null)
-	if skull == null:
-		settings.assist_instant_hints = true
-		return
-	var room: Room = skull._room
-	await place(room.entry_spawn if room else skull.global_position + Vector2(-80, 0))
-	await place(skull.global_position + Vector2(-60, -10))
+	var skull: HintStone = lvl.find_children("*", "HintStone", true, false)[0]
+	check("first hint is ready on arrival", skull.is_ready())
+	for i in 3:
+		skull.listen()
+		check("hint %d arrives without waiting" % (i + 1), skull.stage == i + 1 and skull.is_ready())
 	skull.listen()
-	check("straight away it only listens", skull.stage == 0 and not skull.is_ready())
-	skull.nudge()
-	check("a nudge waits too", not skull.nudging)
-	skull.waited = 58.0
-	await seconds(0.3)
-	check("its ring is filling", skull._near and skull.listening() > 0.9 and skull.listening() < 1.0, "%.2f" % skull.listening())
-	skull.waited = 30.0
-	await seconds(0.2)
-	await shot("hint_ring")
-	skull.waited = 59.0
-	await seconds(2.2)
-	check("after a minute in the room the first hint is ready", skull.is_ready(), "%.1f" % skull.waited)
-	check("and the waiting nudge calls out", skull.nudging)
+	check("repeated requests keep the solution safely", skull.stage == 3)
+	skull.hints = PackedStringArray()
 	skull.listen()
-	check("the first hint", skull.stage == 1)
-	skull.listen()
-	check("the second needs longer", skull.stage == 1)
-	# away from the room the wait stands still
-	var before: float = skull.waited
-	if room:
-		await place(Vector2(room.bounds.end.x + 400.0, room.entry_spawn.y))
-		await seconds(1.0)
-		check("time outside the room doesn't count", is_equal_approx(skull.waited, before) or skull.waited - before < 0.05, "%.2f" % (skull.waited - before))
-	# a reload keeps it
-	skull.waited = 300.0
-	var key := skull._wait_key()
-	await load_scene(Journey.KILN, false)
-	check("a reload keeps the wait", float(game_state().session.get(key, 0.0)) >= 300.0)
-	for n in lvl.find_children("*", "HintStone", true, false):
-		if n._wait_key() == key:
-			skull = n
-	skull.stage = 1
-	check("the second hint is ready at 3.5 minutes", skull.is_ready())
-	skull.listen()
-	check("the solution needs longer still", not skull.is_ready())
-	skull.waited = 450.0
-	check("and is ready at 7.5 minutes", skull.is_ready())
+	check("an empty hint list is safe", skull.stage == 3)
 	settings.assist_instant_hints = true
-	skull.stage = 0
-	skull.waited = 0.0
-	check("the assist lets it speak at once", skull.is_ready())
 
-
-## Fair aiming: standing at each rune cube, every target in that room that is
-## off the screen and not yet done has a pip on the screen's edge pointing at
-## it (TargetPips), so nothing has to be guessed at or learnt from a hint.
 func scenario_sightlines() -> void:
 	print("SCENARIO every target can be found from where she aims")
 	for path in [Journey.BELFRY, Journey.OBSERVATORY, Journey.KILN, "res://scenes/chapter/wing_cistern.tscn",

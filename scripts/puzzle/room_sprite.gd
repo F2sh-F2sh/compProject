@@ -15,6 +15,8 @@ extends Node2D
 
 
 func _ready() -> void:
+	if sprite_name in ["nan", "wren", "ilse", "tam", "mira", "pip", "edda", "monk"]:
+		sprite_scale = 64.0 / SurfaceArt.size_of(sprite_name).y
 	var sprite := SurfaceArt.animated(self, sprite_name, Vector2.ZERO, 3.0, sprite_scale, flip)
 	sprite.name = "Sprite"
 	if not play:

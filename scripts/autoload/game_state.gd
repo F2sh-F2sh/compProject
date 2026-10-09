@@ -87,10 +87,12 @@ var _earlier := -1
 ## Whether Echidna has this spell. A save from before spells had to be earned
 ## (the tutorial or a chapter already played) has them all.
 func has_ability(id: String) -> bool:
-	return all_abilities or has_flag("ability." + id) or _has_earlier_progress()
+	return id in ABILITIES and (all_abilities or has_flag("ability." + id))
 
 
 func grant_ability(id: String) -> void:
+	if id not in ABILITIES:
+		return
 	set_flag("ability." + id)
 
 
@@ -196,7 +198,9 @@ func save_game() -> void:
 	if not persist_to_disk:
 		return
 	var file := ConfigFile.new()
-	file.set_value("progress", "flags", flags)
+	var saved_flags := flags.duplicate()
+	saved_flags["progress.abilities_version"] = 1
+	file.set_value("progress", "flags", saved_flags)
 	file.set_value("progress", "checkpoint_scene", checkpoint_scene)
 	file.set_value("progress", "checkpoint_id", checkpoint_id)
 	file.set_value("progress", "checkpoints", checkpoints)
@@ -233,3 +237,11 @@ func load_game(path := SAVE_PATH) -> void:
 	# Saves from before per-scene checkpoints
 	if checkpoints.is_empty() and checkpoint_scene != "":
 		checkpoints[checkpoint_scene] = checkpoint_id
+	# Migrate genuinely old saves once, while loading, rather than making
+	# spell access depend on unrelated flags during play. Learning HEAL must
+	# never revoke FIRE or ECHO, and a room flag must never teach a spell.
+	if not flags.is_empty() and not flags.has("progress.abilities_version"):
+		if not ABILITIES.any(func(ability): return flags.has("ability." + ability)) and (has_flag("tutorial.done") or count_flags("ch1.") > 0 or count_flags("ch2.") > 0):
+			for ability in ABILITIES:
+				flags["ability." + ability] = true
+		flags["progress.abilities_version"] = 1

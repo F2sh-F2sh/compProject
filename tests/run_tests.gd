@@ -66,7 +66,7 @@ func _run() -> void:
 	# Tests check audio state, not sound; keep the speakers quiet while they run
 	AudioServer.set_bus_mute(0, true)
 
-	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune", "wing", "prologue", "adversarial"] if suite_name == "all" else [suite_name]
+	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune", "wing", "prologue", "adversarial", "polish"] if suite_name == "all" else [suite_name]
 	var passed := 0
 	var failed := 0
 	for n in names:
@@ -84,6 +84,9 @@ func _run() -> void:
 		suite.process_mode = Node.PROCESS_MODE_ALWAYS
 		root.add_child(suite)
 		await suite.run_suite(scenario)
+		if "completed" in suite and not suite.completed:
+			print("  FAIL suite aborted before completion: ", n)
+			failed += 1
 		passed += suite.passed
 		failed += suite.failed
 		suite.queue_free()

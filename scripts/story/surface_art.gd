@@ -244,6 +244,11 @@ static func animated(parent: Node, names: Variant, foot: Vector2, fps := 6.0, sc
 	a.sprite_frames = frames(names, fps)
 	a.centered = false
 	var size := a.sprite_frames.get_frame_texture(&"default", 0).get_size()
+	if names is String and names in ["tam", "mira", "pip", "edda", "nan", "monk", "ilse", "wren"]:
+		# World characters share a 64-pixel height, preserving their aspect
+		# ratio and bottom pivot. Cinematic staging keeps its authored scale.
+		if is_equal_approx(scale, LANE_SCALE):
+			scale = 64.0 / size.y
 	a.offset = Vector2(-floorf(size.x / 2.0), -size.y)
 	a.position = foot
 	a.scale = Vector2(scale, scale)

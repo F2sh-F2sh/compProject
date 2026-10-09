@@ -19,7 +19,7 @@ signal advanced
 
 const ART := "res://assets/sprites/story/portrait_%s.png"
 const ART_SIZE := Vector2(112, 136)
-const SCALE := 3.0
+const SCALE := 2.0
 ## Each portrait strip's frames, in order (as the generator draws them).
 const FACES := {
 	"echidna": ["neutral", "worried", "determined", "sad", "surprised"],
@@ -33,7 +33,7 @@ const NAMES := {"echidna": "Echidna", "nan": "Nan", "wren": "Wren", "ilse": "Ils
 const SIDES := {"echidna": "left", "nan": "right", "wren": "right", "ilse": "right"}
 const CHARS_PER_SECOND := 48.0
 const BOX_H := 152.0
-const FONT_SIZE := 22
+const FONT_SIZE := 26
 
 var handles_input := true
 ## The line showing now.

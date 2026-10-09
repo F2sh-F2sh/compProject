@@ -46,13 +46,13 @@ func _ready() -> void:
 	_label = Label.new()
 	_label.text = label_text
 	_label.add_theme_font_override("font", FONT)
-	_label.add_theme_font_size_override("font_size", 8)
+	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", Color(0.85, 0.82, 0.95))
 	_label.add_theme_color_override("font_outline_color", Color(0.02, 0.01, 0.05, 0.9))
 	_label.add_theme_constant_override("outline_size", 4)
 	# Over the bell-light (at the foot it hid in the floor's grass)
-	_label.position = Vector2(-60, -height - 14.0 - SurfaceArt.size_of(BELL).y * 3.0 - 20.0)
-	_label.size = Vector2(120, 16)
+	_label.position = Vector2(-90, -height - 14.0 - SurfaceArt.size_of(BELL).y * 3.0 - 28.0)
+	_label.size = Vector2(180, 24)
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_label)
 	if Engine.is_editor_hint():

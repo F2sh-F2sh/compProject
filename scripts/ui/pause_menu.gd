@@ -54,7 +54,7 @@ const SLOTS := 12
 const CONTROLS := [
 	["Walk left", "move_left"], ["Walk right", "move_right"], ["Jump", "jump"],
 	["Crouch / charge", "crouch"], ["Sprint", "sprint"], ["Fireball", "shoot"],
-	["Heal", "heal"], ["Kindle (mana)", "reload"], ["Echo", "echo"],
+	["Heal", "heal"], ["Reload mana", "reload"], ["Echo", "echo"],
 	["Use / inscribe", "interact"], ["Carry a cube", "rune_carry"],
 	["Rune overview", "rune_overview"], ["Pause", "pause"],
 ]
