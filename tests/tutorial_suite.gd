@@ -148,17 +148,13 @@ func aim_and_shoot(world_pos: Vector2) -> void:
 	if DisplayServer.get_name() == "headless":
 		await preload("res://tests/background_aim.gd").fire(player, world_pos)
 		return
-	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	# Retain retrying aim updates using viewport events, without OS cursor control.
-	for attempt in 8:
-		var motion := InputEventMouseMotion.new()
-		motion.position = screen_pos
-		motion.global_position = screen_pos
-		get_tree().root.push_input(motion, true)
-		await frames(2)
-		if lvl.get_global_mouse_position().distance_to(world_pos) < 10.0:
-			break
+	# A windowed run aims through the player's aim_override, not the OS cursor
+	# (it belongs to whoever is using the computer); the shot itself goes through
+	# the real shoot input, mana and cooldown
+	var shooter: Node = player
+	shooter.aim_override = world_pos
 	await tap_action("shoot")
+	shooter.aim_override = null
 
 
 func fight_slimes(slimes: Array, timeout: float) -> bool:
@@ -394,7 +390,8 @@ func scenario_playthrough() -> void:
 	Input.action_release("move_right")
 	var slimes := lvl.get_node("Enemies").get_children()
 	var killed := await fight_slimes(slimes, 25.0)
-	check("both slimes defeated with fireballs", killed)
+	check("both slimes defeated with fireballs", killed, "mana %d/%d, slimes left %d, health %d" % [player.current_mana, player.get_mana_cap(),
+		slimes.filter(func(s): return is_instance_valid(s) and not s.is_dead).size(), player.current_health])
 	await shot("play_08_arena")
 
 	# Exit door

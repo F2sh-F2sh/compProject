@@ -301,25 +301,23 @@ func scenario_charge() -> void:
 		return
 	check("no glow, breeze or bar while idle", light.energy < 0.05 and breeze.strength == 0.0 and not bar.visible,
 		"%.2f %.2f %s" % [light.energy, breeze.strength, bar.visible])
-	# A quick dip never flashes the bar
-	Input.action_press("crouch")
-	await seconds(0.3)
-	Input.action_release("crouch")
-	await seconds(0.3)
-	check("a quick crouch shows no bar", not bar.visible)
+	# The charge registers the moment crouch is pressed: no wait before the power
 	var chimes: int = Sfx.played.get("charge_full", 0)
 	Input.action_press("crouch")
-	await seconds(0.6)
-	check("no glow before the charge pose", light.energy < 0.05, "%.2f" % light.energy)
-	await seconds(0.8)
+	await frames(3)
+	check("the charge starts at once", player.charging_jump and player.charge_amount() > 0.0,
+		"%.3f" % player.charge_amount())
+	await seconds(0.2)
+	check("the bar shows straight away", bar.visible and bar.fill > 0.0, "fill %.2f" % bar.fill)
+	await seconds(0.5)
 	check("the charge pose plays", player.animated_sprite.animation == &"JumpCharge")
-	check("the bar shows over her head as the charge builds", bar.visible and bar.fill > 0.1 and bar.fill < 0.6
+	check("the bar shows over her head as the charge builds", bar.visible and bar.fill > 0.25 and bar.fill < 0.7
 		and bar.global_position.y < player.global_position.y - 44.0, "fill %.2f" % bar.fill)
 	check("not full yet", not bar.full)
 	check("a light breeze gathers at her feet", breeze.visible and breeze.strength > 0.1, "%.2f" % breeze.strength)
 	var early := light.energy
 	var early_breeze := breeze.strength
-	await seconds(1.4)
+	await seconds(1.0)
 	check("the glow builds with the charge", light.energy > early + 0.3 and light.energy > 0.8, "%.2f -> %.2f" % [early, light.energy])
 	check("the breeze grows with the charge", breeze.strength > early_breeze + 0.3, "%.2f -> %.2f" % [early_breeze, breeze.strength])
 	check("sparks show the charge is full", sparks.emitting)
@@ -341,7 +339,7 @@ func scenario_charge() -> void:
 	check("the puff has settled", not breeze.visible)
 	# Standing up part-way drops the charge: the bar goes, nothing chimes
 	Input.action_press("crouch")
-	await seconds(1.5)
+	await seconds(0.8)
 	Input.action_release("crouch")
 	await seconds(0.5)
 	check("standing up part-way clears the bar and breeze", not bar.visible and not bar.full and breeze.strength == 0.0)

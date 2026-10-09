@@ -120,6 +120,11 @@ func _on_body_entered(body: Node2D) -> void:
 		explode(false, true)
 		return
 
+	# A cube's own portal doorway takes fire that grazes the cube on the way in
+	if body.is_in_group("rune_cube_body"):
+		var cube := body.get_parent() as RuneCube
+		if cube and cube.is_active and cube.effect is RunePortal and (cube.effect as RunePortal).takes_fire_at(global_position):
+			return
 	# Splash on walls, floors and anything else solid
 	if body.is_in_group("world") or body is TileMap or body is TileMapLayer:
 		explode(true)

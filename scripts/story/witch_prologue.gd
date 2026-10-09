@@ -40,6 +40,10 @@ var _resume_when_released := false
 var _cottage_framing := 1.35
 
 func _ready() -> void:
+	# The scenery, the bridge, the wisp and the cottage camera move every drawn
+	# frame: drawn as they are. Echidna and her camera move in physics steps and
+	# are drawn between them (set in _build_player)
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	get_tree().paused = false
 	AudioDirector.reset_combat()
 	AudioDirector.duck(-5.0, 0.8)
@@ -99,6 +103,7 @@ func _build_player() -> void:
 	camera.bounds = Rect2(0, 200, _width, 480 if stage != Stage.WELL else 640)
 	camera.base_zoom = Vector2(2, 2)
 	player.add_child(camera)
+	player.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	add_child(player)
 	var aura := PointLight2D.new()
 	aura.texture = LightTextures.radial(256)
@@ -109,7 +114,7 @@ func _build_player() -> void:
 	_lantern = SurfaceArt.sprite(player, "wall_lantern", Vector2(19, -17), 0.65)
 	_lantern.z_index = 1
 	_lantern.visible = stage != Stage.COTTAGE
-	player.died.connect(func(): get_tree().reload_current_scene())
+	player.died.connect(func(): SceneFade.restart(get_tree()))
 	player.lock_controls(true)
 
 func _solid(rect: Rect2, label: String = "Terrain", active := true) -> StaticBody2D:
@@ -473,7 +478,7 @@ func _transition(path: String) -> void:
 	player.lock_controls(true)
 	var t := create_tween()
 	t.tween_property(_fade, "color:a", 1.0, 0.8)
-	t.tween_callback(func(): get_tree().change_scene_to_file(path))
+	t.tween_callback(func(): SceneFade.change(get_tree(), path, 0.0))
 
 func _process(delta: float) -> void:
 	_time += delta

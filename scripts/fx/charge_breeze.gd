@@ -44,7 +44,7 @@ func _process(delta: float) -> void:
 	var t: float = _player.charge_time
 	if charging:
 		# A faint stir as she crouches, then the real gathering with the power
-		var settle := clampf((t - _start * 0.5) / (_start * 0.5), 0.0, 1.0)
+		var settle := clampf((t - _start * 0.5) / (_start * 0.5), 0.0, 1.0) if _start > 0.0 else 1.0
 		var target: float = 0.2 * settle + 0.8 * _player.charge_amount()
 		strength = move_toward(strength, target, delta * 3.0)
 	elif strength > 0.0:

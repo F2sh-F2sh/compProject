@@ -10,7 +10,7 @@ const SPIKE_TEXTURE := preload("res://assets/Spikes.png")
 const SPIKE_SIZE := 32.0
 const GLINT_SHADER := preload("res://assets/shaders/hazard_glint.gdshader")
 const GLOW_TEXTURE := preload("res://assets/fx/soft_glow.png")
-const GLINT_NORMAL := 1.5
+const GLINT_NORMAL := 1.8
 const GLINT_WARNING := 2.6
 
 # Shared by every strip: one material per glint strength

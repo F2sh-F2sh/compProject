@@ -4,7 +4,7 @@ extends Node2D
 ## A short line of text that rises and fades in the world, e.g. "+5 MP" over a
 ## pickup or "Echo faded" over Echidna. Unshaded, so it reads in the dark.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.UI
 
 
 static func spawn(parent: Node, at: Vector2, text: String, color := Color(0.85, 0.78, 1.0), rise := 26.0,
@@ -17,13 +17,15 @@ static func spawn(parent: Node, at: Vector2, text: String, color := Color(0.85, 
 
 
 func _start(text: String, color: Color, rise: float, life: float) -> void:
+	# (tweened every drawn frame: drawn where it is, not between physics steps)
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	z_index = 50
 	material = MagicLight.unshaded()
 	var label := Label.new()
 	label.text = text
 	label.use_parent_material = true
 	label.add_theme_font_override("font", FONT)
-	label.add_theme_font_size_override("font_size", 20)
+	label.add_theme_font_size_override("font_size", 16)
 	label.add_theme_color_override("font_color", color)
 	label.add_theme_color_override("font_outline_color", Color(0.02, 0.01, 0.05, 0.9))
 	label.add_theme_constant_override("outline_size", 6)

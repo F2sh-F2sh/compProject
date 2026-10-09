@@ -8,6 +8,8 @@ extends Node2D
 
 
 func setup(damage: int, critical: bool) -> void:
+	# (tweened every drawn frame: drawn where it is, not between physics steps)
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	z_index = 50
 	material = MagicLight.unshaded()
 	label.use_parent_material = true

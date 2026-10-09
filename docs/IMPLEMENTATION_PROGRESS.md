@@ -33,8 +33,8 @@ states) and [PLAYTEST_CHECKLIST.md](PLAYTEST_CHECKLIST.md) (what a human still n
 
 - Engine: Godot 4.7.2 (Forward+, D3D12). No engine, renderer or project-setting changes
   beyond new input actions, autoloads and one physics layer name.
-- Branch: `teammate-work`. All of this work is **uncommitted** in the working tree. Nothing
-  has been committed or pushed.
+- Branch: `teammate-work`. Everything up to the Great Sluice was committed and merged into `main`
+  on GitHub on 2026-10-05 (commit c86804b); work after that is uncommitted until asked.
 - Existing systems reused, not replaced: player controller, health/mana, fireball, heal,
   mana reload (R), Echo recording (E) with temporal debt, spike recovery vs real death, the
   death screen, lighting (CanvasModulate + FlickerLights + occluders + PostFX).
@@ -44,8 +44,18 @@ states) and [PLAYTEST_CHECKLIST.md](PLAYTEST_CHECKLIST.md) (what a human still n
 
 ## Status: all milestones implemented and passing automated tests
 
-Last full run (2026-10-05, after the Great Sluice): tutorial 173, chapter 341, presentation 111, experience 243,
-rune 304, wing 530, all passing (1,702 checks). The first full run (2026-09-29) was 561 checks in four suites.
+Last full run (2026-10-08, after the story, reels and Eye rework): wing 945, chapter 341, presentation 111,
+experience 246, rune 304, prologue 38, adversarial 18 all passing; tutorial 172 of 173. The one miss was "now a
+fireball flies" in the tutorial `abilities` scenario (code this work did not touch); it passed 4 of 4 reruns on its
+own and the whole tutorial suite passed 173 of 173 when rerun, so it is a flake. The run before it (after the
+Galleries rebuild): wing 937, tutorial 173, chapter 341, presentation 111, experience 246, rune 304, prologue 38,
+adversarial 18, all passing (2,168 checks). The run before that (after the
+Hall of Lamps): wing 654, chapter 341, presentation 111, experience 246,
+rune 304, prologue 38, adversarial 18 all passing; tutorial 172 of 173. The one tutorial miss is the slime arena in
+the `play` scenario ("both slimes defeated with fireballs"): the scripted fight stands and shoots with finite mana
+(cap 90 after the Echo, random 3-7 damage) and ends with 1-16 mana to spare when it wins, so it sometimes runs dry
+(failed 2 of 5 runs; it now prints mana, slimes left and health). It does not touch anything changed here. The first
+full run (2026-09-29) was 561 checks in four suites.
 
 | Milestone | Status |
 |---|---|
@@ -781,10 +791,12 @@ two endings. It is deliberately rough: playable and tested end to end, but the p
     Forge Bell).
   - Drowned Cistern: *The First Pool* (a slime stands on a stone-only plate; a Long chill freezes it, and a frozen
     creature is heavy as stone) and *The Sluice* (two slimes, two plates, one cube; the Tide Bell).
-  - Lampworks: *The Dark Reading Room* (a beam across a pit lights a crystal, which raises a bridge) and
+  - Lampworks: *The Dark Reading Room* (a beam across a pit lights a crystal, which raises a bridge; since
+    replaced by *The Hall of Lamps*, see the section of 2026-10-08) and
     *The Lamp Stair* (carry a glow cube under a high crystal; a Large glow reaches it; the Lamp Bell).
   - Folded Galleries: *The First Door* (carry a portal cube, Up-Right and Long, to doorway over a stone wall) and
-    *The Fold Bell* (an Echo holds a plate, faint stairs rise to the Fold Bell).
+    *The Fold Bell* (an Echo holds a plate, faint stairs rise to the Fold Bell); both since replaced by *The Folded
+    Archive* and *Wren's Test*, see the second section of 2026-10-08.
   - The Eye: the great cube (fed by the dungeon, fully editable). `Light · Beam · Up · Long` is the Rewritten Sky;
     `Ice · Freeze · Self · Large` is the Stillness (a real ending that leads back: "that is not the only
     sentence"); anything else is "not enough". Ilse and Wren's bed are pixel sprites (`RoomSprite`).
@@ -1024,7 +1036,7 @@ is shorter than the Cold Forge's because the room has less back-and-forth), whet
 meets the cold" can be worked out from the fountains and then used at the clock, the fountain climb's timing, and
 the switch-on-as-the-tide-rises timing at the clock.
 
-## The Great Sluice: the Cistern's second room, reworked (2026-10-05)
+## The Great Sluice: the Cistern's second room, reworked (2026-10-05; made simpler on 2026-10-07, see below)
 
 Requested: rework the second room to take around an hour to beat. Taken to mean the Drowned Cistern's second room
 (the Sluice, after the Still Water), since the request before it was about the Cistern's first room.
@@ -1093,6 +1105,301 @@ the scripted route is 2.3 times the Still Water's, with more to work out; the te
 long it takes); whether the tide rule can be read from trying; the crossing's mana (about 60 of 100 in the tests);
 the high-mark timing from the high ledge (about 4 s in each 20 s cycle); whether players think to take the Sluice
 Cube back out for the bridge; the slimes on the pan; the far pier as an optional page.
+
+## Smoother motion, scene fades and a steadier camera (2026-10-05)
+
+Requested: polish the game a bit and make it seem smoother.
+
+**What was wrong.** The two screens here run at 120 Hz and 165 Hz, but the game world moves in 60 Hz physics
+steps. Echidna, creatures, platforms and cubes therefore moved in uneven two-or-three-frame jumps while the camera
+glided every frame: a visible judder, worst at 165 Hz. Several scene changes also cut hard, and on high ledges the
+view bobbed up and down with every hop.
+
+**Changes.**
+- **Smooth motion** (`Settings.smooth_motion`, on by default, saved; a switch in the pause menu's Graphics list and
+  on the title's settings panel): turns on Godot's physics interpolation at run time (`SceneTree.physics_interpolation`,
+  with `Engine.physics_jitter_fix` 0), so everything that moves in physics steps is drawn in between them. The
+  project file is unchanged. Things animated every drawn frame opt out (`physics_interpolation_mode` OFF) so they
+  stay smooth: every CanvasLayer (menus, HUD, cards, story pictures; a hook in Settings catches them as they are
+  added), the title screen and story pictures, Lowbell's and the cottage's tweened scenery and intro cameras (Echidna
+  and her camera stay interpolated), floating text, damage numbers, the forge door's slide, a ledger page's bob, a
+  candle's flame and the parallax backgrounds. Teleports reset the interpolation (spawn placement and Reset Room in
+  ChapterRoot; teleport_to, portals, cubes and wind bodies already did).
+- **Camera** (`scripts/camera_bounds.gd`): with smooth motion, the follow and its offsets (shake, the look at a
+  distant point) run in the physics step, so the engine draws camera and world consistently and the offset clamp is
+  exact (an earlier version set the offset every drawn frame and could show 1-7 px past a room's edge; the chapter
+  suite's camera checks caught it). Without smooth motion it follows every drawn frame as before. New `hop_band`
+  (72 px): the camera holds its height while she is within a hop of the floor she last stood on, and follows a
+  hop's height behind her once she climbs, falls or rides higher.
+- **Scene fades** (`scripts/ui/scene_fade.gd`, `SceneFade.change` / `SceneFade.restart`): every scene change and
+  restart fades through black (0.3 s out, 0.45 s in): Landing doors (she stops first), the title's level starts,
+  Quit to Title (the world holds still while it fades), the end card's Continue, the ending, and restarting after
+  death or from the menu. Scenes that already fade themselves to black (the story pictures, Lowbell, the cottage, a
+  chapter's end) now also fade the next scene in instead of popping. Only the fade-out blocks a second request (no
+  double loads); the new scene is live while it fades in.
+
+**Measured** (a probe, not part of the suites: uncapped at 165 or 120 fps in a 1152x648 window, sprinting across the
+Landing, every drawn frame read back to find a bar riding on her and a bar fixed in the world; "wobble" is how far
+each frame lands from where its two neighbours put it):
+
+| | her bar, wobble | world bar, wobble |
+|---|---|---|
+| 165 fps, before | 3.8 px | 2.8 px |
+| 165 fps, smooth motion | 0.4 px | 0.8 px |
+| 120 fps, before | 4.0 px | 4.1 px |
+| 120 fps, smooth motion | 0.5 px | 1.2 px |
+
+What is left is pixel rounding. Hopping along the High Walk (a high ledge in a tall room), the view moved 103 screen
+px up and down over five hops before and 0.1 px after.
+
+**Found while testing.** A static function named `reload` on the fade clashed with `GDScript.reload()` and broke
+restarting after death (renamed `restart`); the first fade ignored a scene change asked for while the previous scene
+was still fading in (the title's Continue pressed straight away did nothing); the Graphics menu has one more row (the
+experience test counts it).
+
+**Tests.** `tests/run_tests.gd` turns smooth motion on (the default), so the suites run with interpolation. The
+chapter suite's camera-bounds check waits two steps after a room's slide ends before judging (the slide's last step
+is drawn a step later). Full run, 2026-10-06: tutorial 172 of 173, chapter 341, presentation 111, experience 243,
+rune 304, wing 530 (1,701 of 1,702). The one failure, "both slimes defeated with fireballs" in the tutorial
+playthrough, aims with the real mouse and flakes either way: rerun alone it failed 1 time in 3 with smooth motion
+on and 1 in 5 with it off.
+
+**Needs a human look** (on the 120 Hz and 165 Hz screens): whether walking, sprinting, jumping and riding lifts feel
+smooth now; anything that looks stepped or laggy (it would be something animated every drawn frame that still
+follows physics steps; turning Smooth motion off in the menu brings back the old behaviour for comparison); whether
+the steadier camera on high ledges feels better or hides anything you need to see; and the fades' length.
+
+## Merged GitHub main, an instant charged jump, a simpler Great Sluice (2026-10-07)
+
+**Merge.** GitHub `main` had three new commits from a teammate (a playable witch prologue with story dialogue, a
+bell aftermath between the Belfry and the Observatory, a background bug hunt with ten fixes in `docs/BUG_HUNT.md`,
+headless-friendly tests and two new suites, `prologue` and `adversarial`). The local smooth-motion work was set
+aside, `teammate-work` fast-forwarded to `main` (33692f0), and the local work reapplied. One conflict
+(`scripts/ui/chapter_complete.gd`): both kept, the bell-aftermath redirect then the scene fade. The new story scenes
+were brought in line with the smooth-motion and fade rules (their exits and the prologue's restart go through
+`SceneFade`; their per-frame scenery, cameras, bridge and wisp opt out of interpolation, Echidna stays smoothed).
+The merged tests aimed fireballs by pushing mouse events, which a desktop window ignores (it reads the OS cursor),
+so every windowed fireball check missed (tutorial 20, chapter 62, experience 5 failures). Windowed runs now aim with the
+player's new test-only `aim_override` instead of the OS cursor (so a test run no longer moves the mouse, and a moved
+mouse no longer spoils a run; the shot still goes through the real shoot input, mana and cooldown); headless runs
+keep the teammate's `BackgroundAim`.
+
+**Charged jump.** Requested: the charge should register the moment crouch is pressed, with no delay. It used to do
+nothing for a second, then charge for 1.5 s. Now `CHARGE_START_TIME` is 0 and `MAX_CHARGE_TIME` 1.5 s: power, bar,
+breeze and glow from the first frame, full after 1.5 s, the same top height. (The breeze's settle no longer divides
+by the start time.) The presentation `charge` checks now test the instant start.
+
+**The Great Sluice, simpler and clearer.** Requested: rework it (chosen: "simpler and clearer"). Cut: the high mark
+(freezing the tide at its very top, a 4 s window in a 20 s cycle, from the high ledge), the ballast stone and its
+Strong-wind Drover Cube and kerb, and the High Walk's fallen span with its ice bridge. The Great Sluice now opens
+when its weigh pan holds two weights: the two slimes on it, frozen by the Sluice Cube in the socket (Persist, free
+there). The Tide Lever is fed by the dungeon (no mana to budget while crossing), and the tide's dry wait is 4 s
+(was 7). The far pier (page vi) stays as an optional challenge from the high ledge. Hints, steps, the Warden's page
+v and the room's notes were rewritten to match. Scripted route 97 s of game time (was 143). Design estimate 25 to 40
+minutes; it needs a human playtest. Tests: wing `c2` 38, `c2_full` 33, `c2_pages` 12, `c2_broken` 6, `c2_look`.
+Full run (2026-10-07, eight suites), all passing: tutorial 173, chapter 341, presentation 111, experience 246,
+rune 304, wing 496, prologue 38, adversarial 18 (1,727 checks).
+
+## The Hall of Lamps: the Lampworks' first room, reworked (2026-10-08)
+
+Requested: rework the Lampworks' first room around light so that it takes about an hour to beat. *The Dark
+Reading Room* (one beam across one pit, a minute's work) is replaced by **The Hall of Lamps** (`lamps_hall()` in
+`tools/build_wings.gd`, columns 0-96; the Lamp Stair moved east with it, `lamps_stair(o)`). One long room in five
+parts, each teaching one thing about light and ending with a lamp lit that opens the way on. No timing anywhere.
+The story of each part is in docs/STORY_PLAYTHROUGH.md (Chapter 3, item 1).
+
+- **The parts.** *Reading Room* (Light, Beam: a bridge over a spiked pit). *Mirror Gallery* (Bounce; three
+  mirrors, two hung high and turned from wheels on the floor, carry the Gallery Cube's beam up, across and down,
+  680 px, inside a plain beam's 900). *Watchers' Walk* (Glow, Self: the Watch Cube glowing in a socket on a
+  stone-only plate holds the patrolling Watcher there as stone; a Watcher stops where light begins, so Large stops
+  him short of the plate). *Watch Lamp* (her fire on a hung brazier holds the second Watcher; from his back a
+  charged jump carries her and the cube to a ledge 132 px up, out of reach from the floor). *Dark Stacks* (a
+  walkway of light-revealed stones over spikes: a hung brazier lights the first four, the cube on the middle
+  pillar one each side or two with Large, the Stacks Lamp the last four; plain leaves a 128 px gap, Large 64,
+  none 192). *Great Lamp* (Up-Left on the Door Cube). Learned here: Light, Beam, Bounce, Glow, Self, Up-Left.
+- **Making the long room fair.** A low vault over the chasm (underside y 400) caps every jump at about 165 px, so
+  the dark can't be jumped without the cube's light (her charged, sprinting jump otherwise carries ~224 px). Gates
+  sit in stone walls, never free-standing in the tall hall (a charged jump from the cube's top would clear one).
+  The lamps, mirrors and the Great Lamp hang low enough to be seen from the floor (the camera shows about 190 px
+  above her). Reset Room here returns her to the last shrine she lit (new opt-in `Room.reset_at_shrine`, used only
+  by this room; other rooms still go back to their entrance); the gates behind her are saved open, so nothing is
+  out of reach.
+- **New pieces.** `HallLamp` (`scripts/puzzle/hall_lamp.gd`, `scenes/puzzle/hall_lamp.tscn`): a hanging pixel-art
+  lamp, dark until a circuit lights it. Sprites by `tools/generate_lamp_sprites.gd`: `hall_lamp`, `great_lamp`,
+  `bookshelf`, `lamplighter_plaque` (registered in `SurfaceArt.STRIPS`). `SpectralPlatform.casts_shadow` (default
+  true): when false, a light-revealed platform never shades another one like it (lit stones were shading the
+  stones beyond them); it is still solid and still blocks light for everything else. Three Lamplighter's ledger
+  pages (`lamps.page.1-3`, `total_pages` 3).
+- **Tests** (wing suite): `l1` part by part with the wrong tries (Large off the plate, straight up misses) 61,
+  `l1_full` the straight route 56 (98 s of game time), `l1_pages` 43, `l1_dark` 6 (the ledge out of reach from the
+  floor; without the cube's light both a running jump and her longest jump fall short; Reset Room to the shrine),
+  `l1_look` screenshots and wall/vault probes. `l2` unchanged (it finds the Lamp Stair's pieces by name).
+- **Estimate.** Design estimate for a first-time player: about 45 to 60 minutes. That is a guess from the number
+  of steps; only a human playtest can confirm it (the room has not been played by a person yet).
+
+## The Folded Galleries rebuilt: the Folded Archive and Wren's Test (2026-10-08)
+
+Requested: fully rework the Galleries so the whole wing takes about two hours, with the detail and depth of the
+other three wings. The two one-minute rooms (*The First Door*, *The Fold Bell*) are replaced by two long rooms
+built by `galleries_archive()` (cols 0-70) and `galleries_wren()` (cols 70-134) in `tools/build_wings.gd`. Their
+story is in docs/STORY_PLAYTHROUGH.md (Chapter 4). Words taught: Space and Portal (the Archive), Repeat and
+Down-Left (Wren's Test).
+
+- **The Folded Archive** (five parts): the Sealed Door (a doorway through a frozen door and rock), the Tall
+  Stacks (the Archive Cube in a socket, Portal Up: the far doorway hangs over a shelf 196 px up), the Sealed
+  Reading Room (an Echo recorded jumping in through the doorway holds a plate in a sealed pocket), the Pillar
+  (Right comes out in a hollow inside a pillar of rock, Long goes through; an Echo recorded going in still goes
+  in after the cube is rewritten to Long, and holds the gate beyond), the Hearth (fire thrown straight up
+  through a doorway hung in the air comes out in a sealed hearth, into its brazier).
+- **Wren's Test** (four locks Wren half-wrote, one seal each on her door): Again (Repeat keeps the Ember Lift's
+  brazier burning; it burns two seconds), Aslant (Down-Left on the Frost Lock freezes five fountains into a
+  stair; the Cistern's fountains mirrored), Two Hearths (two braziers 448 px apart, two seconds each: an Echo
+  throws at one while she throws at the other), the Last Crystal (Bounce and three mirrors; the last mirror's
+  wheel is in a sealed pocket reached by a doorway Up). Then Wren's door, Wren, and the Fold Bell.
+- **Gates held by an Echo stay open once she is through:** each such gate's circuit is ANY of [the plate, a
+  latched circuit on a threshold plate just past the gate]. Reset Room returns to the last shrine lit
+  (`reset_at_shrine`, as in the Hall of Lamps).
+- **Engine changes (shared, small):** fire flies through portals (`RunePortal._carry_fire`: a bolt in one
+  doorway comes out of the other with the rest of its range; a bolt that grazes the portal's own cube in its
+  doorway passes instead of bursting, `takes_fire_at`, `FireBall._on_body_entered`); a burning brazier hit by
+  more fire burns its full time again (`Brazier._set_lit`; before, a second bolt was ignored, so Repeat could
+  not keep a short-burning brazier lit).
+- **New pieces:** `WrenMeeting` (`scripts/story/wren_meeting.gd`): Wren, who breathes, blinks, turns to look,
+  and the first time Echidna is near talks line by line (her bubble, Echidna's thought); saved by
+  `galleries.wren_spoke`. Sprites by `tools/generate_gallery_sprites.gd`: `wren` (3 frames), `archivist_plaque`,
+  `scroll_rack`, `seal_fire/ice/space/light` (2 frames each, shown by `HallLamp`), `chalk_hands`. Five
+  Archivist's ledger pages (`galleries.page.1-5`).
+- **Found and fixed on the way:** a sideways portal from a cube on the floor is always refused (its far doorway
+  dips 6 px into the floor), so such cubes stand 8 px up; the camera shows only ~190 px above her, so the cubes
+  and doorways she aims at hang no higher than that; a mirror's wheel reaches up from its point, so the pocket
+  wheel sits on the pocket floor; page i's shelf moved off the far doorway's approach.
+- **Tests** (wing suite): `g1` 46 and `g2` 45 (part by part, with the wrong tries: Long straight through finds
+  the gate shut; a single bolt stops the lift halfway; one pair of hearths by hand goes out), `g1_full` 38 (61 s
+  of game time), `g2_full` 39 (112 s, 30 of them Wren talking), `galleries_full` 77 (both rooms in one go, 188
+  s), `g1_pages` 10, `g2_pages` 36, `g1_dark` 7 and `g2_dark` 4 (shelves and walkways out of reach, pockets
+  sealed, fire into the hearth only through the doorway, Reset Room to the shrine), `g1_look` and `g2_look`
+  (screenshots and probes, not in the default run).
+- **Estimate.** About 1.5 to 2 hours for a first-time player (ten new ideas, each about 6 to 15 minutes, and the
+  pages). A design estimate only: nobody has played it yet.
+
+## One story, an ending that lands, reels staged like Hollow Knight (2026-10-08)
+
+Asked for: an ending with real emotional weight, a much more coherent story, and cutscenes that look like
+Hollow Knight's (a small figure before something vast and glowing, chains, deep dark layers). Chosen: the whole
+game's reels, pixel art staged the Hollow Knight way, the held moment shown as a great moth in four chains, and
+the two bell aftermaths merged into one.
+
+- **The story bible** is the first section of `docs/STORY_PLAYTHROUGH.md`: love that holds on versus love that
+  lets go; Echidna losing Nan mirrors Ilse losing Wren; Ilse's lullaby of four notes is the bell's peal (why the
+  bell quiets the Hush) and Nan's hum; Wren's chalk stars mean "look up"; the Stillness is Echidna's own
+  temptation; the Rewritten Sky gives two stars, Wren's and Ilse's; the cottage promise ("as many times as it
+  takes") closes the game.
+- **Staging toolkit** `scripts/story/story_stage.gd` (`StoryStage`): depth layers that drift and scale with the
+  camera's push (`Layer`), fog bands (`assets/shaders/story_fog.gdshader`), rising embers, hanging snow, washes,
+  silhouette pieces, a rising/falling `Beam`, the `Moth` (frozen → kindling → alight, breathing, or folded) and
+  the `Chain` (links, a word plate, `snap()`).
+- **Presentation** (`StoryIntro`, so every reel): letterbox bars that close in; the words small in the bottom
+  bar and the era in the top bar; lore cards (words centred on black between pixel ornaments); a per-shot
+  colour grade and vignette (`assets/shaders/story_grade.gdshader`); silent beats (`""` lines); story music cues
+  per shot (`"music"`). `AudioDirector.play_cue()/stop_cue()` play a cue once, duck the loops and open the Music
+  bus low-pass. The Hush shader can run backwards (`thaw`).
+- **New pixel art** `tools/generate_story_hk_sprites.gd`: the moth (3 frames) and folded moth, chain link, four
+  word plates, Ilse kneeling (3), the lore-card ornament, and silhouettes (stalactites, rocks, crystals, arch,
+  pillar, grass, the mountain with the monastery, Lowbell's roofs, the dome's rim).
+- **Music cues** `tools/generate_story_music.gd`: `lullaby.wav` (music box over piano, 19 s), `bell_peal.wav`
+  (the four notes as bell strikes, 12 s), `ending_swell.wav` (the motif, a rising pad, turning to A major, 46 s).
+- **Every reel rewritten and restaged** (shot lists in `docs/STORY_PLAYTHROUGH.md`): the opening 9 → 8, the
+  bell 2 → 4 (with the teammate's beats: half a name, the Bellkeeper's last note), the dome 3, the wings 2 each,
+  the Eye opens 3, the Stillness 3, the Rewritten Sky 11.
+- **The Eye rebuilt as the finale** (`build_eye()`, `scripts/story/eye_scene.gd`): the moth and chains over the
+  great cube, hanging snow, Ilse kneeling at the bed by the candle, a darker room (no window or banners; the
+  moth and the candle are the light), the camera drawn back to 1.5. Wren meets Echidna at the door and walks
+  with her to the cube; Ilse pleads near the cube (the camera leans to her) and Wren answers. The hint stone
+  points at the clues and names the sentences only at its last stage. `EyeAltar.wrong_sentence` lets Wren answer
+  a wrong sentence (the old toast stays when nothing listens). After the Stillness, Wren has new lines
+  (`eye.stillness_seen`).
+- **Coherence fixes:** Nan hums the four notes as Echidna comes in (the lullaby plays quietly) and says the bell
+  "rang the tune I'm always humming"; Wren's Landing chalk now says "if you get lost, look up" (the scene's one
+  text line changed by hand as well as in the builder, so the Landing is not regenerated).
+- **Tests:** wing `eye` (24: the moth and four chains, Wren's lines and walk, Ilse's plea, Wren's answers, both
+  endings, THE END), `*_look` scenarios that page every reel and save each shot (`intro_look`, `bell_look`,
+  `dome_look`, `kiln_look`, `cistern_look`, `lamps_look`, `galleries_look`, `eye_reel_look`, `stillness_look`,
+  `sky_look`; screenshots only, not in the default run); experience counts updated (8 opening pictures, 4 bell).
+- **Looked at by eye:** every shot of every reel (contact sheets from the look scenarios) and the Eye room in
+  play; several framings fixed after looking (plates hidden by the cube, stars under the bar, empty ground,
+  the mountain not reading as a silhouette, Ilse off screen during her plea).
+- **Not checked by anyone yet:** whether the ending moves a player, the pacing of the reels, whether anything is
+  too dark to read on a real screen, and how the generated music sounds.
+
+## The polish pass: one dungeon look, portraits, levels that feel different, creatures, fair puzzles (2026-10-09)
+
+Asked for: polish every part of the game, with five reference images (pastel per-level palettes, a gold and
+crimson 9-slice dungeon frame, UnderMine's carved rune wheel, RefRain's big title art, large dialogue portraits).
+Chosen with you: free open-licence fonts, our shadow-faced portrait style, creatures in corridors (puzzle spots
+stay calm), and targets that can be found without hints (with the hints slowed down).
+
+- **Fonts** (Google Fonts, SIL OFL, each folder has its `OFL.txt`): Jacquard 12 (titles, YOU DIED), Silkscreen
+  (HUD, menus, prompts), Pixelify Sans (dialogue, captions), IM Fell English (lore pages, notes), Patrick Hand
+  (Wren's chalk). Roles in `scripts/ui/fonts.gd` (`Fonts`); every Orbitron/SystemFont use moved to a role.
+- **The dungeon UI kit:** `tools/generate_ui_sprites.gd` draws the 9-slice stone panel with gold filigree and
+  crimson gems, lighter panel, parchment, button plates, banner, name plate, dividers, slider, checkbox,
+  scrollbar and bar frame (`assets/ui/`), and saves the project theme `assets/ui/dungeon_theme.tres` (set in
+  `project.godot`). `scripts/ui/dungeon_ui.gd` (`DungeonUI`): palette, styles, corner crests, dividers. Every
+  screen reskinned: HUD, pause menu (stone ring and plates), settings, toasts, prompts, signs, page reader
+  (parchment), tours, chapter card, death screen, title cards, rune overview and journal.
+- **Portraits and the dialogue box:** `tools/generate_portraits.gd` (112×136, shown 3×): Echidna (5 faces), Nan
+  (4), Wren (4), Ilse (3). `scripts/ui/dialogue_box.gd` (`DialogueBox`): the speaker's portrait on their side, a
+  gold name plate, typewriter text with the forgotten-name gaps. Used in Nan's cottage, Wren's meeting, the Eye
+  (door talk and Ilse's plea) and in reels (a line can be `{"who", "face", "text"}`).
+- **The story's whys** (shown on screen, written into `docs/STORY_PLAYTHROUGH.md`): the cottage is the Choir's
+  old gatehouse and Nan their last novice; the mountain road has been frozen shut for nine winters, so the way
+  up is the novices' path inside the mountain, under the gatehouse; the Choir sealed the Eye with four bells; at
+  the end the great bell hangs silent ("It would never need to ring again") and Lowbell's chimes move in the
+  returning wind (no bell sound). Opening, Lowbell, cottage, bell and dome scenes rewritten around this.
+- **Title screen:** a full-screen composition: Echidna's portrait large over a crimson lattice banner, the moth's
+  wing behind, "The Sealed Belfry" in Jacquard at 84, a gold rule, an italic tagline, angled stone panels and
+  snow; the menu as stone plates on the right.
+- **Runes:** the rune screen rebuilt as a carved serpent wheel (`tools/generate_rune_ui_sprites.gd`) with four
+  sockets, a stone eye that opens when the sentence is whole, fragments as tablets, a "WHERE IT GOES" view of
+  the aim path, and a parchment info plate (same API, all rune tests pass). `RuneFragments.combo_glow()` gives
+  each combination its colour, pattern, size and pulse (broken runes flicker); cubes are carved stone sprites
+  lit in that colour. `AimPreview` draws a dotted path to the first solid while aiming.
+- **Each level its own feel:** `scripts/fx/level_theme.gd` (`LevelTheme`, applied from `PostFX`): a tile
+  recolour shader (`assets/shaders/tile_recolor.gdshader`) maps the shared tileset to three tones per level,
+  plus mist, shadow/highlight tints, saturation, torch and shaft colours, drifting air (fireflies, snow, stars,
+  frost, embers, drips, dust, paper) and props (`tools/generate_level_props.gd`). Passage mossy teal, Belfry
+  cold blue, Observatory indigo, Landing dusk violet, Kilnworks ember, Cistern aqua, Lampworks sepia gold,
+  Galleries pastel pink, the Eye blue-black. Rooms keep their own moods, leaning toward the level's.
+- **Creatures** (`scripts/creatures/creature.gd`, `creature_spawner.gd`, sprites from
+  `tools/generate_creature_sprites.gd`, shown 3×): bats and star mites (Belfry, Observatory), cinderlings
+  (fire-proof) and clinkers (armour cracks first) in the Kilnworks, frostlings and brine jellies in the Cistern,
+  lampmoths (Lampworks, Galleries), foldmites that blink (Galleries), hushlings that drain mana (the Eye). They
+  are scattered on open floor in each room, never within 170 px of anything with an Area2D or a rune cube, nor
+  300 px of a room's way in; a room's own slimes count toward its share. The Passage (the movement lesson)
+  keeps only its taught slimes, and the Landing is the safe hub. Tests run with `GameState.calm_creatures`.
+- **Sound** (`tools/generate_sfx.gd`, appended so every earlier sound is byte-identical apart from the menu
+  sounds re-voiced in stone): creature alert/hurt/die/hop/crack/drain; a full death (`death_fall`: the blow,
+  the fall, a minor chord, a heartbeat that stops), a toll under YOU DIED (`death_sting`) and `respawn`;
+  footsteps on ash (Kilnworks), wet stone (Cistern) and paper (Galleries); a page turn; the hint skull's
+  whisper; and 8 s ambience beds per level (wind, stars, hush, forge with chains, water, lamp hum, folds, the
+  Eye's near-silence) on a new `AudioDirector.set_bed()` channel under the cave ambience.
+- **Fair puzzles:** the hint skull listens before it speaks: the first hint after about a minute in its room,
+  the second 2.5 minutes after that, the solution 4 minutes after that; a gold ring fills round it, the wait
+  survives deaths and reloads, a stuck-player nudge waits for it, and the "Hints without waiting" assist turns
+  it off. Every target a rune, beam or bolt must reach that is off the screen in the room she is in gets a gold
+  pip at the screen's edge pointing at it (`scripts/ui/target_pips.gd`, added by `ChapterRoot`), until it is lit,
+  cleared or broken; with the aim preview, nothing has to be found by guessing.
+- **Tests:** wing `creatures` (20), `sounds` (13), `hint_wait` (14), `sightlines` (15), `levels_look` (9);
+  updated cottage, Eye and experience checks for the dialogue box and the death sounds. Test runs keep hint
+  waits off (`Settings.assist_instant_hints`) and creatures calm. All 8 suites pass (2026-10-09): wing 1007,
+  tutorial 173, chapter 341, presentation 111, experience 248, rune 304, prologue 38, adversarial 18 (2,240).
+  The brighter palettes made spike tips harder to pick out, so the spike glint went from 1.5 to 1.8 and the
+  Passage's lightest tone was softened.
+- **Looked at by eye:** the title screen, pause menu, tour card, map, dialogue in the cottage and reels, every
+  level's palette, the rune wheel, creatures in each level (sprites redrawn for the bat and moth, drawn larger
+  after looking), the hint ring and the target pips.
+- **Not checked by anyone yet:** how the fonts and UI feel on a real screen, creature difficulty, whether the
+  hint waits feel fair, the sound mix (beds, death, stone menus), and each level's timing with creatures in it.
 
 ## Known limitations and decisions
 

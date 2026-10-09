@@ -6,7 +6,7 @@ extends PanelContainer
 ## When a step completes its name flashes under the pips, so players see
 ## their progress without being told the solution.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.STORY
 const DONE_COLOR := Color(0.78, 0.66, 1.0)
 const TODO_COLOR := Color(0.5, 0.44, 0.66)
 const CLEAR_COLOR := Color(0.6, 0.95, 0.75)
@@ -27,22 +27,12 @@ func _ready() -> void:
 	offset_right = -16
 	offset_top = 16
 	grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.05, 0.035, 0.09, 0.78)
-	style.border_color = Color(0.5, 0.38, 0.78, 0.8)
-	style.set_border_width_all(1)
-	style.border_width_left = 3
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 12
-	style.content_margin_right = 12
-	style.content_margin_top = 7
-	style.content_margin_bottom = 7
-	add_theme_stylebox_override("panel", style)
+	add_theme_stylebox_override("panel", DungeonUI.style("panel_lite", 8, Vector4(14, 10, 14, 10)))
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 4)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(box)
-	_goal = _label(14, Color("e4ddf2"))
+	_goal = _label(16, Color("e8dcc0"))
 	_goal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_goal)
 	_pips = Control.new()

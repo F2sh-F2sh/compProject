@@ -7,7 +7,7 @@ extends Area2D
 
 signal interacted(player: Node)
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.UI
 
 @export var verb := "Use":
 	set(value):
@@ -134,16 +134,7 @@ func _build_prompt() -> void:
 
 	var panel := PanelContainer.new()
 	panel.use_parent_material = true
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.05, 0.035, 0.09, 0.88)
-	style.border_color = Color(0.5, 0.38, 0.78, 0.9)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 8
-	style.content_margin_right = 8
-	style.content_margin_top = 3
-	style.content_margin_bottom = 3
-	panel.add_theme_stylebox_override("panel", style)
+	panel.add_theme_stylebox_override("panel", DungeonUI.style("panel_lite", 8, Vector4(12, 5, 12, 5)))
 	panel.scale = Vector2(0.5, 0.5)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_prompt.add_child(panel)
@@ -151,8 +142,8 @@ func _build_prompt() -> void:
 	_label = Label.new()
 	_label.use_parent_material = true
 	_label.add_theme_font_override("font", FONT)
-	_label.add_theme_font_size_override("font_size", 20)
-	_label.add_theme_color_override("font_color", Color("e4ddf2"))
+	_label.add_theme_font_size_override("font_size", 16)
+	_label.add_theme_color_override("font_color", Color("e8dcc0"))
 	panel.add_child(_label)
 	_refresh_text()
 	panel.resized.connect(func(): panel.position = Vector2(-panel.size.x * 0.25, -panel.size.y * 0.5))

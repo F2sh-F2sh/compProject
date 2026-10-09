@@ -16,6 +16,7 @@ var _glow: Node2D
 
 func _ready() -> void:
 	_glow = Node2D.new()
+	_glow.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	var mat := CanvasItemMaterial.new()
 	mat.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 	_glow.material = mat

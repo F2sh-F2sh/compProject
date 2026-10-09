@@ -193,14 +193,15 @@ label_text = "The Eye"
 [node name="Choir" type="Node2D" parent="R1/Signs" unique_id=1507923509 instance=ExtResource("12_nveny")]
 position = Vector2(390.4, 456)
 script = ExtResource("13_4dxdr")
-text = "The Choir's last note: Four bells hold the Eye shut. Ring the Forge Bell first: its heat runs in the pipes behind every door and thaws the next."
+text = "The Choir's last note: We sealed the Eye with four bells, so only one who has walked every wing, and learned every word, can open it. Ring the Forge Bell first: its heat runs in the pipes behind every door and thaws the next."
 width = 210.0
 
 [node name="Chalk" type="Node2D" parent="R1/Signs" unique_id=559825643 instance=ExtResource("12_nveny")]
 position = Vector2(1920, 456)
 script = ExtResource("13_4dxdr")
-text = "A chalk star, and below it: don't be afraid of the cold. -W"
+text = "A chalk star, and below it: if you get lost, look up. And don't be afraid of the cold. -W"
 width = 170.0
+handwritten = true
 
 [node name="Chalk" type="Node2D" parent="R1" unique_id=1769029808]
 

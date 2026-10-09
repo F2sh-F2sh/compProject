@@ -6,7 +6,8 @@ extends Node
 ##   drone  a low, echoing cave drone in A          (always present)
 ##   piano  a sparse, melancholic piano melody      (the main theme)
 ##   pulse  a slow heartbeat and trembling strings  (combat only)
-## plus a cave-ambience bed (drips and wind) on its own channel.
+## plus a cave-ambience bed (drips and wind) on its own channel, and under it
+## each level's own bed (forge roar, water, lamp hum...: set_bed()).
 ##
 ## Combat intensity (0..1) eases toward 1 while any combat source is active
 ## (a combat room, a CombatZone) and back to 0 when none is. As it rises the
@@ -42,10 +43,21 @@ var _duck_tween: Tween
 ## The ambience level (see fade_ambience()).
 var ambience_db := AMBIENCE_DB
 var _ambience_tween: Tween
+## Each level's own ambience bed (see set_bed()), under the cave ambience.
+const BED_DIR := "res://assets/audio/sfx/"
+const BED_DB := -9.0
+## The bed playing now ("" for none): LevelTheme picks it per level.
+var bed_name := ""
+var _bed: AudioStreamPlayer
+var _bed_level := 0.0
+var _bed_tween: Tween
+## The story cue playing now, if any (see play_cue()).
+var cue: AudioStreamPlayer
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().scene_changed.connect(_on_scene_changed)
 	for layer in LAYERS:
 		var player := _looping_player(MUSIC_DIR + LAYERS[layer][0], Settings.MUSIC_BUS)
 		if player:
@@ -134,8 +146,81 @@ func _apply_mix() -> void:
 		players[layer].volume_db = maxf(db + start + duck_db, -80.0)
 	if ambience:
 		ambience.volume_db = maxf(ambience_db + start, -80.0)
+	if _bed:
+		_bed.volume_db = maxf(ambience_db - AMBIENCE_DB + BED_DB + start + linear_to_db(maxf(_bed_level, 0.0001)), -80.0)
 	var music := AudioServer.get_bus_index(Settings.MUSIC_BUS)
 	if music >= 0 and AudioServer.get_bus_effect_count(music) > 0:
 		var lowpass := AudioServer.get_bus_effect(music, 0) as AudioEffectLowPassFilter
 		if lowpass:
-			lowpass.cutoff_hz = lerpf(CUTOFF_EXPLORE, CUTOFF_COMBAT, k)
+			lowpass.cutoff_hz = 16000.0 if is_instance_valid(cue) else lerpf(CUTOFF_EXPLORE, CUTOFF_COMBAT, k)
+
+
+## Plays a story cue once (a file in MUSIC_DIR, e.g. the lullaby): the music
+## steps back for it and the Music bus's low-pass opens so it rings clear,
+## then the music comes back when it ends (or stop_cue() is called).
+func play_cue(file: String, db := 0.0, duck_to := -26.0) -> AudioStreamPlayer:
+	stop_cue(0.6)
+	var path := MUSIC_DIR + file
+	if not ResourceLoader.exists(path):
+		return null
+	var player := AudioStreamPlayer.new()
+	player.name = "Cue"
+	player.stream = load(path)
+	player.bus = Settings.MUSIC_BUS
+	player.volume_db = db
+	add_child(player)
+	player.play()
+	cue = player
+	duck(duck_to, 1.5)
+	player.finished.connect(func() -> void:
+		if cue == player:
+			cue = null
+			duck(0.0, 3.0)
+		player.queue_free())
+	return player
+
+
+## Fades out the story cue playing now, if any, and brings the music back.
+func stop_cue(seconds := 1.5) -> void:
+	if not is_instance_valid(cue):
+		cue = null
+		return
+	var player := cue
+	cue = null
+	var t := create_tween()
+	t.tween_property(player, "volume_db", -60.0, seconds)
+	t.tween_callback(player.queue_free)
+	duck(0.0, 3.0)
+
+
+## Crossfades to a level's ambience bed (assets/audio/sfx/bed_<name>.wav),
+## or out to none with "". Follows fade_ambience() like the cave ambience.
+func set_bed(bed: String, seconds := 2.0) -> void:
+	if bed == bed_name:
+		return
+	bed_name = bed
+	if _bed:
+		var old := _bed
+		var t := create_tween()
+		t.tween_property(old, "volume_db", -60.0, seconds)
+		t.tween_callback(old.queue_free)
+	_bed = null
+	if _bed_tween:
+		_bed_tween.kill()
+	_bed_level = 0.0
+	if bed == "":
+		return
+	_bed = _looping_player(BED_DIR + "bed_%s.wav" % bed, Settings.AMBIENT_BUS)
+	if _bed:
+		_bed.name = "Bed"
+		_bed.play()
+		_bed_tween = create_tween()
+		_bed_tween.tween_property(self, "_bed_level", 1.0, seconds)
+
+
+## A scene that isn't a themed level (the title, a story scene) has no bed.
+func _on_scene_changed() -> void:
+	await get_tree().create_timer(0.3).timeout
+	var scene := get_tree().current_scene
+	if scene == null or not scene.has_meta("level_theme"):
+		set_bed("")

@@ -7,7 +7,7 @@ extends RefCounted
 ## rune she has cast, with what it does. All of it is saved (GameState
 ## flags "rune.frag.<id>", "rune.note.<id>", "rune.cast.<recipe>").
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.STORY
 
 ## id: what she writes down the first time she sees it happen.
 const NOTES := {
@@ -51,19 +51,19 @@ static func fill(list: VBoxContainer, tree: SceneTree) -> void:
 				row.add_child(_fragment(id, kind))
 				any = true
 		if any:
-			list.add_child(_label(RuneFragments.KIND_NAMES[kind], 12, Color("a99ccf")))
+			list.add_child(_label(RuneFragments.KIND_NAMES[kind], 12, Color("c9a24a")))
 			list.add_child(row)
 	list.add_child(_heading("WHAT YOU HAVE SEEN"))
 	var notes := 0
 	for id in NOTES:
 		if GameState.has_flag("rune.note." + id):
-			var l := _label("·  " + NOTES[id], 13, Color("e4ddf2"))
+			var l := _label("·  " + NOTES[id], 13, Color("e8dcc0"))
 			l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			l.custom_minimum_size = Vector2(520, 0)
 			list.add_child(l)
 			notes += 1
 	if notes == 0:
-		list.add_child(_label("Nothing yet. Try a cube.", 13, Color("9d93b8")))
+		list.add_child(_label("Nothing yet. Try a cube.", 13, Color("9a8f86")))
 	list.add_child(_heading("RUNES YOU HAVE CAST"))
 	var cast := 0
 	for key in GameState.flags:
@@ -78,7 +78,7 @@ static func fill(list: VBoxContainer, tree: SceneTree) -> void:
 				list.add_child(l)
 				cast += 1
 	if cast == 0:
-		list.add_child(_label("None yet.", 13, Color("9d93b8")))
+		list.add_child(_label("None yet.", 13, Color("9a8f86")))
 
 
 static func _fragment(id: StringName, kind: int) -> Control:
@@ -91,12 +91,12 @@ static func _fragment(id: StringName, kind: int) -> Control:
 		var col := RuneFragments.essence_color(id) if kind == RuneFragments.Kind.ESSENCE else RuneFragments.NEUTRAL
 		RuneFragments.draw_glyph(glyph, id, Vector2(13, 13), 22.0, col, 1.5))
 	box.add_child(glyph)
-	box.add_child(_label(RuneFragments.name_of(id), 13, Color("e4ddf2")))
+	box.add_child(_label(RuneFragments.name_of(id), 13, Color("e8dcc0")))
 	return box
 
 
 static func _heading(text: String) -> Label:
-	return _label(text, 14, Color("cbbdf2"))
+	return _label(text, 14, Color("f0d27a"))
 
 
 static func _label(text: String, size: int, color: Color) -> Label:

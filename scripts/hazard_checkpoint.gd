@@ -25,6 +25,7 @@ var _time := 0.0
 
 
 func _ready() -> void:
+	flame.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	collision_layer = 0
 	collision_mask = 1
 	monitoring = true

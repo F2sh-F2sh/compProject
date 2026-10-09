@@ -6,7 +6,7 @@ extends CanvasLayer
 ## mana it all costs per second, and a warning when mana is running low.
 ## Hidden when no rune is on.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.UI
 
 var _panel: Control
 var _label: Label
@@ -31,8 +31,8 @@ func _ready() -> void:
 	_label = Label.new()
 	_label.position = Vector2(0, 2)
 	_label.add_theme_font_override("font", FONT)
-	_label.add_theme_font_size_override("font_size", 13)
-	_label.add_theme_color_override("font_color", Color("e4ddf2"))
+	_label.add_theme_font_size_override("font_size", 16)
+	_label.add_theme_color_override("font_color", Color("e8dcc0"))
 	_label.add_theme_color_override("font_outline_color", Color(0.02, 0.01, 0.05, 0.9))
 	_label.add_theme_constant_override("outline_size", 5)
 	_panel.add_child(_label)
@@ -75,7 +75,7 @@ func _process(delta: float) -> void:
 	parts.append("[%s] runes" % InputLabels.primary("rune_overview"))
 	_label.text = "   ".join(parts)
 	var warn := Color(1.0, 0.55, 0.45) if int(_time * 3.0) % 2 == 0 else Color(1.0, 0.8, 0.7)
-	_label.add_theme_color_override("font_color", warn if low else Color("e4ddf2"))
+	_label.add_theme_color_override("font_color", warn if low else Color("e8dcc0"))
 	_pips.queue_redraw()
 
 

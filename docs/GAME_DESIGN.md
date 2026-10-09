@@ -48,14 +48,21 @@ experiment: a wrong sentence costs nothing, Reset Room is instant, mana can neve
 
 ## 1. The story in plain words
 
-### 1.1 What the player already knows (from the nine story pictures)
+*The full story bible, the one source every scene follows, is the first section of
+`docs/STORY_PLAYTHROUGH.md` (v3, 2026-10-08). Its spine: love that holds on versus love that lets go;
+Echidna losing Nan mirrors Ilse losing Wren; the four notes of Ilse's lullaby are the bell's peal and Nan's
+hum.*
+
+### 1.1 What the player already knows (from the eight opening pictures)
 Long ago the Choir, monks on a mountain, found that **stars are words**. Four star-words make a spell.
-The Choir carved spells into **rune cubes**. Sixty years ago the Choir's leader **Ilse** carved the
-strongest spell, **ICE · FREEZE · SELF · PERSIST** ("freeze this moment and never let it end") so her
-sick daughter **Wren** could not die. The spell never stopped. Its stillness spread as **the Hush**:
-sound, colour, memories, then names. The great **bell** pushed it back for sixty years, until it
-cracked nine years ago. The monks sealed the **Belfry** and left. Now the Hush has reached the village
-of **Lowbell**, and a young witch, **Echidna**, has to get into the Belfry and make the bell ring.
+The Choir carved spells into **rune cubes**. Sixty years ago the Choir's leader **Ilse** sat every night
+by her dying daughter **Wren** and sang her **four notes**; Wren asked *"Will you be here when I wake up?"*
+So that morning would never come, Ilse wrote **ICE · FREEZE · SELF · PERSIST** on the great cube. The spell
+grew into something vast (the held moment, a great moth) and eats the sky's words to keep that night: stars
+go out and names are forgotten. That is **the Hush**. The great **bell** rang the same four notes, so the
+spell went quiet while it rang; the monks rang it every day for sixty years, until it cracked nine years ago.
+The monks sealed the **Belfry** and left. Now the Hush has reached **Lowbell**, and a young witch,
+**Echidna**, has to get into the Belfry and ring the bell.
 
 ### 1.2 What the player learns next, in order
 1. **Nan can't remember Echidna's name, and the Hush took Echidna's spells too.** (Nan's cottage)
@@ -80,7 +87,7 @@ with a chalk star is dramatic irony, not a puzzle.
 |---|---|---|
 | **Echidna** (she/her) | A witch of Lowbell | The player. Kind, stubborn. |
 | **Nan** | Her grandmother, a hedge-witch | The reason. Forgets Echidna's name; says it again in the ending. |
-| **Wren** | Ilse's daughter, frozen for 60 years | A small girl who leaves chalk stars (hints), shows up ahead, speaks in Chapter 4. |
+| **Wren** | Ilse's daughter, frozen for 60 years | A small girl who leaves chalk stars (hints), shows up ahead, speaks in Chapter 4, walks into the Eye with Echidna. |
 | **Ilse** | The Choir's leader | Frozen beside Wren in the Eye. Asks Echidna not to let go. |
 | **The Choir** | The monks | Their ledgers explain each wing. The Watchers are the Choir. |
 | **The Hush** | A spell still running | Not a person. Creatures made of silence. |
@@ -102,22 +109,29 @@ the Archivist. Brother Aldous stays only as a name in an existing ledger page.
 | **Ch 5 · The Eye** | Ilse, the choice, the ending | no new words; she writes one sentence |
 
 ### 1.5 The ending
-Echidna writes on the great cube. Two sentences "answer"; any other says "that isn't enough":
-- **The Stillness** (`Ice · Freeze · Self · Large`): do as Ilse asks, hold everyone still forever. The
-  world goes silent; credits in silence with no stars. It is a real ending, but the game says "That
-  is not the only sentence" and returns Echidna to the cube.
-- **The Rewritten Sky** (`Light · Beam · Up · Long`): the held moment becomes light sent up into the
-  empty sky. Wren becomes a new star, Ilse lets go, the Hush thaws. Cut to Lowbell: colour, chimes,
-  and Nan on her porch says **"Echidna."** The last shot is the sky with one new star.
+Echidna writes on the great cube, under the moth in its four chains, with Wren beside her and Ilse
+pleading at the bed. Two sentences "answer"; to any other, Wren says it isn't the one:
+- **The Stillness** (`Ice · Freeze · Self · Large`): Echidna's temptation, to hold Nan still so she
+  never forgets again. Lowbell stops; Nan stops mid-word (*"Echi..."*); Wren: *"That's what Mum did."*
+  It leads back to the cube.
+- **The Rewritten Sky** (`Light · Beam · Up · Long`): the four chains break, the moth fills with light,
+  Wren comes to her mother (*"I'm awake, Mum. It's morning."* / *"Come with me. You won't be alone."*),
+  the candle goes out and Ilse lets go. Two new stars rise side by side where the dark gap was. The Hush
+  thaws and the snow falls; Lowbell's colour and chimes come back; Nan says **"Echidna."** and then
+  *"I'll lose it again one day, love."* / *"Then I'll tell you again. As many times as it takes."* Two
+  stars over the mountain; THE END.
 
-The clues: Wren's chalk drawings (a star, an arrow up, a long line), the Observatory mural "what can't
-be kept can be sent", and every word of the answer has been learned by the end of Chapter 3.
+The clues: Wren's chalk (*"if you get lost, look up"*; on the plinth, a star with a line drawn straight up
+from it, on and on), the words over the Eye's door *"What cannot be kept can be sent"*, and every word of
+the answer has been learned by the end of Chapter 3.
 
 ### 1.6 Themes and how the story is told
-Learning a language is gaining power. Love that won't let go versus love that lets someone go. Almost
-no cutscenes: the Nan scene (~3 min), the two glue moments after the bell and the dome, the Landing
-beats, and the ending. Everything else is **ledger pages** (3 per wing, using the existing page
-reader), **Wren's chalk marks**, and **signs only in the Novices' Way**.
+Learning a language is gaining power. Love that won't let go versus love that lets someone go. The
+reels between the parts are staged like Hollow Knight's cutscenes (dark layered depth, silhouettes in
+front, one glowing focus, fog and drifting light, a letterbox, lore cards, few words; see
+`scripts/story/story_stage.gd`), and the four notes play where they belong: Nan's hum, the bell's peal,
+the night of the spell and the last scene. Everything else is **ledger pages** (3 per wing, using the
+existing page reader), **Wren's chalk marks**, and **signs only in the Novices' Way**.
 
 ---
 
@@ -253,14 +267,14 @@ Ledger (6 pages, three a room): the Smith. Wren: chalk footprints leading into t
 
 ### Chapter 2 · The Drowned Cistern (Ice) — ~24 min
 *The water clocks that measured the sky. All stopped at the same minute.*
-(The ~24 min is the original plan. By request the two built rooms are long ones: about 30 minutes and about an hour,
-an estimate of 65 to 100 minutes for the wing until a playtest says otherwise.)
+(The ~24 min is the original plan. By request the two built rooms are long ones: about 30 minutes, and 25 to 40
+minutes for the Great Sluice once it was made simpler: about 55 to 70 for the wing until a playtest says otherwise.)
 New words: Ice, Freeze, Long, Persist, Down-Right. New creature: **Brine Jelly**.
 
 | Room | Idea | Time |
 |---|---|---|
 | C1 The Still Water | **Built (2026-10-04), a long room, the theme "freezing things".** Water frozen into a floor (two pools: Ice, Freeze, Long), old ice melted by fire, a slime frozen to stone-weight through an iron grate (the Clock Gate), five fountains frozen into a stair by cold laid aslant (**Down-Right**, Long), and a tide clock stopped at the hour by cold placed just above the mark (it opens the Sluice Door). Rule: rising water freezes where it first meets the cold. See `STORY_PLAYTHROUGH.md`. | 20–30 (estimate, needs a playtest) |
-| C2 The Great Sluice | **Built (2026-10-05), a long room, the theme "the cold that never lets go".** Takes in the Tide Stairs, the Frozen Weights and the Sluice. Persist learned and used four ways: a slime held on a slow plate (the Silence Gate), a tide frozen level with the doorways and held while she crosses (the Tide Lever over the doorway), two slimes held frozen on a weigh pan with the Ballast shoved onto it by a Strong wind (three weights), and the tide held at its high mark (from the high ledge) while the pan is held: the Great Sluice opens and drains the Bell Well. Then the room's one free cube, out of its socket, bridges the High Walk's fallen span (Ice, Bridge, Right). Rule: switched on while the hall is dry, the rising tide freezes at the doorways; while it is up, where it stands. See `STORY_PLAYTHROUGH.md`. | 45–70 (estimate, needs a playtest) |
+| C2 The Great Sluice | **Built (2026-10-05), made simpler and clearer (2026-10-07); the theme "the cold that never lets go".** Takes in the Tide Stairs, the Frozen Weights and the Sluice. Persist learned and used three ways: a slime held on a slow plate (the Silence Gate), a tide frozen level with the doorways and held while she crosses (the Tide Lever over the doorway, fed by the dungeon), and two slimes held frozen on the Great Sluice's weigh pan (the Sluice Cube in its socket): the sluice opens and drains the Bell Well. Up the lift, along the High Walk, into the well. Optional far pier: the tide frozen on its way down. Rule: switched on while the hall is dry, the rising tide freezes at the doorways; while it is up, where it stands. See `STORY_PLAYTHROUGH.md`. | 25–40 (estimate, needs a playtest) |
 | C3 The Jellies | Jellies float at tide level; freeze one as a moving platform, or fire-pop one for a 3 s steam updraft | 4 |
 | C4 The Long Bridge | `Ice · Bridge · Right · Long` with **Persist** upkeep against your mana; budget it | 5 |
 | **Boss: Mere, the Cistern Leviathan** | Phase 1: freeze footholds before the tide takes them. Phase 2: freeze Mere mid-leap with Persist for a walkway (watch upkeep). Phase 3: span its jaws with a Long bridge, then melt its gill-seal so it coughs up the Tide Bell's clapper. | 6 |
@@ -273,7 +287,7 @@ New words: Light, Beam, Glow, Self, Bounce, Up-Left. New creatures: **Mirror Kni
 
 | Room | Idea | Time |
 |---|---|---|
-| L1 The Dark Reading Room | Beams, Glow; a watcher you can't hurt but can calm | 3 |
+| L1 The Hall of Lamps (built) | One long room in five parts: a beam bridge, Bounce through three mirrors, a Glow that holds a Watcher on a plate, fire that holds a Watcher as a step, a walkway that exists only in light, and Up-Left to the Great Lamp | ~45-60 (estimate) |
 | L2 The Mirror Walk | A Mirror Knight reflects fireballs and beams; reflect your own fireball at a wall switch | 4 |
 | L3 The Moth Garden | Lampmoths fly to the brightest light and snuff braziers; protect yours with a Glow decoy | 4 |
 | L4 The Carousel | A rotating mirror deck; `Wind · Burst · Self · Repeat` spins it on a beat; Bounce beams | 5 |
@@ -294,6 +308,7 @@ New words: Space, Portal, Repeat, Down-Left. New creatures: **Hushling** (first 
 | F4 Carry the Flame | Send fire and a beam through a portal to reach the unreachable | 4 |
 | F5 The Sorting Hall | Five essences, four small tasks, one room (the first true "everything" room) | 5 |
 | F6 The Folded Room | A room that is also its own lock: solve it from inside and outside at once | 4 |
+| *Built (2026-10-08)* | **The Folded Archive** (Sealed Door, Tall Stacks, Sealed Reading Room, Pillar, Hearth: doorways through rock, Up into the air, Echoes through doors, Long, fire through a door) and **Wren's Test** (four lock cubes Wren half-wrote: Repeat keeps a lift's brazier burning, Down-Left freezes a fountain stair, an Echo and she light two hearths at once, Bounce and a mirror turned from a sealed pocket; then Wren speaks and the Fold Bell) | ~90-120 (estimate) |
 | **Boss: Wren's Test** | Not a fight. Wren writes half a sentence on each of four lock cubes; you finish each (opposites, borrowed words, portals, Echo). At the end she takes Echidna's hand: *"Mum won't let go. Please."* | 6 |
 Ledger: the Archivist. Wren speaks for the first time. Ends with the **Fold Bell**.
 
@@ -384,6 +399,12 @@ turret and a decoy. Rune cubes: wind and ice and light bend the room around the 
 HP and damage (starting values, to tune by playtest): Cinder 6, Clinker 24, Jelly 10, Knight 18
 (back ×2), Moth 4, Hushling 8; contact damage 1–2 like today; i-frames and knockback unchanged.
 
+**Built in the polish pass (2026-10-09): roaming creatures**, simpler than the table above (fighters, not
+puzzle pieces): bats, star mites, cinderlings (fire-proof), clinkers (armour cracks first), frostlings, brine
+jellies, lampmoths, foldmites (blink) and hushlings (drain mana), scattered by `CreatureSpawner` in each room's
+open floor away from every puzzle piece and way in. The Passage and the Landing have none. The puzzle creatures
+in the table remain ideas.
+
 Implementation shape: a shared base class `scripts/creatures/creature.gd` for the new creatures (HP,
 `take_damage`, burn and chill, drops, reset, plate weight, camera-safety `is_threatening`), written to
 the existing contract (group `enemy`, `DamageArea`). The slime and watcher stay as they are.
@@ -422,7 +443,11 @@ solved in the wrong order lock the door (Reset fixes it).
   carved pictures and **Wren's chalk marks** instead of skull hints: one chalk drawing per room, stage 1
   only (a picture, no words); a second smudge if you are stuck for five minutes.
 - Auto-nudge at 5 minutes or 4 deaths, Full guidance only.
-- No arrows or glowing markers outside Full.
+- No arrows or glowing markers outside Full, with one exception (2026-10-09, asked for in the polish pass):
+  any target a rune, beam or bolt must reach that is off the screen gets a small gold pip at the screen's
+  edge (Light and Full guidance), so no target is found by guessing.
+- The hint skulls listen before they speak (2026-10-09): the first hint after about a minute in the room, the
+  second 2.5 minutes after that, the solution 4 minutes after that. "Hints without waiting" (an assist) skips it.
 
 ---
 
@@ -431,6 +456,10 @@ solved in the wrong order lock the door (Reset fixes it).
 Brightness first (B1): Normal is about twice as bright, and each region sets its own colour:
 Kilnworks amber, Cistern teal, Lampworks gold and violet, Galleries star-blue, the Eye white-blue.
 Darkness stays as a *local* puzzle ingredient (watcher rooms, the Lamp Stair), never the default.
+Built (2026-10-09, `LevelTheme`): every level recolours the shared tileset to its own three tones, with its own
+mist, grade, torch colour, drifting air, props and ambience bed: Passage mossy teal, Belfry cold blue, Observatory
+indigo, Landing dusk violet, Kilnworks ember, Cistern aqua, Lampworks sepia gold, Galleries pastel pink, the Eye
+blue-black.
 The packs have no forge, cistern or lamp pieces, so new props and creatures are made as pixel
 sprites by a generator tool (like `tools/generate_story_sprites.gd`), in the packs' palette, never as
 drawn shapes.
@@ -438,6 +467,11 @@ drawn shapes.
 ---
 
 ## 12. The Eye and the ending
+
+**As built (2026-10-08):** one dark chamber, the story's last room, with no puzzle but the sentence: the
+moth in its chains over the great cube, Wren walking in with Echidna, Ilse's plea, the clues and Wren's
+replies (`build_eye()` in `tools/build_wings.gd`, `scripts/story/eye_scene.gd`; details in
+`docs/STORY_PLAYTHROUGH.md`, Chapter 5). The plan below is the older, bigger version, not built.
 
 *Chapter 5, about 20 min.* Three approach rooms (Hush zones, Hushlings, Choristers) lead to the dome.
 Ilse stands frozen beside Wren's bed; the great cube floats between them reading

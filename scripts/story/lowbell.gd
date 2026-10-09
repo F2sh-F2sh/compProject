@@ -61,6 +61,10 @@ var _wind: AudioStreamPlayer
 
 
 func _ready() -> void:
+	# The scenery, puppets and the intro camera are tweened every drawn frame:
+	# drawn as they are. Echidna and her camera move in physics steps and are
+	# drawn between them (set in _build_player)
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	get_tree().paused = false
 	AudioDirector.reset_combat()
 	AudioDirector.fade_ambience(-40.0, 2.0)
@@ -398,7 +402,7 @@ func _build_people() -> void:
 	_villager(people, "Tam", "tam", 412.0, "Listen. The chimes used to {4} every evening. Now I can't even remember the word.")
 	_villager(people, "Mira", "mira", 664.0, "Have you seen my... my {6}? Round. Wooden. For the dough. I had it this morning.")
 	_villager(people, "Pip", "pip", 1084.0, "Nan says there used to be {5} up there. Lots and lots. Like spilled sugar.")
-	_villager(people, "Edda", "edda", 1410.0, "The bell on the mountain had a name. Everyone knew it. Now it's just... the {4}.")
+	_villager(people, "Edda", "edda", 1410.0, "The road up the mountain's been frozen shut for nine winters. Ever since the bell went {5}.")
 
 
 func _villager(parent: Node, villager_name: String, sprite: String, x: float, line: String) -> Villager:
@@ -434,6 +438,7 @@ func _build_player() -> void:
 	aura.energy = 0.55
 	aura.position = Vector2(0, -20)
 	player.add_child(aura)
+	player.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	add_child(player)
 	intro_camera = Camera2D.new()
 	intro_camera.name = "IntroCamera"
@@ -718,7 +723,7 @@ func knock() -> void:
 
 
 func _leave() -> void:
-	get_tree().change_scene_to_file(next_scene())
+	SceneFade.change(get_tree(), next_scene(), 0.0)
 
 
 func _unhandled_input(event: InputEvent) -> void:

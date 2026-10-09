@@ -36,8 +36,10 @@ const FRICTION = 1200.0
 const BASE_JUMP_VELOCITY = -350.0
 const MAX_JUMP_VELOCITY = -500.0
 
-const CHARGE_START_TIME = 1.0
-const MAX_CHARGE_TIME = 2.5
+## The charged jump gathers power from the moment crouch is pressed (no wait)
+## and is full after MAX_CHARGE_TIME.
+const CHARGE_START_TIME = 0.0
+const MAX_CHARGE_TIME = 1.5
 const JUMP_BUFFER_DURATION = 0.15
 ## A jump pressed just after running off a ledge still counts.
 const COYOTE_DURATION = 0.1
@@ -93,6 +95,9 @@ var knockback_time := 0.0
 var air_time := 0.0
 var charging_jump := false
 var charge_time := 0.0
+## Tests only: aim here instead of at the mouse (the OS cursor belongs to
+## whoever is using the computer). null in play.
+var aim_override: Variant = null
 var jumped := false
 var jump_buffer_time := 0.0
 var coyote_time := 0.0
@@ -179,7 +184,7 @@ func shoot_fireball() -> void:
 	# 50 px toward it; with a controller, just in front of her
 	var spawn_distance := 24.0
 	if not InputLabels.use_pad:
-		spawn_distance = minf(origin_point.distance_to(get_global_mouse_position()), 50.0)
+		spawn_distance = minf(origin_point.distance_to(_mouse_point()), 50.0)
 
 	var spawn_position: Vector2 = _clear_spawn_point(origin_point, origin_point + dir * spawn_distance)
 	spawn_fireball(spawn_position, dir)
@@ -203,7 +208,7 @@ func shoot_fireball() -> void:
 ## pulled toward a creature or target close to that line.
 func aim_direction(origin: Vector2) -> Vector2:
 	if not InputLabels.use_pad:
-		return (get_global_mouse_position() - origin).normalized()
+		return (_mouse_point() - origin).normalized()
 	var stick := Vector2.ZERO
 	var pads := Input.get_connected_joypads()
 	if not pads.is_empty():
@@ -403,6 +408,7 @@ func die() -> void:
 		hazard_recovery.abort()
 	set_physics_process(false)
 	Sfx.play("player_death", global_position)
+	Sfx.play("death_fall", global_position, -2.0, 0.0)
 	_dissolve()
 
 	var death_screen = get_tree().get_first_node_in_group("death_screen")
@@ -690,12 +696,15 @@ func _on_sprite_frame_changed() -> void:
 	if _plants_heard % 2 == 0:
 		return
 	var on_grate := _standing_on_group(&"iron_grate")
-	var count := 2 if on_grate else 4
+	# each level's floor has its own steps (LevelTheme sets "footstep")
+	var scene := get_tree().current_scene
+	var floor_kind := "grate" if on_grate else (String(scene.get_meta(&"footstep", "stone")) if scene else "stone")
+	var count: int = {"grate": 2, "stone": 4}.get(floor_kind, 3)
 	var variant := randi_range(1, count)
 	if variant == _last_step_variant:
 		variant = variant % count + 1
 	_last_step_variant = variant
-	var sound := ("step_grate_%d" if on_grate else "step_stone_%d") % variant
+	var sound := "step_%s_%d" % [floor_kind, variant]
 	var volume := (-12.0 if sprinting else -15.0) + randf_range(-2.0, 2.0)
 	Sfx.play(sound, global_position, volume, 0.06, true)
 
@@ -1018,3 +1027,10 @@ func complete_heal():
 
 	if current_mana <= 0:
 		hint_kindle()
+
+
+
+
+## Where the mouse aims, in the world (or the tests' aim_override).
+func _mouse_point() -> Vector2:
+	return aim_override if aim_override is Vector2 else get_global_mouse_position()

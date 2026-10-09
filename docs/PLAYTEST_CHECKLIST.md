@@ -377,8 +377,8 @@ Nothing in this chapter has been played by a human yet; everything below is unch
 - [ ] After the dome pictures the game drops onto the Landing: five doors, only the first open, a Kindle flame, a shrine.
 - [ ] Kilnworks: the Cold Forge and the Kiln Heart (both long rooms now: see their own sections below).
 - [ ] Cistern: the Still Water and the Great Sluice (both long rooms now: see their own sections below).
-- [ ] Lampworks: the beam across the pit lights the crystal; carry the glow cube under the high crystal.
-- [ ] Galleries: carry the portal cube to the wall and jump through; an Echo holds the plate for the stairs.
+- [ ] Lampworks: the Hall of Lamps (a long room now: see its own section below); then carry the glow cube under the high crystal (the Lamp Stair).
+- [ ] Galleries: the Folded Archive and Wren's Test (both long rooms now: see their own sections below).
 - [ ] After each bell: 2 or 3 pictures straight away, then the card with your time and deaths (Continue / Return to Title),
       then back on the Landing with that wing's bell-light lit and the next door open.
 - [ ] After four bells the fifth door shows the pictures and opens the Eye.
@@ -456,32 +456,147 @@ and where you got stuck. The target is about 30 minutes for a first-time player;
 
 ## The Great Sluice, the Cistern's second room (needs a human; time it)
 
-Play it cold. Note the time from the Sluice Door to the Tide Bell, the hints you used, and where you got stuck. The
-target is about an hour for a first-time player; the design estimate is 45 to 70 minutes (the tests prove every step
-can be done, not how long it takes).
+Made simpler and clearer on 2026-10-07 (one counterweight, no timing at the tide's top, a free Tide Lever, no
+ballast stone, no fallen span). Play it cold. Note the time from the Sluice Door to the Tide Bell, the hints you
+used, and where you got stuck. The design estimate is 25 to 40 minutes for a first-time player.
 - [ ] The Silence Gallery: the cube as written freezes the slime on the plate, but it thaws before the slow plate opens
       the gate. Does that make you read the Persist tablet? Is the hop over the cube on the grate annoying?
 - [ ] The Tide Hall: does the tide's rhythm read (fills, stands, empties, rests; the doorway gates shut while the water
       is up)? Do the iron teeth in the dry basin say "not this way"?
-- [ ] The Tide Lever: switched on while the hall is dry, the rising tide freezes level with the doorways; switched on
-      while it is up, where it stands. Can you work that out from trying? Is the camera's glance at the hall enough?
-- [ ] The crossing with Persist: the low pier hop, taking the Sluice Cube, the walk out. Is the mana enough for a
-      careful walker (about 60 of 100 in the tests)? What happens if you run dry on the ice (back to a candle with the
-      cube)?
-- [ ] The Weigh House: a steady wind can't shift the Ballast; Strong does, and the kerb stops it on the pan. Do the
-      slimes freeze on the pan reliably with the Sluice Cube in the socket? The pan's notches lighting one by one.
-- [ ] The high mark: up the lift, through the high door to the high ledge; switching the lever on as the tide stands at
-      its top (a window of about four seconds in each twenty). Is it clear the pan must be held at the same time?
+- [ ] The Tide Lever: switched on while the hall is dry, the rising tide freezes level with the doorways. Can you work
+      that out from trying? Persist holds it while you cross (it costs no mana now).
+- [ ] The crossing: the low pier hop, taking the Sluice Cube, the walk out.
+- [ ] The Weigh House: does "two weights of stone, two slimes, a socket at the end" read at a glance? Do the slimes
+      freeze on the pan reliably? The pan's notches lighting one by one.
 - [ ] The Great Sluice opening: the camera's glance at the well, the well draining, the frost melting. Enough of a moment?
-- [ ] The fallen span: do you think of taking the Sluice Cube back out of its socket (switch it off first) once the
-      sluice is open? Ice, Bridge, Right from the edge. Placing it close enough to the edge.
-- [ ] Dropping into the drained well, the page in the outflow past the sluice gate, the bell.
-- [ ] The far pier (page vi): freezing the falling tide a little under the pier's top from the high ledge, and getting
-      down again with the Warden's lectern on the pier. Too fiddly for an optional page?
+- [ ] Up the lift, along the High Walk, dropping into the drained well, the page in the outflow past the sluice gate,
+      the bell.
+- [ ] The far pier (page vi, optional): freezing the falling tide a little under the pier's top from the high ledge,
+      and getting down again with the Warden's lectern on the pier. Too fiddly for an optional page?
 - [ ] The gallery's high shelf (page iv, a charged jump): findable?
-- [ ] Reset Room in this big room: the Silence Gate and the Great Sluice stay open (saved); the crossing and the pan do
-      not. Is redoing them fair?
+- [ ] Reset Room in this big room: the Silence Gate and the Great Sluice stay open (saved); the crossing does not.
 - [ ] Total time.
+
+## Smooth motion, scene fades, steadier camera (2026-10-05, needs a human)
+
+Play on the 120 Hz and the 165 Hz screen (windowed and fullscreen). Pause > Graphics > Smooth motion switches it
+off and on for comparison.
+- [ ] Walking, sprinting and jumping: Echidna and the background glide; no stutter or doubled edges when the camera
+      follows her. Compare with Smooth motion off.
+- [ ] Moving platforms and lifts (the Weigh House lift, the Kiln hoist), slimes hopping, a carried cube, an Echo
+      replaying, the lantern wisp: all smooth, nothing lagging a frame behind her.
+- [ ] Anything that now looks stepped or a little behind (that would be something animated every frame that still
+      follows physics steps): note what and where.
+- [ ] The camera on high ledges (the High Walk, the Kiln's balconies): it no longer bobs with each hop. It follows
+      once she climbs higher, falls or rides a lift. Does it ever hide something you need to see above or below?
+- [ ] Camera glances at a distant point and screen shake still look right; the view never shows past a room's edge.
+- [ ] Scene changes fade through black: a Landing door, a level from the title, Quit to Title, the end card's
+      Continue, restarting after death and from the menu, the story pictures into Lowbell and the cottage into the
+      Passage. Too long, too short? Any double fade or a flash of the old scene?
+
+## Instant charged jump (2026-10-07, needs a human)
+
+- [ ] Hold crouch (S): the charge starts the moment you press it (bar, breeze and glow at once) and is full after
+      1.5 seconds; a quick crouch-jump goes a little higher than a tap jump. Does it feel responsive, and is the full
+      charge still easy to judge?
+
+## The Hall of Lamps, the Lampworks' first room (2026-10-08, needs a human; time it)
+
+The goal is about an hour for a first-time player. Write down the time for each part.
+- [ ] The whole room: how long from the door to the Lamp Door? (Target about 45-60 minutes.) Too long anywhere,
+      too empty anywhere? Do the three little lamps over the Lamp Door read as "one per part"?
+- [ ] Reading Room: Light and Beam, the bridge. Is the page i shelf by the door noticed (a charged jump)?
+- [ ] Mirror Gallery: is it clear that the beam stopping at the first mirror means "it needs Bounce"? Are the
+      wheels on the floor for the high mirrors easy to find, and is it clear which wheel turns which mirror?
+- [ ] Watchers' Walk: does the Watcher stopping where the light begins read? Does anyone try Large, see him stop
+      short of the plate, and understand why? Getting the cube back out past the waking Watcher: fair or annoying?
+- [ ] Watch Lamp: is the idea "light the brazier so the Watcher holds still and stand on him" found without the
+      hint stone? Is the charged jump from his back to the ledge easy enough while carrying the cube?
+- [ ] Dark Stacks: do the stones appearing in light read clearly (and the faint outlines of the dark ones)? With a
+      plain glow the last gap is a running jump: too hard? With Large it is a hop: is Large's benefit noticed?
+- [ ] Dark Stacks: does the low vault look like part of the hall (the book stacks), not a bug?
+- [ ] Great Lamp: Up-Left found quickly? Is the Great Lamp lighting and the door opening a big enough finish?
+- [ ] Reset Room in the middle of the hall: you come back at the last shrine you passed (not the hall's door), the
+      gates behind you stay open, and the Watch Cube is back at its stand in the Watchers' Walk.
+- [ ] The hall is dimmer than other rooms (ambient 85%) so lamps and glows stand out: too dark anywhere?
+
+## The Folded Galleries: the Folded Archive and Wren's Test (2026-10-08, needs a human; time it)
+
+The goal is about two hours for the whole wing. Write down the time for each part.
+- [ ] The whole wing: how long from the Archive's door to the Fold Bell? (Target about 2 hours; the estimate is
+      1.5 to 2.) Anything too long, too empty, or too fiddly?
+- [ ] Sealed Door: is "hop over the Door Cube into its doorway" found? Does coming out beyond the rock read?
+- [ ] Tall Stacks: is the shelf and its lever noticed from the floor (the camera glances at it once)? Is it clear
+      that the doorway Up hangs in the air over the shelf?
+- [ ] Sealed Reading Room: is the pocket overhead noticed? How long until someone thinks of the Echo? Is it clear
+      the gate stays open once you are through?
+- [ ] Pillar: does a player try Long first, find the gate shut, and work out "Echo into the hollow, then Long"?
+      Is rewriting the cube while the Echo still goes into the hollow surprising in a good way?
+- [ ] Hearth: is "throw fire straight up through the doorway" found? Is the spot to stand under the doorway easy
+      to hit (about 35 px wide)?
+- [ ] Again: does the stalling lift (one bolt, two seconds) teach Repeat? Boarding the moving lift: fine?
+- [ ] Aslant: is Down-Left found (it is the Cistern's fountain stair, mirrored)? Is the climb too rushed?
+- [ ] Two Hearths: how long until the Echo idea comes? Is syncing your throw with the Echo's comfortable (each fire
+      burns two seconds)?
+- [ ] The Last Crystal: the pocket with the last mirror's wheel: found without the hint stone?
+- [ ] Wren: does she read as a child in a nightdress (pixel art)? Her lines: clear, too many, too slow (3.8 s
+      each)? Does it feel like a moment worth the climb?
+- [ ] Reset Room in either room: back at the last shrine passed, gates behind you still open, cubes back home.
+
+## The story, the reels and the ending (2026-10-08, needs a human)
+
+Play the opening, every reel between the parts, and the Eye with both endings, with sound on. Everything here was
+looked at only as still screenshots; nobody has watched the reels move or heard the music.
+
+- [ ] **Does the ending land?** From writing Light · Beam · Up · Long to the two stars over the mountain: is it moving,
+      or does it drag? Note any line that feels flat or too much.
+- [ ] The story makes sense in one sitting: the four notes (Nan's hum at the cottage, the bell's peal, the night of
+      the spell, the last scene), why the bell quiets the Hush, who leaves the chalk stars and why, what the moth is,
+      why the Stillness is tempting, and why there are two stars at the end.
+- [ ] Reels read clearly: the letterbox, the small words in the bottom bar, the lore cards; nothing too dark to make
+      out on your screen (try the dark shots: the Choir on the ledge, the dome, the Eye, the Stillness).
+- [ ] The depth layers drift smoothly as the camera pushes in; nothing shows an edge or a gap at the sides of the frame
+      (try a wide window too).
+- [ ] Music: the lullaby (opening, Lampworks memory, the porch scenes), the bell peal (opening, the bell reel) and the
+      ending swell (the Rewritten Sky) start where they should, are not too loud or too quiet against the loops, and
+      stop cleanly when a reel is skipped with Esc. The music-box tone is pleasant, not harsh.
+- [ ] Nan hums when Echidna comes into the cottage, and stops when she speaks.
+- [ ] The Eye: the moth over the cube is in view without looking for it; Wren meets you at the door and walks to the
+      cube; Ilse's plea is readable and you can see her while she speaks; a wrong sentence gets Wren's answer; the room
+      is dark but the floor is clear to walk; the hint stone's first two stages point you at the clues without giving
+      the answer away. Time how long the Eye takes.
+- [ ] The Stillness: it feels like a real temptation, not a fail screen; back in the Eye, Wren's "You came back." lines
+      play.
+- [ ] The Rewritten Sky: the chains break one at a time, the candle goes out, the snow starts falling again, Nan says
+      "Echidna.", and THE END card follows with the run's time and deaths.
+
+## The polish pass (2026-10-09, needs a human)
+
+Play from the title screen through at least the Kilnworks and one more wing, with sound on, with the default settings
+(hint waits on, creatures roaming). The new look was checked as still screenshots and the new sounds only by test
+counters: nobody has heard them or fought the creatures.
+
+- [ ] **Title screen:** the portrait, banner and big title fit your window (try a wide and a narrow one); the menu
+      buttons are easy to read and click.
+- [ ] **Fonts and UI:** every text is readable at your screen size (the small Silkscreen labels on the HUD, the
+      pause menu's plates, the parchment pages); nothing is cut off or overlaps; the stone and gold look holds up.
+- [ ] **Dialogue:** the portraits in the cottage, Wren's meeting and the Eye look right (faces match the lines), the
+      typewriter is a good speed, and pressing skips then advances as you'd expect.
+- [ ] **Story:** after the opening and the cottage, can you say why there's a dungeon under Nan's house (the gatehouse,
+      the frozen road)? At the end, is it clear the bell is silent and only the wind moves the chimes?
+- [ ] **Levels feel different:** each wing's colours, drifting air and props read as its own place; nothing is too
+      dark or too saturated on your screen.
+- [ ] **Creatures:** fights feel fair (not too many, not too tanky); none blocks a puzzle or stands where you have to
+      think; cinderlings shrug off fire, clinkers crack then break, jellies and hushlings are readable threats. Note any
+      room where they get in the way. Time each wing again with creatures in it.
+- [ ] **Sound:** the beds (Belfry wind, forge, water, lamp hum, paper folds, the Eye's silence) sit under the music, not
+      over it; dying sounds heavy but not too long; the stone menu clicks are pleasant; footsteps on ash, wet stone and
+      paper sound right.
+- [ ] **Hint waits:** a minute before the first hint feels fair, not punishing; the ring is noticed; the message when it
+      isn't ready is clear. Try the "Hints without waiting" assist.
+- [ ] **Target pips:** the gold pips at the screen's edge help you find off-screen targets without giving the puzzle
+      away; they vanish when the target is lit; they're not distracting.
+- [ ] **Rune wheel:** reading a combination, the glow colours and the "WHERE IT GOES" view make aiming feel informed.
 
 ## The second playtest list (2026-10-03, needs a human)
 

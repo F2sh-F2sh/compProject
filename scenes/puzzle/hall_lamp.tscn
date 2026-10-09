@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/hall_lamp.gd" id="1_fl7iy"]
+
+[node name="HallLamp" type="Node2D" unique_id=339239628]
+script = ExtResource("1_fl7iy")

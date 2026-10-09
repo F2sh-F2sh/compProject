@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://dg15xbxf5rypu" path="res://scripts/hud.gd" id="1_ahhtf"]
 [ext_resource type="Script" path="res://scripts/status_bar.gd" id="2_status"]
-[ext_resource type="FontFile" uid="uid://d4dwis51yqpwv" path="res://assets/Text/Orbitron-Black.ttf" id="3_black"]
-[ext_resource type="FontFile" uid="uid://xfeoutn2suk0" path="res://assets/Text/Orbitron-Bold.ttf" id="4_bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/jacquard12/Jacquard12-Regular.ttf" id="3_black"]
+[ext_resource type="FontFile" path="res://assets/fonts/silkscreen/Silkscreen-Regular.ttf" id="4_bold"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1164875932 groups=["hud", "gameplay_ui"]]
 script = ExtResource("1_ahhtf")

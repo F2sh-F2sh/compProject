@@ -8,7 +8,7 @@ extends RefCounted
 
 const GLOW_TEXTURE := preload("res://assets/fx/soft_glow.png")
 const MOTE := preload("res://assets/fx/mote.png")
-const LABEL_FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const LABEL_FONT := Fonts.UI
 
 
 static func label_font() -> Font:

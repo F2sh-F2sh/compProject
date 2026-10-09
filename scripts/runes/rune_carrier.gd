@@ -7,7 +7,7 @@ extends Node2D
 ## rune is complete the ghost also marks the area the rune would cover.
 ## Added to the player by the RuneManager.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.UI
 const PICK_RANGE := 46.0
 ## How far ahead of her feet the cube's centre lands.
 const PLACE_AHEAD := 30.0

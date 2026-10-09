@@ -8,9 +8,12 @@ extends Node2D
 ##   Ice · Freeze · Self · Large   the stillness: Ilse's wish, a real ending
 ##                                 that is not the only sentence (it leads
 ##                                 back here)
-## Anything else is just a spell and it says it isn't enough.
+## Anything else is only a spell: Wren says so in the Eye (wrong_sentence),
+## or, with nobody listening, a message does.
 
 signal sentence_read(kind: String)
+## A sentence that is neither answer (the Eye's Wren answers it).
+signal wrong_sentence(key: String)
 
 const SKY := "light/beam/up/long"
 const STILLNESS := "ice/freeze/self/large"
@@ -46,7 +49,9 @@ func _on_activated(c: RuneCube) -> void:
 	var kind := kind_of(c.recipe.to_key())
 	var root := get_tree().get_first_node_in_group("chapter_root") as ChapterRoot
 	if kind == "":
-		if root:
+		if wrong_sentence.get_connections().size() > 0:
+			wrong_sentence.emit(c.recipe.to_key())
+		elif root:
 			root.show_toast("That isn't enough. The cube answers to one sentence that sends the held moment away, and one that keeps it.", 5.0)
 		return
 	decided = kind
@@ -62,7 +67,7 @@ func _on_activated(c: RuneCube) -> void:
 		# The last card, after the closing pictures: the whole journey's numbers
 		ChapterComplete.pending = {"name": "The Rewritten Sky", "stats": whole_run_stats()}
 	get_tree().paused = false
-	get_tree().change_scene_to_file(path)
+	SceneFade.change(get_tree(), path)
 
 
 ## Time and deaths added up over every part of the journey.

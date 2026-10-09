@@ -6,7 +6,7 @@ extends Node2D
 ## not full and she is close enough, a faint "[R]" from a little further off,
 ## so it is clear which flames refill her mana. Added to the player.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.UI
 ## How far off the faint cue shows.
 const CUE_RANGE := 220.0
 ## How high over the flame's foot it floats.
@@ -29,24 +29,15 @@ func _ready() -> void:
 	material = mat
 	var panel := PanelContainer.new()
 	panel.use_parent_material = true
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.09, 0.05, 0.03, 0.9)
-	style.border_color = Color(1.0, 0.72, 0.4, 0.95)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 8
-	style.content_margin_right = 8
-	style.content_margin_top = 3
-	style.content_margin_bottom = 3
-	panel.add_theme_stylebox_override("panel", style)
+	panel.add_theme_stylebox_override("panel", DungeonUI.style("panel_lite", 8, Vector4(12, 5, 12, 5)))
 	panel.scale = Vector2(0.5, 0.5)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
 	_label = Label.new()
 	_label.use_parent_material = true
 	_label.add_theme_font_override("font", FONT)
-	_label.add_theme_font_size_override("font_size", 20)
-	_label.add_theme_color_override("font_color", Color("ffe6c4"))
+	_label.add_theme_font_size_override("font_size", 16)
+	_label.add_theme_color_override("font_color", DungeonUI.GOLD)
 	panel.add_child(_label)
 	panel.resized.connect(func(): panel.position = Vector2(-panel.size.x * 0.25, -panel.size.y * 0.5))
 	_refresh()

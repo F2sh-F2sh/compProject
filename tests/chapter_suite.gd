@@ -32,6 +32,7 @@ var ended_alive := true
 var ended_hp := 0
 var camera_worst := 0.0
 var camera_worst_at := ""
+var _cam_settle := 0
 var recoveries := 0
 
 
@@ -236,17 +237,13 @@ func aim_and_shoot(world_pos: Vector2) -> void:
 	if DisplayServer.get_name() == "headless":
 		await preload("res://tests/background_aim.gd").fire(player, world_pos)
 		return
-	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	# Retain retrying aim updates using viewport events, without OS cursor control.
-	for attempt in 8:
-		var motion := InputEventMouseMotion.new()
-		motion.position = screen_pos
-		motion.global_position = screen_pos
-		get_tree().root.push_input(motion, true)
-		await frames(2)
-		if lvl.get_global_mouse_position().distance_to(world_pos) < 10.0:
-			break
+	# A windowed run aims through the player's aim_override, not the OS cursor
+	# (it belongs to whoever is using the computer); the shot itself goes through
+	# the real shoot input, mana and cooldown
+	var shooter: Node = player
+	shooter.aim_override = world_pos
 	await tap_action("shoot")
+	shooter.aim_override = null
 
 
 func shot(file_name: String) -> void:
@@ -278,6 +275,11 @@ func _physics_process(_delta: float) -> void:
 	# Judge the camera only once it has settled into the room
 	var cam = player.get_node("Camera2D")
 	if cam._bounds_tween and cam._bounds_tween.is_running():
+		_cam_settle = 0
+		return
+	# (with smooth motion the slide's last step is drawn a step later)
+	_cam_settle += 1
+	if _cam_settle < 3:
 		return
 	var r := cam_rect()
 	var b: Rect2 = room.bounds

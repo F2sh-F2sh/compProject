@@ -21,6 +21,8 @@ var _ambient_tween: Tween
 
 
 func _ready() -> void:
+	# each level its own palette, mist and air (LevelTheme)
+	LevelTheme.apply.call_deferred(get_parent())
 	Settings.changed.connect(_on_settings_changed)
 	_on_settings_changed.call_deferred()
 

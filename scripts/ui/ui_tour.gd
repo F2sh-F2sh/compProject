@@ -13,10 +13,10 @@ extends CanvasLayer
 
 signal finished
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
-const INK := Color("e4ddf2")
-const DIM := Color("9c92b8")
-const FRAME := Color(0.88, 0.85, 0.94)
+const FONT := Fonts.STORY
+const INK := Color("e8dcc0")
+const DIM := Color("9a8f86")
+const FRAME := Color(0.94, 0.82, 0.48)
 
 ## Off in the automated tests, which would otherwise be paused by it.
 static var enabled := true
@@ -164,32 +164,23 @@ func _build() -> void:
 		_dim.append(d)
 	_frame = Panel.new()
 	_frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var frame_style := StyleBoxFlat.new()
-	frame_style.bg_color = Color(1, 1, 1, 0.0)
-	frame_style.set_border_width_all(2)
-	frame_style.border_color = FRAME
-	frame_style.set_corner_radius_all(3)
-	_frame.add_theme_stylebox_override("panel", frame_style)
+	_frame.add_theme_stylebox_override("panel", DungeonUI.style("button_focus", 10, Vector4(0, 0, 0, 0)))
 	root.add_child(_frame)
 	_card = PanelContainer.new()
 	_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.08, 0.15, 0.96)
-	style.set_border_width_all(2)
-	style.border_color = FRAME
-	style.set_content_margin_all(18)
-	_card.add_theme_stylebox_override("panel", style)
-	_card.custom_minimum_size = Vector2(420, 0)
+	_card.add_theme_stylebox_override("panel", DungeonUI.panel_style())
+	_card.custom_minimum_size = Vector2(470, 0)
 	root.add_child(_card)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
 	_card.add_child(box)
-	_eyebrow = _label(11, DIM)
-	_title = _label(20, INK)
-	_text = _label(13, INK)
+	_eyebrow = DungeonUI.caps("", 16, DIM)
+	_title = DungeonUI.heading("", 36)
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_text = _label(16, INK)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_text.custom_minimum_size = Vector2(384, 0)
-	_hint = _label(10, DIM)
+	_text.custom_minimum_size = Vector2(400, 0)
+	_hint = _label(14, DIM)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	for l in [_eyebrow, _title, _text, _hint]:
 		box.add_child(l)

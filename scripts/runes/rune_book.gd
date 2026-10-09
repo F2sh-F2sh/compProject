@@ -219,7 +219,7 @@ static func describe(r: RuneRecipe, dungeon_powered := false) -> Dictionary:
 			effect = "Lights everything within %d px of the cube that it can see." % s["radius"]
 		"space/portal":
 			title = "%s portal" % dir.capitalize()
-			effect = "Links the cube's doorway to a spot %d px %s. Carries you and loose objects." % [s["range"], dir]
+			effect = "Links the cube's doorway to a spot %d px %s. Carries you, loose objects and fire." % [s["range"], dir]
 	title = title.substr(0, 1).to_upper() + title.substr(1)
 	return {"title": title, "effect": effect, "cost": cost_text(s, dungeon_powered), "valid": true}
 

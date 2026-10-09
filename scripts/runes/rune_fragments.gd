@@ -102,6 +102,41 @@ static func essence_color(id: StringName) -> Color:
 
 ## Draws a fragment's glyph centred at `c` in a cell of `size` px, with
 ## simple strokes that stay readable at 8 px and at 48 px.
+## Each form's accent, mixed into the essence's colour where the form shows.
+const FORM_ACCENTS := {
+	&"push": Color(0.75, 1.0, 0.85), &"lift": Color(0.85, 1.0, 0.95), &"burst": Color(1.0, 0.95, 0.8),
+	&"projectile": Color(1.0, 0.85, 0.6), &"freeze": Color(0.7, 0.95, 1.0), &"bridge": Color(0.8, 0.9, 1.0),
+	&"beam": Color(1.0, 0.98, 0.85), &"glow": Color(1.0, 0.92, 0.7), &"portal": Color(0.85, 0.7, 1.0),
+}
+
+
+## How a sentence glows, from its four words: `color` (the essence), `accent`
+## (the form's tint), `speed` (how fast it pulses: Long slow, Repeat and
+## Strong quick, Persist steady at 0), `size` (Large wider) and `flicker`
+## (an unfinished or broken sentence: a dull red stutter).
+static func combo_glow(recipe: RuneRecipe) -> Dictionary:
+	var essence := recipe.get_slot(Kind.ESSENCE)
+	var form := recipe.get_slot(Kind.FORM)
+	var modifier := recipe.get_slot(Kind.MODIFIER)
+	var whole := essence != &"" and form != &"" and recipe.get_slot(Kind.DIRECTION) != &"" and modifier != &""
+	var base := essence_color(essence) if essence != &"" else NEUTRAL
+	var accent: Color = FORM_ACCENTS.get(form, Color.WHITE)
+	var speed := 1.0
+	var size := 1.0
+	match modifier:
+		&"strong": speed = 2.2
+		&"long": speed = 0.5
+		&"large": size = 1.45
+		&"persist": speed = 0.0
+		&"repeat": speed = 3.0
+		&"delay": speed = 0.35
+		&"bounce": speed = 1.6
+		&"split": size = 1.2
+		&"explode": speed = 2.6
+	return {"color": base, "accent": base.lerp(accent, 0.45), "speed": speed, "size": size,
+		"flicker": not whole, "whole": whole}
+
+
 static func draw_glyph(canvas: CanvasItem, id: StringName, c: Vector2, size: float, color: Color, width := 1.0) -> void:
 	var s := size * 0.5
 	match id:

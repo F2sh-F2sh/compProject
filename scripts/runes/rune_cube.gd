@@ -24,6 +24,8 @@ signal power_changed(powered: bool)
 enum State { INACTIVE, ACTIVE, OBSTRUCTED, NO_MANA, INVALID, CARRIED }
 
 const SIZE := 32.0
+## The carved block (tools/generate_rune_ui_sprites.gd).
+const BLOCK := preload("res://assets/sprites/story/rune_block.png")
 const STATE_NAMES := ["off", "on", "blocked", "no mana", "broken", "carried"]
 
 ## Short name shown in the overview ("East cube").
@@ -68,6 +70,8 @@ var body: StaticBody2D
 var _collider: CollisionShape2D
 var _face: Node2D
 var _glow: Sprite2D
+## A real light in the sentence's colour, while it runs.
+var _light: PointLight2D
 var _start_position := Vector2.ZERO
 var _flash_state := -1
 var _flash_time := 0.0
@@ -115,6 +119,13 @@ func _ready() -> void:
 	_glow.modulate.a = 0.0
 	_glow.z_index = -1
 	add_child(_glow)
+	_light = PointLight2D.new()
+	_light.texture = preload("res://assets/fx/soft_glow.png")
+	_light.texture_scale = 2.2
+	_light.position = Vector2(0, -SIZE / 2.0)
+	_light.energy = 0.0
+	_light.enabled = false
+	add_child(_light)
 	interactable = Interactable.new()
 	interactable.verb = "Inscribe"
 	interactable.use_priority = 1
@@ -276,7 +287,11 @@ func activate(by_player := true) -> String:
 	RuneJournal.note_cast(recipe)
 	if not fed_by_dungeon():
 		RuneJournal.note("mana")
-	_glow.modulate = RuneFragments.essence_color(recipe.essence)
+	var look := RuneFragments.combo_glow(recipe)
+	_glow.modulate = look["accent"]
+	_glow.scale = Vector2.ONE * 0.9 * float(look["size"])
+	_light.color = look["color"]
+	_light.enabled = true
 	queue_redraw()
 	_refresh_verb()
 	activated.emit(self)
@@ -393,8 +408,12 @@ func _physics_process(delta: float) -> void:
 					deactivate("exhausted")
 	if is_carried:
 		return
-	var target := 0.55 + sin(_time * 3.0) * 0.12 if is_active else 0.0
+	# the glow pulses at the sentence's own pace (Persist steady, Repeat quick)
+	var speed := float(RuneFragments.combo_glow(recipe)["speed"]) if is_active else 0.0
+	var target := 0.55 + sin(_time * 3.0 * speed) * 0.14 if is_active else 0.0
 	_glow.modulate.a = move_toward(_glow.modulate.a, target, delta * 2.0)
+	_light.energy = move_toward(_light.energy, 0.7 * target, delta * 2.0)
+	_light.enabled = _light.energy > 0.01
 	_face.queue_redraw()
 
 
@@ -467,50 +486,51 @@ func _draw() -> void:
 		# An iron bracket behind the cube
 		draw_rect(Rect2(-h - 4, top + 6, SIZE + 8, 4), Color("2a2438"))
 		draw_rect(Rect2(-h - 4, top + SIZE - 10, SIZE + 8, 4), Color("2a2438"))
-	# Weathered stone block
-	draw_rect(Rect2(-h, top, SIZE, SIZE), Color("16121f"))
-	draw_rect(Rect2(-h + 1, top + 1, SIZE - 2, SIZE - 2), Color("3a3350"))
-	draw_rect(Rect2(-h + 1, top + 1, SIZE - 2, 2), Color("514870"))
-	draw_rect(Rect2(-h + 3, top + 3, SIZE - 6, SIZE - 6), Color("241f33"))
+	# The carved block, its four sockets recessed
+	draw_texture(BLOCK, Vector2(-h, top))
 	if fed_by_dungeon():
 		# A carved channel from the floor: the dungeon feeds this one
-		draw_rect(Rect2(-h - 3, -3, SIZE + 6, 3), Color("2c2544"))
-		draw_rect(Rect2(-2, -3, 4, 3), Color("6d56b8"))
+		draw_rect(Rect2(-h - 3, -3, SIZE + 6, 3), Color("241f2b"))
+		draw_rect(Rect2(-2, -3, 4, 3), Color("b08a3e"))
 
 
 func _draw_face() -> void:
 	var h := SIZE / 2.0
 	var top := -SIZE
 	var s := state()
-	var base := RuneFragments.essence_color(recipe.essence)
+	var look := RuneFragments.combo_glow(recipe)
+	var base: Color = look["color"]
 	var lit := is_active and _delay_left <= 0.0
-	var pulse := 0.5 + 0.5 * sin(_time * 4.0)
-	var rim := Color(0.55, 0.45, 0.8, 0.35)
+	var pulse := 0.5 + 0.5 * sin(_time * 4.0 * maxf(float(look["speed"]), 0.25))
+	var rim := Color(0.55, 0.47, 0.35, 0.35)
 	match s:
-		State.ACTIVE: rim = Color(base, 0.55 + 0.3 * pulse)
+		State.ACTIVE: rim = Color(look["accent"], 0.55 + 0.3 * pulse)
 		State.OBSTRUCTED: rim = Color(1.0, 0.7, 0.25, 0.5 + 0.5 * pulse)
 		State.NO_MANA: rim = Color(1.0, 0.3, 0.3, 0.9 if int(_time * 8.0) % 2 == 0 else 0.3)
-		State.INVALID: rim = Color(1.0, 0.35, 0.35, 0.55)
-		State.CARRIED: rim = Color(0.9, 0.85, 1.0, 0.6)
+		State.INVALID: rim = Color(0.85, 0.25, 0.25, 0.35 + (0.3 if int(_time * 6.0) % 3 == 0 else 0.0))
+		State.CARRIED: rim = Color(0.95, 0.85, 0.6, 0.6)
 	if is_selected:
-		rim = Color(1, 1, 1, 0.9)
+		rim = Color(0.94, 0.82, 0.48, 0.95)
 	_face.draw_rect(Rect2(-h + 0.5, top + 0.5, SIZE - 1, SIZE - 1), rim, false, 1.0)
-	# The four quadrants of the composite
+	# The four words, each in its socket: the essence in its own colour, the
+	# others in the form's tint once the sentence runs
 	var cell := 12.0
 	var origins := [Vector2(-h + 3, top + 3), Vector2(1, top + 3), Vector2(-h + 3, top + 17), Vector2(1, top + 17)]
 	for kind in 4:
 		var id := recipe.get_slot(kind)
 		var o: Vector2 = origins[kind]
 		var c := o + Vector2(cell / 2.0, cell / 2.0)
-		var col := base if kind == RuneFragments.Kind.ESSENCE else RuneFragments.NEUTRAL
+		var col: Color = base if kind == RuneFragments.Kind.ESSENCE else (look["accent"] if lit else Color(0.78, 0.72, 0.62))
 		col.a = 0.95 if lit else 0.55
+		if lit:
+			_face.draw_rect(Rect2(o + Vector2(1, 1), Vector2(cell - 2, cell - 2)), Color(base.darkened(0.6), 0.55 * (0.7 + 0.3 * pulse)))
 		if id == &"":
 			col = Color(1.0, 0.4, 0.4, 0.8)
 		RuneFragments.draw_glyph(_face, id, c, cell, col, 1.0)
 		if is_slot_locked(kind):
-			_face.draw_rect(Rect2(o.x + cell - 3, o.y, 3, 3), Color(0.7, 0.65, 0.85, 0.7))
+			_face.draw_rect(Rect2(o.x + cell - 3, o.y, 3, 3), Color(0.85, 0.7, 0.4, 0.75))
 	if fed_by_dungeon():
-		_face.draw_rect(Rect2(-2, -3, 4, 3), Color(0.6, 0.5, 1.0, 0.5 + 0.4 * pulse if lit else 0.35))
+		_face.draw_rect(Rect2(-2, -3, 4, 3), Color(0.95, 0.8, 0.45, 0.5 + 0.4 * pulse if lit else 0.35))
 	# Delay: a draining ring. Timed: a shrinking bar
 	if is_active and _delay_left > 0.0:
 		var t := _delay_left / maxf(spell.get("delay", 1.0), 0.01)
