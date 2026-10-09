@@ -5,7 +5,7 @@ extends VBoxContainer
 ## guidance, reduced motion, fullscreen, and a list of the controls (read
 ## from the real bindings, so it is always right).
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.STORY
 const CONTROLS := [
 	["Walk left", "move_left"],
 	["Walk right", "move_right"],
@@ -71,7 +71,8 @@ func _ready() -> void:
 	graphics.item_selected.connect(func(i): Sfx.play("ui_click"); Settings.set_graphics(i))
 	add_child(graphics)
 	add_child(_check("Show FPS", Settings.show_fps, Settings.set_show_fps))
-	add_child(_label("Assist", 14, Color("cbbdf2")))
+	add_child(_check("Smooth motion", Settings.smooth_motion, Settings.set_smooth_motion))
+	add_child(_label("Assist", 14, Color("f0d27a")))
 	var damage := OptionButton.new()
 	var levels := [1.0, 0.75, 0.5, 0.25]
 	for level in levels:
@@ -87,6 +88,8 @@ func _ready() -> void:
 		func(on): Settings.set_assist("assist_auto_sprint", on)))
 	add_child(_check("Crouch toggles (press once, no holding)", Settings.assist_toggle_crouch,
 		func(on): Settings.set_assist("assist_toggle_crouch", on)))
+	add_child(_check("Hints without waiting (the skulls speak at once)", Settings.assist_instant_hints,
+		func(on): Settings.set_assist("assist_instant_hints", on)))
 	var controls := Button.new()
 	controls.text = "Show controls"
 	controls.toggle_mode = true
@@ -114,20 +117,20 @@ func _controls_grid() -> VBoxContainer:
 	grid.add_theme_constant_override("v_separation", 2)
 	box.add_child(grid)
 	for row in CONTROLS:
-		grid.add_child(_label(row[0], 12, Color("b8acd8")))
+		grid.add_child(_label(row[0], 12, Color("b9ab90")))
 		var key := Button.new()
 		key.custom_minimum_size = Vector2(130, 24)
 		key.add_theme_font_override("font", FONT)
-		key.add_theme_font_size_override("font_size", 12)
+		key.add_theme_font_size_override("font_size", 14)
 		key.add_theme_color_override("font_color", Color("f0d890"))
 		key.pressed.connect(_begin_rebind.bind(row[1]))
 		grid.add_child(key)
 		_key_buttons[row[1]] = key
-	box.add_child(_label("Click a key to change it. Controller: A jump, RT fire, right stick aim, LT sprint,\nX heal, Y refill, B echo, D-pad up use, Start pause.", 11, Color("8f84ad")))
+	box.add_child(_label("Click a key to change it. Controller: A jump, RT fire, right stick aim, LT sprint,\nX heal, Y refill, B echo, D-pad up use, Start pause.", 11, Color("8a8092")))
 	var reset := Button.new()
 	reset.text = "Reset controls"
 	reset.add_theme_font_override("font", FONT)
-	reset.add_theme_font_size_override("font_size", 13)
+	reset.add_theme_font_size_override("font_size", 14)
 	reset.pressed.connect(func():
 		Sfx.play("ui_click")
 		_waiting = ""
@@ -182,14 +185,14 @@ func _check(text: String, value: bool, on_change: Callable) -> CheckBox:
 	box.text = text
 	box.button_pressed = value
 	box.add_theme_font_override("font", FONT)
-	box.add_theme_font_size_override("font_size", 15)
+	box.add_theme_font_size_override("font_size", 16)
 	box.toggled.connect(func(on): Sfx.play("ui_click"); on_change.call(on))
 	return box
 
 
 func _slider_row(text: String, value: float, on_change: Callable) -> Control:
 	var row := VBoxContainer.new()
-	row.add_child(_label(text, 14, Color("e4ddf2")))
+	row.add_child(_label(text, 14, Color("e8dcc0")))
 	var slider := HSlider.new()
 	slider.min_value = 0.0
 	slider.max_value = 1.0

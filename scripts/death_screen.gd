@@ -1,7 +1,7 @@
 extends Control
 
 ## Full death sequence: the frozen game is dimmed and desaturated, a soft black
-## band fades in with "YOU DIED", then a fresh press of the restart key reloads
+## band fades in with "You Died" (in the blackletter title face), then a fresh press of the restart key reloads
 ## the level from its normal start.
 
 @export var restart_action := "jump"
@@ -28,6 +28,13 @@ func _ready() -> void:
 	# Keeps running while the game is paused so it can take the restart input
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	prompt.text = "Press %s to Continue" % InputLabels.primary(restart_action)
+	title.text = "You Died"
+	title.add_theme_font_override("font", Fonts.TITLE)
+	title.add_theme_font_size_override("font_size", 96)
+	title.add_theme_color_override("font_color", Color(0.72, 0.1, 0.14))
+	prompt.add_theme_font_override("font", Fonts.UI)
+	prompt.add_theme_font_size_override("font_size", 16)
+	prompt.add_theme_color_override("font_color", DungeonUI.INK)
 
 
 func show_death_screen() -> void:
@@ -50,6 +57,7 @@ func show_death_screen() -> void:
 	tween.tween_method(_set_dim, 0.0, 1.0, dim_time)
 	tween.tween_property(band, "modulate:a", 1.0, band_fade_time).set_delay(band_delay)
 	tween.tween_property(title, "modulate:a", 1.0, title_fade_time).set_delay(title_delay)
+	tween.tween_callback(Sfx.play.bind("death_sting", null, -3.0, 0.0)).set_delay(title_delay)
 	tween.tween_property(title, "scale", Vector2.ONE * title_zoom, 6.0).set_delay(title_delay)
 	tween.tween_property(prompt, "modulate:a", 1.0, prompt_fade_time).set_delay(prompt_delay)
 	tween.tween_callback(_arm_restart).set_delay(prompt_delay + prompt_fade_time)
@@ -76,7 +84,8 @@ func restart_level() -> void:
 	if _pulse:
 		_pulse.kill()
 	get_tree().paused = false
-	get_tree().reload_current_scene()
+	Sfx.play("respawn", null, -4.0, 0.0)
+	SceneFade.restart(get_tree())
 
 
 func _set_dim(amount: float) -> void:

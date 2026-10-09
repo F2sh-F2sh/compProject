@@ -20,6 +20,10 @@ extends Node2D
 	set(value):
 		entry_spawn = value
 		queue_redraw()
+## A long room with shrines along it: "Reset Room" puts the player at the last
+## shrine she lit inside it instead (everything else is reset as usual, and
+## every part behind her stays open, so nothing is out of reach).
+@export var reset_at_shrine := false
 ## A room with something to fight: the music leans into its combat layer
 ## while the player is here.
 @export var combat := false

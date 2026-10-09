@@ -28,6 +28,10 @@ AudioDirector="*res://scripts/autoload/audio_director.gd"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[gui]
+
+theme/custom="res://assets/ui/dungeon_theme.tres"
+
 [input]
 
 jump={

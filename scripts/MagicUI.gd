@@ -9,6 +9,7 @@ extends CanvasLayer
 
 func _ready() -> void:
 	add_to_group("ammo_ui")
+	_dungeon_skin()
 	for slot in [heal_slot, fire_slot]:
 		slot.pivot_offset = slot.size / 2.0
 		slot.resized.connect(func(): slot.pivot_offset = slot.size / 2.0)
@@ -45,3 +46,16 @@ func flash_spell(spell: String) -> void:
 	tween.tween_property(slot, "scale", Vector2.ONE, 0.2) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(slot, "self_modulate", Color.WHITE, 0.25)
+
+
+## The spell slots as small stone frames with gold corners; the key on a gold
+## plate, the cost beneath in the UI face.
+func _dungeon_skin() -> void:
+	for slot in [heal_slot, fire_slot]:
+		slot.add_theme_stylebox_override("panel", DungeonUI.style("panel_lite", 8, Vector4(8, 6, 8, 6)))
+		for label in slot.find_children("*", "Label", true, false):
+			label.add_theme_font_override("font", Fonts.UI)
+			label.add_theme_font_size_override("font_size", 8)
+			if label.name == "Key":
+				label.add_theme_stylebox_override("normal", DungeonUI.style("nameplate", 8, Vector4(6, 1, 6, 1)))
+				label.add_theme_color_override("font_color", DungeonUI.INK_DARK)

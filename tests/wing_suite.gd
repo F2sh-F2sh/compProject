@@ -55,6 +55,34 @@ func run_suite(filter: String) -> void:
 		"heart_look": scenario_heart_look,
 		"c1_look": scenario_c1_look,
 		"c2_look": scenario_c2_look,
+		"l1_look": scenario_l1_look,
+		"l1_full": scenario_l1_full,
+		"l1_pages": scenario_l1_pages,
+		"l1_dark": scenario_l1_dark,
+		"g1_look": scenario_g1_look,
+		"g1_full": scenario_g1_full,
+		"g1_pages": scenario_g1_pages,
+		"g1_dark": scenario_g1_dark,
+		"g2_look": scenario_g2_look,
+		"g2_full": scenario_g2_full,
+		"g2_pages": scenario_g2_pages,
+		"g2_dark": scenario_g2_dark,
+		"galleries_full": scenario_galleries_full,
+		"intro_look": scenario_reel_look.bind("intro"),
+		"bell_look": scenario_reel_look.bind("bell"),
+		"dome_look": scenario_reel_look.bind("dome"),
+		"kiln_look": scenario_reel_look.bind("kiln"),
+		"cistern_look": scenario_reel_look.bind("cistern"),
+		"lamps_look": scenario_reel_look.bind("lamps"),
+		"galleries_look": scenario_reel_look.bind("galleries"),
+		"eye_reel_look": scenario_reel_look.bind("eye"),
+		"stillness_look": scenario_reel_look.bind("stillness"),
+		"sky_look": scenario_reel_look.bind("sky"),
+		"levels_look": scenario_levels_look,
+		"creatures": scenario_creatures,
+		"sounds": scenario_sounds,
+		"hint_wait": scenario_hint_wait,
+		"sightlines": scenario_sightlines,
 	}
 	for key in scenarios:
 		if only == key or (only == "" and not key.ends_with("_look")):
@@ -1146,19 +1174,19 @@ func _c2_cross() -> void:
 	check("B switched off, the ice lets go", not tide.is_frozen)
 
 
-## The Weigh House: the Sluice Cube in the socket under the shelf (Ice,
-## Freeze, Right, Persist) freezes the slimes hopping on the pan; a Strong wind
-## from the Drover Cube shoves the Ballast off its shelf, and the kerb stops it
-## on the pan.
-func _c2_weigh(wrong: bool) -> void:
+## The Weigh House: the Sluice Cube in the socket at the pan's end (Ice,
+## Freeze, Right, Persist) freezes the two slimes hopping on the pan; held,
+## the pan opens the Great Sluice and the Bell Well drains.
+func _c2_weigh() -> void:
 	var sluice: RuneCube = cube_named("R2/SluiceCube")
-	var drover: RuneCube = cube_named("R2/DroverCube")
 	var pan: PressurePlate = node("R2/WeighPan")
-	var ballast: WindBody = node("R2/Ballast")
+	var well: TidePool = node("R2/BellWell")
 	var carrier: Node = player.get_node("RuneCarrier")
+	check("C the pan wants two weights, and there is nothing else to weigh it", pan.weight_needed == 2
+		and lvl.get_node_or_null("R2/Ballast") == null and lvl.get_node_or_null("R2/DroverCube") == null)
 	await walk_to(6432.0)
 	await kindle()
-	check("C under the shelf to the pan's socket", await walk_to(6612.0), "at %s" % player.global_position.round())
+	check("C to the pan's socket", await walk_to(6612.0), "at %s" % player.global_position.round())
 	var placed := await put_down("move_right")
 	check("C set the Sluice Cube in the socket", placed and sluice.fed_by_dungeon(),
 		"at %s (%s)" % [sluice.global_position.round(), carrier.get("reason")])
@@ -1169,100 +1197,27 @@ func _c2_weigh(wrong: bool) -> void:
 	check("C it reads ice/freeze/right/persist", sluice.recipe.to_key() == "ice/freeze/right/persist", sluice.recipe.to_key())
 	manager.assembly.toggle_cube()
 	check("C on, fed by the socket", sluice.is_active and sluice.fed_by_dungeon())
-	check("C the slimes freeze as they hop into the cold: two weights", await wait_until(func(): return pan.weight() >= 2, 20.0),
+	check("C the slimes freeze as they hop into the cold, and the pan sinks", await wait_until(func(): return pan.is_powered(), 20.0),
 		"weight %d, slimes at %.0f %.0f" % [pan.weight(), node("R2/WeigherA").global_position.x, node("R2/WeigherB").global_position.x])
-	await walk_to(6476.0)
-	await face("move_right")
-	var start := ballast.global_position
-	check("C the lectern by the flame works the Drover Cube", await open_here(drover))
-	if wrong:
-		manager.assembly.toggle_cube()
-		await seconds(2.0)
-		check("C a steady wind can't shift the stone", ballast.global_position.distance_to(start) < 4.0)
-		drover.deactivate()
-		await frames(4)
-		check("C open it again", await open_here(drover))
-	inscribe(["strong"])
-	check("C it reads wind/push/right/strong", drover.recipe.to_key() == "wind/push/right/strong", drover.recipe.to_key())
-	manager.assembly.toggle_cube()
-	check("C the Strong wind shoves the Ballast off its shelf, and the kerb stops it on the pan: three weights",
-		await wait_until(func(): return pan.is_powered(), 6.0), "weight %d, stone at %s" % [pan.weight(), ballast.global_position.round()])
-	drover.deactivate()
-	await seconds(1.5)
-	check("C the pan stays down", pan.is_powered() and not ballast.is_lost and lvl.broken_reason == "",
-		"stone at %s" % ballast.global_position.round())
+	check("C held, the Great Sluice opens for good", await wait_until(func(): return game_state().has_flag("cistern.r2.sluice"), 5.0))
+	check("C the Bell Well drains through the sluice gate", await wait_until(func(): return well.level <= 0.0, 8.0)
+		and node("R2/GreatSluiceGate").open_amount >= 1.0)
 	await shot("sluice_part_pan")
 
 
-## Up the lift to the high ledge, and the tide frozen at its top from the high
-## lectern: with the pan held, the Great Sluice opens and the well drains.
-func _c2_high_mark() -> void:
-	var tide: TidePool = node("R2/Tide")
-	var lever: RuneCube = cube_named("R2/TideLever")
-	var lift: Node2D = node("R2/WeighLift")
-	var mark: TideMark = node("R2/HighMark")
-	var well: TidePool = node("R2/BellWell")
-	await walk_to(6150.0)
-	await wait_until(func(): return lift.global_position.y < 300.0, 15.0)
-	await walk_to(6272.0)
-	await wait_until(func(): return lift.global_position.y >= 515.0, 15.0)
-	check("C up the lift", await wait_until(func(): return lift.global_position.y <= 129.0, 15.0) and _on_ledge(146.0),
-		"at %s" % player.global_position.round())
-	check("C west off the lift onto the high ledge", await walk_to(6150.0, true) and _on_ledge(146.0), "at %s" % player.global_position.round())
-	await walk_to(6154.0)
-	await face("move_right")
-	await wait_until(func(): return tide.level >= tide.high_level - 0.5 and not tide.is_frozen, 25.0)
-	check("D the high lectern works the lever too", await open_here(lever))
-	manager.assembly.toggle_cube()
-	check("D switched on while the tide stands at its top, it freezes there: the high mark", await wait_until(func(): return mark.is_powered(), 2.0),
-		"surface %.0f" % tide.surface_y())
-	check("D with the pan held as well, the Great Sluice opens for good", await wait_until(func(): return game_state().has_flag("cistern.r2.sluice"), 5.0))
-	check("D the Bell Well drains", await wait_until(func(): return well.level <= 0.0, 8.0) and node("R2/GreatSluiceGate").open_amount >= 1.0)
-	await shot("sluice_part_sluice")
-	lever.deactivate()
-
-
-## With the sluice open: down from the high ledge, the Sluice Cube out of its
-## socket, up the lift, an ice bridge over the High Walk's fallen span; then
-## down into the drained well, out through the sluice gate for the last page,
-## and the bell.
+## Up the lift and along the High Walk, down into the drained well, out
+## through the sluice gate for the last page, and the bell.
 func _c2_bell() -> void:
 	var lift: Node2D = node("R2/WeighLift")
-	var sluice: RuneCube = cube_named("R2/SluiceCube")
-	var pan: PressurePlate = node("R2/WeighPan")
-	# Off the high ledge onto the lift at the bottom, and back to the socket
-	await wait_until(func(): return lift.global_position.y >= 515.0, 15.0)
-	await walk_to(6300.0)
-	check("E down from the high ledge", await wait_until(func(): return _on_ledge(534.0), 4.0), "at %s" % player.global_position.round())
-	await walk_to(6634.0)
-	await face("move_right")
-	check("E open the Sluice Cube in its socket and switch it off", await open_here(sluice))
-	manager.assembly.toggle_cube()
-	manager.assembly.close()
-	await frames(4)
-	check("E the Sluice Cube back out of its socket (the sluice stays open)", await pick_up(sluice)
-		and game_state().has_flag("cistern.r2.sluice"))
-	await seconds(2.0)
-	check("E the slimes thaw, and the pan lets go", not pan.is_powered())
-	# Back up the lift with it
+	await walk_to(6350.0)
+	# (on the lift's spot once it has risen away, so it comes down under her)
 	await wait_until(func(): return lift.global_position.y < 300.0, 15.0)
 	await walk_to(6272.0)
 	await wait_until(func(): return lift.global_position.y >= 515.0, 15.0)
-	check("E up the lift with the cube", await wait_until(func(): return lift.global_position.y <= 129.0, 15.0) and _on_ledge(146.0),
+	check("E up the lift", await wait_until(func(): return lift.global_position.y <= 129.0, 15.0) and _on_ledge(146.0),
 		"at %s" % player.global_position.round())
-	check("E east along the High Walk to the fallen span", await walk_to(6594.0) and _on_ledge(146.0),
+	check("E east along the High Walk", await walk_to(7000.0, true, 12.0) and _on_ledge(146.0),
 		"at %s" % player.global_position.round())
-	check("E set the cube at its edge", await put_down("move_right"), "(%s)" % player.get_node("RuneCarrier").get("reason"))
-	await walk_to(sluice.global_position.x - 26.0)
-	await face("move_right")
-	check("E open it", await open_here(sluice))
-	inscribe(["bridge", "normal"])
-	check("E it reads ice/bridge/right/normal", sluice.recipe.to_key() == "ice/bridge/right/normal", sluice.recipe.to_key())
-	manager.assembly.toggle_cube()
-	check("E a bridge of ice reaches over the span", await wait_until(func(): return sluice.is_active, 1.0))
-	await shot("sluice_part_bridge")
-	check("E over the cube and across the bridge", await run_to(7000.0, [player.global_position.x], 10.0) and _on_ledge(146.0)
-		and recoveries_since == 0, "at %s" % player.global_position.round())
 	check("E off its end into the drained well", await walk_to(7150.0, false, 6.0) and _on_ledge(598.0) and recoveries_since == 0,
 		"at %s" % player.global_position.round())
 	check("E out through the sluice gate: the Warden's page", await walk_to(7520.0, false, 6.0)
@@ -1287,8 +1242,7 @@ func scenario_c2() -> void:
 	check("the Bell Well is full and the Great Sluice shut", node("R2/BellWell").level > 290.0 and node("R2/GreatSluiceGate").open_amount <= 0.0)
 	await _c2_silence(true)
 	await _c2_cross()
-	await _c2_weigh(true)
-	await _c2_high_mark()
+	await _c2_weigh()
 	await _c2_bell()
 	game_state().clear_all()
 	game_state().all_abilities = true
@@ -1301,8 +1255,7 @@ func scenario_c2_full() -> void:
 	var frame0 := Engine.get_physics_frames()
 	await _c2_silence(false)
 	await _c2_cross()
-	await _c2_weigh(false)
-	await _c2_high_mark()
+	await _c2_weigh()
 	await _c2_bell()
 	check("every step of the room is done", node("R2").is_cleared())
 	print("  (the scripted route took %.0f s of game time)" % ((Engine.get_physics_frames() - frame0) / 60.0))
@@ -1410,31 +1363,449 @@ func scenario_c2_broken() -> void:
 	game_state().all_abilities = true
 
 
-func scenario_l1() -> void:
-	print("-- the Lampworks, room 1: The Dark Reading Room")
+func scenario_l1_look() -> void:
+	print("SCENARIO the Hall of Lamps: screenshots")
+	await load_scene(Journey.LAMPS)
+	# The walls between the parts: solid above the doorway, open in it
+	var walls := []
+	for col in [16, 33, 50, 59, 81, 96]:
+		walls.append("%d:%s|%s" % [col, _solid_at(Vector2(col * 64 + 32, 300)), _solid_at(Vector2(col * 64 + 32, 470))])
+	print("  walls (above the doorway | in it): %s" % " ".join(walls))
+	print("  vault over the chasm at y 380: %s, at 420: %s; pillar top 540: %s" % [_solid_at(Vector2(4700, 380)),
+		_solid_at(Vector2(4700, 420)), _solid_at(Vector2(4448, 540))])
+	var spots := {
+		"hall_01_reading": Vector2(300, 530), "hall_02_crystal": Vector2(960, 530), "hall_03_gallery": Vector2(1180, 530),
+		"hall_04_mirrors": Vector2(1500, 530), "hall_05_gallery_end": Vector2(1950, 530), "hall_06_walk": Vector2(2300, 530),
+		"hall_07_plate": Vector2(2848, 530), "hall_08_watch": Vector2(3290, 530), "hall_09_ledge": Vector2(3600, 398),
+		"hall_10_stacks_bank": Vector2(3960, 530), "hall_11_pillar": Vector2(4448, 530), "hall_12_far_bank": Vector2(5050, 530),
+		"hall_13_great": Vector2(5400, 530), "hall_14_door": Vector2(6000, 530), "hall_15_stair": Vector2(6260, 530),
+	}
+	for key in spots:
+		await place(spots[key])
+		await seconds(1.2)
+		await shot(key)
+	# The Gallery: Bounce, the mirrors turned right
+	var gallery: RuneCube = cube_named("R1/GalleryCube")
+	gallery.deactivate()
+	gallery.recipe = RuneRecipe.from_key("light/beam/right/bounce")
+	for spec in [["R1/MirrorLow", 3], ["R1/MirrorHigh", 1], ["R1/MirrorFar", 2]]:
+		node(spec[0]).facing = spec[1]
+	gallery.activate(false)
+	await place(Vector2(1500, 530))
+	await seconds(3.5)
+	await shot("hall_16_gallery_lit")
+	print("  gallery crystal lit: %s, lamp: %s" % [node("R1/GalleryCrystal").powered, node("R1/GalleryLamp").lit])
+	# The Watchers' Walk: the Watch Cube glowing in the plate's socket
+	var watch: RuneCube = cube_named("R1/WatchCube")
+	watch.put_down(node("R1/PlateSocket").global_position)
+	watch.recipe = RuneRecipe.from_key("light/glow/self/normal")
+	print("  watch cube on the plate's socket: %s" % watch.fed_by_dungeon())
+	watch.activate(false)
+	await place(Vector2(2400, 530))
+	await wait_until(func(): return node("R1/WatcherA").is_frozen, 20.0)
+	await seconds(1.0)
+	await place(Vector2(2780, 530))
+	await seconds(1.0)
+	await shot("hall_17_plate_held")
+	print("  watcher A frozen at %.0f, plate pressed: %s" % [node("R1/WatcherA").global_position.x, node("R1/MonkPlate").is_pressed])
+	watch.deactivate()
+	# The Watch Lamp: the brazier holds the second monk; the cube on the ledge
+	node("R1/MonkBrazier").ignite()
+	await place(Vector2(3270, 530))
+	await seconds(1.0)
+	await shot("hall_18_monk_held")
+	print("  watcher B frozen at %.0f" % node("R1/WatcherB").global_position.x)
+	watch.put_down(node("R1/LampSocket").global_position)
+	watch.activate(false)
+	await place(Vector2(3500, 398))
+	await seconds(3.5)
+	await shot("hall_19_watch_lamp")
+	print("  watch crystal lit: %s, lamp: %s" % [node("R1/WatchCrystal").powered, node("R1/WatchLamp").lit])
+	watch.deactivate()
+	# The Dark Stacks: plain glow, then Large
+	node("R1/StacksBrazier").ignite()
+	watch.put_down(node("R1/ChasmSocket").global_position)
+	watch.activate(false)
+	node("R1/StacksLamp").ignite()
+	await place(Vector2(3960, 530))
+	await seconds(3.5)
+	print("  walkway lit, plain glow: %s" % _solid_stones())
+	await place(Vector2(4448, 530))
+	await seconds(1.0)
+	await shot("hall_20_stacks_plain")
+	watch.deactivate()
+	watch.recipe = RuneRecipe.from_key("light/glow/self/large")
+	watch.activate(false)
+	await seconds(3.5)
+	print("  walkway lit, Large glow: %s" % _solid_stones())
+	await shot("hall_21_stacks_large")
+	await place(Vector2(4700, 530))
+	await seconds(1.0)
+	await shot("hall_22_stacks_far")
+	# The Great Lamp
+	var door: RuneCube = cube_named("R1/DoorCube")
+	door.recipe = RuneRecipe.from_key("light/beam/up_left/normal")
+	door.activate(false)
+	await place(Vector2(5640, 530))
+	await seconds(3.5)
+	await shot("hall_23_great_lit")
+	print("  great crystal lit: %s, lamp: %s, door open: %.2f" % [node("R1/GreatCrystal").powered, node("R1/GreatLamp").lit,
+		node("R1/LampDoor").open_amount])
+	await place(Vector2(5980, 530))
+	await seconds(1.0)
+	await shot("hall_24_board")
+	check("the Hall of Lamps loads with its lamps", node("R1/GreatLamp") is HallLamp)
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+func _solid_at(p: Vector2) -> bool:
+	var q := PhysicsPointQueryParameters2D.new()
+	q.position = p
+	q.collision_mask = 2
+	return not lvl.get_world_2d().direct_space_state.intersect_point(q).is_empty()
+
+
+## Which of the Dark Stacks' walkway stones are solid now (column numbers).
+func _solid_stones() -> String:
+	var cols := []
+	for stone in lvl.find_children("Walk*", "SpectralPlatform", true, false):
+		if stone.is_solid:
+			cols.append(int(stone.global_position.x / 64.0))
+	cols.sort()
+	return str(cols) + (" page stone" if node("R1/PageStone").is_solid else "")
+
+
+# ---------------------------------------------------------------- the Hall of Lamps (the Lampworks, room 1)
+
+## The Hall of Lamps as a player reaches it: in its doorway, with the words
+## of the first two wings.
+func _l1_arrive() -> void:
 	await load_scene(Journey.LAMPS)
 	await enter_room("R1")
-	await solve_l1()
 
 
-func solve_l1() -> void:
-	var c: RuneCube = node("R1/ReadingCube")
-	var crystal = node("R1/Crystal")
+## The Reading Room: Light and Beam on the Reading Cube; a bridge of light.
+func _l1_reading() -> void:
+	var c: RuneCube = cube_named("R1/ReadingCube")
+	var crystal: LightReceiver = node("R1/ReadingCrystal")
 	await kindle()
 	await read_tablet("R1/TabletLight")
 	await read_tablet("R1/TabletBeam")
-	check("L1 the tablets teach Light and Beam", RuneManager.knows(&"light", get_tree()) and RuneManager.knows(&"beam", get_tree()))
-	check("L1 open the reading cube", await open_cube(c))
+	check("A the tablets teach Light and Beam", RuneManager.knows(&"light", get_tree()) and RuneManager.knows(&"beam", get_tree()))
+	check("A open the Reading Cube", await open_cube(c))
 	inscribe(["light", "beam"])
-	check("L1 it reads light/beam/right/normal", c.recipe.to_key() == "light/beam/right/normal", c.recipe.to_key())
+	check("A it reads light/beam/right/normal", c.recipe.to_key() == "light/beam/right/normal", c.recipe.to_key())
 	manager.assembly.toggle_cube()
-	check("L1 the beam lights the crystal across the pit", await wait_until(func(): return crystal.powered, 3.0))
+	check("A the beam lights the crystal across the pit", await wait_until(func(): return crystal.powered, 3.0))
 	var bridge := lvl.find_children("Bridge*", "SpectralPlatform", true, false)
-	check("L1 a bridge of faint stone forms", await wait_until(func(): return bridge.all(func(b): return b.is_solid), 3.0))
-	await shot("wing_l1_beam")
-	check("L1 hop the cube and walk across", await run_to(1100.0, [c.global_position.x - 40.0]), "x=%.0f y=%.0f" % [player.global_position.x, player.global_position.y])
-	check("L1 no fall into the spikes", recoveries_since == 0 and player.global_position.y < 540.0)
-	check("L1 room cleared", await wait_until(func(): return node("R1").is_cleared(), 3.0))
+	check("A a bridge of light forms", await wait_until(func(): return bridge.all(func(b): return b.is_solid), 3.0))
+	check("A over the cube and across", await run_to(990.0, [c.global_position.x - 40.0]) and _on_ledge(534.0) and recoveries_since == 0,
+		"at %s" % player.global_position.round())
+
+
+## The Mirror Gallery: Bounce on the Gallery Cube, then each mirror turned
+## from its wheel (two turns, one, three) until the beam goes up, across and
+## down onto the Gallery Lamp's crystal.
+func _l1_gallery() -> void:
+	var c: RuneCube = cube_named("R1/GalleryCube")
+	var crystal: LightReceiver = node("R1/GalleryCrystal")
+	check("B the Gallery Cube's beam is on, and stops at the first mirror", c.is_active and not crystal.powered)
+	await read_tablet("R1/TabletBounce")
+	check("B the tablet teaches Bounce", RuneManager.knows(&"bounce", get_tree()))
+	check("B open the Gallery Cube", await open_cube(c))
+	check("B only its last word can change", c.is_slot_locked(RuneFragments.Kind.DIRECTION) and not c.is_slot_locked(RuneFragments.Kind.MODIFIER))
+	manager.assembly.toggle_cube()
+	inscribe(["bounce"])
+	manager.assembly.toggle_cube()
+	check("B it reads light/beam/right/bounce, and is on again", c.recipe.to_key() == "light/beam/right/bounce" and c.is_active, c.recipe.to_key())
+	await seconds(0.5)
+	check("B the mirrors start turned wrong", not crystal.powered)
+	# (over the cube to the first mirror's foot)
+	await run_to(1300.0, [player.global_position.x])
+	for spec in [["R1/MirrorLow", 2], ["R1/MirrorHigh", 1], ["R1/MirrorFar", 3]]:
+		var mirror: Mirror = node(spec[0])
+		var wheel: float = mirror.global_position.x + mirror.interact_offset.x
+		await walk_to(wheel - 6.0 if wheel > player.global_position.x else wheel + 6.0)
+		for i in spec[1]:
+			await interact()
+			await frames(16)
+	check("B the beam turns up, across and down onto the crystal", await wait_until(func(): return crystal.powered, 3.0),
+		"facings %d %d %d" % [node("R1/MirrorLow").facing, node("R1/MirrorHigh").facing, node("R1/MirrorFar").facing])
+	check("B the Gallery Lamp burns and the Gallery Gate opens", await wait_until(func(): return (node("R1/GalleryLamp").lit
+		and node("R1/GalleryGate").open_amount >= 1.0), 4.0))
+
+
+## The Watchers' Walk: Glow and Self on the Watch Cube, set in the plate's
+## socket: the Watcher walks into the light and stops on the plate as stone.
+## With `large_first`, Large is tried first: it stops him short of the plate.
+func _l1_monks(large_first: bool) -> void:
+	var c: RuneCube = cube_named("R1/WatchCube")
+	var monk: WatcherGargoyle = node("R1/WatcherA")
+	var plate: PressurePlate = node("R1/MonkPlate")
+	var gate: PortcullisGate = node("R1/MonksGate")
+	check("C through the Gallery Gate", await walk_to(2240.0, false, 14.0), "at %s" % player.global_position.round())
+	await kindle()
+	await read_tablet("R1/TabletGlow")
+	await read_tablet("R1/TabletSelf")
+	check("C the tablets teach Glow and Self", RuneManager.knows(&"glow", get_tree()) and RuneManager.knows(&"self", get_tree()))
+	check("C open the Watch Cube where it stands", await open_cube(c))
+	inscribe(["light", "glow", "self", "large" if large_first else "normal"])
+	manager.assembly.close()
+	await frames(4)
+	check("C pick it up", await pick_up(c))
+	# (in while the Watcher is at the far end, walking away)
+	await wait_until(func(): return monk.global_position.x > 3000.0 and monk.facing > 0, 30.0)
+	await walk_to(2800.0)
+	check("C set it in the plate's socket", await put_down("move_right") and c.fed_by_dungeon(), "at %s" % c.global_position.round())
+	check("C open it there", await open_cube(c))
+	manager.assembly.toggle_cube()
+	if large_first:
+		check("C Large: the Watcher stops as stone where the light begins, off the plate",
+			await wait_until(func(): return monk.is_frozen, 25.0) and not plate.is_pressed and gate.open_amount <= 0.0,
+			"stopped at %.0f" % monk.global_position.x)
+		check("C open it again", await open_here(c))
+		manager.assembly.toggle_cube()
+		inscribe(["normal"])
+		manager.assembly.toggle_cube()
+	check("C the Watcher walks into the light and stops on the plate as stone",
+		await wait_until(func(): return monk.is_frozen and plate.is_pressed, 25.0), "at %.0f" % monk.global_position.x)
+	check("C held, the Monks' Gate opens for good", await wait_until(func(): return (gate.open_amount >= 1.0
+		and game_state().has_flag("lamps.r1.monks")), 4.0))
+	# Off, and away with the cube while the Watcher wakes
+	check("C open it again", await open_here(c))
+	manager.assembly.toggle_cube()
+	manager.assembly.close()
+	await frames(2)
+	check("C take the cube", await pick_up(c))
+	check("C past the waking Watcher and through the Monks' Gate", await walk_to(3290.0, true, 8.0) and c.is_carried,
+		"at %s" % player.global_position.round())
+	check("C and the gate stays open", gate.open_amount >= 1.0)
+
+
+## The Watch Lamp: her fire lights the brazier, its light holds the second
+## Watcher; from his back a charged jump with the cube reaches the ledge, and
+## the cube glows in the socket by the crystal.
+func _l1_watch() -> void:
+	var c: RuneCube = cube_named("R1/WatchCube")
+	var monk: WatcherGargoyle = node("R1/WatcherB")
+	var crystal: LightReceiver = node("R1/WatchCrystal")
+	await walk_to(3300.0)
+	throw_fire(Vector2(60, -106))
+	check("D her fire lights the brazier over the Watcher", await wait_until(func(): return node("R1/MonkBrazier").is_lit, 2.0))
+	check("D its light holds him still", await wait_until(func(): return monk.is_frozen, 2.0))
+	await walk_to(monk.global_position.x - 50.0)
+	await hop_to(monk.global_position.x)
+	check("D up on the Watcher's back, the cube carried", _on_ledge(502.0) and c.is_carried, "at %s" % player.global_position.round())
+	check("D a charged jump to the ledge", await charged_jump("move_right") and _on_ledge(402.0), "at %s" % player.global_position.round())
+	await walk_to(3504.0)
+	check("D the cube in the socket by the crystal", await put_down("move_right") and c.fed_by_dungeon(), "at %s" % c.global_position.round())
+	check("D open it", await open_cube(c))
+	inscribe(["light", "glow", "self", "normal"])
+	manager.assembly.toggle_cube()
+	check("D its glow lights the crystal", await wait_until(func(): return crystal.powered, 3.0))
+	check("D the Watch Lamp burns and the Walk Gate opens", await wait_until(func(): return (node("R1/WatchLamp").lit
+		and node("R1/WalkGate").open_amount >= 1.0), 4.0))
+	check("D open it again", await open_here(c))
+	manager.assembly.toggle_cube()
+	manager.assembly.close()
+	await frames(2)
+	check("D take the cube", await pick_up(c))
+	check("D off the ledge and through the Walk Gate", await walk_to(3880.0, false, 10.0) and _on_ledge(534.0) and c.is_carried,
+		"at %s" % player.global_position.round())
+
+
+## The Dark Stacks: fire on the brazier over the edge, the Watch Cube glowing
+## in the pillar's socket (plain, or Large), fire on the Stacks Lamp from the
+## last lit stone, and across.
+func _l1_stacks(large: bool) -> void:
+	var c: RuneCube = cube_named("R1/WatchCube")
+	var lamp: Brazier = node("R1/StacksLamp")
+	await walk_to(3990.0)
+	await kindle()
+	throw_fire(Vector2(138, -106))
+	check("E her fire lights the brazier over the edge", await wait_until(func(): return node("R1/StacksBrazier").is_lit, 2.0))
+	check("E the first stones show", await wait_until(func(): return [65, 66, 67, 68].all(_stone_lit), 2.0), _solid_stones())
+	check("E along them to the pillar", await walk_to(4400.0) and _on_ledge(534.0) and recoveries_since == 0,
+		"at %s" % player.global_position.round())
+	check("E the cube in the pillar's socket", await put_down("move_right") and c.fed_by_dungeon(), "at %s" % c.global_position.round())
+	check("E open it", await open_cube(c))
+	inscribe(["light", "glow", "self", "large" if large else "normal"])
+	manager.assembly.toggle_cube()
+	var shown := [70, 71] if large else [70]
+	check("E stones show round the pillar (%s)" % ("Large" if large else "plain"), await wait_until(func(): return shown.all(_stone_lit), 2.0)
+		and not _stone_lit(72), _solid_stones())
+	var last := 4590.0 if large else 4528.0
+	check("E over the cube to the last lit stone", await run_to(last, [player.global_position.x]) and _on_ledge(534.0) and recoveries_since == 0,
+		"at %s" % player.global_position.round())
+	throw_fire(Vector2(4800.0 - player.global_position.x, -106))
+	check("E from there her fire reaches the Stacks Lamp", await wait_until(func(): return lamp.is_lit, 2.0))
+	check("E the far stones show, and the Stacks Gate opens", await wait_until(func(): return ([73, 74, 75, 76].all(_stone_lit)
+		and node("R1/StacksGate").open_amount >= 1.0), 4.0), _solid_stones())
+	if large:
+		check("E Large leaves one dark stone: a walking hop", await leap("move_right", 4600.0, 4700.0, 6.0, false)
+			and _on_ledge(534.0) and recoveries_since == 0, "at %s" % player.global_position.round())
+	else:
+		check("E plain leaves two: a running jump", await leap("move_right", 4530.0, 4700.0, 6.0, true)
+			and _on_ledge(534.0) and recoveries_since == 0, "at %s" % player.global_position.round())
+	check("E across to the far bank", await walk_to(4990.0) and _on_ledge(534.0) and recoveries_since == 0,
+		"at %s" % player.global_position.round())
+
+
+## The Great Lamp: Up-Left on the Door Cube. With `try_up`, straight up first
+## (it misses).
+func _l1_great(try_up: bool) -> void:
+	var c: RuneCube = cube_named("R1/DoorCube")
+	var crystal: LightReceiver = node("R1/GreatCrystal")
+	check("F through the Stacks Gate", await walk_to(5300.0, false, 10.0), "at %s" % player.global_position.round())
+	await read_tablet("R1/TabletUpLeft")
+	check("F the tablet teaches Up-Left", RuneManager.knows(&"up_left", get_tree()))
+	check("F open the Door Cube", await open_cube(c))
+	if try_up:
+		manager.assembly.toggle_cube()
+		await seconds(1.0)
+		check("F straight up misses the Great Lamp", c.is_active and not crystal.powered)
+		check("F open it again", await open_here(c))
+		manager.assembly.toggle_cube()
+	inscribe(["up_left"])
+	check("F it reads light/beam/up_left/normal", c.recipe.to_key() == "light/beam/up_left/normal", c.recipe.to_key())
+	manager.assembly.toggle_cube()
+	check("F Up-Left, the beam reaches the Great Lamp's crystal", await wait_until(func(): return crystal.powered, 3.0))
+	check("F the Great Lamp burns and the Lamp Door opens", await wait_until(func(): return (node("R1/GreatLamp").lit
+		and node("R1/LampDoor").open_amount >= 1.0 and game_state().has_flag("lamps.r1.solved")), 4.0))
+	check("F the three hall lamps over the door burn too", ["R1/BoardLamp1", "R1/BoardLamp2", "R1/BoardLamp3"].all(func(p): return node(p).lit))
+
+
+func _stone_lit(col: int) -> bool:
+	return (node("R1/Walk%d" % col) as SpectralPlatform).is_solid
+
+
+func scenario_l1() -> void:
+	print("SCENARIO the Hall of Lamps, part by part")
+	await _l1_arrive()
+	check("its new pieces are pixel art, not drawn shapes", lvl.find_children("*", "Polygon2D", true, false).is_empty())
+	await _l1_reading()
+	await _l1_gallery()
+	await _l1_monks(true)
+	await _l1_watch()
+	await _l1_stacks(false)
+	await _l1_great(true)
+	check("every step of the hall is done", node("R1").is_cleared())
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## The Hall of Lamps from its door to the Lamp Door with her own feet, no detours.
+func scenario_l1_full() -> void:
+	print("SCENARIO the Hall of Lamps, played through with her own feet")
+	await _l1_arrive()
+	var frame0 := Engine.get_physics_frames()
+	await _l1_reading()
+	await _l1_gallery()
+	await _l1_monks(false)
+	await _l1_watch()
+	await _l1_stacks(true)
+	await _l1_great(false)
+	check("every step of the hall is done", node("R1").is_cleared())
+	print("  (the scripted route took %.0f s of game time)" % ((Engine.get_physics_frames() - frame0) / 60.0))
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## The three ledger pages: i on the shelf by the Reading Room's door (a
+## charged jump), ii on the ledge over the Gallery Cube (a charged jump from
+## its top), iii on the stone over the walkway that only Large shows.
+func scenario_l1_pages() -> void:
+	print("SCENARIO the Hall of Lamps: the ledger pages")
+	await _l1_arrive()
+	await _l1_reading()
+	await walk_to(900.0)
+	check("i a charged jump onto the shelf by the door: the first page", await charged_jump("move_right") and _on_ledge(436.0)
+		and await wait_until(func(): return game_state().has_flag("lamps.page.1"), 2.0), "at %s" % player.global_position.round())
+	await _l1_gallery()
+	var gallery: RuneCube = cube_named("R1/GalleryCube")
+	await walk_to(gallery.global_position.x + 40.0)
+	await hop_to(gallery.global_position.x)
+	check("ii up on the Gallery Cube", _on_ledge(502.0), "at %s" % player.global_position.round())
+	check("ii a charged jump onto the ledge over it: the second page", await charged_hop_to(1184.0) and _on_ledge(402.0)
+		and await wait_until(func(): return game_state().has_flag("lamps.page.2"), 2.0), "at %s" % player.global_position.round())
+	await _l1_monks(false)
+	await _l1_watch()
+	# The Dark Stacks with Large, the page stone shown over the walkway
+	await walk_to(3990.0)
+	await kindle()
+	throw_fire(Vector2(138, -106))
+	await wait_until(func(): return node("R1/StacksBrazier").is_lit, 2.0)
+	await walk_to(4400.0)
+	await put_down("move_right")
+	var c: RuneCube = cube_named("R1/WatchCube")
+	await open_cube(c)
+	inscribe(["light", "glow", "self", "large"])
+	manager.assembly.toggle_cube()
+	check("iii Large shows the stone over the walkway", await wait_until(func(): return node("R1/PageStone").is_solid, 2.0))
+	await run_to(4496.0, [player.global_position.x])
+	check("iii a charged jump onto it: the third page", await charged_hop_to(4556.0) and _on_ledge(470.0)
+		and await wait_until(func(): return game_state().has_flag("lamps.page.3"), 2.0), "at %s" % player.global_position.round())
+	check("all three pages", node("R1").get_steps().filter(func(s): return s.optional and s.done).size() == 3)
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## Her longest jump: fully charged, then sprinting toward `dir` in the air.
+func longest_jump(dir: String) -> void:
+	var before := recoveries_since
+	Input.action_press("crouch")
+	await seconds(1.7)
+	Input.action_press(dir)
+	Input.action_press("sprint")
+	await tap_action("jump")
+	Input.action_release("crouch")
+	await wait_until(func(): return not player.is_on_floor(), 0.6)
+	await wait_until(func(): return player.is_on_floor() or recoveries_since > before, 3.0)
+	Input.action_release(dir)
+	Input.action_release("sprint")
+	await frames(10)
+
+
+## What must not work: the Watch Lamp's ledge from the floor, and the Dark
+## Stacks without the cube's light (even the Stacks Lamp lit, even her longest
+## jump, under the vault). And Reset Room in the hall brings her back to the
+## last shrine she lit, not to the hall's door.
+func scenario_l1_dark() -> void:
+	print("SCENARIO the Hall of Lamps: what must not work")
+	await _l1_arrive()
+	# The ledge from the floor beside it
+	await place(Vector2(3740, 530))
+	await charged_hop_to(3690.0)
+	check("the Watch Lamp's ledge is out of a charged jump's reach from the floor", _on_ledge(534.0), "at %s" % player.global_position.round())
+	# The Dark Stacks with both braziers lit and no cube
+	await place(Vector2(3990, 530))
+	node("R1/StacksBrazier").ignite()
+	node("R1/StacksLamp").ignite()
+	await seconds(1.0)
+	await walk_to(4460.0)
+	check("on the pillar, nothing lit beyond it", _on_ledge(534.0) and not _stone_lit(70) and _stone_lit(73), _solid_stones())
+	var before := recoveries_since
+	await leap("move_right", 4462.0, 4700.0, 4.0, true)
+	check("a running jump from the pillar falls short", recoveries_since > before, "at %s" % player.global_position.round())
+	await place(Vector2(4462, 530))
+	await face("move_right")
+	before = recoveries_since
+	await longest_jump("move_right")
+	check("so does her longest jump (charged, sprinting): the vault holds it down", recoveries_since > before,
+		"at %s" % player.global_position.round())
+	# Reset Room: back to the last shrine she lit
+	await place(Vector2(3850, 530))
+	await walk_to(3930.0)
+	var cube_home: Vector2 = cube_named("R1/WatchCube").global_position
+	cube_named("R1/WatchCube").put_down(Vector2(3950, 534))
+	lvl.reset_current_room()
+	await seconds(1.5)
+	check("Reset Room brings her back to the Dark Stacks' shrine, not the hall's door",
+		absf(player.global_position.x - _shrine("lamps.cp.stacks").global_position.x) < 60.0, "at %s" % player.global_position.round())
+	check("and puts the Watch Cube back where it began", cube_named("R1/WatchCube").global_position.distance_to(cube_home) < 2.0)
+	game_state().clear_all()
+	game_state().all_abilities = true
 
 
 func scenario_l2() -> void:
@@ -1475,113 +1846,579 @@ func solve_l2() -> void:
 	get_tree().paused = false
 
 
-func scenario_g1() -> void:
-	print("-- the Galleries, room 1: The First Door")
+# ---------------------------------------------------------------- the Folded Archive (the Galleries, room 1)
+
+## The Folded Archive as a player reaches it, in its doorway.
+func _g1_arrive() -> void:
 	await load_scene(Journey.GALLERIES)
 	await enter_room("R1")
-	await solve_g1()
 
 
-func solve_g1() -> void:
-	var c: RuneCube = node("R1/DoorCube")
+## The Sealed Door: Space and Portal on the Door Cube; over it into its doorway.
+func _g1_door() -> void:
+	var c: RuneCube = cube_named("R1/DoorCube")
 	await kindle()
 	await read_tablet("R1/TabletSpace")
 	await read_tablet("R1/TabletPortal")
-	check("G1 the tablets teach Space and Portal", RuneManager.knows(&"space", get_tree()) and RuneManager.knows(&"portal", get_tree()))
-	# Pick up the cube and set it down near the wall
-	await walk_to(c.global_position.x - 34.0)
-	await face("move_right")
-	await tap_action("rune_carry")
-	check("G1 pick up the door cube", c.is_carried)
-	await walk_to(560.0)
-	await tap_action("rune_carry")
-	check("G1 set it down near the wall", not c.is_carried, "at %.0f" % c.global_position.x)
-	check("G1 open the door cube", await open_cube(c))
-	inscribe(["space", "portal", "up_right", "long"])
-	check("G1 it reads space/portal/up_right/long", c.recipe.to_key() == "space/portal/up_right/long", c.recipe.to_key())
+	check("A the tablets teach Space and Portal", RuneManager.knows(&"space", get_tree()) and RuneManager.knows(&"portal", get_tree()))
+	check("A open the Door Cube", await open_cube(c))
+	inscribe(["space", "portal"])
+	check("A it reads space/portal/right/normal", c.recipe.to_key() == "space/portal/right/normal", c.recipe.to_key())
 	manager.assembly.toggle_cube()
-	check("G1 the portal opens", c.is_active and c.effect is RunePortal, manager.assembly._state.text)
-	await shot("wing_g1_portal")
-	check("G1 the doorway carries her up and over", await _portal_over(c), "at %s" % player.global_position.round())
-	check("G1 she lands on top of the wall", player.is_on_floor() and player.global_position.y < 290.0, "at %s" % player.global_position.round())
-	# It works both ways: into the far side from the wall, out of the near one
-	var portal: RunePortal = c.effect
-	var back_before := portal.carried_back.size()
-	await walk_to(portal.exit_point.x)
-	if portal.carried_back.size() == back_before:
-		await tap_action("jump")
-	check("G1 the far side takes her back too", await wait_until(func(): return portal.carried_back.size() > back_before, 2.0),
-		"far side at %s, she is at %s" % [portal.exit_point.round(), player.global_position.round()])
+	check("A its doorway opens", c.is_active and c.effect is RunePortal, manager.assembly._state.text)
+	await walk_to(c.global_position.x - 50.0)
+	check("A over the cube into the doorway, out beyond the sealed door", await run_to(760.0, [player.global_position.x])
+		and _on_ledge(534.0) and (c.effect as RunePortal).carried.has(player), "at %s" % player.global_position.round())
+
+
+## The Tall Stacks: the Archive Cube in the socket, Portal Up; into the doorway
+## over it, out above the shelf; the lever; back down for the cube.
+func _g1_stacks() -> void:
+	var c: RuneCube = cube_named("R1/ArchiveCube")
+	var socket: Node2D = node("R1/LiftSocket")
+	await walk_to(c.global_position.x - 34.0)
+	check("B pick up the Archive Cube", await pick_up(c))
+	await walk_to(socket.global_position.x - 40.0)
+	check("B set it in the socket under the shelf", await put_down("move_right") and c.fed_by_dungeon(), "at %s" % c.global_position.round())
+	check("B open it", await open_cube(c))
+	inscribe(["space", "portal", "up"])
+	check("B it reads space/portal/up/normal", c.recipe.to_key() == "space/portal/up/normal", c.recipe.to_key())
+	manager.assembly.toggle_cube()
+	await walk_to(socket.global_position.x - 48.0)
+	await hop_to(socket.global_position.x)
 	await wait_until(func(): return player.is_on_floor(), 2.0)
-	await frames(10)
-	check("G1 she comes out of the near side, back below the wall", player.global_position.x < 704.0 and player.global_position.y > 500.0,
-		"at %s" % player.global_position.round())
-	# (she lands between the cube and the wall: back over the cube, and again)
-	if player.global_position.x > c.global_position.x:
-		await run_to(c.global_position.x - 50.0, [player.global_position.x])
-	check("G1 and over it once more", await _portal_over(c), "at %s" % player.global_position.round())
+	await frames(6)
+	check("B into the doorway over the cube: out above the shelf, onto it", _on_ledge(338.0), "at %s" % player.global_position.round())
+	await walk_to(node("R1/StacksLever").global_position.x - 8.0)
+	await interact()
+	check("B the lever opens the Stacks Gate", await wait_until(func(): return node("R1/StacksGate").open_amount >= 1.0, 3.0))
+	# Down off the shelf's west end, back to the cube
 	await walk_to(1150.0, false, 8.0)
 	await wait_until(func(): return player.is_on_floor(), 2.0)
-	check("G1 down the other side", player.global_position.y > 500.0 and player.global_position.x > 1090.0, "at %s" % player.global_position.round())
-	check("G1 room cleared", await wait_until(func(): return node("R1").is_cleared(), 4.0))
+	check("B down off the shelf", _on_ledge(534.0), "at %s" % player.global_position.round())
+	check("B open the cube again", await open_cube(c))
+	manager.assembly.toggle_cube()
+	manager.assembly.close()
+	await frames(2)
+	check("B and take it", await pick_up(c))
 
 
-## A running jump into the portal's near side by the wall: out of the far
-## side, up and over, onto the top of the wall.
-func _portal_over(c: RuneCube) -> bool:
-	await walk_to(c.global_position.x - 60.0)
-	Input.action_press("move_right")
-	await tap_action("jump")
-	var through := await wait_until(func(): return player.global_position.y < 300.0, 2.0)
+## The Sealed Reading Room. With `alone`, first she goes up herself: the gate
+## opens while she stands on the plate and shuts when she leaves. Then an Echo
+## is recorded jumping in; it holds the plate, and she walks through.
+func _g1_reading(alone: bool) -> void:
+	var c: RuneCube = cube_named("R1/ArchiveCube")
+	var socket: Node2D = node("R1/ReadingSocket")
+	var plate: PressurePlate = node("R1/PocketPlate")
+	var gate: PortcullisGate = node("R1/ReadingGate")
+	var recorder: Node = player.get_node("EchoRecorder")
+	check("C through the Stacks Gate with the cube", await walk_to(1880.0, false, 14.0) and c.is_carried, "at %s" % player.global_position.round())
+	await kindle()
+	await walk_to(socket.global_position.x - 40.0)
+	check("C set it in the socket under the pocket", await put_down("move_right") and c.fed_by_dungeon(), "at %s" % c.global_position.round())
+	check("C switch it on (still Space, Portal, Up)", await open_cube(c) and c.recipe.to_key() == "space/portal/up/normal")
+	manager.assembly.toggle_cube()
+	check("C its doorway opens under the pocket", c.is_active)
+	if alone:
+		await walk_to(socket.global_position.x - 48.0)
+		await hop_to(socket.global_position.x)
+		await wait_until(func(): return player.is_on_floor(), 2.0)
+		check("C into the pocket: on the plate, the gate opens", _on_ledge(338.0) and await wait_until(func(): return gate.open_amount > 0.5, 3.0),
+			"at %s" % player.global_position.round())
+		await tap_action("jump")
+		await wait_until(func(): return player.global_position.y > 450.0 and player.is_on_floor(), 3.0)
+		await frames(6)
+		check("C a jump into the doorway takes her back down, and the gate shuts behind her", player.global_position.y > 450.0
+			and await wait_until(func(): return gate.open_amount <= 0.0, 4.0), "at %s" % player.global_position.round())
+	# The Echo: recorded jumping in and onto the plate
+	await walk_to(socket.global_position.x - 48.0)
+	await tap_action("echo")
+	check("C recording an Echo", recorder.is_recording)
+	await hop_to(socket.global_position.x)
 	await wait_until(func(): return player.is_on_floor(), 2.0)
-	Input.action_release("move_right")
-	await frames(10)
-	return through and player.is_on_floor() and player.global_position.y < 290.0
+	await seconds(0.4)
+	await tap_action("echo")
+	check("C the Echo follows her path through the doorway and stays on the plate", await wait_until(func(): return (recorder.echoes.size() >= 1
+		and recorder.echoes[-1].is_finished()), 10.0) and plate.is_pressed)
+	await tap_action("jump")
+	await wait_until(func(): return player.global_position.y > 450.0 and player.is_on_floor(), 3.0)
+	await frames(6)
+	check("C back down; the gate stands open, held by the Echo", player.global_position.y > 450.0 and gate.open_amount >= 1.0,
+		"at %s, gate %.2f" % [player.global_position.round(), gate.open_amount])
+	check("C through the Reading Gate", await walk_to(2870.0, false, 10.0) and _on_ledge(534.0), "at %s" % player.global_position.round())
+	check("C once through, it stays open for good", game_state().has_flag("galleries.r1.reading"))
+
+
+## The Pillar. With `wrong`, first Long straight through: the Pillar Gate is
+## shut, so back through the pillar. Then Right: an Echo recorded hopping into
+## the hollow, onto the plate that holds the gate (and a page); out again; Long;
+## through, and the Echo holds the gate while she walks through it.
+func _g1_pillar(wrong: bool) -> void:
+	var c: RuneCube = cube_named("R1/PillarCube")
+	var gate: PortcullisGate = node("R1/PillarGate")
+	var recorder: Node = player.get_node("EchoRecorder")
+	await kindle()
+	check("D open the Pillar Cube", await open_cube(c))
+	if wrong:
+		inscribe(["right", "long"])
+		manager.assembly.toggle_cube()
+		await walk_to(c.global_position.x - 50.0)
+		check("D Long: straight through the pillar", await run_to(3560.0, [player.global_position.x]) and _on_ledge(534.0),
+			"at %s" % player.global_position.round())
+		check("D but the Pillar Gate beyond is shut", gate.open_amount <= 0.0)
+		check("D back through the pillar the way she came", await run_to(3000.0, [3132.0], 8.0) and player.global_position.x < 3060.0,
+			"at %s" % player.global_position.round())
+		await walk_to(3050.0)
+		check("D open it again", await open_cube(c))
+		manager.assembly.toggle_cube()
+		inscribe(["normal"])
+	else:
+		inscribe(["right"])
+	manager.assembly.toggle_cube()
+	check("D it reads space/portal/right/normal, on", c.is_active and c.recipe.to_key() == "space/portal/right/normal", c.recipe.to_key())
+	await walk_to(c.global_position.x - 50.0)
+	await tap_action("echo")
+	check("D recording an Echo", recorder.is_recording)
+	await run_to(3360.0, [player.global_position.x])
+	await seconds(0.3)
+	await tap_action("echo")
+	check("D a plain doorway comes out inside the pillar: a hollow, its plate and a page; the gate opens", _on_ledge(534.0)
+		and absf(player.global_position.x - 3360.0) < 40.0 and game_state().has_flag("galleries.page.3")
+		and await wait_until(func(): return gate.open_amount > 0.5, 3.0), "at %s" % player.global_position.round())
+	check("D the Echo follows her into the hollow and stays on the plate", await wait_until(func(): return (recorder.echoes.size() >= 1
+		and recorder.echoes[-1].is_finished()), 10.0) and node("R1/HollowPlate").is_pressed)
+	# Back out: east in the hollow, then west into the far doorway, over the cube
+	await walk_to(3384.0)
+	check("D back out the way she came, and over the cube", await run_to(3000.0, [3132.0], 6.0) and player.global_position.x < 3060.0,
+		"at %s" % player.global_position.round())
+	await walk_to(3050.0)
+	check("D open it again", await open_cube(c))
+	manager.assembly.toggle_cube()
+	inscribe(["long"])
+	manager.assembly.toggle_cube()
+	check("D it reads space/portal/right/long, on", c.is_active and c.recipe.to_key() == "space/portal/right/long", c.recipe.to_key())
+	await walk_to(c.global_position.x - 50.0)
+	check("D Long: through the pillar to the far side", await run_to(3560.0, [player.global_position.x]) and _on_ledge(534.0),
+		"at %s" % player.global_position.round())
+	check("D the Echo still holds the plate: through the Pillar Gate", gate.open_amount >= 1.0 and await walk_to(3780.0, false, 8.0)
+		and game_state().has_flag("galleries.r1.pillar"), "at %s, gate %.2f" % [player.global_position.round(), gate.open_amount])
+
+
+## The Hearth: Right on the Hearth Cube from its lectern; fire thrown straight
+## up through the doorway comes out in the hearth, into the brazier. With
+## `wrong`, first a throw straight up somewhere else.
+func _g1_hearth(wrong: bool) -> void:
+	await walk_to(3790.0, false, 10.0)
+	var c: RuneCube = cube_named("R1/HearthCube")
+	var lectern: Node2D = node("R1/HearthLectern")
+	var hearth: Brazier = node("R1/HearthBrazier")
+	await kindle()
+	await walk_to(lectern.global_position.x - 10.0)
+	check("E the lectern works the Hearth Cube", await open_here(c))
+	inscribe(["right"])
+	manager.assembly.toggle_cube()
+	check("E it reads space/portal/right/normal, on", c.is_active and c.recipe.to_key() == "space/portal/right/normal", c.recipe.to_key())
+	var portal: RunePortal = c.effect
+	if wrong:
+		await walk_to(portal.exit_point.x)
+		throw_fire(Vector2(0, -1))
+		await seconds(1.2)
+		check("E fire thrown up under the hearth splashes on its floor", not hearth.is_lit)
+	await walk_to(portal.entrance.x)
+	throw_fire(Vector2(0, -1))
+	check("E fire thrown up through the doorway comes out in the hearth and lights the brazier",
+		await wait_until(func(): return hearth.is_lit, 2.0) and not portal.carried_fire.is_empty(),
+		"she was at %s, the doorway at %s, %d carried" % [player.global_position.round(), portal.entrance, portal.carried_fire.size()])
+	check("E the Archive Door opens", await wait_until(func(): return node("R1/ArchiveDoor").open_amount >= 1.0, 4.0))
+
+
+func scenario_g1() -> void:
+	print("SCENARIO the Folded Archive, part by part")
+	await _g1_arrive()
+	check("its new pieces are pixel art, not drawn shapes", lvl.find_children("*", "Polygon2D", true, false).is_empty())
+	await _g1_door()
+	await _g1_stacks()
+	await _g1_reading(true)
+	await _g1_pillar(true)
+	await _g1_hearth(true)
+	check("every step of the archive is done", node("R1").is_cleared())
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## The Folded Archive from its door to the Archive Door with her own feet.
+func scenario_g1_full() -> void:
+	print("SCENARIO the Folded Archive, played through with her own feet")
+	await _g1_arrive()
+	var frame0 := Engine.get_physics_frames()
+	await _g1_door()
+	await _g1_stacks()
+	await _g1_reading(false)
+	await _g1_pillar(false)
+	await _g1_hearth(false)
+	check("every step of the archive is done", node("R1").is_cleared())
+	print("  (the scripted route took %.0f s of game time)" % ((Engine.get_physics_frames() - frame0) / 60.0))
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## The first two pages (the third is in the pillar's hollow, in `g1`): i on
+## the shelf behind the sealed door (a charged jump), ii high over the stacks
+## (the Archive Cube's doorway Up and Long).
+func scenario_g1_pages() -> void:
+	print("SCENARIO the Folded Archive: the ledger pages")
+	await _g1_arrive()
+	await _g1_door()
+	await walk_to(778.0)
+	check("i a charged jump onto the shelf behind the door: the first page", await charged_hop_to(745.0) and _on_ledge(436.0)
+		and await wait_until(func(): return game_state().has_flag("galleries.page.1"), 2.0), "at %s" % player.global_position.round())
+	var c: RuneCube = cube_named("R1/ArchiveCube")
+	var socket: Node2D = node("R1/LiftSocket")
+	await walk_to(c.global_position.x - 34.0)
+	await pick_up(c)
+	await walk_to(socket.global_position.x - 40.0)
+	await put_down("move_right")
+	await open_cube(c)
+	inscribe(["space", "portal", "up", "long"])
+	manager.assembly.toggle_cube()
+	check("ii Long Up from the socket: on", c.is_active and c.recipe.to_key() == "space/portal/up/long", c.recipe.to_key())
+	await walk_to(socket.global_position.x - 48.0)
+	await hop_to(socket.global_position.x)
+	await wait_until(func(): return player.is_on_floor(), 2.0)
+	await frames(6)
+	check("ii out of the doorway high over the stacks, onto the top shelf", _on_ledge(146.0), "at %s" % player.global_position.round())
+	check("ii the second page", await walk_to(1380.0) and await wait_until(func(): return game_state().has_flag("galleries.page.2"), 2.0))
+	await walk_to(1440.0)
+	await wait_until(func(): return player.is_on_floor(), 2.0)
+	check("ii down onto the stacks shelf", _on_ledge(338.0), "at %s" % player.global_position.round())
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## What must not work: the stacks shelf from the cube's top (even a charged
+## jump); fire into the hearth any way but through the doorway; and Reset Room
+## brings her back to the last shrine she lit.
+func scenario_g1_dark() -> void:
+	print("SCENARIO the Folded Archive: what must not work")
+	await _g1_arrive()
+	var c: RuneCube = cube_named("R1/ArchiveCube")
+	c.put_down(Vector2(1190, 534))
+	await place(Vector2(1150, 530))
+	await hop_to(1190.0)
+	check("up on the Archive Cube by the shelf", _on_ledge(502.0), "at %s" % player.global_position.round())
+	await charged_jump("move_right")
+	check("a charged jump from the cube's top doesn't reach the shelf", not _on_ledge(338.0), "at %s" % player.global_position.round())
+	var pocket := []
+	for p in [Vector2(2100, 250), Vector2(2252, 250), Vector2(2176, 180), Vector2(2176, 350)]:
+		pocket.append(_solid_at(p))
+	check("the reading pocket is sealed on every side", pocket.all(func(s): return s), str(pocket))
+	check("the pillar is rock from floor to roof", [Vector2(3290, 300), Vector2(3290, 500), Vector2(3420, 500)].all(_solid_at))
+	await place(Vector2(4207, 530))
+	throw_fire(Vector2(0, -1))
+	await seconds(1.5)
+	check("fire thrown up under the hearth doesn't reach its brazier", not node("R1/HearthBrazier").is_lit)
+	# Reset Room
+	await place(Vector2(2860, 530))
+	await walk_to(2950.0)
+	c.put_down(Vector2(3000, 534))
+	lvl.reset_current_room()
+	await seconds(1.5)
+	check("Reset Room brings her back to the Pillar's shrine", absf(player.global_position.x - _shrine("galleries.cp.pillar").global_position.x) < 60.0,
+		"at %s" % player.global_position.round())
+	check("and puts the Archive Cube back where it began", c.global_position.distance_to(Vector2(cx_test(15), 534)) < 2.0, "at %s" % c.global_position.round())
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+func cx_test(col: int) -> float:
+	return col * 64.0 + 32.0
+
+
+
+
+# ---------------------------------------------------------------- Wren's Test (the Galleries, room 2)
+
+## Wren's Test as a player reaches it from the archive: Space and Portal known.
+func _g2_arrive() -> void:
+	await load_scene(Journey.GALLERIES)
+	for w in ["space", "portal"]:
+		RuneManager.learn(StringName(w))
+	await enter_room("R2")
+
+
+## Her own fire through the real shoot input (so an Echo records it), aimed at `at`.
+func aim_fire(at: Vector2) -> void:
+	player.aim_override = at
+	await tap_action("shoot")
+	player.aim_override = null
+	await frames(2)
+
+
+## Again: Repeat on Wren's Ember Lock keeps the chimney's brazier burning, so
+## the Ember Lift rises all the way. With `wrong`, first the lock as Wren left
+## it: one bolt, two seconds of fire, and the lift stops halfway.
+func _g2_ember(wrong: bool) -> void:
+	var c: RuneCube = cube_named("R2/EmberLock")
+	var lift: Node2D = node("R2/EmberLift")
+	var ember: Brazier = node("R2/EmberBrazier")
+	await kindle()
+	await read_tablet("R2/TabletRepeat")
+	check("A the tablet teaches Repeat", RuneManager.knows(&"repeat", get_tree()))
+	check("A open Wren's Ember Lock", await open_cube(c))
+	check("A Wren wrote Fire, Projectile, Up: only the last word is hers to finish", c.is_slot_locked(RuneFragments.Kind.DIRECTION)
+		and c.is_slot_locked(RuneFragments.Kind.ESSENCE) and not c.is_slot_locked(RuneFragments.Kind.MODIFIER))
+	if wrong:
+		manager.assembly.toggle_cube()
+		check("A as Wren left it, one bolt up the chimney lights the brazier", await wait_until(func(): return ember.is_lit, 2.0))
+		await seconds(4.0)
+		check("A it burns two seconds, and the lift stops on its way up", not ember.is_lit and lift.global_position.y > 300.0
+			and lift.global_position.y < 500.0, "lift at %.0f" % lift.global_position.y)
+		await interact()
+		if c.is_active:
+			manager.assembly.toggle_cube()
+	inscribe(["repeat"])
+	check("A it reads fire/projectile/up/repeat", c.recipe.to_key() == "fire/projectile/up/repeat", c.recipe.to_key())
+	manager.assembly.toggle_cube()
+	check("A Repeat: a bolt every 1.6 s, and the brazier burns on", await wait_until(func(): return ember.is_lit, 2.0))
+	await seconds(3.0)
+	check("A still burning", ember.is_lit)
+	# Onto the lift's spot once it has risen away, so it comes down under her
+	await wait_until(func(): return lift.global_position.y < 420.0, 15.0)
+	await run_to(lift.global_position.x + 64.0, [player.global_position.x])
+	await wait_until(func(): return lift.global_position.y >= 512.0, 20.0)
+	check("A the lift carries her all the way up", await wait_until(func(): return lift.global_position.y <= 194.0, 15.0)
+		and _on_ledge(210.0), "at %s" % player.global_position.round())
+	check("A off onto the ledge: the seal of fire burns", await walk_to(5280.0) and await wait_until(func(): return node("R2/SealFire").lit, 3.0),
+		"at %s" % player.global_position.round())
+
+
+## Aslant: through the high doorway to the balcony and Down-Left; down to the
+## lectern, Down-Left on the Frost Lock, up the frozen fountains to the walkway.
+func _g2_frost() -> void:
+	var c: RuneCube = cube_named("R2/FrostLock")
+	var lectern: Node2D = node("R2/FrostLectern")
+	var fountains := [1, 2, 3, 4, 5].map(func(i): return node("R2/Fountain%d" % i))
+	check("B through the high doorway onto the balcony", await walk_to(5480.0, false, 8.0) and _on_ledge(210.0), "at %s" % player.global_position.round())
+	await read_tablet("R2/TabletDownLeft")
+	check("B the tablet teaches Down-Left", RuneManager.knows(&"down_left", get_tree()))
+	await walk_to(5700.0, false, 8.0)
+	await wait_until(func(): return player.is_on_floor(), 2.0)
+	check("B down off the balcony", _on_ledge(534.0), "at %s" % player.global_position.round())
+	await kindle()
+	await walk_to(lectern.global_position.x - 10.0)
+	check("B the lectern works Wren's Frost Lock", await open_here(c))
+	check("B Wren wrote Ice, Freeze and Long: the way is hers to finish", c.is_slot_locked(RuneFragments.Kind.MODIFIER)
+		and not c.is_slot_locked(RuneFragments.Kind.DIRECTION))
+	inscribe(["down_left"])
+	check("B it reads ice/freeze/down_left/long", c.recipe.to_key() == "ice/freeze/down_left/long", c.recipe.to_key())
+	manager.assembly.toggle_cube()
+	check("B the cold lies aslant across all five jets: a stair of ice", await wait_until(func(): return _stair_of_pillars(fountains), 3.0),
+		_pillar_tops(fountains))
+	await walk_to(5796.0)
+	var ok := true
+	for i in range(4, -1, -1):
+		ok = ok and await hop_to(6000.0 - 45.0 * i)
+	check("B up the frozen fountains", ok and _on_ledge(304.0), "at %s" % player.global_position.round())
+	check("B onto the walkway: the seal of ice burns", await walk_to(6176.0) and await wait_until(func(): return node("R2/SealIce").lit, 3.0),
+		"at %s" % player.global_position.round())
+	check("B and the gate below opens", await wait_until(func(): return node("R2/FrostGate").open_amount >= 1.0, 3.0))
+	await walk_to(6380.0, false, 6.0)
+	await wait_until(func(): return player.is_on_floor(), 2.0)
+	check("B off the walkway's end and through the gate", await walk_to(6520.0, false, 8.0) and _on_ledge(534.0), "at %s" % player.global_position.round())
+
+
+## Two Hearths: with `wrong`, first both by hand (too far apart: the first is
+## out before the second burns). Then an Echo throws at the west hearth while
+## she throws at the east one.
+func _g2_hearths(wrong: bool) -> void:
+	var west: Brazier = node("R2/WestHearth")
+	var east: Brazier = node("R2/EastHearth")
+	var wp: RunePortal = cube_named("R2/WestHearthCube").effect
+	var ep: RunePortal = cube_named("R2/EastHearthCube").effect
+	var recorder: Node = player.get_node("EchoRecorder")
+	await kindle()
+	check("C both hearth doorways stand open", wp != null and ep != null)
+	if wrong:
+		await walk_to(wp.entrance.x)
+		await aim_fire(player.global_position + Vector2(0, -200))
+		check("C fire up through the west doorway lights the west hearth", await wait_until(func(): return west.is_lit, 1.5))
+		await walk_to(ep.entrance.x, false, 8.0)
+		await aim_fire(player.global_position + Vector2(0, -200))
+		await wait_until(func(): return east.is_lit, 1.5)
+		check("C but by the time she lights the east one, the west is out", east.is_lit and not west.is_lit and not node("R2/SealSpace").lit)
+		await seconds(2.5)
+	await walk_to(wp.entrance.x, false, 8.0)
+	await tap_action("echo")
+	check("C recording an Echo under the west doorway", recorder.is_recording)
+	await seconds(3.5)
+	await aim_fire(player.global_position + Vector2(0, -200))
+	await seconds(0.3)
+	await tap_action("echo")
+	await walk_to(ep.entrance.x, false, 8.0)
+	check("C the Echo throws its fire up through the west doorway", await wait_until(func(): return west.is_lit, 6.0))
+	await aim_fire(player.global_position + Vector2(0, -200))
+	check("C she throws through the east one while the west still burns: the seal of space", await wait_until(func(): return node("R2/SealSpace").lit, 2.0))
+	check("C and the gate east opens", await wait_until(func(): return node("R2/HearthsGate").open_amount >= 1.0, 4.0))
+
+
+## The Last Crystal: Bounce on Wren's Lens Lock, the low and high mirrors
+## from the floor, the last from its wheel in the pocket (up through the
+## Pocket Cube's doorway, and back down).
+func _g2_crystal() -> void:
+	var c: RuneCube = cube_named("R2/LensLock")
+	var pocket_cube: RuneCube = cube_named("R2/PocketCube")
+	var crystal: LightReceiver = node("R2/LastCrystal")
+	check("D through the gate", await walk_to(7560.0, false, 10.0), "at %s" % player.global_position.round())
+	await kindle()
+	check("D open Wren's Lens Lock", await open_cube(c))
+	check("D Wren wrote Light, Beam, Right", c.is_slot_locked(RuneFragments.Kind.DIRECTION) and not c.is_slot_locked(RuneFragments.Kind.MODIFIER))
+	inscribe(["bounce"])
+	manager.assembly.toggle_cube()
+	check("D it reads light/beam/right/bounce, on", c.is_active and c.recipe.to_key() == "light/beam/right/bounce", c.recipe.to_key())
+	await run_to(7700.0, [player.global_position.x])
+	for spec in [["R2/LensMirrorLow", 2], ["R2/LensMirrorHigh", 1]]:
+		var mirror: Mirror = node(spec[0])
+		var wheel: float = mirror.global_position.x + mirror.interact_offset.x
+		await walk_to(wheel - 6.0 if wheel > player.global_position.x else wheel + 6.0)
+		for i in spec[1]:
+			await interact()
+			await frames(16)
+	check("D not yet: the last mirror sends it up into the pocket's floor", not crystal.powered)
+	check("D open the Pocket Cube", await open_cube(pocket_cube))
+	manager.assembly.toggle_cube()
+	await walk_to(pocket_cube.global_position.x - 48.0)
+	await hop_to(pocket_cube.global_position.x)
+	await wait_until(func(): return player.is_on_floor(), 2.0)
+	check("D up through the doorway into the pocket", _on_ledge(338.0), "at %s" % player.global_position.round())
+	var far: Mirror = node("R2/LensMirrorFar")
+	await walk_to(far.global_position.x - 4.0)
+	for i in 3:
+		await interact()
+		await frames(16)
+	check("D the last mirror turned from its wheel: the beam comes down onto the crystal", await wait_until(func(): return crystal.powered, 3.0),
+		"facing %d" % far.facing)
+	check("D the seal of light burns", await wait_until(func(): return node("R2/SealLight").lit, 3.0))
+	# Back down through the doorway
+	await walk_to(pocket_cube.global_position.x)
+	await tap_action("jump")
+	await wait_until(func(): return player.global_position.y > 450.0 and player.is_on_floor(), 3.0)
+	await frames(6)
+	check("D back down through the doorway", player.global_position.y > 450.0, "at %s" % player.global_position.round())
+
+
+## Wren's door opens with all four seals; Wren speaks; the Fold Bell.
+func _g2_door() -> void:
+	var wren: Node = node("R2/Wren")
+	var bell: Node2D = node("R2/GreatBell")
+	check("E all four seals burn: Wren's door opens", await wait_until(func(): return node("R2/WrensDoor").open_amount >= 1.0, 5.0))
+	await walk_to(8300.0, false, 10.0)
+	check("E Wren speaks", await wait_until(func(): return wren.is_talking(), 3.0))
+	await shot("wing_g2_wren")
+	check("E and says her piece", await wait_until(func(): return game_state().has_flag("galleries.wren_spoke"), 45.0))
+	await walk_to(bell.global_position.x + 40.0, false, 8.0)
+	await interact()
+	check("E the Fold Bell rings and the wing is complete", await wait_until(func(): return game_state().has_flag("galleries.complete"), 25.0))
+	check("E the end card leads to the pictures", lvl.next_chapter == Journey.GALLERIES_INTERLUDE)
+	get_tree().paused = false
 
 
 func scenario_g2() -> void:
-	print("-- the Galleries, room 2: The Fold Bell")
-	await load_scene(Journey.GALLERIES)
-	await enter_room("R2")
-	await solve_g2()
+	print("SCENARIO Wren's Test, part by part")
+	await _g2_arrive()
+	check("its new pieces are pixel art, not drawn shapes", lvl.find_children("*", "Polygon2D", true, false).is_empty())
+	await _g2_ember(true)
+	await _g2_frost()
+	await _g2_hearths(true)
+	await _g2_crystal()
+	await _g2_door()
+	check("every step of Wren's Test is done", node("R2").is_cleared())
+	game_state().clear_all()
+	game_state().all_abilities = true
 
 
-func solve_g2() -> void:
-	var plate = node("R2/Plate")
-	var bell = node("R2/GreatBell")
-	var recorder = player.get_node("EchoRecorder")
-	await kindle()
-	await walk_to(plate.global_position.x - 90.0)
-	await tap_action("echo")
-	check("G2 recording starts", recorder.is_recording)
-	await walk_to(plate.global_position.x)
-	await seconds(0.6)
-	await tap_action("echo")
-	await frames(10)
-	check("G2 the Echo walks onto the plate and holds it", await wait_until(func(): return plate.is_pressed and recorder.echoes.size() == 1 and recorder.echoes[0].is_finished(), 8.0))
-	check("G2 the stairs stand", await wait_until(func(): return lvl.find_children("Stair*", "SpectralPlatform", true, false).all(func(s): return s.is_solid), 3.0))
-	await shot("wing_g2_stairs")
-	# Up the stairs to the balcony
-	var stairs := lvl.find_children("Stair*", "SpectralPlatform", true, false)
-	stairs.sort_custom(func(a, b): return a.global_position.x < b.global_position.x)
-	await walk_to(stairs[0].global_position.x - 20.0)
-	for s in stairs:
-		Input.action_press("move_right")
-		await tap_action("jump")
-		await wait_until(func(): return player.is_on_floor() and player.global_position.y <= s.global_position.y + 4.0, 1.5)
-	Input.action_release("move_right")
-	await frames(10)
-	Input.action_press("move_right")
-	await tap_action("jump")
-	await wait_until(func(): return player.is_on_floor(), 1.5)
-	Input.action_release("move_right")
-	await frames(10)
-	check("G2 she reaches the balcony", player.global_position.y < 260.0, "at %s" % player.global_position.round())
-	await walk_to(bell.global_position.x + 40.0, false, 8.0)
-	await interact()
-	check("G2 the Fold Bell rings and the wing is complete", await wait_until(func(): return game_state().has_flag("galleries.complete"), 25.0))
-	check("G2 the end card leads to the pictures", lvl.next_chapter == Journey.GALLERIES_INTERLUDE)
-	get_tree().paused = false
+## Wren's Test from its door to the bell with her own feet, no detours.
+func scenario_g2_full() -> void:
+	print("SCENARIO Wren's Test, played through with her own feet")
+	await _g2_arrive()
+	var frame0 := Engine.get_physics_frames()
+	await _g2_ember(false)
+	await _g2_frost()
+	await _g2_hearths(false)
+	await _g2_crystal()
+	await _g2_door()
+	print("  (the scripted route took %.0f s of game time, %.0f s of it Wren talking)" % [(Engine.get_physics_frames() - frame0) / 60.0, 8 * 3.8])
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## The whole wing in one go: the Folded Archive, through the Archive Door into
+## Wren's Test, to the bell.
+func scenario_galleries_full() -> void:
+	print("SCENARIO the Folded Galleries, both rooms in one go")
+	await _g1_arrive()
+	var frame0 := Engine.get_physics_frames()
+	await _g1_door()
+	await _g1_stacks()
+	await _g1_reading(false)
+	await _g1_pillar(false)
+	await _g1_hearth(false)
+	check("through the Archive Door into Wren's Test", await walk_to(4600.0, false, 12.0) and lvl.current_room == node("R2"),
+		"at %s" % player.global_position.round())
+	await _g2_ember(false)
+	await _g2_frost()
+	await _g2_hearths(false)
+	await _g2_crystal()
+	await _g2_door()
+	print("  (the whole wing's scripted route took %.0f s of game time)" % ((Engine.get_physics_frames() - frame0) / 60.0))
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## The two pages of Wren's Test: iv on top of the Frost Lock (a charged jump
+## from the walkway), v in the pocket over the Last Crystal.
+func scenario_g2_pages() -> void:
+	print("SCENARIO Wren's Test: the ledger pages")
+	await _g2_arrive()
+	await _g2_ember(false)
+	await _g2_frost()
+	# Back up: the gate is open; the walkway again from the frozen stair
+	var c: RuneCube = cube_named("R2/FrostLock")
+	await walk_to(node("R2/FrostLectern").global_position.x - 10.0, false, 12.0)
+	await open_here(c)
+	manager.assembly.toggle_cube()
+	await walk_to(5796.0)
+	for i in range(4, -1, -1):
+		await hop_to(6000.0 - 45.0 * i)
+	await walk_to(6040.0)
+	check("iv a charged jump from the walkway onto the Frost Lock: the fourth page", await charged_hop_to(5995.0)
+		and await wait_until(func(): return game_state().has_flag("galleries.page.4"), 2.0), "at %s" % player.global_position.round())
+	await walk_to(6380.0, false, 8.0)
+	await wait_until(func(): return player.is_on_floor(), 3.0)
+	await walk_to(6520.0, false, 8.0)
+	await _g2_hearths(false)
+	await _g2_crystal()
+	check("v the fifth page, in the pocket", game_state().has_flag("galleries.page.5"))
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+## What must not work: the lift's ledge from the Ember Lock's top; the walkway
+## without the frozen stair; the pockets are sealed.
+func scenario_g2_dark() -> void:
+	print("SCENARIO Wren's Test: what must not work")
+	await _g2_arrive()
+	await place(Vector2(4850, 530))
+	await hop_to(4896.0)
+	check("up on the Ember Lock", _on_ledge(502.0), "at %s" % player.global_position.round())
+	await charged_jump("move_right")
+	check("a charged jump from its top reaches nothing", player.global_position.y > 400.0, "at %s" % player.global_position.round())
+	await place(Vector2(6000, 530))
+	await charged_jump("move_right")
+	check("the walkway is out of reach from the floor", not _on_ledge(308.0), "at %s" % player.global_position.round())
+	check("the hearths and the lens pocket are sealed", [Vector2(105 * 64 + 32, 300), Vector2(108 * 64 + 32, 300), Vector2(112 * 64 + 32, 300),
+		Vector2(115 * 64 + 32, 300), Vector2(122 * 64 + 32, 300), Vector2(126 * 64 + 32, 300), Vector2(124 * 64 + 32, 360)].all(_solid_at))
+	game_state().clear_all()
+	game_state().all_abilities = true
 
 
 # ================================================================ the Eye
@@ -1595,12 +2432,33 @@ func scenario_eye() -> void:
 	check("the great cube is fed by the dungeon and fixed", great.dungeon_powered and not great.carryable)
 	check("Ilse and Wren's bed are pixel sprites", node("R1/Ilse/Sprite") is AnimatedSprite2D and node("R1/WrenBed/Sprite") is AnimatedSprite2D
 		and lvl.find_children("*", "Polygon2D", true, false).is_empty())
+	# The staging: the moth in its four chains, snow that does not fall
+	var stage: EyeScene = node("R1/EyeScene")
+	check("the held moment hangs over the cube: a moth, four chains, ICE FREEZE SELF PERSIST", stage.moth != null
+		and stage.chains.size() == 4 and stage.chains.all(func(c): return not c.broken) and stage.snow.speed_scale == 0.0)
+	# Wren meets her at the door, then walks with her to the cube
+	var wren: WrenMeeting = node("R1/Wren")
+	await walk_to(wren.global_position.x - 40.0)
+	check("Wren talks at the door", await wait_until(func(): return wren.is_talking(), 3.0))
+	await seconds(2.0)
+	await shot("wing_eye_wren")
+	check("and says all her lines", await wait_until(func(): return wren.has_spoken(), 30.0))
+	check("then walks to the cube", await wait_until(func(): return absf(wren.position.x - (stage.cube_x - 150.0)) < 4.0, 12.0))
+	# Near the cube Ilse pleads, and Wren answers her
+	await walk_to(great.global_position.x - 185.0)
+	await walk_to(great.global_position.x - 150.0, false, 1.5)
+	check("Ilse pleads when Echidna nears the cube", await wait_until(func(): return stage.plea_index == 0 and stage.dialogue.speaker == "ilse" and stage.dialogue.showing, 3.0))
+	await seconds(1.6)
+	await shot("wing_eye_plea")
+	check("and Wren answers her mother", await wait_until(func(): return stage.plea_index == 2 and stage.dialogue.speaker == "wren", 12.0))
+	check("the plea ends", await wait_until(func(): return stage.plea_index == -1, 20.0))
 	# A sentence that is neither answer is only a spell
 	check("open the great cube", await open_cube(great))
 	inscribe(["wind", "push", "right", "normal"])
 	manager.assembly.toggle_cube()
 	await frames(10)
 	check("a wrong sentence does not end anything", altar.decided == "" and get_tree().current_scene == lvl)
+	check("and Wren says so, in her own words", stage.dialogue.showing and EyeScene.WRONG.has(stage.dialogue.text), stage.dialogue.text)
 	great.deactivate()
 	await frames(5)
 	# The stillness: a real ending that leads back
@@ -1618,6 +2476,8 @@ func scenario_eye() -> void:
 	await enter_room("R1")
 	great = node("R1/GreatCube")
 	altar = node("R1/Altar")
+	# (Ilse pleads again on this visit: press through it)
+	await _press_through_plea(node("R1/EyeScene"), great)
 	await open_cube(great)
 	inscribe(["light", "beam", "up", "long"])
 	check("the cube reads light/beam/up/long", great.recipe.to_key() == EyeAltar.SKY, great.recipe.to_key())
@@ -1672,7 +2532,7 @@ func scenario_loop() -> void:
 		await shot("loop_%s" % kind)
 		# every picture, then it leads on
 		var guard := 0
-		while not scene.finished and guard < 14:
+		while not scene.finished and guard < 24:
 			guard += 1
 			await wait_until(func(): return not scene._changing, 4.0)
 			await seconds(0.8)
@@ -2370,3 +3230,439 @@ func _button_titled(parent: Node, text: String) -> Button:
 		if (b as Button).text == text:
 			return b
 	return null
+
+
+## The shrine with this checkpoint id.
+func _shrine(id: String) -> Node2D:
+	for s in get_tree().get_nodes_in_group("chapter_checkpoint"):
+		if s.checkpoint_id == id:
+			return s
+	return null
+
+
+# ---------------------------------------------------------------- the Folded Archive, looked at
+
+## Whether this recipe's portal would open from where the cube stands ("" = yes).
+func _portal_problem(c: RuneCube, key: String) -> String:
+	return RunePortal.problem(c, RuneBook.spell(RuneRecipe.from_key(key)))
+
+
+func scenario_g1_look() -> void:
+	print("SCENARIO the Folded Archive: screenshots")
+	await load_scene(Journey.GALLERIES)
+	var door: RuneCube = cube_named("R1/DoorCube")
+	var archive: RuneCube = cube_named("R1/ArchiveCube")
+	var pillar: RuneCube = cube_named("R1/PillarCube")
+	var hearth: RuneCube = cube_named("R1/HearthCube")
+	print("  door right: '%s'" % _portal_problem(door, "space/portal/right/normal"))
+	archive.put_down(node("R1/LiftSocket").global_position)
+	print("  stacks up: '%s', up long: '%s'" % [_portal_problem(archive, "space/portal/up/normal"), _portal_problem(archive, "space/portal/up/long")])
+	archive.put_down(node("R1/ReadingSocket").global_position)
+	print("  reading up: '%s'" % _portal_problem(archive, "space/portal/up/normal"))
+	print("  pillar up: '%s', right: '%s', right long: '%s'" % [_portal_problem(pillar, "space/portal/up/normal"),
+		_portal_problem(pillar, "space/portal/right/normal"), _portal_problem(pillar, "space/portal/right/long")])
+	print("  hearth up: '%s', right: '%s', right long: '%s'" % [_portal_problem(hearth, "space/portal/up/normal"),
+		_portal_problem(hearth, "space/portal/right/normal"), _portal_problem(hearth, "space/portal/right/long")])
+	var walls := []
+	for col in [9, 10, 13, 27, 43, 51, 52, 53, 57, 70]:
+		walls.append("%d:%s|%s" % [col, _solid_at(Vector2(col * 64 + 32, 300)), _solid_at(Vector2(col * 64 + 32, 470))])
+	print("  walls (y300 | y470): %s" % " ".join(walls))
+	var spots := {
+		"arch_01_start": Vector2(300, 530), "arch_02_beyond": Vector2(760, 530), "arch_03_stacks": Vector2(1000, 530),
+		"arch_04_socket": Vector2(1250, 530), "arch_05_shelf": Vector2(1500, 334), "arch_06_reading": Vector2(1900, 530),
+		"arch_07_socket": Vector2(2100, 530), "arch_08_pocket": Vector2(2176, 334), "arch_09_pillar": Vector2(3000, 530),
+		"arch_10_hollow": Vector2(3360, 530), "arch_11_beyond": Vector2(3550, 530), "arch_12_hearth": Vector2(3800, 530),
+		"arch_13_under": Vector2(3983, 530), "arch_14_in_hearth": Vector2(4207, 398), "arch_15_door": Vector2(4380, 530),
+	}
+	for key in spots:
+		await place(spots[key])
+		await seconds(1.2)
+		await shot(key)
+	# Portals open
+	for spec in [[door, "space/portal/right/normal"], [archive, "space/portal/up/normal"], [pillar, "space/portal/right/long"],
+			[hearth, "space/portal/right/normal"]]:
+		var c: RuneCube = spec[0]
+		c.recipe = RuneRecipe.from_key(spec[1])
+		print("  %s on: '%s'" % [c.display_name, c.activate(false)])
+	await place(Vector2(560, 530))
+	await seconds(1.5)
+	await shot("arch_16_door_open")
+	await place(Vector2(2100, 530))
+	await seconds(1.5)
+	await shot("arch_17_reading_open")
+	await place(Vector2(3060, 530))
+	await seconds(1.5)
+	await shot("arch_18_pillar_open")
+	await place(Vector2(3960, 530))
+	await seconds(1.5)
+	await shot("arch_19_hearth_open")
+	check("the Folded Archive loads with its cubes", door != null and archive != null and pillar != null and hearth != null)
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+func scenario_g2_look() -> void:
+	print("SCENARIO Wren's Test: screenshots")
+	await load_scene(Journey.GALLERIES)
+	await enter_room("R2")
+	for n in ["R2/WestHearthCube", "R2/EastHearthCube"]:
+		print("  %s right: '%s' on: %s" % [n, _portal_problem(cube_named(n), "space/portal/right/normal"), cube_named(n).is_active])
+	print("  pocket cube up: '%s'" % _portal_problem(cube_named("R2/PocketCube"), "space/portal/up/normal"))
+	var probes := []
+	for spec in [["high door", Vector2(84 * 64 + 32, 180)], ["low door", Vector2(84 * 64 + 32, 470)], ["chimney L", Vector2(75 * 64 + 32, 300)],
+			["chimney in", Vector2(76 * 64 + 32, 300)], ["W pocket", Vector2(105 * 64 + 32, 300)], ["E pocket", Vector2(115 * 64 + 32, 300)],
+			["lens pocket wall", Vector2(122 * 64 + 32, 300)], ["wren door", Vector2(128 * 64 + 32, 470)]]:
+		probes.append("%s:%s" % [spec[0], _solid_at(spec[1])])
+	print("  probes: %s" % ", ".join(probes))
+	var spots := {
+		"wren_01_start": Vector2(4600, 530), "wren_02_lock": Vector2(4870, 530), "wren_03_lift": Vector2(5100, 530),
+		"wren_04_ledge": Vector2(5260, 206), "wren_05_balcony": Vector2(5500, 206), "wren_06_lectern": Vector2(5730, 530),
+		"wren_07_fountains": Vector2(5900, 530), "wren_08_walkway": Vector2(6200, 302), "wren_09_hearth_w": Vector2(6610, 530),
+		"wren_10_hearth_e": Vector2(7060, 530), "wren_11_lens": Vector2(7700, 530), "wren_12_pocket": Vector2(7968, 334),
+		"wren_13_door": Vector2(8150, 530),
+	}
+	for key in spots:
+		await place(spots[key])
+		await seconds(1.2)
+		await shot(key)
+	# Again: Repeat
+	var ember: RuneCube = cube_named("R2/EmberLock")
+	ember.recipe = RuneRecipe.from_key("fire/projectile/up/repeat")
+	print("  ember on: '%s'" % ember.activate(false))
+	var lift: Node2D = node("R2/EmberLift")
+	var ys := []
+	for i in 8:
+		await seconds(1.0)
+		ys.append(roundi(lift.global_position.y))
+	print("  lift y each second: %s, brazier lit %s" % [ys, node("R2/EmberBrazier").is_lit])
+	await place(Vector2(5100, 530))
+	await seconds(1.0)
+	await shot("wren_14_lift_running")
+	# Aslant: Down-Left
+	var frost: RuneCube = cube_named("R2/FrostLock")
+	frost.recipe = RuneRecipe.from_key("ice/freeze/down_left/long")
+	print("  frost on: '%s'" % frost.activate(false))
+	await seconds(2.0)
+	print("  fountain tops: %s" % _pillar_tops([1, 2, 3, 4, 5].map(func(i): return node("R2/Fountain%d" % i))))
+	await place(Vector2(5880, 530))
+	await seconds(0.5)
+	await shot("wren_15_fountains_frozen")
+	# The seals
+	node("R2/WestHearth").ignite()
+	node("R2/EastHearth").ignite()
+	await seconds(0.5)
+	print("  space seal: %s" % node("R2/SealSpace").lit)
+	var lens: RuneCube = cube_named("R2/LensLock")
+	lens.recipe = RuneRecipe.from_key("light/beam/right/bounce")
+	for spec in [["R2/LensMirrorLow", 3], ["R2/LensMirrorHigh", 1], ["R2/LensMirrorFar", 2]]:
+		node(spec[0]).facing = spec[1]
+	print("  lens on: '%s'" % lens.activate(false))
+	await seconds(1.0)
+	print("  crystal %s, light seal %s" % [node("R2/LastCrystal").powered, node("R2/SealLight").lit])
+	await place(Vector2(7700, 530))
+	await seconds(1.5)
+	await shot("wren_16_lens_lit")
+	node("R2/SealFire").set_powered(true)
+	node("R2/SealIce").set_powered(true)
+	await seconds(2.0)
+	print("  door open: %.2f" % node("R2/WrensDoor").open_amount)
+	await place(Vector2(8150, 530))
+	await seconds(1.5)
+	await shot("wren_17_door")
+	await place(Vector2(8300, 530))
+	await seconds(2.0)
+	await shot("wren_18_wren")
+	var wren: Node = node("R2/Wren")
+	print("  wren talking: %s line %d" % [wren.is_talking(), wren.line_index])
+	await seconds(8.0)
+	await shot("wren_19_wren_later")
+	print("  wren line %d" % wren.line_index)
+	check("Wren's Test loads with its locks", ember != null and frost != null and lens != null and wren != null)
+	game_state().clear_all()
+	game_state().all_abilities = true
+
+
+# ================================================================ looking at the reels
+
+## Pages through one story reel and saves every line twice, partway through
+## its movement and near its end (user://test_shots/reel_<kind>_<picture>_<line><a|b>.png),
+## for looking at by eye.
+func scenario_reel_look(kind: String) -> void:
+	print("SCENARIO look at the %s reel" % kind)
+	ChapterComplete.pending = {}
+	var path := "res://scenes/story/story_intro.tscn"
+	if kind in ["stillness", "sky"]:
+		path = "res://scenes/story/ending_%s.tscn" % kind
+	elif kind != "intro":
+		path = "res://scenes/story/interlude_%s.tscn" % kind
+	if is_instance_valid(get_tree().current_scene):
+		get_tree().current_scene.queue_free()
+	await get_tree().process_frame
+	var scene: StoryIntro = load(path).instantiate()
+	get_tree().root.add_child(scene)
+	get_tree().current_scene = scene
+	var guard := 0
+	while not scene.finished and guard < 40:
+		guard += 1
+		await wait_until(func(): return not scene._changing, 6.0)
+		var length: float = scene._line_length
+		await seconds(length * 0.45)
+		await shot("reel_%s_%02d_%da" % [kind, scene.index, scene.line])
+		await seconds(length * 0.45)
+		await shot("reel_%s_%02d_%db" % [kind, scene.index, scene.line])
+		scene.next()
+		await seconds(0.3)
+	check("%s: the reel plays to its end" % kind, scene.finished)
+	await seconds(1.5)
+
+
+## Walks up to the great cube and presses through Ilse's plea, so the cube
+## can be used.
+func _press_through_plea(stage: EyeScene, great: RuneCube) -> void:
+	var guard := 0
+	while guard < 60:
+		guard += 1
+		if (stage.wren and stage.wren.is_talking()) or stage.plea_index >= 0:
+			await tap_action("interact")
+			await frames(20)
+		elif not stage.pleaded:
+			await walk_to(great.global_position.x - 150.0, false, 2.0)
+		else:
+			break
+
+
+## Each level in its own colours (LevelTheme): a screenshot a little way into
+## each, for looking at by eye.
+func scenario_levels_look() -> void:
+	print("SCENARIO each level's look")
+	for calm in [Journey.PASSAGE, Journey.LANDING]:
+		await load_scene(calm)
+		await seconds(0.5)
+		check("%s stays calm (the movement lesson, the hub)" % calm.get_file(), get_tree().get_nodes_in_group("creature").is_empty())
+	for path in [Journey.BELFRY, Journey.OBSERVATORY, Journey.KILN,
+			"res://scenes/chapter/wing_cistern.tscn", "res://scenes/chapter/wing_lamps.tscn",
+			"res://scenes/chapter/wing_galleries.tscn", Journey.EYE]:
+		await load_scene(path)
+		await seconds(2.5)
+		var theme := String(get_tree().current_scene.get_meta(&"level_theme", ""))
+		check("%s wears its theme" % path.get_file(), theme != "", theme)
+		await shot("level_%s" % (theme if theme != "" else path.get_file().get_basename()))
+
+
+## The roaming creatures: every level but the Passage and the Landing has some,
+## none starts beside a rune cube, and they come for her and fall to fire.
+func scenario_creatures() -> void:
+	print("SCENARIO the roaming creatures")
+	game_state().calm_creatures = false
+	for calm in [Journey.PASSAGE, Journey.LANDING]:
+		await load_scene(calm)
+		await seconds(0.5)
+		check("%s stays calm (the movement lesson, the hub)" % calm.get_file(), get_tree().get_nodes_in_group("creature").is_empty())
+	for path in [Journey.BELFRY, Journey.OBSERVATORY, Journey.KILN,
+			"res://scenes/chapter/wing_cistern.tscn", "res://scenes/chapter/wing_lamps.tscn",
+			"res://scenes/chapter/wing_galleries.tscn", Journey.EYE]:
+		await load_scene(path)
+		await seconds(0.5)
+		var creatures := get_tree().get_nodes_in_group("creature")
+		check("%s has creatures" % path.get_file(), creatures.size() > 0, "%d" % creatures.size())
+		var too_close := 0
+		for c in creatures:
+			for cube in get_tree().get_nodes_in_group("rune_cube"):
+				if cube.global_position.distance_to(c.home) < 120.0:
+					too_close += 1
+		check("%s: none start beside a rune cube" % path.get_file(), too_close == 0, "%d" % too_close)
+		if path == Journey.KILN:
+			# a cinderling shrugs off fire; a clinker's armour cracks first
+			var cinder: Creature = creatures.filter(func(c): return c.kind == "cinderling").front() if creatures.any(func(c): return c.kind == "cinderling") else null
+			if cinder:
+				var before := cinder.health
+				cinder.take_damage(5)
+				check("a cinderling shrugs off fire", cinder.health == before)
+			var clinker: Creature = creatures.filter(func(c): return c.kind == "clinker").front() if creatures.any(func(c): return c.kind == "clinker") else null
+			if clinker:
+				clinker.take_damage(5)
+				check("a clinker's armour cracks first", not clinker.armoured and clinker.health == clinker.spec["health"])
+		if not creatures.is_empty():
+			var seen: Creature = creatures[creatures.size() / 2]
+			var lift := 90.0 if String(seen.spec["move"]) in ["flyer", "drifter"] else 0.0
+			await place(seen.home + Vector2(-240, lift - 20))
+			await seconds(0.7)
+		await shot("creatures_%s" % path.get_file().get_basename())
+	# A bat swoops at her and falls to fireballs
+	await load_scene(Journey.BELFRY)
+	await seconds(0.5)
+	var bat: Creature = get_tree().get_nodes_in_group("creature").front()
+	if bat:
+		await place(bat.home + Vector2(-60, 90))
+		check("a creature comes for her", await wait_until(func(): return bat.get("_state") == "rush" or bat.global_position.distance_to(player.global_position) < 80.0, 6.0))
+		var guard := 0
+		while is_instance_valid(bat) and not bat.is_dead and guard < 6:
+			guard += 1
+			bat.take_damage(5)
+			await frames(10)
+		check("and falls to fire", not is_instance_valid(bat) or bat.is_dead)
+	game_state().calm_creatures = true
+
+
+## Each level sounds like itself: its own ambience bed under the cave
+## ambience and its own footsteps; the creatures and the hint skull have voices.
+func scenario_sounds() -> void:
+	print("SCENARIO each level's sound")
+	var sfx := get_tree().root.get_node("Sfx")
+	var director := get_tree().root.get_node("AudioDirector")
+	for pair in [[Journey.BELFRY, "wind", "stone"], [Journey.KILN, "forge", "ash"],
+			["res://scenes/chapter/wing_cistern.tscn", "water", "wet"], ["res://scenes/chapter/wing_galleries.tscn", "folds", "paper"],
+			[Journey.EYE, "eye", "stone"]]:
+		await load_scene(pair[0])
+		await seconds(0.5)
+		check("%s: the %s bed plays" % [String(pair[0]).get_file(), pair[1]], director.bed_name == pair[1], director.bed_name)
+		check("%s: %s footsteps" % [String(pair[0]).get_file(), pair[2]], String(lvl.get_meta(&"footstep", "")) == pair[2])
+	# walking the Kilnworks crunches ash
+	await load_scene(Journey.KILN)
+	var heard := 0
+	for key in sfx.played:
+		if String(key).begins_with("step_ash_"):
+			heard -= int(sfx.played[key])
+	await walk_to(player.global_position.x + 260.0)
+	for key in sfx.played:
+		if String(key).begins_with("step_ash_"):
+			heard += int(sfx.played[key])
+	check("walking the Kilnworks crunches ash", heard > 0, "%d" % heard)
+	# a creature's death has a voice
+	game_state().calm_creatures = false
+	await load_scene(Journey.BELFRY)
+	await seconds(0.3)
+	var dies := int(sfx.played.get("creature_die", 0))
+	var victim: Creature = get_tree().get_nodes_in_group("creature").front()
+	for i in 6:
+		if is_instance_valid(victim) and not victim.is_dead:
+			victim.take_damage(5)
+			await frames(10)
+	check("a creature dies with a sound", int(sfx.played.get("creature_die", 0)) > dies)
+	game_state().calm_creatures = true
+	# the hint skull whispers
+	var whispers := int(sfx.played.get("hint_whisper", 0))
+	var skull := get_tree().get_first_node_in_group("hint_stone")
+	if skull == null:
+		for n in lvl.find_children("*", "HintStone", true, false):
+			skull = n
+			break
+	if skull:
+		skull.next_hint()
+		check("the hint skull whispers", int(sfx.played.get("hint_whisper", 0)) > whispers)
+
+
+## The hint skull listens before it speaks: a minute in the room for the
+## first hint, 2.5 more for the second, 4 more for the solution; time spent
+## outside the room doesn't count, a reload keeps the wait, and a nudge
+## waits until there's something to say.
+func scenario_hint_wait() -> void:
+	print("SCENARIO the hint skull listens first")
+	var settings := get_tree().root.get_node("Settings")
+	settings.assist_instant_hints = false
+	await load_scene(Journey.KILN)
+	var skull: HintStone = null
+	for n in lvl.find_children("*", "HintStone", true, false):
+		skull = n
+		break
+	check("the Kilnworks has a hint skull", skull != null)
+	if skull == null:
+		settings.assist_instant_hints = true
+		return
+	var room: Room = skull._room
+	await place(room.entry_spawn if room else skull.global_position + Vector2(-80, 0))
+	await place(skull.global_position + Vector2(-60, -10))
+	skull.listen()
+	check("straight away it only listens", skull.stage == 0 and not skull.is_ready())
+	skull.nudge()
+	check("a nudge waits too", not skull.nudging)
+	skull.waited = 58.0
+	await seconds(0.3)
+	check("its ring is filling", skull._near and skull.listening() > 0.9 and skull.listening() < 1.0, "%.2f" % skull.listening())
+	skull.waited = 30.0
+	await seconds(0.2)
+	await shot("hint_ring")
+	skull.waited = 59.0
+	await seconds(2.2)
+	check("after a minute in the room the first hint is ready", skull.is_ready(), "%.1f" % skull.waited)
+	check("and the waiting nudge calls out", skull.nudging)
+	skull.listen()
+	check("the first hint", skull.stage == 1)
+	skull.listen()
+	check("the second needs longer", skull.stage == 1)
+	# away from the room the wait stands still
+	var before: float = skull.waited
+	if room:
+		await place(Vector2(room.bounds.end.x + 400.0, room.entry_spawn.y))
+		await seconds(1.0)
+		check("time outside the room doesn't count", is_equal_approx(skull.waited, before) or skull.waited - before < 0.05, "%.2f" % (skull.waited - before))
+	# a reload keeps it
+	skull.waited = 300.0
+	var key := skull._wait_key()
+	await load_scene(Journey.KILN, false)
+	check("a reload keeps the wait", float(game_state().session.get(key, 0.0)) >= 300.0)
+	for n in lvl.find_children("*", "HintStone", true, false):
+		if n._wait_key() == key:
+			skull = n
+	skull.stage = 1
+	check("the second hint is ready at 3.5 minutes", skull.is_ready())
+	skull.listen()
+	check("the solution needs longer still", not skull.is_ready())
+	skull.waited = 450.0
+	check("and is ready at 7.5 minutes", skull.is_ready())
+	settings.assist_instant_hints = true
+	skull.stage = 0
+	skull.waited = 0.0
+	check("the assist lets it speak at once", skull.is_ready())
+
+
+## Fair aiming: standing at each rune cube, every target in that room that is
+## off the screen and not yet done has a pip on the screen's edge pointing at
+## it (TargetPips), so nothing has to be guessed at or learnt from a hint.
+func scenario_sightlines() -> void:
+	print("SCENARIO every target can be found from where she aims")
+	for path in [Journey.BELFRY, Journey.OBSERVATORY, Journey.KILN, "res://scenes/chapter/wing_cistern.tscn",
+			"res://scenes/chapter/wing_lamps.tscn", "res://scenes/chapter/wing_galleries.tscn", Journey.EYE]:
+		await load_scene(path)
+		var pips: TargetPips = lvl.get_node("TargetPips")
+		await frames(2)
+		var rooms := lvl.find_children("*", "Room", true, false)
+		var outside := pips.tracked.filter(func(t): return not rooms.any(func(r): return r.contains(t.global_position)))
+		check("%s: every target lies in a room (so it can be pointed at)" % path.get_file(), outside.is_empty(),
+			", ".join(outside.map(func(t): return t.name)))
+		var offscreen := 0
+		var missing: Array = []
+		var stands: Array = get_tree().get_nodes_in_group("rune_cube").map(func(c): return c.global_position)
+		if stands.is_empty():
+			stands = rooms.map(func(r): return r.entry_spawn)
+		for at in stands:
+			await place(at + Vector2(-40, -10))
+			await seconds(1.2)
+			var cam := get_viewport().get_camera_2d()
+			var size := get_viewport().get_visible_rect().size / cam.zoom
+			var view := Rect2(cam.get_screen_center_position() - size / 2.0, size).grow(-12.0)
+			for t in pips.tracked:
+				if lvl.current_room and lvl.current_room.contains(t.global_position) and not view.has_point(t.global_position) \
+						and not TargetPips.is_done(t):
+					offscreen += 1
+					if not pips.showing.has(t):
+						missing.append(t.name)
+		print("  SIGHT %s: %d targets, %d off-screen sightings, all pointed at: %s" % [path.get_file(), pips.tracked.size(), offscreen, missing.is_empty()])
+		check("%s: every off-screen target has a pip" % path.get_file(), missing.is_empty(), ", ".join(missing))
+		if path == Journey.KILN:
+			await shot("target_pips")
+	# done targets lose their pip
+	await load_scene(Journey.KILN)
+	var pips2: TargetPips = lvl.get_node("TargetPips")
+	await frames(2)
+	var lit: Node = null
+	for t in pips2.tracked:
+		if t.has_method("is_powered") and "is_lit" in t:
+			lit = t
+			break
+	if lit:
+		await place(lvl.current_room.entry_spawn)
+		await seconds(0.5)
+		lit.set("is_lit", true)
+		await frames(3)
+		check("a lit brazier has no pip", not pips2.showing.has(lit) or TargetPips.is_done(lit))

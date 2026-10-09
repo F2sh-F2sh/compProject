@@ -313,20 +313,16 @@ func aim_and_shoot(world_pos: Vector2) -> void:
 	if DisplayServer.get_name() == "headless":
 		await preload("res://tests/background_aim.gd").fire(lvl.get_node("Player"), world_pos)
 		return
-	var screen_pos: Vector2 = lvl.get_viewport().get_canvas_transform() * world_pos
-	# Retain retrying aim updates using viewport events, without OS cursor control.
-	for attempt in 8:
-		var motion := InputEventMouseMotion.new()
-		motion.position = screen_pos
-		motion.global_position = screen_pos
-		get_tree().root.push_input(motion, true)
-		await frames(2)
-		if lvl.get_global_mouse_position().distance_to(world_pos) < 10.0:
-			break
+	# A windowed run aims through the player's aim_override, not the OS cursor
+	# (it belongs to whoever is using the computer); the shot itself goes through
+	# the real shoot input, mana and cooldown
+	var shooter: Node = lvl.get_node("Player")
+	shooter.aim_override = world_pos
 	Input.action_press("shoot")
 	await frames(2)
 	Input.action_release("shoot")
 	await frames(1)
+	shooter.aim_override = null
 
 
 func _particles_in(node: Node) -> int:
@@ -395,8 +391,10 @@ func scenario_feedback() -> void:
 	player.invulnerable_time = 0.0
 	player.take_damage(99)
 	check("dying has its own sound", _sounds("player_death") > deaths)
+	check("and a fall, a chord and a heartbeat that stops", _sounds("death_fall") > 0)
 	var armed := await wait_until(func(): return death.can_restart, 2.0)
 	check("the retry prompt is ready within two seconds", armed)
+	check("YOU DIED tolls", _sounds("death_sting") > 0)
 	check("Echidna fades as she falls", player.animated_sprite.self_modulate.a < 0.5)
 	get_tree().paused = false
 	# Each room has its own colour
@@ -603,8 +601,8 @@ func scenario_menu() -> void:
 	await press_action("ui_right")
 	check("right goes into the list, with a beep", menu._col == 1 and menu._row1 == 0 and int(menu.played.get("select", 0)) == selects + 1)
 	check("the active row is solid orange", menu._visible_rows(menu._list1)[0].active)
-	check("Graphics cascades out its own list: five levels, two switches and Brightness", menu._list2 != null and menu._list2.visible
-		and menu._visible_rows(menu._list2).size() == 8)
+	check("Graphics cascades out its own list: five levels, three switches and Brightness", menu._list2 != null and menu._list2.visible
+		and menu._visible_rows(menu._list2).size() == 9)
 	await press_action("ui_right")
 	for i in 4:
 		await press_action("ui_down")
@@ -779,7 +777,7 @@ func scenario_story() -> void:
 		await press_action("jump")
 		await seconds(0.8)
 		guard += 1
-	check("all nine pictures can be paged through", seen.size() == 9, str(seen.keys()))
+	check("all eight pictures can be paged through", seen.size() == 8, str(seen.keys()))
 	check("and the last leads out onto Lowbell's lane", await wait_for_scene(LOWBELL, 5.0))
 	# Holding Esc skips straight there
 	state().clear_all()
@@ -881,7 +879,7 @@ func scenario_cottage() -> void:
 	check("Nan greets her", await wait_until(func(): return lvl.stage == "greeting", 10.0))
 	check("and Nan is in her chair by the fire", lvl.nan.position.x > 700.0 and lvl.nan.flip_h)
 	await _cottage_next()
-	check("Echidna thinks: she does not know me", lvl._thought.text.contains("know me"))
+	check("Echidna thinks: she does not know me", lvl.dialogue.thought and lvl.dialogue.text.contains("know me"))
 	await _cottage_next()
 	check("then she is free to walk to Nan", await wait_until(func(): return lvl.stage == "talk", 5.0)
 		and lvl.nan_talk.enabled and not player.controls_locked)
@@ -894,7 +892,9 @@ func scenario_cottage() -> void:
 	await press_action("interact")
 	check("talking starts the conversation", await wait_until(func(): return lvl.stage == "conversation", 2.0))
 	await _cottage_next()
-	check("Nan cannot say her name: the words are glyph gaps", lvl._speech.gap_count() > 0, "%d gaps" % lvl._speech.gap_count())
+	check("Nan cannot say her name: the words are glyph gaps", lvl.dialogue.gap_count() > 0, "%d gaps" % lvl.dialogue.gap_count())
+	await seconds(1.2)
+	await shot("cottage_dialogue")
 	await _cottage_next()
 	await _cottage_next()
 	# The fire spell will not come
@@ -911,10 +911,10 @@ func scenario_cottage() -> void:
 	check("trying it only sputters: no fireball, the game is told", denied == ["fire"]
 		and get_tree().get_nodes_in_group("fireball").size() == fireballs, str(denied))
 	await frames(40)
-	check("she thinks: the word is gone", lvl._thought.text.contains("word is gone"))
+	check("she thinks: the word is gone", lvl.dialogue.text.contains("word is gone"))
 	await _cottage_next()
 	check("Nan explains the Hush", await wait_until(func(): return lvl.stage == "explaining", 4.0))
-	for i in 6:
+	for i in 7:
 		await _cottage_next()
 	check("then Nan gives her the lantern", await wait_until(func(): return lvl.stage == "lantern", 4.0))
 	await _cottage_next()
@@ -968,7 +968,7 @@ func scenario_interludes() -> void:
 		# (no finished chapter's card is waiting for these pictures)
 		ChapterComplete.pending = {}
 		await open_scene(path)
-		var count := 2 if kind == "bell" else 3
+		var count := 4 if kind == "bell" else 3
 		state().all_abilities = false
 		state().clear_all()
 		state().grant_ability("fire")

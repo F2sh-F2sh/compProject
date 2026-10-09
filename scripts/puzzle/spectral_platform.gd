@@ -18,6 +18,13 @@ enum Mode { POWERED, REVEALED }
 		queue_redraw()
 @export var start_solid := false
 @export var vanish_warning := 0.35
+## False: it never shades another platform like it from light (a walkway of
+## them lit from one place doesn't shade itself, stone by stone). It is solid
+## and blocks light for everything else as usual.
+@export var casts_shadow := true
+
+## The bodies of the platforms that cast no shadow on other platforms.
+static var _clear_bodies: Array[RID] = []
 
 var is_solid := false
 var _powered := false
@@ -47,6 +54,8 @@ func _ready() -> void:
 	_shape.position = size / 2.0
 	_body.add_child(_shape)
 	add_child(_body)
+	if not casts_shadow:
+		_clear_bodies.append(_body.get_rid())
 	# Detects the player overlapping where the platform would appear
 	_sensor = Area2D.new()
 	_sensor.collision_layer = 0
@@ -61,6 +70,11 @@ func _ready() -> void:
 	add_child(_sensor)
 	_powered = start_solid
 	_set_solid(start_solid)
+
+
+func _exit_tree() -> void:
+	if _body and not casts_shadow:
+		_clear_bodies.erase(_body.get_rid())
 
 
 func set_powered(powered: bool) -> void:
@@ -79,8 +93,11 @@ func _physics_process(delta: float) -> void:
 	_time += delta
 	var want := _powered
 	if mode == Mode.REVEALED:
-		# Its own body must not shadow the light that makes it solid
-		want = MagicLight.aura_reaches(get_world_2d(), global_position + size / 2.0, [_body.get_rid()])
+		# Its own body must not shadow the light that makes it solid, nor
+		# a platform that casts no shadow
+		var exclude: Array[RID] = [_body.get_rid()]
+		exclude.append_array(_clear_bodies)
+		want = MagicLight.aura_reaches(get_world_2d(), global_position + size / 2.0, exclude)
 	if want:
 		_warning = 0.0
 		if not is_solid and not _player_inside():

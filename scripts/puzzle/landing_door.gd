@@ -16,7 +16,7 @@ extends Node2D
 const DOOR := "door_nan"
 const BELL := "shrine_bell"
 const SCALE := 3.0
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.UI
 
 var interactable: Interactable
 var _door: AnimatedSprite2D
@@ -46,7 +46,7 @@ func _ready() -> void:
 	_label = Label.new()
 	_label.text = label_text
 	_label.add_theme_font_override("font", FONT)
-	_label.add_theme_font_size_override("font_size", 10)
+	_label.add_theme_font_size_override("font_size", 8)
 	_label.add_theme_color_override("font_color", Color(0.85, 0.82, 0.95))
 	_label.add_theme_color_override("font_outline_color", Color(0.02, 0.01, 0.05, 0.9))
 	_label.add_theme_constant_override("outline_size", 4)
@@ -160,7 +160,10 @@ func _on_used(_by: Node) -> void:
 	if Journey.admin_unlock:
 		Journey.admin_prepare(Journey.EYE if index >= Journey.WINGS.size() else target_scene())
 	opened.emit(target_scene())
-	get_tree().change_scene_to_file.call_deferred(target_scene())
+	var player := get_tree().get_first_node_in_group("player")
+	if player:
+		player.lock_controls()
+	SceneFade.change(get_tree(), target_scene())
 
 
 signal opened(scene_path: String)

@@ -28,6 +28,7 @@ var _shape: CollisionShape2D
 
 func _ready() -> void:
 	_art = Node2D.new()
+	_art.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_art.name = "Art"
 	_art.z_index = -1
 	add_child(_art)

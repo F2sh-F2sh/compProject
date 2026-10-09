@@ -4,10 +4,16 @@ extends Camera2D
 ## Keeps the camera inside the level's (or current room's) playable area. If
 ## the window's shape would show more than the bounds hold, the zoom is raised
 ## just enough to fit. It trails its parent (the player) with a subtle damped
-## follow: a little quicker sideways than up and down, leaning slightly ahead
+## follow: a little quicker sideways than up and down, holding its height
+## through small hops, leaning slightly ahead
 ## of her movement, and it snaps on teleports. Also offers smooth room
 ## transitions, screen shake that respects the reduced-motion setting, and a
 ## brief look at a distant point.
+##
+## With smooth motion on (physics interpolation, Settings.smooth_motion) the
+## follow runs in the physics step, like the player it trails, and the engine
+## draws both in between steps; otherwise it follows every drawn frame. Shake
+## and the look at a distant point are offsets, set in the same step.
 
 ## The area the camera may show, in world coordinates.
 @export var bounds := Rect2(0, 0, 1152, 648):
@@ -28,6 +34,11 @@ extends Camera2D
 @export var look_ahead_time := 0.24
 ## The most it will ever lean ahead.
 @export var look_ahead_max := 56.0
+## How far she may rise above (or drop below) the floor she last stood on
+## before the camera follows her up or down: a hop leaves the view still (a
+## jump rises ~62 px), a climb, a fall or a lift is followed. 0 follows every
+## hop.
+@export var hop_band := 72.0
 ## A jump in the target larger than this (a teleport or respawn) snaps.
 @export var snap_distance := 320.0
 
@@ -38,22 +49,39 @@ var _focus_tween: Tween
 var _focus_offset := Vector2.ZERO
 var _follow := Vector2.ZERO
 var _lead := 0.0
+## The height of the floor she last stood on (for hop_band).
+var _floor_y := 0.0
+var _has_floor := false
 
 
 func _ready() -> void:
 	# The camera moves itself, trailing its parent instead of being rigidly attached
 	top_level = true
+	refresh_motion_mode()
 	_apply()
 	get_viewport().size_changed.connect(_apply)
 	snap()
 
 
+## Follows in the physics step when the world is drawn between steps, else
+## every drawn frame (Settings.set_smooth_motion calls this on a change).
+func refresh_motion_mode() -> void:
+	process_callback = CAMERA2D_PROCESS_PHYSICS if _interpolated() else CAMERA2D_PROCESS_IDLE
+	reset_physics_interpolation()
+
+
+func _interpolated() -> bool:
+	return is_inside_tree() and get_tree().physics_interpolation
+
+
 ## Jumps straight to the target (teleports, respawns, room resets).
 func snap() -> void:
 	_lead = 0.0
+	_has_floor = false
 	_follow = _target()
 	global_position = _follow
 	reset_smoothing()
+	reset_physics_interpolation()
 
 
 func _target() -> Vector2:
@@ -76,6 +104,7 @@ func _update_follow(delta: float) -> void:
 	if _follow.distance_to(goal) > snap_distance:
 		snap()
 		return
+	goal.y = _steady_height(parent, goal.y)
 	_follow.x = lerpf(_follow.x, goal.x, 1.0 - exp(-follow_damping.x * delta))
 	_follow.y = lerpf(_follow.y, goal.y, 1.0 - exp(-follow_damping.y * delta))
 	global_position = _follow
@@ -121,7 +150,20 @@ func cancel_focus() -> void:
 	_focus_offset = Vector2.ZERO
 
 
+func _physics_process(delta: float) -> void:
+	if _interpolated():
+		_step(delta)
+
+
 func _process(delta: float) -> void:
+	if not _interpolated():
+		_step(delta)
+
+
+# The follow, then the shake and the look at a distant point, together: with
+# smooth motion the engine samples the camera (position and offset) at each
+# physics step and draws in between, so both are set in the same step
+func _step(delta: float) -> void:
 	_update_follow(delta)
 	var shake_offset := Vector2.ZERO
 	if _shake_time > 0.0:
@@ -163,3 +205,15 @@ func _set_limits(r: Rect2) -> void:
 
 func _current_limits() -> Rect2:
 	return Rect2(limit_left, limit_top, limit_right - limit_left, limit_bottom - limit_top)
+
+
+## The height to follow: the floor she last stood on while she is within a hop
+## of it, otherwise a hop's height behind her (so it picks up smoothly).
+func _steady_height(parent: Node2D, y: float) -> float:
+	var body := parent as CharacterBody2D
+	if body == null or hop_band <= 0.0:
+		return y
+	if body.is_on_floor() or not _has_floor:
+		_floor_y = y
+		_has_floor = true
+	return clampf(_floor_y, y - hop_band, y + hop_band)

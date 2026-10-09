@@ -9,9 +9,9 @@ extends CanvasLayer
 ## top, so this screen always answers "can I edit this, and how?".
 ## Pauses the game while open. Cubes are only switched on at the cube.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
-const INK := Color("e4ddf2")
-const DIM := Color("9c92b8")
+const FONT := Fonts.UI
+const INK := Color("e8dcc0")
+const DIM := Color("9a8f86")
 const LOCK := Color(0.78, 0.72, 0.95)
 const WARN := Color("ffc070")
 
@@ -189,37 +189,21 @@ func _build() -> void:
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.05, 0.035, 0.09, 0.97)
-	box.border_color = Color(0.5, 0.38, 0.78, 0.9)
-	box.set_border_width_all(2)
-	box.set_corner_radius_all(4)
-	box.content_margin_left = 18
-	box.content_margin_right = 18
-	box.content_margin_top = 14
-	box.content_margin_bottom = 14
-	panel.add_theme_stylebox_override("panel", box)
+	panel.add_theme_stylebox_override("panel", DungeonUI.panel_style())
+	DungeonUI.decorate(panel)
 	_root.add_child(panel)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
 	panel.add_child(col)
-	var heading := _label("YOUR RUNES  ·  THIS ROOM", 20, Color("cbbdf2"))
+	var heading := _label("YOUR RUNES  ·  THIS ROOM", 24, Color("f0d27a"))
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(heading)
 	# The rules for changing words, always in view here
 	var rules_box := PanelContainer.new()
-	var rb := StyleBoxFlat.new()
-	rb.bg_color = Color(0.09, 0.07, 0.15, 0.95)
-	rb.border_color = Color(0.36, 0.3, 0.55, 0.9)
-	rb.set_border_width_all(1)
-	rb.set_corner_radius_all(3)
-	rb.content_margin_left = 12
-	rb.content_margin_right = 12
-	rb.content_margin_top = 8
-	rb.content_margin_bottom = 8
-	rules_box.add_theme_stylebox_override("panel", rb)
+	rules_box.add_theme_stylebox_override("panel", DungeonUI.lite_style())
 	col.add_child(rules_box)
-	_rules = _label("", 12, Color("d8cff0"))
+	_rules = _label("", 16, Color("e8dcc0"))
+	_rules.add_theme_font_override("font", Fonts.STORY)
 	_rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_rules.custom_minimum_size = Vector2(760, 0)
 	_rules.text = rules_text()
@@ -227,7 +211,8 @@ func _build() -> void:
 	_list = VBoxContainer.new()
 	_list.add_theme_constant_override("separation", 8)
 	col.add_child(_list)
-	_summary = _label("", 13, Color("ffd88a"))
+	_summary = _label("", 16, Color("ffd88a"))
+	_summary.add_theme_font_override("font", Fonts.STORY)
 	col.add_child(_summary)
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -264,19 +249,5 @@ func _label(text: String, size: int, color: Color) -> Label:
 
 
 func _style(b: Button) -> void:
-	b.add_theme_font_override("font", FONT)
-	b.add_theme_font_size_override("font_size", 14)
-	var mk := func(bg: Color, border: Color) -> StyleBoxFlat:
-		var s := StyleBoxFlat.new()
-		s.bg_color = bg
-		s.border_color = border
-		s.set_border_width_all(2)
-		s.set_corner_radius_all(4)
-		s.content_margin_left = 8
-		s.content_margin_right = 8
-		return s
-	b.add_theme_stylebox_override("normal", mk.call(Color(0.1, 0.08, 0.16), Color(0.32, 0.26, 0.5)))
-	b.add_theme_stylebox_override("hover", mk.call(Color(0.16, 0.12, 0.26), Color(0.6, 0.5, 0.9)))
-	b.add_theme_stylebox_override("pressed", mk.call(Color(0.2, 0.15, 0.34), Color(0.85, 0.78, 1.0)))
-	b.add_theme_stylebox_override("focus", mk.call(Color(0, 0, 0, 0), Color(1, 1, 1, 0.9)))
-	b.add_theme_stylebox_override("disabled", mk.call(Color(0.07, 0.06, 0.1), Color(0.2, 0.18, 0.28)))
+	# (the project theme draws the stone plates; only the size is set here)
+	b.add_theme_font_size_override("font_size", 16)

@@ -6,7 +6,7 @@ extends Node2D
 ## glyphs in a little box, where the word should have been. Drawn at twice
 ## the size and scaled down, so the words stay sharp under the 2x camera.
 
-const FONT := preload("res://assets/Text/Orbitron-Medium.ttf")
+const FONT := Fonts.STORY
 const FONT_SIZE := 20
 const MAX_WIDTH := 340.0
 const PAD := Vector2(16, 12)
@@ -102,19 +102,17 @@ func _draw() -> void:
 	if _lines.is_empty():
 		return
 	var rect := Rect2(-_box.x / 2.0, -_box.y - 16.0, _box.x, _box.y)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.93, 0.9, 0.84, 0.94) if thought else Color(0.07, 0.055, 0.11, 0.92)
-	style.border_color = Color(0.62, 0.55, 0.78, 0.7) if thought else Color(0.55, 0.45, 0.8, 0.8)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(14 if thought else 8)
+	var style: StyleBox = DungeonUI.THEME.get_stylebox("panel", "ParchmentPanel") if thought else DungeonUI.style("panel_lite", 8)
+	var fill := Color("d8c59c") if thought else Color("16131a")
 	draw_style_box(style, rect)
 	if thought:
-		draw_circle(Vector2(-6, -9), 5.0, style.bg_color)
-		draw_circle(Vector2(-12, 2), 3.0, style.bg_color)
+		draw_circle(Vector2(-6, -9), 5.0, fill)
+		draw_circle(Vector2(-12, 2), 3.0, fill)
 	else:
-		draw_colored_polygon(PackedVector2Array([Vector2(-8, -18), Vector2(8, -18), Vector2(0, -4)]), style.bg_color)
-	var ink := Color(0.16, 0.13, 0.22) if thought else Color(0.9, 0.87, 0.96)
-	var faded := Color(0.62, 0.52, 0.9, 0.85)
+		draw_colored_polygon(PackedVector2Array([Vector2(-8, -18), Vector2(8, -18), Vector2(0, -4)]), fill)
+		draw_polyline(PackedVector2Array([Vector2(-8, -17), Vector2(0, -4), Vector2(8, -17)]), Color("7a5f2a"), 2.0)
+	var ink := Color("2a2016") if thought else Color("e8dcc0")
+	var faded := Color(0.62, 0.42, 0.32, 0.85) if thought else Color(0.86, 0.7, 0.42, 0.85)
 	var space := FONT.get_string_size(" ", HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE).x
 	for row in _lines.size():
 		var words: Array = _lines[row]
@@ -127,7 +125,7 @@ func _draw() -> void:
 			if item["gap"] > 0:
 				var n: int = item["gap"]
 				var box := Rect2(x, baseline - FONT_SIZE * 0.85, n * GLYPH + 8.0, FONT_SIZE * 1.05)
-				draw_rect(box, Color(0.3, 0.24, 0.45, 0.35))
+				draw_rect(box, Color(0.42, 0.1, 0.14, 0.3))
 				for g in n:
 					var ids := RuneFragments.ALL.keys()
 					var id: StringName = ids[absi(hash(text) + g * 7 + row * 13) % ids.size()]

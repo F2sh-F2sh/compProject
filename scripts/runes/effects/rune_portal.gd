@@ -4,15 +4,18 @@ extends Node2D
 ## Space Portal: a doorway just beyond the cube's face, and its far side
 ## `range` px further in the same direction, through walls and gates. The
 ## player, loose objects and creatures that step into either side come out
-## of the other moving exactly as they were: it works both ways. Something
-## that has just come out of a side has to step clear of it before that side
-## will take it back, so nothing bounces to and fro. The far side is checked
+## of the other moving exactly as they were: it works both ways (and fire
+## flies through too). Something that has just come out of a side has to step
+## clear of it before that side will take it back, so nothing bounces to and
+## fro. The far side is checked
 ## when the rune is switched on: it must be open space inside the room and
 ## not on a hazard, or the rune refuses to start (see problem()).
 
 const DOOR_SIZE := Vector2(26, 44)
 ## How long a body that has just come through is held to the side it came out of.
 const SETTLE := 0.3
+## A bolt of fire's own radius (scenes/FireBall.tscn), so one brushing a doorway counts.
+const FIRE_RADIUS := 9.0
 
 var cube: RuneCube
 var direction := Vector2.RIGHT
@@ -23,8 +26,12 @@ var _far_door: Area2D
 ## body -> the door it came out of (it can't use that one until it leaves it).
 var _arrived := {}
 var _time := 0.0
+## Fire through a doorway: fireball -> [the side it came out of, seconds since].
+var _fire_arrived := {}
 ## Bodies carried through, either way (for tests).
 var carried: Array[Node] = []
+## Fireballs carried through, either way (for tests).
+var carried_fire: Array[Node] = []
 ## Bodies carried back from the far side (for tests).
 var carried_back: Array[Node] = []
 
@@ -119,7 +126,51 @@ func _physics_process(delta: float) -> void:
 			if body.get("is_dead") == true or body.get("controls_locked") == true:
 				continue
 			_carry(body, from, pair[1])
+	_carry_fire(delta)
 	queue_redraw()
+
+
+## Fire flies through too: a bolt in one doorway comes out of the other, still
+## flying the same way, with the rest of its range (so fire can reach what
+## stone walls and shut gates hide).
+func _carry_fire(delta: float) -> void:
+	for bolt in _fire_arrived.keys():
+		if not is_instance_valid(bolt):
+			_fire_arrived.erase(bolt)
+			continue
+		_fire_arrived[bolt][1] += delta
+		if _fire_arrived[bolt][1] > SETTLE and not _door_rect(_fire_arrived[bolt][0]).grow(FIRE_RADIUS).has_point(bolt.global_position):
+			_fire_arrived.erase(bolt)
+	for bolt in get_tree().get_nodes_in_group("fireball"):
+		if not bolt is Area2D or bolt.is_queued_for_deletion():
+			continue
+		for pair in [[_door, _far_door], [_far_door, _door]]:
+			var from: Area2D = pair[0]
+			if not _door_rect(from).grow(FIRE_RADIUS).has_point(bolt.global_position):
+				continue
+			if _fire_arrived.has(bolt) and (_fire_arrived[bolt][0] == from or _fire_arrived[bolt][1] < SETTLE):
+				continue
+			var to: Area2D = pair[1]
+			var shift: Vector2 = to.global_position - from.global_position
+			bolt.global_position += shift
+			if "start_position" in bolt:
+				bolt.start_position += shift
+			bolt.reset_physics_interpolation()
+			_fire_arrived[bolt] = [to, 0.0]
+			carried_fire.append(bolt)
+			Sfx.play("portal_warp", to.global_position, -6.0)
+			RuneJournal.note("portal")
+			break
+
+
+func _door_rect(door: Area2D) -> Rect2:
+	return Rect2(door.global_position - DOOR_SIZE / 2.0, DOOR_SIZE)
+
+
+## True if a bolt of fire at `p` is in (or brushing, by its own size) either
+## doorway: the cube it touches there must let it through, not burst it.
+func takes_fire_at(p: Vector2) -> bool:
+	return _door_rect(_door).grow(FIRE_RADIUS).has_point(p) or _door_rect(_far_door).grow(FIRE_RADIUS).has_point(p)
 
 
 ## Whether a body is in a side now, by where it really is.

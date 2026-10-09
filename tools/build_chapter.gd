@@ -411,9 +411,9 @@ func group(parent: Node, group_name: String) -> Node2D:
 	return n
 
 
-func add_sign(parent: Node, sign_name: String, col: float, text: String, surface := float(FLOOR_Y), width := 170.0) -> void:
+func add_sign(parent: Node, sign_name: String, col: float, text: String, surface := float(FLOOR_Y), width := 170.0, handwritten := false) -> void:
 	inst("res://scenes/tutorial_sign.tscn", parent, sign_name, Vector2(cx(col), surface - 78.0),
-		{"text": text, "width": width})
+		{"text": text, "width": width, "handwritten": handwritten})
 
 
 func torch(parent: Node, col: int, row := 6) -> void:

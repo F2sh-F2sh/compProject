@@ -1,7 +1,7 @@
 class_name NanCottage
 extends Node2D
 
-## Nan's cottage, the grandma scene. Echidna knocks, Nan lets her in, and does
+## Nan's cottage, the grandma scene (told with portraits, DialogueBox). Echidna knocks, Nan lets her in, and does
 ## not know her. She tries her fire spell for the fire in the hearth and it
 ## will not come (the Hush took the word, and Nan says why), Nan sends her to
 ## the old Novices' Way under the house, gives her the lantern, and she goes
@@ -49,6 +49,9 @@ var has_lantern := false
 
 var _speech: SpeechBubble
 var _thought: SpeechBubble
+## The conversation, Persona-style: portraits and a framed box (the cottage
+## handles the presses).
+var dialogue: DialogueBox
 var _hint: Label
 var _fade: ColorRect
 var _puppet: AnimatedSprite2D
@@ -64,6 +67,10 @@ var _fire_denied := false
 
 
 func _ready() -> void:
+	# The scenery, puppets and the intro camera are tweened every drawn frame:
+	# drawn as they are. Echidna and her camera move in physics steps and are
+	# drawn between them (set in _build_player)
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	get_tree().paused = false
 	AudioDirector.reset_combat()
 	AudioDirector.fade_ambience(-40.0, 2.0)
@@ -240,6 +247,7 @@ func _build_player() -> void:
 	var aura := _light(Vector2(0, -20), Color(0.8, 0.76, 1.0), 0.45, 1.0)
 	aura.name = "PlayerLight"
 	player.add_child(aura)
+	player.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	add_child(player)
 	player.ability_denied.connect(_on_ability_denied)
 	intro_camera = Camera2D.new()
@@ -251,6 +259,9 @@ func _build_player() -> void:
 	add_child(_speech)
 	_thought = SpeechBubble.new()
 	_thought.thought = true
+	dialogue = DialogueBox.new()
+	dialogue.handles_input = false
+	add_child(dialogue)
 	add_child(_thought)
 
 
@@ -321,6 +332,12 @@ func _story() -> void:
 	t.tween_property(_fade, "color:a", 0.0, 1.4)
 	await t.finished
 	Sfx.play("door_creak", Vector2(DOOR_X, FLOOR_Y - 20), -8.0, 0.05)
+	# Nan is humming by the fire, as she always does: four notes, the bell's
+	# old tune (the lullaby Ilse sang; see docs/STORY_PLAYTHROUGH.md)
+	AudioDirector.play_cue("lullaby.wav", -12.0)
+	_speech.text = "Mm, mm-mm, mm..."
+	_speech.position = nan.global_position + Vector2(0, -(40.0 * S + 8.0))
+	_speech.show_bubble()
 	# She steps in out of the cold and stops a little short of the fire
 	_puppet.visible = true
 	_puppet.speed_scale = 0.7
@@ -332,11 +349,14 @@ func _story() -> void:
 	_puppet.play(&"idle")
 	_hand_to_player()
 
+	_speech.hide_bubble(0.3)
+	AudioDirector.stop_cue(2.5)
 	stage = "greeting"
-	await _say(nan, "Oh, a visitor! Come in, dear. Come in. Mind the step.")
-	await _say(player, "She doesn't know me.", true)
+	await _say(nan, "Oh, a visitor! Come in, dear. Come in. Mind the step.", false, "warm")
+	await _say(player, "She's humming the bell's old tune again. But she doesn't know me.", true, "sad")
 	stage = "talk"
 	_set_hint("%s  talk to Nan" % InputLabels.primary("interact"))
+	dialogue.close()
 	player.unlock_controls()
 	nan_talk.enabled = true
 	await nan_talk.interacted
@@ -345,25 +365,27 @@ func _story() -> void:
 	_set_hint("")
 
 	stage = "conversation"
-	await _say(player, "Nan, it's me.")
-	await _say(nan, "Of course it is. Of course. You're my... you're {4}...")
-	await _say(nan, "It was right here, on the tip of my tongue. I'm sorry, love.")
+	await _say(player, "Nan, it's me.", false, "worried")
+	await _say(nan, "Of course it is. Of course. You're my... you're {4}...", false, "lost")
+	await _say(nan, "It was right here, on the tip of my tongue. I'm sorry, love.", false, "sad")
 	if not GameState.has_ability("fire"):
 		await _fire_beat()
 	stage = "explaining"
-	await _say(nan, "The Hush takes names first, then the little spells, then everything else.")
-	await _say(nan, "It took my knitting word this morning. But words don't die, love. The monks carved theirs in stone.")
-	await _say(nan, "They'll still be up there. Find the old words, and yours will come home.")
-	await _say(nan, "And the bell, love. The big bell on the mountain kept the Hush away for sixty years. Somebody has to ring it again.")
-	await _say(player, "I'll do it, Nan.")
-	await _say(nan, "The Novices' Way starts in my cellar. Your grandfather used it to sneak up the mountain.")
+	await _say(nan, "The Hush takes names first, then the little spells, then everything else.", false, "sad")
+	await _say(nan, "But words don't die, love. The Choir carved theirs in stone, up in the mountain. Stone remembers.", false, "warm")
+	await _say(nan, "Find the old words, and yours will come home.", false, "bright")
+	await _say(nan, "And the bell. The big bell kept the Hush away for sixty years. It rang the tune I'm always humming.", false, "warm")
+	await _say(player, "Then I'll ring it again. But the road up the mountain has been frozen shut for nine winters.", false, "determined")
+	await _say(nan, "Not the road, love. This cottage was the Choir's gatehouse, and I was their last novice, when I was your age.", false, "bright")
+	await _say(nan, "The Novices' Way starts right under our feet, in the cellar, and climbs up through the inside of the mountain.", false, "warm")
 	stage = "lantern"
-	await _say(nan, "Take my lantern, love. It's the only thing in this house that still burns properly.")
+	await _say(nan, "Take my lantern. It's the only thing in this house that still burns properly.", false, "warm")
 	await _give_lantern()
-	await _say(player, "I'll bring your words back. And I'll tell you my name as many times as it takes.")
+	await _say(player, "I'll bring your words back. And I'll tell you my name as many times as it takes.", false, "determined")
 	stage = "farewell"
-	await _say(nan, "That's kind. Go on, then. And mind the step.")
+	await _say(nan, "That's kind. Go on, then. And mind the step.", false, "warm")
 	stage = "free"
+	dialogue.close()
 	player.unlock_controls()
 	cellar_door.enabled = true
 	cellar_door.interacted.connect(func(_who): _go_down(), CONNECT_ONE_SHOT)
@@ -373,8 +395,9 @@ func _story() -> void:
 ## Echidna tries to light the fire for Nan and the spell will not come.
 func _fire_beat() -> void:
 	stage = "spell"
-	await _say(nan, "The fire's nearly out. Would you, dear? You always lit it with a flick of your finger.")
+	await _say(nan, "The fire's nearly out. Would you, dear? You always lit it with a flick of your finger.", false, "warm")
 	_fire_denied = false
+	dialogue.close()
 	player.unlock_controls()
 	_set_hint("%s  try your fire spell" % InputLabels.primary("shoot"))
 	var waited := 0.0
@@ -384,7 +407,7 @@ func _fire_beat() -> void:
 	player.lock_controls(false)
 	_set_hint("")
 	await get_tree().create_timer(0.5).timeout
-	await _say(player, "I did this yesterday. The word is gone.", true)
+	await _say(player, "I did this yesterday. The word is gone.", true, "worried")
 
 
 func _on_ability_denied(id: String) -> void:
@@ -427,7 +450,7 @@ func _go_down() -> void:
 	t.tween_interval(0.8)
 	t.tween_property(_fade, "color:a", 1.0, 1.4)
 	t.tween_interval(0.4)
-	t.tween_callback(func(): get_tree().change_scene_to_file(next_scene()))
+	t.tween_callback(func(): SceneFade.change(get_tree(), next_scene(), 0.0))
 
 
 func next_scene() -> String:
@@ -437,18 +460,19 @@ func next_scene() -> String:
 # ------------------------------------------------------------------ talking
 
 ## A bubble over `who` (Nan, or Echidna's own thought); waits for a press.
-func _say(who: Node2D, text: String, thought := false) -> void:
-	var bubble := _thought if thought else _speech
-	(_speech if thought else _thought).hide_bubble(0.15)
-	bubble.text = text
-	var head := 40.0 * S + 8.0 if who == nan else 56.0
-	bubble.position = who.global_position + Vector2(0, -head)
-	bubble.show_bubble()
+func _say(who: Node2D, text: String, thought := false, face := "") -> void:
+	var id := "nan" if who == nan else "echidna"
+	var f := face
+	if f == "":
+		f = "warm" if id == "nan" else ("worried" if thought else "neutral")
+	dialogue.say(id, f, text, thought)
 	await _wait_press()
-	bubble.hide_bubble(0.2)
 
 
 func _wait_press() -> void:
+	# the first press only finishes the typing (see _physics_process)
+	if dialogue.is_typing:
+		await dialogue.typed
 	_cooldown = 0.35
 	_set_hint("%s  ▸" % InputLabels.primary("interact"))
 	_waiting = true
@@ -465,7 +489,10 @@ func _set_hint(text: String) -> void:
 
 func _physics_process(delta: float) -> void:
 	_cooldown = maxf(_cooldown - delta, 0.0)
-	if _waiting and _cooldown <= 0.0 and _pressed():
+	if dialogue and dialogue.is_typing and _pressed():
+		dialogue.finish_typing()
+		_cooldown = 0.2
+	elif _waiting and _cooldown <= 0.0 and _pressed():
 		_waiting = false
 		advanced.emit()
 

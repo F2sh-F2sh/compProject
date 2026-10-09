@@ -20,22 +20,22 @@ extends CanvasLayer
 ## volume. Unavailable while the death screen is up; the chapter-only parts
 ## hide themselves in the tutorial.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
-const FONT_BODY := preload("res://assets/Text/Orbitron-Medium.ttf")
+const FONT := Fonts.STORY
+const FONT_BODY := Fonts.STORY
 const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
 const FRAMES := "res://assets/sprites/Echidna/echidna_frames.tres"
 const SOUNDS := "res://assets/audio/sfx/sao_%s.wav"
 
-const ORANGE := Color("f0a21e")
-const ICON_DARK := Color("3b3b40")
-const ICON_RING := Color("a9a9ae")
-const ROW_GREY := Color(0.32, 0.32, 0.34, 0.95)
-const ROW_WHITE := Color("f5f5f5")
-const TEXT_LIGHT := Color("ececec")
-const TEXT_DARK := Color("252525")
-const TEXT_MUTED := Color("7b7b80")
-const CARD_WHITE := Color("f2f2f2")
-const INFO_GREY := Color("d4d4d7")
+const ORANGE := Color("b23a48")
+const ICON_DARK := Color("1d1922")
+const ICON_RING := Color("7a5f2a")
+const ROW_GREY := Color("241f2b")
+const ROW_WHITE := Color("2f2a36")
+const TEXT_LIGHT := Color("e8dcc0")
+const TEXT_DARK := Color("e8dcc0")
+const TEXT_MUTED := Color("8a8092")
+const CARD_WHITE := Color("c9a24a")
+const INFO_GREY := Color("7a5f2a")
 
 const FRAME_SIZE := Vector2(910, 470)
 const CARD_RECT := Rect2(0, 20, 330, 440)
@@ -273,7 +273,7 @@ func _on_restart() -> void:
 		return
 	GameState.clear_progress(root.chapter_id)
 	_set_open(false)
-	get_tree().reload_current_scene()
+	SceneFade.restart(get_tree())
 
 
 func _on_reset() -> void:
@@ -287,7 +287,8 @@ func _on_reset() -> void:
 func _on_title() -> void:
 	_play("select")
 	_set_open(false)
-	get_tree().change_scene_to_file(TITLE_SCENE)
+	get_tree().paused = true
+	SceneFade.change(get_tree(), TITLE_SCENE)
 
 
 # ------------------------------------------------------------------ building
@@ -364,16 +365,8 @@ func _build() -> void:
 
 func _build_card() -> void:
 	_card = PanelContainer.new()
-	var style := StyleBoxFlat.new()
-	style.bg_color = CARD_WHITE
-	style.set_corner_radius_all(2)
-	style.shadow_color = Color(0, 0, 0, 0.35)
-	style.shadow_size = 10
-	style.content_margin_left = 12
-	style.content_margin_right = 12
-	style.content_margin_top = 10
-	style.content_margin_bottom = 12
-	_card.add_theme_stylebox_override("panel", style)
+	_card.add_theme_stylebox_override("panel", DungeonUI.panel_style())
+	DungeonUI.decorate(_card)
 	_card.position = CARD_RECT.position
 	_card.custom_minimum_size = CARD_RECT.size
 	_card.size = CARD_RECT.size
@@ -381,12 +374,10 @@ func _build_card() -> void:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
 	_card.add_child(column)
-	var name_label := _label("Echidna", 17, TEXT_DARK)
+	var name_label := DungeonUI.heading("Echidna", 36)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(name_label)
-	var rule := ColorRect.new()
-	rule.color = Color(0.3, 0.3, 0.32)
-	rule.custom_minimum_size = Vector2(0, 1)
+	var rule := DungeonUI.divider()
 	column.add_child(rule)
 	var stack := Control.new()
 	stack.custom_minimum_size = Vector2(306, 386)
@@ -416,13 +407,7 @@ func _build_card() -> void:
 	notch.draw.connect(func(): notch.draw_colored_polygon(PackedVector2Array([Vector2(18, 7), Vector2(26, 0), Vector2(34, 7)]), INFO_GREY))
 	_menu_box.add_child(notch)
 	var info := PanelContainer.new()
-	var info_style := StyleBoxFlat.new()
-	info_style.bg_color = INFO_GREY
-	info_style.content_margin_left = 10
-	info_style.content_margin_right = 10
-	info_style.content_margin_top = 8
-	info_style.content_margin_bottom = 8
-	info.add_theme_stylebox_override("panel", info_style)
+	info.add_theme_stylebox_override("panel", DungeonUI.lite_style())
 	info.custom_minimum_size = Vector2(306, 112)
 	_menu_box.add_child(info)
 	var info_row := HBoxContainer.new()
@@ -432,16 +417,17 @@ func _build_card() -> void:
 	_info_icon.custom_minimum_size = Vector2(26, 26)
 	_info_icon.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	_info_icon.draw.connect(func():
-		_info_icon.draw_circle(Vector2(13, 13), 13.0, Color(0.2, 0.2, 0.22))
-		draw_glyph(_info_icon, _info_glyph, Vector2(13, 13), 7.0, Color.WHITE))
+		_info_icon.draw_circle(Vector2(13, 13), 13.0, ICON_DARK)
+		_info_icon.draw_arc(Vector2(13, 13), 12.0, 0.0, TAU, 28, DungeonUI.GOLD_DIM, 2.0)
+		draw_glyph(_info_icon, _info_glyph, Vector2(13, 13), 7.0, DungeonUI.GOLD))
 	info_row.add_child(_info_icon)
 	var info_text := VBoxContainer.new()
 	info_text.add_theme_constant_override("separation", 3)
 	info_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info_row.add_child(info_text)
-	_info_title = _label("", 14, TEXT_DARK)
+	_info_title = _label("", 16, DungeonUI.GOLD, Fonts.UI)
 	info_text.add_child(_info_title)
-	_info_body = _label("", 11, Color("3c3c40"), FONT_BODY)
+	_info_body = _label("", 14, DungeonUI.INK, FONT_BODY)
 	_info_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info_body.custom_minimum_size = Vector2(240, 0)
 	info_text.add_child(_info_body)
@@ -449,7 +435,7 @@ func _build_card() -> void:
 	# The map, the ledger and the rune journal open in the card, on a dark page
 	_map_box = _card_view(stack, "CHAPTER MAP")
 	_map_list = _scroll_list(_map_box, 3)
-	_map_box.add_child(_label("▶ here   ✓ cleared   • visited   ◆ page   ◇ to find", 10, Color("9d93b8")))
+	_map_box.add_child(_label("▶ here   ✓ cleared   • visited   ◆ page   ◇ to find", 10, Color("9a8f86")))
 	_ledger_box = _card_view(stack, "THE BELLKEEPER'S LEDGER")
 	_ledger_list = _scroll_list(_ledger_box, 10)
 	_journal_box = _card_view(stack, "RUNE JOURNAL")
@@ -464,17 +450,11 @@ func _card_view(stack: Control, title := "") -> VBoxContainer:
 	_views.append(box)
 	if title == "":
 		return box
-	var page := StyleBoxFlat.new()
-	page.bg_color = Color("2b2a31")
-	page.content_margin_left = 10
-	page.content_margin_right = 10
-	page.content_margin_top = 8
-	page.content_margin_bottom = 8
 	box.add_theme_constant_override("separation", 6)
-	var heading := _label(title, 13, TEXT_DARK)
+	var heading := _label(title, 16, DungeonUI.GOLD_DIM, Fonts.UI)
 	box.add_child(heading)
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", page)
+	panel.add_theme_stylebox_override("panel", DungeonUI.lite_style())
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	box.add_child(panel)
 	var inner := VBoxContainer.new()
@@ -635,6 +615,8 @@ func _graphics_list() -> VBoxContainer:
 			func(): return "●  In use" if Settings.graphics == level else "", 4 + i])
 	rows.append(["Show FPS", "dot", "Show FPS", "A small frames-per-second counter in the bottom-left corner.",
 		func(): Settings.set_show_fps(not Settings.show_fps), func(): return "On" if Settings.show_fps else "Off", 9])
+	rows.append(["Smooth motion", "monitor", "Smooth motion", "Draws everything that moves in between the game's 60 steps a second, so movement glides on 120 Hz and faster screens. Turn it off if anything looks wrong.",
+		func(): Settings.set_smooth_motion(not Settings.smooth_motion), func(): return "On" if Settings.smooth_motion else "Off", -1])
 	rows.append(["Fullscreen", "monitor", "Fullscreen", "Fill the whole screen (also F11).",
 		func(): Settings.set_fullscreen(not Settings.fullscreen), func(): return "On" if Settings.fullscreen else "Off", 10])
 	rows.append(["Brightness", "sliders", "Brightness", "How bright the dungeon is. Dim is the original gloom, Normal the default, Bright lifts the shadows more.",
@@ -662,7 +644,7 @@ func _audio_list() -> VBoxContainer:
 	for spec in [["Master volume", "master_volume", Settings.set_master_volume], ["Music volume", "music_volume", Settings.set_music_volume],
 			["Ambience volume", "ambient_volume", Settings.set_ambient_volume], ["Effects volume", "sfx_volume", Settings.set_sfx_volume]]:
 		var row := SaoRow.new("", "speaker", false, SUB2_W)
-		var label := _label(spec[0], 12, TEXT_DARK)
+		var label := _label(spec[0], 14, TEXT_DARK)
 		label.position = Vector2(44, 0)
 		label.size = Vector2(130, ROW_H)
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -677,17 +659,6 @@ func _audio_list() -> VBoxContainer:
 		slider.position = Vector2(SUB2_W - 92.0, 12.0)
 		slider.size = Vector2(80, 16)
 		slider.focus_mode = Control.FOCUS_NONE
-		var track := StyleBoxFlat.new()
-		track.bg_color = Color(0.6, 0.6, 0.64)
-		track.content_margin_top = 2
-		track.content_margin_bottom = 2
-		var fill := StyleBoxFlat.new()
-		fill.bg_color = ORANGE
-		fill.content_margin_top = 2
-		fill.content_margin_bottom = 2
-		slider.add_theme_stylebox_override("slider", track)
-		slider.add_theme_stylebox_override("grabber_area", fill)
-		slider.add_theme_stylebox_override("grabber_area_highlight", fill)
 		slider.value_changed.connect(spec[2])
 		row.add_child(slider)
 		row.set_meta(&"slider", slider)
@@ -732,7 +703,7 @@ func _describe_rows() -> void:
 		"Reset Room": "Put this room's puzzle back to its start. Health is kept.",
 		"The Ledger": "The Bellkeeper's Ledger: every page you have found, to read again.",
 		"Rune Journal": "Fragments you know, what you have seen runes do, and the runes you have cast.",
-		"Graphics": "Quality from Low to Elite, the FPS counter and fullscreen.",
+		"Graphics": "Quality from Low to Elite, the FPS counter, smooth motion and fullscreen.",
 		"Controls": "Change any key.",
 		"Audio": "Volumes for music, ambience and effects.",
 		"Gameplay": "Guidance and assists.",
@@ -1114,10 +1085,10 @@ func _draw_figure() -> void:
 		var p := c + Vector2(cos(a) * 124.0, sin(a) * 100.0)
 		if i == _slot:
 			_figure.draw_circle(p, 11.0, ORANGE)
-			_figure.draw_arc(p, 15.0, 0.0, TAU, 28, ORANGE, 1.5, true)
+			_figure.draw_arc(p, 15.0, 0.0, TAU, 28, DungeonUI.GOLD, 1.5, true)
 		else:
-			_figure.draw_circle(p, 10.0, Color(0.24, 0.24, 0.26))
-			_figure.draw_arc(p, 10.0, 0.0, TAU, 28, Color(0.64, 0.64, 0.68), 1.2, true)
+			_figure.draw_circle(p, 10.0, ICON_DARK)
+			_figure.draw_arc(p, 10.0, 0.0, TAU, 28, ICON_RING, 1.5, true)
 
 
 # The card points at the active icon, and the icon points on to its list
@@ -1168,7 +1139,7 @@ func _fill_map() -> void:
 	var chapter: String = root.chapter_id
 	for room in rooms:
 		if room.act != "":
-			_map_list.add_child(_label("ACT %s  ·  %s" % [room.act, room.act_title], 11, Color("a99ccf")))
+			_map_list.add_child(_label("ACT %s  ·  %s" % [room.act, room.act_title], 11, Color("c9a24a")))
 		var key: String = room.room_id.get_slice(".", 1)
 		var seen := GameState.has_flag("%s.seen.%s" % [chapter, key])
 		var cleared := GameState.has_flag("%s.clear.%s" % [chapter, key])
@@ -1177,9 +1148,9 @@ func _fill_map() -> void:
 		for id in room.page_ids:
 			pages += "◆" if GameState.has_flag(id) else ("◇" if seen else "")
 		var text := " %s  %s  %s" % [mark, room.title if seen else "? ? ?", pages]
-		var color := Color("e4ddf2") if room == root.current_room else (Color("b8acd8") if seen else Color("6d6488"))
+		var color := Color("e8dcc0") if room == root.current_room else (Color("b9ab90") if seen else Color("6e6474"))
 		_map_list.add_child(_label(text, 12, color))
-	_map_list.add_child(_label("Lore pages found: %d / %d" % [root.pages_found(), root.total_pages], 11, Color("b8acd8")))
+	_map_list.add_child(_label("Lore pages found: %d / %d" % [root.pages_found(), root.total_pages], 11, Color("b9ab90")))
 
 
 # ------------------------------------------------------------------ ledger
@@ -1195,10 +1166,10 @@ func _fill_ledger() -> void:
 	for page in root.ledger:
 		var found := GameState.has_flag(page["id"])
 		var head := _label("%s   %s" % [page["numeral"], page["title"] if found else "A missing page"], 12,
-			Color("e2d6fa") if found else Color("6d6488"))
+			Color("f0d27a") if found else Color("6e6474"))
 		_ledger_list.add_child(head)
 		var body := _label(page["text"] if found else "Somewhere in %s." % page["room"], 11,
-			Color("cfc4e6") if found else Color("6d6488"), FONT_BODY)
+			Color("d9c9a8") if found else Color("6e6474"), FONT_BODY)
 		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		body.custom_minimum_size = Vector2(270, 0)
 		_ledger_list.add_child(body)
@@ -1332,13 +1303,16 @@ class SaoIcon extends Control:
 	func _draw() -> void:
 		var c := size / 2.0
 		var r := size.x / 2.0 - 5.0
+		# A carved stone disc with a gold ring; the active one set with a
+		# crimson stone and an outer ring of gold
+		draw_circle(c, r, PauseMenu.ORANGE.darkened(0.35) if active else PauseMenu.ICON_DARK)
+		draw_arc(c, r, 0.0, TAU, 48, DungeonUI.GOLD if active else PauseMenu.ICON_RING, 2.0, true)
 		if active:
-			draw_arc(c, r + 5.0, 0.0, TAU, 48, PauseMenu.ORANGE, 2.0, true)
-			draw_circle(c, r, PauseMenu.ORANGE)
-		else:
-			draw_circle(c, r, PauseMenu.ICON_DARK)
-			draw_arc(c, r, 0.0, TAU, 48, PauseMenu.ICON_RING, 1.5, true)
-		PauseMenu.draw_glyph(self, glyph, c, r * 0.55, Color.WHITE)
+			draw_arc(c, r + 5.0, 0.0, TAU, 48, DungeonUI.GOLD_DIM, 1.5, true)
+			for k in 4:
+				var d := Vector2.from_angle(k * TAU / 4.0 + PI / 4.0)
+				draw_circle(c + d * (r + 5.0), 2.0, DungeonUI.GOLD)
+		PauseMenu.draw_glyph(self, glyph, c, r * 0.55, DungeonUI.GOLD if active else DungeonUI.INK)
 
 
 ## A list row: dark grey (the first list) or white (the second), with a
@@ -1369,20 +1343,17 @@ class SaoRow extends Button:
 		mouse_filter = Control.MOUSE_FILTER_PASS
 		clip_text = true
 		add_theme_font_override("font", PauseMenu.FONT)
-		add_theme_font_size_override("font_size", 13 if is_dark else 12)
+		add_theme_font_size_override("font_size", 16 if is_dark else 14)
 		mouse_entered.connect(func(): hovered.emit())
 		_restyle()
 
 	func _restyle() -> void:
-		var box := StyleBoxFlat.new()
-		box.bg_color = PauseMenu.ORANGE if active else (PauseMenu.ROW_GREY if dark else PauseMenu.ROW_WHITE)
-		box.content_margin_left = 44
-		box.content_margin_right = 12
-		box.border_width_bottom = 1
-		box.border_color = Color(0, 0, 0, 0.3) if dark else Color(0.8, 0.8, 0.83)
+		# Stone plates; the active row glows with a gold rim and crimson
+		var plate := "button_hover" if active else ("button_idle" if dark else "button_pressed")
+		var box := DungeonUI.style(plate, 10, Vector4(44, 0, 12, 0))
 		for state in ["normal", "hover", "pressed", "focus", "disabled", "hover_pressed"]:
 			add_theme_stylebox_override(state, box)
-		var fg := Color.WHITE if active else (PauseMenu.TEXT_LIGHT if dark else PauseMenu.TEXT_DARK)
+		var fg := DungeonUI.GOLD if active else DungeonUI.INK
 		for key in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
 			add_theme_color_override(key, fg)
 		add_theme_color_override("font_disabled_color", Color(fg, 0.45))
@@ -1393,17 +1364,18 @@ class SaoRow extends Button:
 	func _draw() -> void:
 		var h := size.y
 		var c := Vector2(22.0, h / 2.0)
-		var circle := Color.WHITE if active else (Color(0.2, 0.2, 0.22) if dark else Color(0.26, 0.26, 0.29))
+		var circle := DungeonUI.CRIMSON_DARK if active else DungeonUI.SHADOW
 		draw_circle(c, 12.0, circle)
-		PauseMenu.draw_glyph(self, glyph, c, 6.5, PauseMenu.ORANGE if active else Color.WHITE)
+		draw_arc(c, 12.0, 0.0, TAU, 28, DungeonUI.GOLD if active else DungeonUI.GOLD_DIM.darkened(0.3), 1.5)
+		PauseMenu.draw_glyph(self, glyph, c, 6.5, DungeonUI.GOLD if active else DungeonUI.INK)
 		if value_text != "":
 			var font: Font = PauseMenu.FONT
-			var width := font.get_string_size(value_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-			var col := Color.WHITE if active else (Color(0.85, 0.85, 0.88) if dark else PauseMenu.TEXT_MUTED)
-			draw_string(font, Vector2(size.x - width - 12.0, h / 2.0 + 4.0), value_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, col)
+			var width := font.get_string_size(value_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+			var col := DungeonUI.GOLD if active else DungeonUI.DIM
+			draw_string(font, Vector2(size.x - width - 12.0, h / 2.0 + 5.0), value_text, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)
 		if active:
 			# A notch on the left edge, pointing back at what opened this list
-			draw_colored_polygon(PackedVector2Array([Vector2(0, h / 2.0 - 7.0), Vector2(-8, h / 2.0), Vector2(0, h / 2.0 + 7.0)]), PauseMenu.ORANGE)
+			draw_colored_polygon(PackedVector2Array([Vector2(0, h / 2.0 - 7.0), Vector2(-8, h / 2.0), Vector2(0, h / 2.0 + 7.0)]), DungeonUI.GOLD)
 
 
 ## "chapter", "level" or "wing": what the current stretch of the game is called.

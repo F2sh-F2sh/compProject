@@ -140,6 +140,9 @@ func _on_area_entered(area: Area2D) -> void:
 
 func _set_lit(lit: bool, silent := false) -> void:
 	if lit == is_lit and not silent:
+		# More fire feeds one that is already burning: it burns its full time again
+		if lit:
+			_burn_left = burn_time
 		return
 	is_lit = lit
 	_burn_left = burn_time

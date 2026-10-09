@@ -16,6 +16,8 @@ var _rings: Node2D
 var _zoom_tween: Tween
 
 func _ready() -> void:
+	# Animated every drawn frame (pictures, the camera's slow zoom): drawn as it is
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	get_tree().paused = false
 	AudioDirector.reset_combat()
 	AudioDirector.duck(-8, 1.0)
@@ -140,4 +142,4 @@ func _finish() -> void:
 	GameState.set_flag("story.bell_echo_seen")
 	var t := create_tween()
 	t.tween_property(_fade, "color:a", 1, 0.8)
-	t.tween_callback(func(): get_tree().change_scene_to_file(NEXT))
+	t.tween_callback(func(): SceneFade.change(get_tree(), NEXT, 0.0))

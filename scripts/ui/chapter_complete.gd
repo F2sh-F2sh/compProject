@@ -5,8 +5,7 @@ extends CanvasLayer
 ## hints heard and ledger pages found, then back to the title (or keep
 ## exploring the chapter, e.g. to find the pages still missing).
 
-const TITLE_FONT_NAMES := ["Cinzel", "Trajan Pro", "Times New Roman", "Georgia", "Liberation Serif", "serif"]
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.STORY
 const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
 
 ## A finished chapter's card waiting for its story pictures to end:
@@ -41,21 +40,25 @@ func _build(chapter_name: String, stats: Dictionary) -> void:
 	dim.color = Color(0.02, 0.01, 0.05, 0.82)
 	_root.add_child(dim)
 	var box := VBoxContainer.new()
-	box.set_anchors_preset(Control.PRESET_CENTER)
-	box.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	box.grow_vertical = Control.GROW_DIRECTION_BOTH
+	var card := PanelContainer.new()
+	card.set_anchors_preset(Control.PRESET_CENTER)
+	card.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	card.grow_vertical = Control.GROW_DIRECTION_BOTH
+	card.custom_minimum_size = Vector2(560, 0)
+	_root.add_child(card)
+	DungeonUI.decorate(card)
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 12)
-	_root.add_child(box)
-	box.add_child(_line(String(stats.get("heading", "CHAPTER COMPLETE")), FONT, 16, Color("a99ccf")))
-	var serif := SystemFont.new()
-	serif.font_names = PackedStringArray(TITLE_FONT_NAMES)
-	box.add_child(_line(chapter_name, serif, 48, Color("e2d6fa")))
+	card.add_child(box)
+	box.add_child(_line(String(stats.get("heading", "CHAPTER COMPLETE")), Fonts.UI, 16, Color("c9a24a")))
+	var serif: Font = Fonts.TITLE
+	box.add_child(_line(chapter_name, serif, 60, Color("f0d27a")))
+	box.add_child(DungeonUI.divider(420.0))
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 40)
 	grid.add_theme_constant_override("v_separation", 6)
-	box.add_child(_line("YOUR RUN", FONT, 12, Color("8f84ad")))
+	box.add_child(_line("YOUR RUN", Fonts.UI, 16, Color("8a8092")))
 	var center := CenterContainer.new()
 	center.add_child(grid)
 	box.add_child(center)
@@ -71,11 +74,11 @@ func _build(chapter_name: String, stats: Dictionary) -> void:
 	if int(stats.get("total_pages", 0)) > 0:
 		rows.append(["Ledger pages", "%d / %d" % [int(stats.get("pages", 0)), int(stats.get("total_pages", 0))]])
 	for row in rows:
-		grid.add_child(_line(row[0], FONT, 16, Color("b8acd8"), HORIZONTAL_ALIGNMENT_LEFT))
+		grid.add_child(_line(row[0], FONT, 16, Color("b9ab90"), HORIZONTAL_ALIGNMENT_LEFT))
 		grid.add_child(_line(row[1], FONT, 16, Color("f0d890"), HORIZONTAL_ALIGNMENT_RIGHT))
 	var next: String = stats.get("next", "")
 	if next == "":
-		box.add_child(_line(String(stats.get("closing", "The next chapter is still being written.")), FONT, 13, Color("8f84ad")))
+		box.add_child(_line(String(stats.get("closing", "The next chapter is still being written.")), FONT, 16, Color("8a8092")))
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 16)
@@ -106,8 +109,8 @@ func _button(text: String, on_press: Callable) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.custom_minimum_size = Vector2(220, 40)
-	b.add_theme_font_override("font", FONT)
-	b.add_theme_font_size_override("font_size", 17)
+	b.add_theme_font_override("font", Fonts.UI)
+	b.add_theme_font_size_override("font_size", 16)
 	b.pressed.connect(func(): Sfx.play("ui_click"); on_press.call())
 	return b
 
@@ -120,7 +123,7 @@ func _to(scene: String) -> void:
 	get_tree().paused = false
 	if scene == "res://scenes/chapter/chapter_2.tscn" and get_tree().current_scene.scene_file_path == "res://scenes/chapter/chapter_1.tscn" and not GameState.has_flag("story.bell_echo_seen"):
 		scene = "res://scenes/story/bell_aftermath.tscn"
-	get_tree().change_scene_to_file(scene)
+	SceneFade.change(get_tree(), scene)
 
 
 func _close() -> void:

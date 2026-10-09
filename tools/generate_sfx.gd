@@ -165,6 +165,76 @@ func _init() -> void:
 	write("knock", mix([thud(150.0, 0.14, 0.035), scaled(click(0.012, 0.45), 0.6), scaled(noise(0.06, 0.015, 0.35, 0.0, 0.2), 0.4)]), 0.5)
 	# The charged jump reaching full power: a small bright two-note ting
 	write("charge_full", mix([chime(1174.7, 0.3, 0.002), offset(chime(1760.0, 0.45, 0.002), 0.07)]), 0.3)
+	# The polish pass. The roaming creatures (scripts/creatures/creature.gd):
+	# a chitter when one spots her, a yelp, a pop and a fizzle when it dies,
+	# a slime's squish, a clinker's shell cracking, a hushling's cold pull
+	write("creature_alert", mix([sweep(500.0, 1100.0, 0.12, false), offset(sweep(620.0, 1320.0, 0.1, false), 0.09)]), 0.32)
+	write("creature_hurt", mix([sweep(760.0, 300.0, 0.14, false), noise(0.1, 0.03, 0.5, 0.0, 0.4)]), 0.34)
+	write("creature_die", mix([thud(200.0, 0.2, 0.04), noise(0.35, 0.12, 0.4, 0.0, 0.4),
+		sweep(620.0, 140.0, 0.35, false), offset(scaled(crackle(0.3, 6), 0.5), 0.08)]), 0.4)
+	write("creature_hop", mix([thud(180.0, 0.12, 0.03), noise(0.1, 0.03, 0.3, 0.0, 0.2)]), 0.28)
+	write("creature_crack", mix([crackle(0.3, 10), partials(1700.0, [1.0, 2.4], [1.0, 0.4], [0.08, 0.04], 0.3, 0.0005),
+		thud(90.0, 0.2, 0.05)]), 0.45)
+	write("creature_drain", mix([sweep(900.0, 200.0, 0.6, true), scaled(noise(0.6, 0.3, 0.2, 0.2, 0.3), 0.6)]), 0.3)
+	# Dying, in full: the blow, her fall, a low minor chord and a heartbeat
+	# that slows and stops; the death screen's own toll; coming back
+	var beat := mix([thud(58.0, 0.2, 0.05), offset(scaled(thud(52.0, 0.2, 0.05), 0.7), 0.18)])
+	write("death_fall", mix([thud(70.0, 0.5, 0.12), noise(0.3, 0.06, 0.3, 0.0, 0.4),
+		offset(thud(90.0, 0.35, 0.08), 0.3), offset(scaled(noise(0.25, 0.08, 0.2, 0.0, 0.3), 0.5), 0.3),
+		offset(scaled(partials(110.0, [1.0, 2.0], [1.0, 0.2], [2.0, 1.0], 3.0, 0.3), 0.5), 0.35),
+		offset(scaled(partials(130.8, [1.0, 2.0], [1.0, 0.2], [2.0, 1.0], 3.0, 0.3), 0.4), 0.4),
+		offset(scaled(partials(164.8, [1.0, 2.0], [1.0, 0.2], [2.0, 1.0], 3.0, 0.3), 0.35), 0.45),
+		offset(beat, 0.8), offset(scaled(beat, 0.7), 1.75), offset(scaled(beat, 0.4), 3.0)]), 0.55)
+	write("death_sting", mix([bell(98.0, 4.0), scaled(bell(116.5, 3.5), 0.45), scaled(rumble(1.5), 0.4)]), 0.5)
+	write("respawn", mix([rising_pad(294.0, 440.0, 0.9), offset(chime(880.0, 0.7), 0.6),
+		scaled(noise(0.8, 0.3, 0.5, 0.3, 0.4), 0.3)]), 0.35)
+	# Footsteps that change with the floor: soot and ash in the Kilnworks,
+	# wet stone in the Cistern, loose paper in the Galleries
+	for i in 3:
+		var heel := thud(rng.randf_range(105.0, 135.0), 0.09, 0.015)
+		var grit := scaled(crackle(0.09, 5), 0.35)
+		write("step_ash_%d" % (i + 1), soften(mix([heel, grit, noise(0.1, 0.03, 0.3, 0.002, 0.4)]), 0.35), 0.3)
+	for i in 3:
+		var heel := thud(rng.randf_range(110.0, 140.0), 0.08, 0.014)
+		write("step_wet_%d" % (i + 1), mix([heel, noise(0.12, 0.04, 0.5, 0.002, 0.35),
+			offset(scaled(sweep(rng.randf_range(950.0, 1150.0), 1800.0, 0.04, false), 0.4), 0.02)]), 0.28)
+	for i in 3:
+		var heel := thud(rng.randf_range(110.0, 140.0), 0.08, 0.014)
+		write("step_paper_%d" % (i + 1), mix([heel, scaled(noise(0.16, 0.05, 0.6, 0.004, 0.6), 0.6)]), 0.26)
+	# The dungeon UI speaks in stone: these replace the earlier digital
+	# menu sounds (written last, so every sound above stays identical)
+	write("ui_click", mix([thud(240.0, 0.09, 0.02), scaled(click(0.006, 0.3), 0.5),
+		scaled(partials(2350.0, [1.0, 2.7], [1.0, 0.3], [0.04, 0.02], 0.12, 0.0005), 0.18)]), 0.3)
+	write("ui_hover", mix([thud(320.0, 0.05, 0.012), scaled(noise(0.04, 0.01, 0.4, 0.0, 0.5), 0.4)]), 0.13)
+	write("ui_open", mix([scrape(0.22), offset(thud(110.0, 0.2, 0.05), 0.16)]), 0.3)
+	write("sao_hover", mix([thud(360.0, 0.05, 0.012), scaled(noise(0.04, 0.01, 0.45, 0.0, 0.5), 0.35)]), 0.13)
+	write("sao_select", mix([thud(220.0, 0.1, 0.022), scaled(click(0.006, 0.3), 0.5), offset(scaled(chime(1568.0, 0.3), 0.3), 0.02)]), 0.3)
+	write("sao_open", mix([scrape(0.3), offset(thud(100.0, 0.25, 0.06), 0.2), offset(scaled(chime(784.0, 0.5), 0.4), 0.22)]), 0.3)
+	write("sao_close", mix([thud(120.0, 0.18, 0.05), scaled(scrape(0.18), 0.7)]), 0.26)
+	write("sao_back", mix([thud(180.0, 0.08, 0.02), scaled(click(0.006, 0.25), 0.5)]), 0.22)
+	write("page_turn", mix([noise(0.28, 0.09, 0.55, 0.02, 0.6), offset(scaled(noise(0.12, 0.04, 0.7, 0.0, 0.7), 0.6), 0.15)]), 0.3)
+	# The hint skull's breath: three whispered syllables
+	write("hint_whisper", whisper(1.1, [0.12, 0.45, 0.8]), 0.22)
+	# Each level's ambience bed (AudioDirector.set_bed), 8 s seamless loops
+	write("bed_wind", bed(func(s): return mix([tremolo(noise(s, 1e6, 0.05, 0.0, 0.1), 0.125, 0.7),
+		scaled(tremolo(partials(740.0, [1.0], [1.0], [1e6], s), 0.25, 1.0), 0.04)])), 0.25)
+	write("bed_stars", bed(func(s): return mix([scaled(tremolo(noise(s, 1e6, 0.04, 0.0, 0.1), 0.25, 0.5), 0.7),
+		scaled(at(func(): return chime(rng.randf_range(2000.0, 3200.0), 1.2), s, [0.6, 2.9, 4.4, 6.8]), 0.08)])), 0.22)
+	write("bed_hush", bed(func(s): return mix([scaled(partials(55.0, [1.0, 2.0], [1.0, 0.3], [1e6, 1e6], s), 0.4),
+		tremolo(noise(s, 1e6, 0.04, 0.0, 0.1), 0.125, 0.6)])), 0.24)
+	write("bed_forge", bed(func(s): return mix([tremolo(noise(s, 1e6, 0.04, 0.0, 0.0), 0.25, 0.4),
+		scaled(crackle(s, 30), 0.25), scaled(at(func(): return partials(rng.randf_range(2400.0, 2900.0), [1.0, 2.7], [1.0, 0.4], [0.02, 0.01], 0.06, 0.0005),
+		s, [3.1, 3.18, 3.24, 3.33, 3.41, 3.5]), 0.25)])), 0.3)
+	write("bed_water", bed(func(s): return mix([scaled(tremolo(noise(s, 1e6, 0.08, 0.0, 0.3), 0.375, 0.3), 0.6),
+		scaled(at(func(): return sweep(rng.randf_range(1100.0, 1400.0), 2300.0, 0.045, false), s, [0.7, 1.9, 3.4, 4.6, 6.2, 7.3]), 0.5),
+		offset(scaled(sweep(500.0, 900.0, 0.08, false), 0.4), 5.5)])), 0.26)
+	write("bed_lamps", bed(func(s): return mix([scaled(partials(60.0, [1.0, 2.0, 3.0], [1.0, 0.5, 0.25], [1e6, 1e6, 1e6], s), 0.25),
+		scaled(at(func(): return click(0.004, 0.2), s, [1.3, 1.36, 4.9, 5.0, 5.04]), 0.15),
+		scaled(at(func(): return noise(0.4, 0.15, 0.5, 0.05, 0.5), s, [2.2, 6.1]), 0.3)])), 0.22)
+	write("bed_folds", bed(func(s): return mix([tremolo(noise(s, 1e6, 0.06, 0.0, 0.2), 0.25, 0.6),
+		scaled(at(func(): return noise(0.5, 0.18, 0.55, 0.06, 0.6), s, [1.5, 4.3, 7.0]), 0.4)])), 0.24)
+	write("bed_eye", bed(func(s): return mix([scaled(partials(41.0, [1.0, 2.0], [1.0, 0.2], [1e6, 1e6], s), 0.6),
+		scaled(tremolo(partials(2637.0, [1.0], [1.0], [1e6], s), 0.125, 1.0), 0.02)])), 0.18)
 	print("SFX DONE")
 	quit()
 
@@ -401,4 +471,51 @@ func fade_ends(samples: PackedFloat32Array, seconds: float) -> PackedFloat32Arra
 		var k := float(i) / n
 		b[i] *= k
 		b[b.size() - 1 - i] *= k
+	return b
+
+
+## Swells and dips a sound's volume: rate in Hz, depth 0..1.
+func tremolo(samples: PackedFloat32Array, rate: float, depth: float) -> PackedFloat32Array:
+	var b := samples.duplicate()
+	for i in b.size():
+		b[i] *= 1.0 - depth * (0.5 + 0.5 * sin(TAU * rate * i / float(RATE)))
+	return b
+
+
+## A fresh copy of make() (a Callable returning samples) at each of the times.
+func at(make: Callable, seconds: float, times: Array) -> PackedFloat32Array:
+	var b := length(seconds)
+	for t in times:
+		var s: PackedFloat32Array = make.call()
+		var start := int(t * RATE)
+		for i in s.size():
+			if start + i < b.size():
+				b[start + i] += s[i]
+	return b
+
+
+## An ambience loop: make(seconds) builds BED + one second, and that last
+## second is crossfaded over the start so the loop has no seam.
+const BED := 8.0
+
+func bed(make: Callable) -> PackedFloat32Array:
+	var long: PackedFloat32Array = make.call(BED + 1.0)
+	var n := int(BED * RATE)
+	var x := long.size() - n
+	var b := long.slice(0, n)
+	for i in x:
+		var k := float(i) / x
+		b[i] = b[i] * k + long[n + i] * (1.0 - k)
+	return b
+
+
+## Breathy noise shaped into whispered syllables peaking at the given times.
+func whisper(seconds: float, peaks: Array) -> PackedFloat32Array:
+	var b := noise(seconds, 1e6, 0.35, 0.0, 0.7)
+	for i in b.size():
+		var t := i / float(RATE)
+		var amp := 0.0
+		for p in peaks:
+			amp = maxf(amp, exp(-pow((t - p) / 0.09, 2.0)))
+		b[i] *= amp * (0.7 + 0.3 * sin(TAU * 3.2 * t))
 	return b

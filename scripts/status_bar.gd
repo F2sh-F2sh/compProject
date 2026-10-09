@@ -1,6 +1,6 @@
 extends Control
 
-@export var player_name := "ECHIDNA"
+@export var player_name := "Echidna"
 @export var name_font: Font
 @export var body_font: Font
 
@@ -12,16 +12,16 @@ const TAB_H := 20.0
 const MANA_PLATE_W := 176.0
 const MANA_PLATE_H := 16.0
 
-const COLOR_PLATE := Color(0.12, 0.1, 0.16, 0.92)
-const COLOR_BORDER := Color(0.88, 0.85, 0.94)
-const COLOR_TRACK := Color(0.05, 0.04, 0.08)
-const COLOR_TAB := Color(0.82, 0.8, 0.87)
-const COLOR_TAB_TEXT := Color(0.14, 0.12, 0.2)
+const COLOR_PLATE := Color(0.086, 0.075, 0.1, 0.94)
+const COLOR_BORDER := Color("c9a24a")
+const COLOR_TRACK := Color("07060a")
+const COLOR_TAB := Color("b08a3e")
+const COLOR_TAB_TEXT := Color("1a120a")
 const COLOR_GHOST := Color(1, 1, 1, 0.75)
 const COLOR_HIT := Color(1.0, 0.3, 0.3)
-const HP_HIGH := Color(0.55, 0.86, 0.2)
-const HP_MID := Color(0.96, 0.78, 0.2)
-const HP_LOW := Color(0.92, 0.22, 0.22)
+const HP_HIGH := Color(0.8, 0.2, 0.27)
+const HP_MID := Color(0.88, 0.45, 0.2)
+const HP_LOW := Color(1.0, 0.28, 0.22)
 const MP_HIGH := Color(0.3, 0.9, 1.0)
 const MP_MID := Color(0.25, 0.6, 1.0)
 const MP_LOW := Color(0.6, 0.35, 1.0)
@@ -50,8 +50,8 @@ var echo_max := 2
 ## Seconds of recording left (negative when unknown).
 var echo_seconds := -1.0
 
-const COLOR_DEBT := Color(0.24, 0.12, 0.34)
-const COLOR_DEBT_HATCH := Color(0.55, 0.32, 0.8, 0.8)
+const COLOR_DEBT := Color(0.3, 0.08, 0.12)
+const COLOR_DEBT_HATCH := Color(0.7, 0.25, 0.3, 0.8)
 const COLOR_REC := Color(1.0, 0.28, 0.32)
 const COLOR_ECHO := Color(0.72, 0.5, 1.0)
 
@@ -144,9 +144,9 @@ func _draw() -> void:
 	draw_rect(Rect2(4, 9, 4, 22), border)
 	draw_line(Vector2(13, 5), Vector2(13, 35), border, 2.0)
 
-	var name_size := 15
+	var name_size := 24
 	var name_w := name_font.get_string_size(player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size).x
-	draw_string(name_font, Vector2(22, 26), player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size, COLOR_BORDER)
+	draw_string(name_font, Vector2(22, 28), player_name, HORIZONTAL_ALIGNMENT_LEFT, -1, name_size, DungeonUI.GOLD)
 
 	_draw_health_bar(22.0 + name_w + 12.0)
 
@@ -246,7 +246,7 @@ func _draw_echo_indicator(top: float, border: Color) -> void:
 	if echo_recording:
 		var pulse := 0.5 + 0.5 * sin(time * 8.0)
 		draw_circle(Vector2(10, top + h / 2.0), 3.5, COLOR_REC.lerp(Color.WHITE, 0.3 * pulse))
-		draw_string(body_font, Vector2(18, baseline), "REC", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, COLOR_REC)
+		draw_string(body_font, Vector2(18, baseline), "REC", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, COLOR_REC)
 		var bar := Rect2(46, top + 6.0, 48, 4)
 		draw_rect(bar, COLOR_TRACK)
 		# The last seconds flash white so running out is never a surprise
@@ -254,10 +254,10 @@ func _draw_echo_indicator(top: float, border: Color) -> void:
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * echo_remaining, bar.size.y)),
 			COLOR_REC.lerp(Color.WHITE, 0.6) if urgent else COLOR_REC)
 		if echo_seconds >= 0.0:
-			draw_string(body_font, Vector2(98, baseline), "%.1fs" % echo_seconds, HORIZONTAL_ALIGNMENT_LEFT, -1, 9,
+			draw_string(body_font, Vector2(98, baseline), "%.1fs" % echo_seconds, HORIZONTAL_ALIGNMENT_LEFT, -1, 8,
 				Color.WHITE if urgent else COLOR_REC)
 	else:
-		draw_string(body_font, Vector2(8, baseline), "ECHO", HORIZONTAL_ALIGNMENT_LEFT, -1, 9, COLOR_ECHO)
+		draw_string(body_font, Vector2(8, baseline), "ECHO", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, COLOR_ECHO)
 		for i in echo_max:
 			var center := Vector2(56 + i * 14, top + h / 2.0)
 			var diamond := PackedVector2Array([center + Vector2(0, -4), center + Vector2(4, 0),
@@ -284,9 +284,9 @@ func _draw_tab() -> void:
 
 	var baseline := bottom - 5.0
 	var mp_text := "KINDLING" if mp_restoring else "MANA %d" % mp
-	draw_string(body_font, Vector2(TAB_X, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 10, COLOR_TAB_TEXT)
+	draw_string(body_font, Vector2(TAB_X, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 8, COLOR_TAB_TEXT)
 	var hp_text := "%d / %d" % [hp, hp_max]
-	draw_string(body_font, Vector2(divider + 2.0, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 12, COLOR_TAB_TEXT)
+	draw_string(body_font, Vector2(divider + 2.0, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 8, COLOR_TAB_TEXT)
 
 
 func _fill_clipped(shape: PackedVector2Array, x0: float, x_max: float, ratio: float, color: Color) -> Array:

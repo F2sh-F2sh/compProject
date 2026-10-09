@@ -6,7 +6,7 @@ extends Node2D
 ## show whatever key that input action is currently bound to.
 ## The node marks the bottom-centre of the plaque.
 
-const FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const FONT := Fonts.STORY
 # Text is rasterised at 2x and scaled down so it stays sharp under the 2x camera
 const TEXT_SCALE := 0.5
 
@@ -18,8 +18,13 @@ const TEXT_SCALE := 0.5
 	set(value):
 		width = value
 		_rebuild()
+## Written by hand in chalk (Wren's notes): the handwriting face, chalk white.
+@export var handwritten := false:
+	set(value):
+		handwritten = value
+		_rebuild()
 @export var key_color := Color("f2c35b")
-@export var text_color := Color("e4ddf2")
+@export var text_color := Color("e8dcc0")
 @export var font_size := 14
 ## Fully visible within this distance of the player, faded out beyond fade_distance.
 @export var reveal_distance := 300.0
@@ -59,18 +64,7 @@ func _rebuild() -> void:
 	if _panel == null:
 		_panel = PanelContainer.new()
 		_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.05, 0.035, 0.09, 0.86)
-		style.border_color = Color(0.5, 0.38, 0.78, 0.85)
-		style.set_border_width_all(2)
-		style.set_corner_radius_all(4)
-		style.content_margin_left = 14
-		style.content_margin_right = 14
-		style.content_margin_top = 10
-		style.content_margin_bottom = 10
-		style.shadow_color = Color(0, 0, 0, 0.45)
-		style.shadow_size = 4
-		_panel.add_theme_stylebox_override("panel", style)
+		_panel.add_theme_stylebox_override("panel", DungeonUI.style("panel_lite", 8, Vector4(16, 12, 16, 12)))
 		_panel.scale = Vector2.ONE * TEXT_SCALE
 		add_child(_panel)
 
@@ -93,9 +87,12 @@ func _rebuild() -> void:
 		_light.energy = self_light_energy
 		add_child(_light)
 
-	_label.add_theme_font_size_override("normal_font_size", font_size * 2)
+	var face: Font = Fonts.HAND if handwritten else FONT
+	_label.add_theme_font_override("normal_font", face)
+	_label.add_theme_font_override("bold_font", face)
+	_label.add_theme_font_size_override("normal_font_size", (font_size + 4 if handwritten else font_size) * 2)
 	_label.add_theme_font_size_override("bold_font_size", font_size * 2)
-	_label.add_theme_color_override("default_color", text_color)
+	_label.add_theme_color_override("default_color", Color("f2efe6") if handwritten else text_color)
 	_label.custom_minimum_size = Vector2(width / TEXT_SCALE - 28.0, 0)
 	_label.text = "[center]%s[/center]" % InputLabels.format(text, "[color=#%s]%%s[/color]" % key_color.to_html(false))
 
@@ -125,5 +122,5 @@ func _draw() -> void:
 	for cx in [-size.x / 2.0 + 10.0, size.x / 2.0 - 10.0]:
 		var y := top - chain_length
 		while y < top:
-			draw_rect(Rect2(cx - 1.0, y, 3, 3), Color("4c4862"), false, 1.0)
+			draw_rect(Rect2(cx - 1.0, y, 3, 3), Color("4a4250"), false, 1.0)
 			y += 4.0

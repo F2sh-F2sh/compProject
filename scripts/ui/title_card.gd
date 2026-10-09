@@ -6,8 +6,7 @@ extends CanvasLayer
 ## above the play space and lets input through; a newer card replaces an
 ## older one.
 
-const TITLE_FONT_NAMES := ["Cinzel", "Trajan Pro", "Times New Roman", "Georgia", "Liberation Serif", "serif"]
-const BODY_FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const BODY_FONT := Fonts.STORY
 
 static var _current: TitleCard
 
@@ -58,12 +57,11 @@ func _build(overline: String, title: String, subtitle: String) -> void:
 	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_box)
 	if overline != "":
-		_box.add_child(_line(overline, BODY_FONT, 15, Color("a99ccf"), 6))
-	var serif := SystemFont.new()
-	serif.font_names = PackedStringArray(TITLE_FONT_NAMES)
-	_box.add_child(_line(title, serif, 46, Color("e2d6fa"), 0))
+		_box.add_child(_line(overline, Fonts.UI, 16, Color("c9a24a"), 6))
+	var serif: Font = Fonts.TITLE
+	_box.add_child(_line(title, serif, 48, Color("f0d27a"), 0))
 	if subtitle != "":
-		_box.add_child(_line(subtitle, BODY_FONT, 15, Color("c9bfe3"), 0))
+		_box.add_child(_line(subtitle, BODY_FONT, 16, Color("d9c9a8"), 0))
 	root.modulate.a = 0.0
 
 

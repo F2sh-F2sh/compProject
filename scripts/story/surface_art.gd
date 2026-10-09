@@ -40,6 +40,15 @@ const STRIPS := {
 	"smith_plaque": 1, "chalk_steps": 1, "chalk_route": 1, "chalk_star": 1, "frost_a": 1, "frost_b": 1, "door_frost": 1,
 	# The Drowned Cistern (tools/generate_cistern_sprites.gd)
 	"cistern_water": 4, "fountain_nozzle": 1, "tide_clock": 1, "tide_float": 1, "warden_plaque": 1, "cistern_pipe": 1,
+	# The Lampworks (tools/generate_lamp_sprites.gd)
+	"hall_lamp": 2, "great_lamp": 2, "bookshelf": 1, "lamplighter_plaque": 1,
+	# The Folded Galleries (tools/generate_gallery_sprites.gd)
+	"wren": 3, "archivist_plaque": 1, "scroll_rack": 1, "chalk_hands": 1,
+	"seal_fire": 2, "seal_ice": 2, "seal_light": 2, "seal_space": 2,
+	# The story reels, staged like Hollow Knight (tools/generate_story_hk_sprites.gd)
+	"hk_moth": 3, "hk_moth_folded": 1, "hk_chain_link": 1, "hk_chain_plate": 4, "hk_ilse_kneel": 3, "hk_ornament": 1,
+	"hk_stalactites": 1, "hk_rocks": 1, "hk_crystals": 1, "hk_arch": 1, "hk_pillar": 1, "hk_grass": 1,
+	"hk_mountain": 1, "hk_roofs": 1, "hk_dome": 1,
 	# The Choir's waymarks (tools/generate_waymark_sprites.gd)
 	"waymark": 3,
 }

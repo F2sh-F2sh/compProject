@@ -32,8 +32,7 @@ signal room_reset_done(room: Room)
 ## Ledger in the pause menu. Written by the chapter builder.
 @export var ledger: Array[Dictionary] = []
 
-const TITLE_FONT_NAMES := ["Cinzel", "Trajan Pro", "Times New Roman", "Georgia", "Liberation Serif", "serif"]
-const BODY_FONT := preload("res://assets/Text/Orbitron-Bold.ttf")
+const BODY_FONT := Fonts.STORY
 
 var player: CharacterBody2D
 var camera: CameraBounds
@@ -78,6 +77,10 @@ func _ready() -> void:
 	camera = player.get_node("Camera2D")
 	rooms = get_tree().get_nodes_in_group("room")
 	_build_ui()
+	# off-screen targets get a pip on the screen's edge (fair aiming)
+	var pips := TargetPips.new()
+	pips.name = "TargetPips"
+	add_child(pips)
 	player.died.connect(func():
 		GameState.add_stat(_stat("deaths"), 1)
 		if current_room:
@@ -104,6 +107,8 @@ func _ready() -> void:
 			_gates.append(node)
 	_update_room(true)
 	_set_up_ways_back()
+	# (she starts at a shrine or a chosen room: drawn there, not slid there)
+	reset_physics_interpolation()
 
 
 func _physics_process(delta: float) -> void:
@@ -199,7 +204,7 @@ func finish_chapter() -> void:
 		player.lock_controls()
 		var tween := create_tween()
 		tween.tween_property(_fade, "color:a", 1.0, 0.9)
-		tween.tween_callback(func(): get_tree().change_scene_to_file(next_chapter))
+		tween.tween_callback(func(): SceneFade.change(get_tree(), next_chapter, 0.0))
 		return
 	ChapterComplete.open(self, chapter_title, stats)
 
@@ -430,15 +435,28 @@ func reset_current_room() -> void:
 			recorder.cancel_recording()
 			recorder.clear_echoes()
 		current_room.reset()
-		player.teleport_to(current_room.entry_spawn)
+		player.teleport_to(reset_spawn(current_room))
 		camera.cancel_focus()
 		camera.bounds = current_room.bounds
-		room_reset_done.emit(current_room))
+		room_reset_done.emit(current_room)
+		# (everything put back is drawn where it is now, not slid there)
+		reset_physics_interpolation())
 	tween.tween_interval(0.15)
 	tween.tween_property(_fade, "color:a", 0.0, 0.3)
 	tween.tween_callback(func():
 		player.unlock_controls()
 		is_resetting = false)
+
+
+## Where Reset Room puts her: the room's way in, or in a long room that asks
+## for it (Room.reset_at_shrine), the last shrine she lit inside it.
+func reset_spawn(room: Room) -> Vector2:
+	if room.reset_at_shrine:
+		var id := GameState.get_checkpoint_for(scene_file_path)
+		for checkpoint in get_tree().get_nodes_in_group("chapter_checkpoint"):
+			if checkpoint.checkpoint_id == id and room.contains(checkpoint.global_position + Vector2(0, -8)):
+				return checkpoint.get_spawn_position()
+	return room.entry_spawn
 
 
 ## True if nothing dangerous is close to the player, so the camera may look away.
@@ -511,16 +529,15 @@ func _build_ui() -> void:
 	ui.layer = 3
 	add_child(ui)
 
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(TITLE_FONT_NAMES)
+	var font: Font = Fonts.TITLE
 	_title = Label.new()
 	_title.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	_title.offset_top = 92
 	_title.offset_bottom = 150
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.add_theme_font_override("font", font)
-	_title.add_theme_font_size_override("font_size", 40)
-	_title.add_theme_color_override("font_color", Color("cbbdf2"))
+	_title.add_theme_font_size_override("font_size", 48)
+	_title.add_theme_color_override("font_color", Color("f0d27a"))
 	_title.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_title.add_theme_constant_override("outline_size", 8)
 	_title.modulate.a = 0.0
@@ -538,16 +555,7 @@ func _build_ui() -> void:
 	_toast_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_toast_panel.modulate.a = 0.0
 	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.05, 0.035, 0.09, 0.9)
-	style.border_color = Color(0.5, 0.38, 0.78, 0.9)
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(4)
-	style.content_margin_left = 18
-	style.content_margin_right = 18
-	style.content_margin_top = 10
-	style.content_margin_bottom = 10
-	_toast_panel.add_theme_stylebox_override("panel", style)
+	_toast_panel.add_theme_stylebox_override("panel", DungeonUI.style("panel", 24, Vector4(28, 18, 28, 18)))
 	ui.add_child(_toast_panel)
 	_toast_label = Label.new()
 	_toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -555,7 +563,7 @@ func _build_ui() -> void:
 	_toast_label.custom_minimum_size = Vector2(560, 0)
 	_toast_label.add_theme_font_override("font", BODY_FONT)
 	_toast_label.add_theme_font_size_override("font_size", 16)
-	_toast_label.add_theme_color_override("font_color", Color("e4ddf2"))
+	_toast_label.add_theme_color_override("font_color", Color("e8dcc0"))
 	_toast_panel.add_child(_toast_label)
 
 	_objective = ObjectivePanel.new()
@@ -572,23 +580,15 @@ func _build_ui() -> void:
 	_broken_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_broken_panel.modulate.a = 0.0
 	_broken_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var broken_style := StyleBoxFlat.new()
-	broken_style.bg_color = Color(0.1, 0.03, 0.05, 0.98)
-	broken_style.border_color = Color(1.0, 0.45, 0.4, 0.95)
-	broken_style.set_border_width_all(3)
-	broken_style.set_corner_radius_all(4)
-	broken_style.content_margin_left = 18
-	broken_style.content_margin_right = 18
-	broken_style.content_margin_top = 10
-	broken_style.content_margin_bottom = 10
-	_broken_panel.add_theme_stylebox_override("panel", broken_style)
+	_broken_panel.add_theme_stylebox_override("panel", DungeonUI.style("panel", 24, Vector4(28, 18, 28, 18)))
+	_broken_panel.self_modulate = Color(1.0, 0.72, 0.7)
 	ui.add_child(_broken_panel)
 	_broken_label = Label.new()
 	_broken_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_broken_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_broken_label.custom_minimum_size = Vector2(620, 0)
 	_broken_label.add_theme_font_override("font", BODY_FONT)
-	_broken_label.add_theme_font_size_override("font_size", 15)
+	_broken_label.add_theme_font_size_override("font_size", 16)
 	_broken_label.add_theme_color_override("font_color", Color("ffe2dc"))
 	_broken_panel.add_child(_broken_label)
 

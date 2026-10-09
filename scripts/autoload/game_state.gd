@@ -78,6 +78,9 @@ func count_flags(prefix: String) -> int:
 const ABILITIES := ["fire", "heal", "echo"]
 ## Tests turn this on so they can use every spell from the first frame.
 var all_abilities := false
+## Tests turn this on: the roaming creatures (CreatureSpawner) stay away, so
+## the scripted puzzle routes are not chased about. Their own tests turn it off.
+var calm_creatures := false
 var _earlier := -1
 
 

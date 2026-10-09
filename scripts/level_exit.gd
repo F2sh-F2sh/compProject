@@ -21,7 +21,6 @@ extends Area2D
 @export var card_title := "The Passage"
 @export var card_next_label := "Continue to Level 2: The Belfry"
 
-const TITLE_FONT_NAMES := ["Cinzel", "Trajan Pro", "Times New Roman", "Georgia", "Liberation Serif", "DejaVu Serif", "serif"]
 
 var _triggered := false
 ## The card shown at the end (for tests).
@@ -75,16 +74,15 @@ func _on_body_entered(body: Node) -> void:
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layer.add_child(fade)
 
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(TITLE_FONT_NAMES)
+	var font: Font = Fonts.TITLE
 	var title := Label.new()
 	title.text = completion_text
 	title.set_anchors_preset(Control.PRESET_FULL_RECT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title.add_theme_font_override("font", font)
-	title.add_theme_font_size_override("font_size", 56)
-	title.add_theme_color_override("font_color", Color("c9b8f0"))
+	title.add_theme_font_size_override("font_size", 60)
+	title.add_theme_color_override("font_color", Color("e8dcc0"))
 	title.modulate.a = 0.0
 	layer.add_child(title)
 

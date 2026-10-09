@@ -75,18 +75,28 @@ const BRIGHTNESS_TABLE := [
 var brightness: int = Brightness.NORMAL
 ## A small frames-per-second readout in the corner of the screen.
 var show_fps := false
+## Smooth motion: the world moves in steps of 1/60 s (the physics), but most
+## screens draw 120 or more frames a second; this draws everything that moves
+## between its steps (Godot's physics interpolation), so Echidna, the camera,
+## creatures and platforms glide instead of juddering. Screen-space layers
+## (menus, the HUD, cards, story pictures), which animate every drawn frame,
+## always draw as they are (see _on_node_added).
+var smooth_motion := true
 var _fps_layer: CanvasLayer
 var _fps_label: Label
 
 ## Assist options, for anyone who wants the puzzles without the pressure:
 ## how much damage Echidna takes (1, 0.75, 0.5, 0.25; never less than 1 per
-## hit), unlimited mana, sprinting by default (hold sprint to walk), and
-## crouch as a toggle instead of a hold.
+## hit), unlimited mana, sprinting by default (hold sprint to walk),
+## crouch as a toggle instead of a hold, and hints without waiting.
 var assist_damage := 1.0
 var assist_infinite_mana := false
 var assist_auto_sprint := false
 var assist_toggle_crouch := false
-const ASSIST_KEYS := ["assist_damage", "assist_infinite_mana", "assist_auto_sprint", "assist_toggle_crouch"]
+## The hint skulls speak at once instead of listening to the room first.
+var assist_instant_hints := false
+const ASSIST_KEYS := ["assist_damage", "assist_infinite_mana", "assist_auto_sprint", "assist_toggle_crouch",
+	"assist_instant_hints"]
 ## Tests turn this off so they never overwrite a player's settings file.
 var persist_to_disk := true
 
@@ -100,6 +110,11 @@ func _ready() -> void:
 		_apply_window()
 	_build_fps_counter()
 	_apply_graphics_globals()
+	get_tree().node_added.connect(_on_node_added)
+	# (layers made before the hook: this one's FPS counter, other autoloads')
+	for layer in get_tree().root.find_children("*", "CanvasLayer", true, false):
+		_on_node_added(layer)
+	_apply_motion()
 
 
 ## The value of one graphics setting at the current level (see GRAPHICS_TABLE).
@@ -136,6 +151,30 @@ func _apply_graphics_globals() -> void:
 	RenderingServer.canvas_set_shadow_texture_size(int(quality("atlas")))
 
 
+func set_smooth_motion(value: bool) -> void:
+	smooth_motion = value
+	_apply_motion()
+	changed.emit()
+	_save()
+
+
+func _apply_motion() -> void:
+	get_tree().physics_interpolation = smooth_motion
+	# The jitter fix only helps motion that isn't interpolated
+	Engine.physics_jitter_fix = 0.0 if smooth_motion else 0.5
+	# A camera already in play picks up the change
+	var camera := get_viewport().get_camera_2d()
+	if camera and camera.has_method("refresh_motion_mode"):
+		camera.refresh_motion_mode()
+
+
+## Screen-space layers draw as they are: they never move with the world, and
+## their animations (tweens, per-frame motion) run every drawn frame.
+func _on_node_added(node: Node) -> void:
+	if node is CanvasLayer:
+		node.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+
+
 func _build_fps_counter() -> void:
 	_fps_layer = CanvasLayer.new()
 	_fps_layer.layer = 90
@@ -147,8 +186,8 @@ func _build_fps_counter() -> void:
 	_fps_label.offset_top = -30
 	_fps_label.offset_right = 160
 	_fps_label.offset_bottom = -8
-	_fps_label.add_theme_font_override("font", preload("res://assets/Text/Orbitron-Bold.ttf"))
-	_fps_label.add_theme_font_size_override("font_size", 14)
+	_fps_label.add_theme_font_override("font", Fonts.UI)
+	_fps_label.add_theme_font_size_override("font_size", 16)
 	_fps_label.add_theme_color_override("font_color", Color("b8f07a"))
 	_fps_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	_fps_label.add_theme_constant_override("outline_size", 4)
@@ -400,6 +439,7 @@ func _save() -> void:
 	file.set_value("display", "graphics", int(graphics))
 	file.set_value("display", "brightness", int(brightness))
 	file.set_value("display", "show_fps", show_fps)
+	file.set_value("display", "smooth_motion", smooth_motion)
 	file.set_value("controls", "bindings", bindings)
 	for key in ASSIST_KEYS:
 		file.set_value("assist", key, get(key))
@@ -428,6 +468,8 @@ func _load() -> void:
 	brightness = clampi(int(bright), Brightness.DIM, Brightness.BRIGHT) if bright is int else Brightness.NORMAL
 	var fps = file.get_value("display", "show_fps", false)
 	show_fps = fps if fps is bool else false
+	var smooth = file.get_value("display", "smooth_motion", true)
+	smooth_motion = smooth if smooth is bool else true
 	var saved = file.get_value("controls", "bindings", {})
 	bindings = saved if saved is Dictionary else {}
 	_apply_bindings()

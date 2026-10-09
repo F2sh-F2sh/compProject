@@ -29,6 +29,8 @@ func _run() -> void:
 	game_state.persist_to_disk = false
 	# Echidna has to earn her spells in the game; the tests use them from the start
 	game_state.all_abilities = true
+	# The roaming creatures stay away from the puzzle routes (their own scenarios bring them back)
+	game_state.calm_creatures = true
 	# (loaded at run time: UiTour needs the autoloads, which are not up while this script compiles)
 	var ui_tour: GDScript = load("res://scripts/ui/ui_tour.gd")
 	ui_tour.set("enabled", false)
@@ -39,6 +41,8 @@ func _run() -> void:
 	game_state.clear_all()
 	var settings := root.get_node("Settings")
 	settings.persist_to_disk = false
+	# hint skulls answer at once (one wing scenario checks the wait)
+	settings.assist_instant_hints = true
 	# The player's own settings file must not change what the tests see
 	settings.guidance = settings.GUIDANCE_FULL
 	settings.brightness = settings.Brightness.NORMAL
@@ -48,6 +52,8 @@ func _run() -> void:
 	InputMap.load_from_project_settings()
 	settings.set_graphics(2)  # High
 	settings.show_fps = false
+	# Smooth motion (physics interpolation) is on, as it is by default
+	settings.set_smooth_motion(true)
 	settings.assist_damage = 1.0
 	settings.assist_infinite_mana = false
 	settings.assist_auto_sprint = false

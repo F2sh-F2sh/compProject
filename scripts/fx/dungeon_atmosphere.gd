@@ -79,6 +79,8 @@ func _unshaded() -> CanvasItemMaterial:
 
 func _plane(plane_name: String, texture: Texture2D, scroll: Vector2, z: int, top: float) -> Parallax2D:
 	var plane := Parallax2D.new()
+	# (placed from the camera every drawn frame: drawn where it is)
+	plane.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	plane.name = plane_name
 	plane.scroll_scale = scroll
 	plane.repeat_size = Vector2(texture.get_width(), 0)
