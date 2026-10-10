@@ -199,16 +199,25 @@ func shoot_fireball() -> void:
 
 
 ## Which way a fireball from `origin` would fly: toward the mouse, or with a
-## controller along the right stick (straight ahead if it's at rest), gently
-## pulled toward a creature or target close to that line.
+## controller along the right stick; without one (most handhelds) the d-pad
+## aims: up or down, diagonally with left or right held, straight ahead
+## otherwise. Gently pulled toward a creature or target close to that line.
 func aim_direction(origin: Vector2) -> Vector2:
 	if not InputLabels.use_pad:
 		return (_mouse_point() - origin).normalized()
 	var stick := Vector2.ZERO
+	var dpad := Vector2.ZERO
 	var pads := Input.get_connected_joypads()
 	if not pads.is_empty():
 		stick = Vector2(Input.get_joy_axis(pads[0], JOY_AXIS_RIGHT_X), Input.get_joy_axis(pads[0], JOY_AXIS_RIGHT_Y))
-	var dir := stick.normalized() if stick.length() > 0.3 else Vector2(-1.0 if animated_sprite.flip_h else 1.0, 0.0)
+		dpad = Vector2(float(Input.is_joy_button_pressed(pads[0], JOY_BUTTON_DPAD_RIGHT)) - float(Input.is_joy_button_pressed(pads[0], JOY_BUTTON_DPAD_LEFT)),
+			float(Input.is_joy_button_pressed(pads[0], JOY_BUTTON_DPAD_DOWN)) - float(Input.is_joy_button_pressed(pads[0], JOY_BUTTON_DPAD_UP)))
+	var ahead := Vector2(-1.0 if animated_sprite.flip_h else 1.0, 0.0)
+	var dir := ahead
+	if stick.length() > 0.3:
+		dir = stick.normalized()
+	elif dpad.y != 0.0:
+		dir = dpad.normalized()
 	return _aim_assist(origin, dir)
 
 

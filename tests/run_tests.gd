@@ -41,6 +41,9 @@ func _run() -> void:
 	game_state.clear_all()
 	var settings := root.get_node("Settings")
 	settings.persist_to_disk = false
+	# (loaded at run time for the same reason: it reaches the autoloads)
+	var daily_store: GDScript = load("res://scripts/daily/daily_store.gd")
+	daily_store.set("persist", false)
 	# hint skulls answer at once (one wing scenario checks the wait)
 	settings.assist_instant_hints = true
 	# The player's own settings file must not change what the tests see
@@ -66,7 +69,7 @@ func _run() -> void:
 	# Tests check audio state, not sound; keep the speakers quiet while they run
 	AudioServer.set_bus_mute(0, true)
 
-	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune", "wing", "prologue", "adversarial", "polish"] if suite_name == "all" else [suite_name]
+	var names: Array = ["tutorial", "chapter", "presentation", "experience", "rune", "wing", "prologue", "adversarial", "polish", "daily"] if suite_name == "all" else [suite_name]
 	var passed := 0
 	var failed := 0
 	for n in names:

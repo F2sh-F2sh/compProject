@@ -438,7 +438,7 @@ func _build_ui() -> void:
 	ui.add_child(_era)
 
 	_next_hint = Label.new()
-	_next_hint.text = "%s  ▸" % InputLabels.primary("jump")
+	InputLabels.watch(_next_hint, func(): _next_hint.text = "%s  ▸" % InputLabels.primary("jump"))
 	_next_hint.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_next_hint.offset_left = -160
 	_next_hint.offset_right = -28
@@ -453,7 +453,7 @@ func _build_ui() -> void:
 	ui.add_child(_next_hint)
 
 	_skip_hint = Label.new()
-	_skip_hint.text = "Hold %s to skip" % InputLabels.primary("pause")
+	InputLabels.watch(_skip_hint, func(): _skip_hint.text = "Hold %s to skip" % InputLabels.primary("pause"))
 	_skip_hint.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_skip_hint.offset_left = -260
 	_skip_hint.offset_right = -28

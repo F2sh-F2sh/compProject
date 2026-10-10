@@ -206,7 +206,7 @@ func _build() -> void:
 	_rules.add_theme_font_override("font", Fonts.STORY)
 	_rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_rules.custom_minimum_size = Vector2(760, 0)
-	_rules.text = rules_text()
+	InputLabels.watch(_rules, func(): _rules.text = rules_text())
 	rules_box.add_child(_rules)
 	_list = VBoxContainer.new()
 	_list.add_theme_constant_override("separation", 8)

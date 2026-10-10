@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gameList>
+  <game>
+    <path>./Sealed Belfry.sh</path>
+    <name>The Sealed Belfry</name>
+    <desc>A witch, a frozen night, and a bell that has not rung in nine years. A puzzle platformer: walk the novices' path inside the mountain, learn the words carved in stone, and write the runes that undo the Hush.</desc>
+    <genre>Puzzle</genre>
+    <image>./sealedbelfry/screenshot.png</image>
+  </game>
+</gameList>

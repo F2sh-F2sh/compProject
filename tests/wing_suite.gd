@@ -83,6 +83,10 @@ func run_suite(filter: String) -> void:
 		"sounds": scenario_sounds,
 		"hint_wait": scenario_hint_wait,
 		"sightlines": scenario_sightlines,
+		"handheld": scenario_handheld,
+		"prompts": scenario_prompts,
+		"surface_look": scenario_surface_look,
+		"floating": scenario_floating,
 	}
 	for key in scenarios:
 		if only == key or (only == "" and not key.ends_with("_look")):
@@ -3612,3 +3616,261 @@ func scenario_sightlines() -> void:
 		lit.set("is_lit", true)
 		await frames(3)
 		check("a lit brazier has no pip", not pips2.showing.has(lit) or TargetPips.is_done(lit))
+
+
+## The handheld build (PortMaster, port/): Rune Carry moves to the left
+## trigger, sprint keeps L1, prompts name pad buttons. Run it with the
+## launcher's renderer and screen for the screenshots:
+##   --rendering-method gl_compatibility --resolution 640x480
+func scenario_handheld() -> void:
+	print("SCENARIO the handheld build")
+	var settings := get_tree().root.get_node("Settings")
+	settings.handheld = true
+	settings._apply_handheld()
+	var carry := InputMap.action_get_events(&"rune_carry").any(func(e): return e is InputEventJoypadMotion and e.axis == JOY_AXIS_TRIGGER_LEFT)
+	check("Rune Carry is on the left trigger", carry)
+	check("the left trigger no longer sprints", not InputMap.action_get_events(&"sprint").any(func(e): return e is InputEventJoypadMotion and e.axis == JOY_AXIS_TRIGGER_LEFT))
+	check("L1 still sprints", InputMap.action_get_events(&"sprint").any(func(e): return e is InputEventJoypadButton and e.button_index == JOY_BUTTON_LEFT_SHOULDER))
+	check("prompts name pad buttons", InputLabels.primary(&"rune_carry") == "LT" and InputLabels.primary(&"jump") == "A", InputLabels.primary(&"rune_carry"))
+	# the screens, for a look at the handheld's size
+	if is_instance_valid(get_tree().current_scene):
+		get_tree().current_scene.queue_free()
+	await get_tree().process_frame
+	var title: Node = load(Journey.TITLE).instantiate()
+	get_tree().root.add_child(title)
+	get_tree().current_scene = title
+	await seconds(1.5)
+	await shot("handheld_title")
+	await load_scene(Journey.KILN)
+	await seconds(1.0)
+	await shot("handheld_kiln")
+	var cube: RuneCube = get_tree().get_nodes_in_group("rune_cube").front()
+	if cube:
+		manager.assembly.open(cube)
+		await seconds(0.5)
+		await shot("handheld_runes")
+		manager.assembly.close()
+	var menu = lvl.get_node("PauseMenu")
+	menu._set_open(true)
+	await seconds(0.6)
+	await shot("handheld_pause")
+	menu._set_open(false)
+	get_tree().paused = false
+	settings.handheld = false
+
+
+## Prompts follow the device: a controller button renames every key on
+## screen to pad buttons, a key press or a mouse move renames them back.
+func scenario_prompts() -> void:
+	print("SCENARIO prompts follow the device in use")
+	await load_scene(Journey.PASSAGE)
+	await seconds(0.3)
+	var keys := InputEventKey.new()
+	keys.physical_keycode = KEY_F24
+	keys.pressed = true
+	Input.parse_input_event(keys)
+	await frames(3)
+	check("starts on keyboard and mouse", not InputLabels.use_pad)
+	var sign: Node = null
+	for s in lvl.find_children("*", "", true, false):
+		if s.get_script() and String(s.get_script().get_global_name()) == "TutorialSign" and String(s.text).contains("{"):
+			sign = s
+			break
+	var prompt: Interactable = lvl.find_children("*", "Interactable", true, false).front()
+	var death: Label = lvl.get_node("DeathUI/DeathScreen").prompt
+	var sign_keys: String = sign._label.text if sign else ""
+	var prompt_keys: String = prompt._label.text if prompt and prompt._label else ""
+	var death_keys := death.text
+	# a pad button
+	var pad := InputEventJoypadButton.new()
+	pad.button_index = JOY_BUTTON_A
+	pad.pressed = true
+	Input.parse_input_event(pad)
+	await frames(3)
+	check("a controller button switches to pad prompts", InputLabels.use_pad)
+	if sign:
+		check("a sign names pad buttons", sign._label.text != sign_keys, sign._label.text.left(80))
+	if prompt and prompt._label:
+		check("an interact prompt names the pad button", prompt._label.text != prompt_keys and prompt._label.text.contains(InputLabels.primary(prompt.action)), prompt._label.text)
+	check("the death screen names the pad button", death.text != death_keys, death.text)
+	var slots := get_tree().get_first_node_in_group("ammo_ui")
+	if slots:
+		check("the fire slot names the pad trigger, not LMB", slots.fire_slot.get_node("VBox/Key").text == InputLabels.primary(&"shoot") and slots.fire_slot.get_node("VBox/Key").text != "LMB", slots.fire_slot.get_node("VBox/Key").text)
+	await shot("prompts_pad")
+	# back to the keyboard
+	keys.pressed = true
+	Input.parse_input_event(keys)
+	await frames(3)
+	check("a key press switches back", not InputLabels.use_pad)
+	if sign:
+		check("the sign names keys again", sign._label.text == sign_keys)
+	check("the death screen names the key again", death.text == death_keys, death.text)
+	if slots:
+		check("and LMB again on the mouse", slots.fire_slot.get_node("VBox/Key").text == "LMB", slots.fire_slot.get_node("VBox/Key").text)
+	# a mouse move counts too, a twitch doesn't
+	Input.parse_input_event(pad)
+	await frames(2)
+	var twitch := InputEventMouseMotion.new()
+	twitch.relative = Vector2(1, 1)
+	Input.parse_input_event(twitch)
+	await frames(2)
+	check("a mouse twitch keeps pad prompts", InputLabels.use_pad)
+	var move := InputEventMouseMotion.new()
+	move.relative = Vector2(30, 10)
+	Input.parse_input_event(move)
+	await frames(2)
+	check("moving the mouse switches back", not InputLabels.use_pad)
+	var release := InputEventJoypadButton.new()
+	release.button_index = JOY_BUTTON_A
+	release.pressed = false
+	Input.parse_input_event(release)
+	keys.pressed = false
+	Input.parse_input_event(keys)
+	await frames(2)
+
+
+## Opens any scene (story scenes build their own player) without the
+## level helpers' assumptions.
+func open_any(path: String) -> Node:
+	release_all()
+	get_tree().paused = false
+	if is_instance_valid(get_tree().current_scene):
+		get_tree().current_scene.queue_free()
+	await get_tree().process_frame
+	lvl = load(path).instantiate()
+	get_tree().root.add_child(lvl)
+	get_tree().current_scene = lvl
+	await seconds(1.5)
+	player = lvl.get_node_or_null("Player")
+	return lvl
+
+
+## Skips whatever conversation a story scene is showing.
+func skip_talk(scene: Node) -> void:
+	for i in 40:
+		var d = scene.get("dialogue")
+		if d == null or not d.get("active"):
+			break
+		if d.has_method("complete"):
+			d.complete()
+		elif d.has_method("close"):
+			d.close()
+		await frames(3)
+	await frames(20)
+
+
+## Screenshots of the surface between Nan's cottage and the Undercroft, the
+## cottage, the title screen and the pause menu's status page.
+func scenario_surface_look() -> void:
+	print("SCENARIO surface, cottage, title and status page screenshots")
+	game_state().clear_all()
+	game_state().set_flag("cottage.done")
+	game_state().set_flag("story.nan_lantern")
+	await open_any("res://scenes/story/pilgrims_path.tscn")
+	await skip_talk(lvl)
+	for x in [120, 500, 760, 960, 1300, 1700, 2000, 2300]:
+		player.teleport_to(Vector2(x, 518))
+		await seconds(1.0)
+		await shot("surf_road_%04d" % x)
+	await open_any("res://scenes/story/well_descent.tscn")
+	await skip_talk(lvl)
+	for x in [150, 700, 1300, 1800]:
+		player.teleport_to(Vector2(x, 500 if x < 576 else (590 if x < 1176 else 662)))
+		await seconds(1.0)
+		await shot("surf_well_%04d" % x)
+	game_state().clear_all()
+	await open_any(Journey.COTTAGE)
+	await seconds(4.0)
+	await shot("surf_cottage_a")
+	await seconds(6.0)
+	await shot("surf_cottage_b")
+	await open_any(Journey.TITLE)
+	await seconds(2.0)
+	await shot("surf_title")
+	await load_scene(Journey.KILN)
+	var menu = lvl.get_node("PauseMenu")
+	menu._set_open(true)
+	await seconds(1.0)
+	await shot("surf_status")
+	menu._set_open(false)
+	get_tree().paused = false
+
+
+## The art words that name things that stand on the floor.
+const FLOOR_WORDS := ["candle", "candelabra", "skull", "barrel", "crate", "urn", "pot", "chest", "bones", "rock", "tomb", "grave", "statue", "pillar", "brazier", "shrine"]
+
+
+## The lowest painted point of a sprite, in the world.
+func ink_bottom(node: Node2D) -> float:
+	var tex: Texture2D = null
+	var region := Rect2()
+	if node is Sprite2D:
+		tex = node.texture
+		if node.region_enabled:
+			region = node.region_rect
+	elif node is AnimatedSprite2D and node.sprite_frames:
+		tex = node.sprite_frames.get_frame_texture(node.animation, node.frame)
+	if tex == null:
+		return node.global_position.y
+	var img := tex.get_image()
+	if img == null:
+		return node.global_position.y
+	if region.size != Vector2.ZERO:
+		img = img.get_region(Rect2i(region))
+	var used := img.get_used_rect()
+	var size := Vector2(img.get_size())
+	var top_left: Vector2 = (-size / 2.0 if node.centered else Vector2.ZERO) + node.offset
+	return node.to_global(Vector2(0, top_left.y + used.end.y)).y
+
+
+## Things that should stand on the floor and don't: candles, candelabras and
+## floor props more than 3 px above the floor right under them.
+func floating_in(level: Node) -> Array:
+	var space: PhysicsDirectSpaceState2D = level.get_world_2d().direct_space_state
+	var found: Array = []
+	for node in level.find_children("*", "", true, false):
+		if not node is Node2D or not node.is_visible_in_tree():
+			continue
+		var bottom := 0.0
+		var label := ""
+		if false:
+			pass
+		elif node is Sprite2D or node is AnimatedSprite2D:
+			var file := ""
+			if node is Sprite2D and node.texture:
+				file = node.texture.resource_path.get_file().get_basename()
+			elif node is AnimatedSprite2D and node.sprite_frames:
+				var t: Texture2D = node.sprite_frames.get_frame_texture(node.animation, 0)
+				file = t.resource_path.get_file().get_basename() if t else ""
+				if file == "" and t is AtlasTexture and t.atlas:
+					file = t.atlas.resource_path.get_file().get_basename()
+			# (a flame burns above its candle; the Eye's bedside candle stands on a crate)
+			if node.name == "Flame" or (node.get_parent() and node.get_parent().name == "Candle" and node.get_parent().get_parent() and node.get_parent().get_parent().get_node_or_null("Crate")):
+				continue
+			if file == "" or not FLOOR_WORDS.any(func(w): return file.to_lower().contains(w)):
+				continue
+			bottom = ink_bottom(node)
+			label = "%s (%s)" % [file, node.name]
+		else:
+			continue
+		var x: float = node.global_position.x
+		var hit: Dictionary = space.intersect_ray(PhysicsRayQueryParameters2D.create(Vector2(x, bottom - 6), Vector2(x, bottom + 160), 2))
+		if hit.is_empty():
+			continue
+		var gap: float = hit["position"].y - bottom
+		if gap > 3.0:
+			found.append("%s at (%d, %d) floats %d px" % [label, int(x), int(bottom), int(gap)])
+	return found
+
+
+func scenario_floating() -> void:
+	print("SCENARIO nothing that stands on the floor floats above it")
+	for path in [Journey.MOVEMENT, Journey.PASSAGE, Journey.BELFRY, Journey.OBSERVATORY, Journey.LANDING, Journey.KILN,
+			Journey.CISTERN, Journey.LAMPS, Journey.GALLERIES, Journey.EYE]:
+		await load_scene(path)
+		await seconds(0.6)
+		var floating := floating_in(lvl)
+		for f in floating:
+			print("  FLOAT %s: %s" % [path.get_file(), f])
+		check("%s: nothing floats" % path.get_file(), floating.is_empty(), "%d floating" % floating.size())
+

@@ -47,7 +47,7 @@ const SOUNDS := {"passage": ["", "stone"], "belfry": ["wind", "stone"], "observa
 	"landing": ["hush", "stone"], "kiln": ["forge", "ash"], "cistern": ["water", "wet"], "lamps": ["lamps", "stone"],
 	"galleries": ["folds", "paper"], "eye": ["eye", "stone"]}
 ## A level's chapter id (ChapterRoot.chapter_id) to its theme.
-const BY_CHAPTER := {"ch1": "belfry", "ch2": "observatory", "landing": "landing", "kiln": "kiln", "cistern": "cistern",
+const BY_CHAPTER := {"daily": "belfry", "ch1": "belfry", "ch2": "observatory", "landing": "landing", "kiln": "kiln", "cistern": "cistern",
 	"lamps": "lamps", "galleries": "galleries", "eye": "eye"}
 
 

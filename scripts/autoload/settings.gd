@@ -99,12 +99,22 @@ const ASSIST_KEYS := ["assist_damage", "assist_infinite_mana", "assist_auto_spri
 	"assist_instant_hints"]
 ## Tests turn this off so they never overwrite a player's settings file.
 var persist_to_disk := true
+## Running on a handheld (the PortMaster launcher in port/ passes --handheld):
+## the first start is on Low graphics (changeable as usual), prompts name pad
+## buttons, the mouse cursor is hidden, and Rune Carry moves to the left
+## trigger (L2), since most handhelds have no stick to click for R3.
+var handheld := false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_buses()
+	handheld = "--handheld" in OS.get_cmdline_user_args()
+	if handheld:
+		graphics = Graphics.LOW
 	_load()
+	if handheld:
+		_apply_handheld()
 	_apply()
 	if fullscreen:
 		_apply_window()
@@ -173,6 +183,17 @@ func _apply_motion() -> void:
 func _on_node_added(node: Node) -> void:
 	if node is CanvasLayer:
 		node.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	elif handheld and (node is Label or node is Button):
+		_lift_small_text.call_deferred(node)
+
+
+## On the handheld's small screen (the 1152x648 design drawn at about half
+## size), text smaller than SMALLEST_TEXT is raised to it.
+const SMALLEST_TEXT := 16
+
+func _lift_small_text(node: Control) -> void:
+	if is_instance_valid(node) and node.get_theme_font_size(&"font_size") < 14:
+		node.add_theme_font_size_override(&"font_size", SMALLEST_TEXT)
 
 
 func _build_fps_counter() -> void:
@@ -481,3 +502,31 @@ func _load() -> void:
 
 func _number(value: Variant, fallback: float) -> float:
 	return clampf(float(value), 0.0, 2.0) if value is float or value is int else fallback
+
+
+## The handheld's controls (see `handheld`): the left trigger carries rune
+## cubes instead of sprinting (L1 still sprints), the pad names every prompt
+## from the start, and there is no mouse cursor.
+func _apply_handheld() -> void:
+	for event in InputMap.action_get_events(&"sprint"):
+		if event is InputEventJoypadMotion and event.axis == JOY_AXIS_TRIGGER_LEFT:
+			InputMap.action_erase_event(&"sprint", event)
+	# the trigger first, so prompts name it; R3 stays for handhelds with sticks
+	var others: Array = InputMap.action_get_events(&"rune_carry").filter(func(e): return e is InputEventJoypadButton)
+	for event in others:
+		InputMap.action_erase_event(&"rune_carry", event)
+	var trigger := InputEventJoypadMotion.new()
+	trigger.axis = JOY_AXIS_TRIGGER_LEFT
+	trigger.axis_value = 1.0
+	InputMap.action_add_event(&"rune_carry", trigger)
+	for event in others:
+		InputMap.action_add_event(&"rune_carry", event)
+	InputLabels.use_pad = true
+	if DisplayServer.get_name() != "headless":
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+
+
+# Prompt watchers (InputLabels.watch) hold callables; let them go before the
+# engine tears scripts down at exit.
+func _exit_tree() -> void:
+	InputLabels.clear_watchers()

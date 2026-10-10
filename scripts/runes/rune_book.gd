@@ -113,7 +113,7 @@ static func spell(r: RuneRecipe) -> Dictionary:
 			s["force"] = WIND_FORCE * (2.0 if m == &"strong" else 1.0)
 			s["reach"] = WIND_REACH * (1.75 if m == &"long" else 1.0)
 			s["width"] = WIND_WIDTH * (3.0 if m == &"large" else 1.0)
-			s["upkeep"] = {&"normal": 3.0, &"strong": 8.0, &"long": 4.0, &"large": 5.0}[m]
+			s["upkeep"] = {&"normal": 3.0, &"strong": 8.0, &"long": 4.0, &"large": 5.0}.get(m, 3.0)
 		"wind/burst":
 			s["kind"] = Kind.REPEAT if m == &"repeat" else Kind.ONCE
 			s["impulse"] = BURST_IMPULSE * (2.0 if m == &"strong" else 1.0)

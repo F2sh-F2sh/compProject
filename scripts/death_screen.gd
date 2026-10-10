@@ -27,7 +27,7 @@ var _pulse: Tween
 func _ready() -> void:
 	# Keeps running while the game is paused so it can take the restart input
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	prompt.text = "Press %s to Continue" % InputLabels.primary(restart_action)
+	InputLabels.watch(prompt, func(): prompt.text = "Press %s to Continue" % InputLabels.primary(restart_action))
 	title.text = "You Died"
 	title.add_theme_font_override("font", Fonts.TITLE)
 	title.add_theme_font_size_override("font_size", 96)

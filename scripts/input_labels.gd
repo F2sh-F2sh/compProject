@@ -27,12 +27,44 @@ const PAD_AXES := {
 static var use_pad := false
 
 
-## Tracks which kind of device was used last (called for every input event).
+## Text that names keys and wants renaming when the device changes: pairs of
+## [weakref(node), refresh] (see watch()).
+static var _watchers: Array = []
+
+
+## Tracks which kind of device was used last (called for every input event):
+## a controller button or a pushed stick or trigger switches every prompt on
+## screen to pad buttons; a key, a click or a real mouse move switches them back.
 static func note_event(event: InputEvent) -> void:
+	var pad := use_pad
 	if event is InputEventJoypadButton or (event is InputEventJoypadMotion and absf(event.axis_value) > 0.5):
-		use_pad = true
-	elif event is InputEventKey or event is InputEventMouseButton:
-		use_pad = false
+		pad = true
+	elif event is InputEventKey or event is InputEventMouseButton \
+			or (event is InputEventMouseMotion and event.relative.length() > 4.0):
+		pad = false
+	if pad != use_pad:
+		use_pad = pad
+		refresh_all()
+
+
+## Runs refresh now and again whenever the player switches between controller
+## and keyboard and mouse, for as long as node exists. For any text built with
+## primary() or format() that stays on screen.
+static func watch(node: Node, refresh: Callable) -> void:
+	refresh.call()
+	_watchers.append([weakref(node), refresh])
+
+
+## Renames every watched prompt for the device in use now.
+static func refresh_all() -> void:
+	var alive: Array = []
+	for pair in _watchers:
+		var node = pair[0].get_ref()
+		if node != null and is_instance_valid(node) and (pair[1] as Callable).is_valid():
+			alive.append(pair)
+	_watchers = alive
+	for pair in alive:
+		(pair[1] as Callable).call()
 
 
 static func primary(action: StringName) -> String:
@@ -94,3 +126,8 @@ static func _event_label(event: InputEvent) -> String:
 		if event.axis == JOY_AXIS_LEFT_Y:
 			return "Stick Up" if event.axis_value < 0.0 else "Stick Down"
 	return ""
+
+
+## Forgets every watched prompt (at exit).
+static func clear_watchers() -> void:
+	_watchers.clear()

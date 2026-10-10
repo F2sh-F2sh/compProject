@@ -51,6 +51,7 @@ const STRIPS := {
 	"hk_mountain": 1, "hk_roofs": 1, "hk_dome": 1,
 	# The Choir's waymarks (tools/generate_waymark_sprites.gd)
 	"waymark": 3,
+	"bridge_winch": 1, "rope_ladder": 1,
 }
 ## The scale everything is drawn at in Lowbell.
 const LANE_SCALE := 1.5

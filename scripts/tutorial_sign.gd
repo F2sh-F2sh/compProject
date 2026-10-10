@@ -23,6 +23,7 @@ const SIGN_LIGHT_LAYER := 1 << 1
 var _panel: PanelContainer
 var _label: RichTextLabel
 var _ui: CanvasLayer
+var _watching := false
 
 func _ready() -> void:
 	add_to_group("readable_sign")
@@ -84,9 +85,20 @@ func _rebuild() -> void:
 	_label.add_theme_color_override("default_color", text_color)
 	_label.add_theme_color_override("font_outline_color", Color("090812"))
 	_label.add_theme_constant_override("outline_size", 6)
-	_label.text = "[center]%s[/center]" % InputLabels.format(text, "[color=#%s]%%s[/color]" % key_color.to_html(false))
+	# key names follow the device in use (InputLabels.watch)
+	if _watching:
+		_render_text()
+	else:
+		_watching = true
+		InputLabels.watch(self, _render_text)
 	_panel.visible = Engine.is_editor_hint()
 	_place_panel.call_deferred()
+
+func _render_text() -> void:
+	if _label == null or not is_instance_valid(_label):
+		return
+	_label.text = "[center]%s[/center]" % InputLabels.format(text, "[color=#%s]%%s[/color]" % key_color.to_html(false))
+
 
 func _place_panel() -> void:
 	if _panel == null or not is_inside_tree():

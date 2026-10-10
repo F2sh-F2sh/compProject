@@ -499,7 +499,7 @@ func _build() -> void:
 	var rules := _label("", 14, Color("d9c9a8"), Fonts.STORY)
 	rules.name = "Rules"
 	rules.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	rules.text = InputLabels.format("Words change only while the cube is OFF  ·  LOCKED words never change  ·  {rune_overview}: every rune here  ·  Esc: done")
+	InputLabels.watch(rules, func(): rules.text = InputLabels.format("Words change only while the cube is OFF  ·  LOCKED words never change  ·  {rune_overview}: every rune here  ·  %s: done" % ("B" if InputLabels.use_pad else "Esc")))
 	rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	rules.custom_minimum_size = Vector2(940, 0)
 	outer.add_child(rules)

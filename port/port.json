@@ -1,0 +1,35 @@
+{
+    "version": 4,
+    "name": "sealedbelfry.zip",
+    "items": [
+        "Sealed Belfry.sh",
+        "sealedbelfry"
+    ],
+    "items_opt": [],
+    "attr": {
+        "title": "The Sealed Belfry",
+        "porter": [
+            "Ish-2601"
+        ],
+        "desc": "A witch, a frozen night, and a bell that has not rung in nine years. A puzzle platformer: walk the novices' path inside the mountain, learn the words carved in stone, and write the runes that undo the Hush.",
+        "desc_md": null,
+        "inst": "Ready to run: the game is included. The first start downloads PortMaster's Godot 4.7.1 and Weston runtimes (Wi-Fi needed once).",
+        "inst_md": null,
+        "genres": [
+            "puzzle",
+            "platformer"
+        ],
+        "image": null,
+        "rtr": true,
+        "exp": false,
+        "runtime": [
+            "godot_4.7.1.squashfs",
+            "weston_pkg_0.2.squashfs"
+        ],
+        "store": [],
+        "availability": "full",
+        "reqs": [],
+        "arch": [],
+        "min_glibc": ""
+    }
+}
