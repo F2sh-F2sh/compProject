@@ -145,7 +145,7 @@ func _build_prompt() -> void:
 	_label.add_theme_font_size_override("font_size", 16)
 	_label.add_theme_color_override("font_color", Color("e8dcc0"))
 	panel.add_child(_label)
-	_refresh_text()
+	InputLabels.watch(self, _refresh_text)
 	panel.resized.connect(func(): panel.position = Vector2(-panel.size.x * 0.25, -panel.size.y * 0.5))
 
 
@@ -153,3 +153,6 @@ func _refresh_text() -> void:
 	if _label:
 		var key := InputLabels.primary(action)
 		_label.text = "[%s]" % key if _compact else "[%s] %s" % [key, verb]
+		# fit the plate to the new key name (shorter on a keyboard than a pad)
+		if _label.get_parent() is Control:
+			(_label.get_parent() as Control).reset_size()

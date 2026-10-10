@@ -81,6 +81,8 @@ func _ready() -> void:
 	var pips := TargetPips.new()
 	pips.name = "TargetPips"
 	add_child(pips)
+	# the room-broken banner names the pause key for the device in use
+	InputLabels.watch(self, func(): if _broken_label and broken_reason != "": _broken_label.text = broken_text(broken_reason))
 	player.died.connect(func():
 		GameState.add_stat(_stat("deaths"), 1)
 		if current_room:

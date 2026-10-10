@@ -42,16 +42,16 @@ func _build(overline: String, title: String, subtitle: String, subtitle_gap: int
 	# Lesson headings and spell cards both use this safe position.
 	var band := ColorRect.new()
 	band.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	band.offset_top = 164 + vertical_offset
-	band.offset_bottom = 316 + subtitle_gap + vertical_offset
+	band.offset_top = 88 + vertical_offset
+	band.offset_bottom = 240 + subtitle_gap + vertical_offset
 	band.color = Color(0.02, 0.01, 0.05, 0.55)
 	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(band)
 	_box = VBoxContainer.new()
 	_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_box.offset_top = 172 + vertical_offset
-	_box.offset_bottom = 308 + vertical_offset
+	_box.offset_top = 96 + vertical_offset
+	_box.offset_bottom = 232 + vertical_offset
 	_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_box.add_theme_constant_override("separation", 6)
 	_box.mouse_filter = Control.MOUSE_FILTER_IGNORE

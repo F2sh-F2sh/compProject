@@ -10,6 +10,8 @@ extends CanvasLayer
 func _ready() -> void:
 	add_to_group("ammo_ui")
 	_dungeon_skin()
+	# each slot names its button for the device in use (Q / LMB, or X / RB on a pad)
+	InputLabels.watch(self, _name_keys)
 	for slot in [heal_slot, fire_slot]:
 		slot.pivot_offset = slot.size / 2.0
 		slot.resized.connect(func(): slot.pivot_offset = slot.size / 2.0)
@@ -59,3 +61,12 @@ func _dungeon_skin() -> void:
 			if label.name == "Key":
 				label.add_theme_stylebox_override("normal", DungeonUI.style("nameplate", 8, Vector4(6, 1, 6, 1)))
 				label.add_theme_color_override("font_color", DungeonUI.INK_DARK)
+
+
+## The slots' key names, short enough for the slot (InputLabels.watch).
+func _name_keys() -> void:
+	for pair in [[heal_slot, "heal"], [fire_slot, "shoot"]]:
+		var key := pair[0].get_node_or_null("VBox/Key") as Label
+		if key:
+			key.text = {"Left Click": "LMB", "Right Click": "RMB", "Middle Click": "MMB"}.get(
+				InputLabels.primary(pair[1]), InputLabels.primary(pair[1]))

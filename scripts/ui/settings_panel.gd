@@ -135,7 +135,7 @@ func _controls_grid() -> VBoxContainer:
 		Settings.reset_bindings()
 		_refresh_keys())
 	box.add_child(reset)
-	_refresh_keys()
+	InputLabels.watch(self, _refresh_keys)
 	return box
 
 

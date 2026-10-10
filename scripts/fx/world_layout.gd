@@ -26,10 +26,21 @@ static func settle(level: Node2D) -> void:
 		var file := sprite.texture.resource_path.get_file().get_basename()
 		if file not in FLOOR_ART:
 			continue
-		if not images.has(file):
+		# A checkpoint's candle and flame belong to the checkpoint (which stands
+		# on the floor where it was put); moving them alone would part them.
+		if sprite.get_parent() is HazardCheckpoint or sprite.get_parent() is ChapterCheckpoint:
+			continue
+		# Measure the part of the texture the sprite actually draws: a sprite
+		# with a region shows only that part, and its last painted row is not
+		# the whole texture's (measuring the whole lifted region sprites into
+		# the air).
+		var key := file + (str(sprite.region_rect) if sprite.region_enabled else "")
+		if not images.has(key):
 			var image := sprite.texture.get_image()
-			images[file] = Rect2(image.get_used_rect()) if image else Rect2(Vector2.ZERO, sprite.texture.get_size())
-		var ink: Rect2 = images[file]
+			if image and sprite.region_enabled:
+				image = image.get_region(Rect2i(sprite.region_rect))
+			images[key] = Rect2(image.get_used_rect()) if image else Rect2(Vector2.ZERO, sprite.texture.get_size())
+		var ink: Rect2 = images[key]
 		# Align the actual last painted pixel, including textures with a
 		# transparent bottom margin. Canvas padding is not the object's foot.
 		sprite.offset.y = -ink.end.y

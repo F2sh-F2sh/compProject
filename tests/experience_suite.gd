@@ -1063,7 +1063,8 @@ func scenario_tours() -> void:
 	await seconds(0.6)
 	var all_text := ""
 	for s in tour.steps:
-		all_text += s["title"] + " " + s["text"] + " "
+		# as shown: the key names filled in for the device in use
+		all_text += InputLabels.format(s["title"]) + " " + InputLabels.format(s["text"]) + " "
 	check("it says LOCKED words never change, and how they look", all_text.contains("LOCKED words never change") and all_text.contains("padlock"))
 	check("it says words change only while the cube is off", all_text.contains("When you can change words")
 		and all_text.contains("Only while the cube is OFF") and all_text.contains("switch it off first"))

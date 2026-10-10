@@ -63,7 +63,7 @@ func _build(title: String, text: String, found: int, total: int) -> void:
 	body.add_theme_color_override("font_color", Color("2b2118"))
 	box.add_child(body)
 	var foot := Label.new()
-	foot.text = "Page %d of %d   ·   %s to continue" % [found, total, InputLabels.primary("interact")]
+	InputLabels.watch(foot, func(): foot.text = "Page %d of %d   ·   %s to continue" % [found, total, InputLabels.primary("interact")])
 	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	foot.add_theme_font_override("font", Fonts.UI)
 	foot.add_theme_font_size_override("font_size", 16)

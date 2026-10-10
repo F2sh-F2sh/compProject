@@ -183,7 +183,14 @@ func audit_floor_art(label: String) -> void:
 			continue
 		if sprite.texture.resource_path.get_file().get_basename() not in ["skull_pile", "rocks_a", "rocks_b", "skeleton", "tombstone_rubble", "candelabra", "candle", "barrel", "crate", "bones", "urn", "pot", "chest"]:
 			continue
-		var ink := Rect2(sprite.texture.get_image().get_used_rect())
+		# A flame burns above its candle; it doesn't stand on the floor
+		if sprite.name == "Flame":
+			continue
+		# Measure what the sprite draws: a region sprite shows only its region
+		var image := sprite.texture.get_image()
+		if sprite.region_enabled:
+			image = image.get_region(Rect2i(sprite.region_rect))
+		var ink := Rect2(image.get_used_rect())
 		var rect := Rect2(sprite.to_global(ink.position + sprite.offset), ink.size * sprite.global_scale)
 		separated = separated and rects.all(func(other): return not other.intersects(rect))
 		rects.append(rect)

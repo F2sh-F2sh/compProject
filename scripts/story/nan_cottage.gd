@@ -21,8 +21,16 @@ const SELF_PATH := "res://scenes/story/nan_cottage.tscn"
 
 const FLOOR_Y := 534.0
 const WIDTH := 1152.0
-const BOUNDS := Rect2(0, 282, WIDTH, 324)
+## A closer camera than the street's: a cottage, not a hall (the floor sits
+## 72 px above the bottom edge as on the street).
+const ZOOM := 2.6
+const BOUNDS := Rect2(0, FLOOR_Y + 72.0 - 648.0 / ZOOM, WIDTH, 648.0 / ZOOM)
 const S := SurfaceArt.LANE_SCALE
+## Furniture is drawn at 1x so it sits in proportion to Echidna (about 44 px
+## tall with her hat): a waist-high table, a shelf half again her height.
+const FURNITURE := 1.0
+## Doors are a head and more taller than her.
+const DOOR_SCALE := 1.8
 const DOOR_X := 92.0
 const SHELF_X := 445.0
 const WINDOW_X := 660.0
@@ -53,6 +61,8 @@ var _thought: SpeechBubble
 ## handles the presses).
 var dialogue: DialogueBox
 var _hint: Label
+## The hint as written, with {action} key names (see _render_hint)
+var _hint_template := ""
 var _fade: ColorRect
 var _puppet: AnimatedSprite2D
 var _hearth: AnimatedSprite2D
@@ -72,6 +82,7 @@ func _ready() -> void:
 	# drawn as they are. Echidna and her camera move in physics steps and are
 	# drawn between them (set in _build_player)
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	InputLabels.watch(self, _render_hint)
 	get_tree().paused = false
 	AudioDirector.reset_combat()
 	AudioDirector.fade_ambience(-40.0, 2.0)
@@ -164,36 +175,33 @@ func _build_room() -> void:
 	props.z_index = -10
 	add_child(props)
 	# The front door she came in by, and a window on the night
-	SurfaceArt.sprite(props, "door_small", Vector2(DOOR_X, FLOOR_Y))
+	SurfaceArt.sprite(props, "door_small", Vector2(DOOR_X, FLOOR_Y), DOOR_SCALE)
 	SurfaceArt.sprite(props, "barrel", Vector2(DOOR_X + 78, FLOOR_Y))
 	SurfaceArt.sprite(props, "crate", Vector2(DOOR_X + 112, FLOOR_Y))
 	# Newly drawn household furniture uses one consistent pixel scale.
-	SurfaceArt.sprite(props, "cottage_bookshelf", Vector2(285, FLOOR_Y), S)
-	SurfaceArt.sprite(props, "cottage_cupboard", Vector2(395, FLOOR_Y), S)
-	SurfaceArt.sprite(props, "cottage_window", Vector2(285, FLOOR_Y - 115), S)
-	SurfaceArt.sprite(props, "cottage_window", Vector2(665, FLOOR_Y - 108), S)
-	SurfaceArt.sprite(props, "cottage_rug", Vector2(665, FLOOR_Y), S)
-	SurfaceArt.sprite(props, "table", Vector2(TABLE_X, FLOOR_Y), S)
+	SurfaceArt.sprite(props, "cottage_bookshelf", Vector2(285, FLOOR_Y), FURNITURE)
+	SurfaceArt.sprite(props, "cottage_cupboard", Vector2(380, FLOOR_Y), FURNITURE)
+	SurfaceArt.sprite(props, "cottage_window", Vector2(220, FLOOR_Y - 36), FURNITURE)
+	SurfaceArt.sprite(props, "cottage_window", Vector2(665, FLOOR_Y - 36), FURNITURE)
+	SurfaceArt.sprite(props, "cottage_rug", Vector2(665, FLOOR_Y), FURNITURE)
+	SurfaceArt.sprite(props, "table", Vector2(TABLE_X, FLOOR_Y), FURNITURE)
 	# Table pixels: the surface is 8 rows below its top; lamp feet sit on it.
-	var tabletop := FLOOR_Y - (SurfaceArt.size_of("table").y - 8) * S
-	_lantern = SurfaceArt.sprite(props, "desk_lantern", Vector2(TABLE_X - 21, tabletop), S)
+	var tabletop := FLOOR_Y - (SurfaceArt.size_of("table").y - 8) * FURNITURE
+	_lantern = SurfaceArt.sprite(props, "desk_lantern", Vector2(TABLE_X - 14, tabletop), 0.75)
 	_lantern.z_as_relative = false
 	_lantern.z_index = 3
-	_lantern_light = _light(_lantern.position + Vector2(0, -18), Color(1.0, 0.76, 0.48), 0.6, 1.1)
+	_lantern_light = _light(_lantern.position + Vector2(0, -10), Color(1.0, 0.76, 0.48), 0.6, 1.1)
 	props.add_child(_lantern_light)
-	# Herbs belong to the ceiling beam, not the walking lane.
-	for hx in [506.0, 531.0, 556.0]:
-		SurfaceArt.sprite(props, "vine_short", Vector2(hx, FLOOR_Y - 11.0 * 16.0 * S + 56.0))
 	# Nan, in her armchair by the fire, facing the door
 	nan = SurfaceArt.animated(props, "nan_seated", Vector2(NAN_X, FLOOR_Y), 0.0, 1.0, true, true)
 	nan.name = "Nan"
 	nan.stop()
 	nan.z_index = -1
-	_hearth = SurfaceArt.animated(props, "hearth", Vector2(HEARTH_X, FLOOR_Y), 5.0, S)
+	_hearth = SurfaceArt.animated(props, "hearth", Vector2(HEARTH_X, FLOOR_Y), 5.0, FURNITURE)
 	_hearth.name = "Hearth"
-	_fire_light = _light(Vector2(HEARTH_X, FLOOR_Y - 34), Color(1.0, 0.76, 0.48), 1.3, 3.6)
+	_fire_light = _light(Vector2(HEARTH_X, FLOOR_Y - 22), Color(1.0, 0.76, 0.48), 1.3, 3.6)
 	props.add_child(_fire_light)
-	_door_sprite = SurfaceArt.animated(props, "door_nan", Vector2(CELLAR_X, FLOOR_Y), 0.0, S)
+	_door_sprite = SurfaceArt.animated(props, "door_nan", Vector2(CELLAR_X, FLOOR_Y), 0.0, DOOR_SCALE)
 	_door_sprite.name = "GardenDoor"
 	_door_sprite.stop()
 	# Nan, to talk to; the garden door, to leave after the conversation
@@ -246,8 +254,8 @@ func _build_player() -> void:
 	camera.name = "Camera2D"
 	camera.set_script(load("res://scripts/camera_bounds.gd"))
 	camera.set("bounds", BOUNDS)
-	camera.set("base_zoom", Vector2(2, 2))
-	camera.zoom = Vector2(2, 2)
+	camera.set("base_zoom", Vector2(ZOOM, ZOOM))
+	camera.zoom = Vector2(ZOOM, ZOOM)
 	player.add_child(camera)
 	var aura := _light(Vector2(0, -20), Color(0.8, 0.76, 1.0), 0.45, 1.0)
 	aura.name = "PlayerLight"
@@ -257,8 +265,8 @@ func _build_player() -> void:
 	player.ability_denied.connect(_on_ability_denied)
 	intro_camera = Camera2D.new()
 	intro_camera.name = "IntroCamera"
-	intro_camera.zoom = Vector2(2, 2)
-	intro_camera.position = Vector2(640, 444)
+	intro_camera.zoom = Vector2(ZOOM, ZOOM)
+	intro_camera.position = Vector2(640, BOUNDS.get_center().y)
 	add_child(intro_camera)
 	_speech = SpeechBubble.new()
 	add_child(_speech)
@@ -360,7 +368,7 @@ func _story() -> void:
 	await _say(nan, "Oh, a visitor! Come in, dear. Come in. Mind the step.", false, "warm")
 	await _say(player, "She's humming the bell's old tune again. But she doesn't know me.", true, "sad")
 	stage = "talk"
-	_set_hint("%s  talk to Nan" % InputLabels.primary("interact"))
+	_set_hint("{interact}  talk to Nan")
 	dialogue.close()
 	player.unlock_controls()
 	nan_talk.enabled = true
@@ -394,7 +402,7 @@ func _story() -> void:
 	player.unlock_controls()
 	cellar_door.enabled = true
 	cellar_door.interacted.connect(func(_who): _go_down(), CONNECT_ONE_SHOT)
-	_set_hint("%s  leave through the garden door" % InputLabels.primary("interact"))
+	_set_hint("{interact}  leave through the garden door")
 
 
 ## Echidna tries to light the fire for Nan and the spell will not come.
@@ -404,7 +412,7 @@ func _fire_beat() -> void:
 	_fire_denied = false
 	dialogue.close()
 	player.unlock_controls()
-	_set_hint("%s  try your fire spell" % InputLabels.primary("shoot"))
+	_set_hint("{shoot}  try your fire spell")
 	var waited := 0.0
 	while not _fire_denied and waited < TRY_FIRE_PATIENCE:
 		await get_tree().process_frame
@@ -480,7 +488,7 @@ func _wait_press() -> void:
 	if dialogue.is_typing:
 		await dialogue.typed
 	_cooldown = 0.35
-	_set_hint("Click or %s  ▸" % InputLabels.primary("interact"))
+	_set_hint("Click or {interact}  ▸")
 	_waiting = true
 	await advanced
 	_waiting = false
@@ -489,8 +497,17 @@ func _wait_press() -> void:
 
 func _set_hint(text: String) -> void:
 	if text != "":
-		_hint.text = text
+		_hint_template = text
+		_render_hint()
 	create_tween().tween_property(_hint, "modulate:a", 0.9 if text != "" else 0.0, 0.25)
+
+
+## Fills in the hint's key names for the device in use (InputLabels.watch).
+func _render_hint() -> void:
+	if _hint and _hint_template != "":
+		var text := InputLabels.format(_hint_template)
+		# a controller has nothing to click
+		_hint.text = text.replace("Click or ", "") if InputLabels.use_pad else text
 
 
 func _physics_process(delta: float) -> void:

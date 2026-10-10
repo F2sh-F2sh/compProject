@@ -90,6 +90,8 @@ var _stats: Label
 var _info_title: Label
 var _info_body: Label
 var _info_glyph := "person"
+## The info card's last [title, body, glyph, slot], to rename its keys when the device changes.
+var _info_args: Array = []
 var _info_icon: Control
 var _slot := 8
 
@@ -128,6 +130,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_audio()
 	_build()
+	# key names in the card and the controls list follow the device in use
+	InputLabels.watch(self, _rename_keys)
 	Settings.changed.connect(_on_settings_changed)
 	_set_open(false)
 
@@ -1038,6 +1042,7 @@ func _capture_key(event: InputEvent) -> void:
 # ------------------------------------------------------------------ card and values
 
 func _set_info(title: String, body: String, glyph: String, slot: int) -> void:
+	_info_args = [title, body, glyph, slot]
 	_info_title.text = title
 	_info_body.text = InputLabels.format(body, "%s") if body != "" else _status_line()
 	_info_glyph = glyph
@@ -1078,17 +1083,11 @@ func _refresh_values() -> void:
 func _draw_figure() -> void:
 	var c := Vector2(_figure.size.x / 2.0, 112.0)
 	_figure.draw_set_transform(Vector2(c.x, 198.0), 0.0, Vector2(1.0, 0.2))
-	_figure.draw_circle(Vector2.ZERO, 70.0, Color(0, 0, 0, 0.14))
+	_figure.draw_circle(Vector2.ZERO, 70.0, Color(0, 0, 0, 0.3))
 	_figure.draw_set_transform(Vector2.ZERO)
-	for i in SLOTS:
-		var a := -PI / 2.0 + i * TAU / SLOTS
-		var p := c + Vector2(cos(a) * 124.0, sin(a) * 100.0)
-		if i == _slot:
-			_figure.draw_circle(p, 11.0, ORANGE)
-			_figure.draw_arc(p, 15.0, 0.0, TAU, 28, DungeonUI.GOLD, 1.5, true)
-		else:
-			_figure.draw_circle(p, 10.0, ICON_DARK)
-			_figure.draw_arc(p, 10.0, 0.0, TAU, 28, ICON_RING, 1.5, true)
+	# Her lantern's warm light behind her (no slots: nothing here to equip)
+	for k in 6:
+		_figure.draw_circle(c, 96.0 - k * 14.0, Color(DungeonUI.GOLD, 0.025 + k * 0.012))
 
 
 # The card points at the active icon, and the icon points on to its list
@@ -1397,3 +1396,10 @@ func focus_reset_room() -> void:
 		return
 	_focus_row1(index, false)
 	_set_info("Reset Room", "This room can't be finished now. %s\nChoose Reset Room to put the room back as it was. Your health is kept." % reset_reason, "reset", -1)
+
+
+## Renames the keys on the open card and in the controls list (InputLabels.watch).
+func _rename_keys() -> void:
+	if not _info_args.is_empty() and is_instance_valid(_info_body):
+		_set_info.callv(_info_args)
+	_refresh_values()

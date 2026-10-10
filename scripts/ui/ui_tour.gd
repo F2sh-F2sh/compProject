@@ -99,39 +99,39 @@ static func steps_for(tour_id: String) -> Array:
 					"arrows": [{"corner": "tl", "rect": HEALTH_BAR}, {"corner": "tl", "rect": HEALTH_NUMBER}],
 					"text": "(1) This bar is your health. Spikes, traps and slimes take it down. (2) The same, in numbers: health left out of the most you can have. If it runs out, you wake at your last candle with it full again."},
 				{"corner": "", "rect": Rect2(), "eyebrow": "THE SCREEN · 2 OF 2", "title": "The menu",
-					"text": InputLabels.format("Press {pause} at any time to pause and open the menu: your spells and controls, the room map (with Reset Room), the journal, and the settings.")},
+					"text": "Press {pause} at any time to pause and open the menu: your spells and controls, the room map (with Reset Room), the journal, and the settings."},
 			]
 		"fire":
 			return [
 				{"corner": "tl", "rect": Rect2(16, 52, 320, 30), "eyebrow": "THE SCREEN · MANA", "title": "Mana is your flame",
 					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
-					"text": InputLabels.format("(1) This bar is your mana, your lantern's flame. Spells draw on it, and it does not fill by itself. (2) The same, in numbers. To restore it, hold {reload} anywhere. You can keep moving while you reload. Beaten slimes drop sparks that give some back.")},
+					"text": "(1) This bar is your mana, your lantern's flame. Spells draw on it, and it does not fill by itself. (2) The same, in numbers. To restore it, hold {reload} anywhere. You can keep moving while you reload. Beaten slimes drop sparks that give some back."},
 				{"corner": "br", "rect": Rect2(-176, -104, 160, 88), "eyebrow": "THE SCREEN · SPELLS", "title": "Your spells",
 					"text": "Each spell has a slot here: its key on top and its mana cost below. A slot goes dim when you don't have enough mana for it. New spells appear here as you remember them."},
 			]
 		"echo":
 			return [
 				{"corner": "tl", "rect": Rect2(16, 76, 140, 18), "eyebrow": "THE SCREEN · ECHO", "title": "The Echo tag",
-					"text": InputLabels.format("When you press {echo}, a red REC tag shows how much recording time is left. Each Echo you have out is a diamond here, and it holds some of your mana until it fades.")},
+					"text": "When you press {echo}, a red REC tag shows how much recording time is left. Each Echo you have out is a diamond here, and it holds some of your mana until it fades."},
 			]
 		"objective":
 			return [
 				{"corner": "tr", "rect": Rect2(-292, 16, 276, 78), "eyebrow": "THE SCREEN · THE GOAL", "title": "The goal card",
-					"text": InputLabels.format("Each room names its goal here, and ticks off the steps as you do them. If you are stuck, the skull stones in a room give hints, and {pause} opens the room map and Reset Room.")},
+					"text": "Each room names its goal here, and ticks off the steps as you do them. If you are stuck, the skull stones in a room give hints, and {pause} opens the room map and Reset Room."},
 			]
 		"runes":
 			return [
 				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 1 OF 5", "title": "Four words in a cube",
-					"text": InputLabels.format("A rune cube holds a spell of four words: what it is made of, what it does, which way, and how. Walk up to a cube and press {interact} to inscribe it: pick a word for each part from the words you have learned, then switch it on.")},
+					"text": "A rune cube holds a spell of four words: what it is made of, what it does, which way, and how. Walk up to a cube and press {interact} to inscribe it: pick a word for each part from the words you have learned, then switch it on."},
 				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 2 OF 5", "title": "When you can change words",
 					"text": "Only while the cube is OFF. A running cube's words can't be changed: switch it off first (at the cube, or from your runes list), change what you need, and switch it on again."},
 				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 3 OF 5", "title": "LOCKED words never change",
 					"text": "A word with a padlock and the word LOCKED is carved into the stone: it can never be changed, on any cube. Some cubes have one or two locked words; some are locked completely and can only be switched on and off. Read a cube before you plan with it."},
-				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 4 OF 5", "title": InputLabels.format("{rune_overview}: your runes"),
-					"text": InputLabels.format("Press {rune_overview} at any time to see every cube in the room: what each one does, whether it is on, what it costs and which words are locked. Switch any running cube off from there, from anywhere in the room, or press Inscribe on the cube you are standing at.")},
+				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 4 OF 5", "title": "{rune_overview}: your runes",
+					"text": "Press {rune_overview} at any time to see every cube in the room: what each one does, whether it is on, what it costs and which words are locked. Switch any running cube off from there, from anywhere in the room, or press Inscribe on the cube you are standing at."},
 				{"corner": "tl", "rect": Rect2(16, 52, 320, 30), "eyebrow": "RUNE CUBES · 5 OF 5", "title": "Running runes use mana",
 					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
-					"text": "A rune you power drains your mana (1) while it runs (2), and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. When you run low, hold R to reload. Stop powering a rune first if it is drawing your mana."},
+					"text": "A rune you power drains your mana (1) while it runs (2), and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. When you run low, hold {reload} to reload. Stop powering a rune first if it is drawing your mana."},
 			]
 	return []
 
@@ -140,6 +140,7 @@ func _ready() -> void:
 	layer = 20
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	current = self
+	InputLabels.watch(self, _rename_keys)
 	is_open = true
 	_was_paused = get_tree().paused
 	get_tree().paused = true
@@ -265,13 +266,29 @@ func _show_step(i: int) -> void:
 	_cooldown = 0.35
 	var step: Dictionary = steps[i]
 	_eyebrow.text = step.get("eyebrow", "")
-	_title.text = step["title"]
-	_text.text = step["text"]
-	_hint.text = "%s  ·  Esc: close" % ("Space / click: next" if i + 1 < steps.size() else "Space / click: done")
+	_fill_text(step, i)
 	Sfx.play("ui_click", null, -8.0)
 	_layout()
 	_card.modulate.a = 0.0
 	create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).tween_property(_card, "modulate:a", 1.0, 0.25)
+
+
+## The step's words with the player's own key names, for the device in use.
+func _fill_text(step: Dictionary, i: int) -> void:
+	_title.text = InputLabels.format(step["title"])
+	_text.text = InputLabels.format(step["text"])
+	var last := i + 1 >= steps.size()
+	if InputLabels.use_pad:
+		_hint.text = "%s: %s  ·  B: close" % [InputLabels.primary("jump"), "done" if last else "next"]
+	else:
+		_hint.text = "Space / click: %s  ·  Esc: close" % ("done" if last else "next")
+
+
+## Renames the open card's keys when the device changes (InputLabels.watch).
+func _rename_keys() -> void:
+	if is_open and index >= 0 and index < steps.size():
+		_fill_text(steps[index], index)
+		_layout()
 
 
 func _layout() -> void:

@@ -1,2 +1,6 @@
 # Normalize EOL for all files that Git considers text files.
 * text=auto eol=lf
+# The handheld port runs these with bash on Linux
+port/*.sh text eol=lf
+port/**/*.gptk text eol=lf
+tools/build_handheld_port.sh text eol=lf

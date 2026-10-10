@@ -14,6 +14,9 @@ const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
 const GOLD := Color("edbc78")
 const VIOLET := Color("9989d7")
 const FLOOR := 520.0
+## The pilgrim road's camera rests with its centre here (the floor sits low on the
+## screen, like Lowbell); its backdrop is laid out around it.
+const REST_Y := 430.0
 
 var player: CharacterBody2D
 var camera: Camera2D
@@ -38,6 +41,9 @@ var _checkpoint := Vector2(120, FLOOR - 2)
 var _safety_running := false
 var _resume_when_released := false
 var _cottage_framing := 1.35
+var _layers: Array = []
+var _winch: Sprite2D
+var _bridge_rope: Line2D
 
 func _ready() -> void:
 	# The scenery, the bridge, the wisp and the cottage camera move every drawn
@@ -75,9 +81,9 @@ func _ready() -> void:
 		bridge_open = true
 		_bridge.rotation = 0
 		_bridge_body.collision_layer = 2
-		objective.text = "The pilgrim road\nRead the seal on the Belfry door."
+		objective.text = "The pilgrim road\nRead the seal on the Belfry's gate."
 		if GameState.has_flag("story.belfry_read"):
-			objective.text = "A way beneath the seal\nFind the old well east of the Belfry door."
+			objective.text = "A way beneath the seal\nFind the old well east of the gate."
 	if stage == Stage.WELL:
 		for i in 2:
 			if GameState.has_flag("story.lamp.%d" % i):
@@ -100,7 +106,10 @@ func _build_player() -> void:
 	player.collision_mask = 2
 	player.z_index = 3
 	camera = CameraBounds.new()
-	camera.bounds = Rect2(0, 200, _width, 480 if stage != Stage.WELL else 640)
+	camera.bounds = Rect2(0, REST_Y - 162.0, _width, 324) if stage == Stage.APPROACH else Rect2(0, 200, _width, 640)
+	# (in the well she stands low on the screen, so it shows the way on, not the floor)
+	if stage == Stage.WELL:
+		camera.position = Vector2(0, -56)
 	camera.base_zoom = Vector2(2, 2)
 	player.add_child(camera)
 	player.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
@@ -187,59 +196,127 @@ func _build_cottage() -> void:
 	StoryPaint.motes(self, Rect2(500, 325, 250, 185), Color(1, 0.72, 0.42, 0.35), 22)
 	_use(Vector2(798, FLOOR), "Leave for the mountain", func(): _transition(APPROACH))
 
+## The pilgrim road at night, in the surface pack's art like Lowbell: the moon
+## and stars, the monastery on its crag (the Belfry, far up the mountain), the
+## bare woods, then the road itself with its old waymarks and graves, the
+## ravine and the bridge the pilgrims raised behind them, the frozen outer gate,
+## and the bellkeepers' well beyond it.
 func _build_approach() -> void:
-	var sky := Node2D.new()
-	sky.z_index = -30
-	add_child(sky)
-	SurfaceArt.backdrop(sky, "sky", Vector2(0, 160), 1.5, _width / 1.5)
-	SurfaceArt.backdrop(sky, "hills", Vector2(0, 200), 1.5, _width / 1.5)
-	SurfaceArt.backdrop(sky, "woods", Vector2(0, 242), 1.5, _width / 1.5).modulate = Color("737689")
+	var sky := _parallax("Sky", 0.0, -40)
+	# (the moon sits right of centre, clear of the heading)
+	SurfaceArt.backdrop(sky, "sky", Vector2(-600, REST_Y - 262), 1.5, 1280)
 	var stars := StoryNodes.Stars.new()
-	stars.area = Rect2(0, 180, _width, 170)
-	stars.count = 80
+	stars.area = Rect2(-600 / 1.5, (REST_Y - 162) / 1.5, 1200 / 1.5, 130 / 1.5)
+	stars.count = 60
 	stars.fade = 0.55
+	stars.scale = Vector2(1.5, 1.5)
 	sky.add_child(stars)
+	for spec in [["cloud_a", Vector2(-260, REST_Y - 110)], ["cloud_c", Vector2(220, REST_Y - 92)]]:
+		SurfaceArt.sprite(sky, spec[0], spec[1], 1.5).modulate.a = 0.25
+	var hills := _parallax("Hills", 0.08, -36)
+	SurfaceArt.backdrop(hills, "hills", Vector2(-700, REST_Y - 279), 1.0, 640 * 3)
+	var woods := _parallax("Woods", 0.3, -32)
+	SurfaceArt.backdrop(woods, "woods", Vector2(-900, REST_Y - 196), 1.0, 640 * 5).modulate = Color(0.8, 0.8, 0.92)
+	for layer in [sky, hills, woods]:
+		for child in layer.find_children("*", "CanvasItem", true, false):
+			if child.material == null:
+				child.use_parent_material = true
+
+	# the road and the ravine (the ravine floor is far below, out of sight)
 	_terrain(0, FLOOR, 816, true)
 	_terrain(1056, FLOOR, 1392, true)
 	_terrain(816, 696, 240)
 	_solid(Rect2(-24, 200, 24, 700))
 	_solid(Rect2(_width, 200, 24, 700))
-	for x in [120, 420, 1180, 1360, 1980, 2290]:
-		SurfaceArt.sprite(self, "pillar", Vector2(x, FLOOR), 1.5)
-		SurfaceArt.sprite(self, "vine", Vector2(x, FLOOR - 40), 1.5)
-	for x in [240, 580, 1150, 1510, 2150]:
-		SurfaceArt.sprite(self, "rock_big", Vector2(x, FLOOR), 1.5)
-	for x in range(80, 2448, 112):
-		SurfaceArt.sprite(self, "grass_3", Vector2(x, FLOOR), 1.5)
-	SurfaceArt.sprite(self, "arch", Vector2(1760, FLOOR), 3.0)
-	SurfaceArt.sprite(self, "door_tall", Vector2(1760, FLOOR), 2.5)
+	var tufts := StoryNodes.Tufts.new()
+	tufts.x0 = 0.0
+	tufts.x1 = _width / 1.5
+	tufts.y = (FLOOR + 3.0) / 1.5
+	tufts.skip = [Vector2(800 / 1.5, 1072 / 1.5)]
+	tufts.scale = Vector2(1.5, 1.5)
+	tufts.z_index = 1
+	add_child(tufts)
+	# roots hanging into the ravine from both lips
+	for x in [804.0, 1064.0]:
+		SurfaceArt.sprite(self, "vine_long", Vector2(x, FLOOR + 66), 1.5)
+
+	# Leaving Lowbell: a signpost, a fence, the graves of old pilgrims
+	SurfaceArt.sprite(self, "signpost", Vector2(150, FLOOR + 1), 1.5)
+	SurfaceArt.sprite(self, "fence_broken", Vector2(60, FLOOR + 1), 1.5)
+	SurfaceArt.sprite(self, "tree_big", Vector2(330, FLOOR + 2), 1.5)
+	for spec in [["grave_round", 470.0], ["grave_cross", 512.0], ["grave_celtic", 560.0], ["grave_broken", 600.0]]:
+		SurfaceArt.sprite(self, spec[0], Vector2(spec[1], FLOOR + 1), 1.5)
+	# The pilgrims' bridge: its winch on the near lip, lit by a road lamp
+	SurfaceArt.sprite(self, "lamp_post", Vector2(686, FLOOR + 1), 1.5)
+	_light(Vector2(694, FLOOR - 100), GOLD, 0.8)
+	_winch = SurfaceArt.sprite(self, "bridge_winch", Vector2(752, FLOOR + 1), 1.5)
+	_use(Vector2(752, FLOOR), "Lower the pilgrim bridge", lower_bridge)
+	_bridge = Node2D.new()
+	_bridge.position = Vector2(816, FLOOR)
+	_bridge.rotation = -PI / 2
+	add_child(_bridge)
+	SurfaceArt.tile_row(_bridge, Vector2(0, -4), ["plank_l", "plank_m", "plank_m", "plank_m", "plank_m", "plank_m", "plank_m", "plank_m", "plank_m", "plank_r"], 1.5)
+	_bridge_body = _solid(Rect2(816, FLOOR, 240, 16), "PilgrimBridge", false)
+	# the rope from the winch's drum to the bridge's far end
+	_bridge_rope = Line2D.new()
+	_bridge_rope.width = 3.0
+	_bridge_rope.texture = load("res://assets/sprites/story/rope.png")
+	_bridge_rope.texture_mode = Line2D.LINE_TEXTURE_TILE
+	_bridge_rope.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	_bridge_rope.z_index = 1
+	add_child(_bridge_rope)
+	_update_rope()
+
+	# Over the bridge: a shrine-ruin with a few rocky steps to climb for fun
+	for spec in [Rect2(1248, 480, 96, 40), Rect2(1344, 450, 72, 70), Rect2(1416, 480, 72, 40)]:
+		SurfaceArt.ground(self, spec.position.x, spec.end.x, spec.position.y, 1.5, int(ceil(spec.size.y / 24.0)), ["grass_a", "grass_b", "grass_c"], ["dirt_stones", "dirt_a", "dirt_b"], int(spec.position.x))
+		_solid(spec)
+	SurfaceArt.sprite(self, "wall_broken", Vector2(1210, FLOOR + 1), 1.5)
+	SurfaceArt.sprite(self, "rock_big", Vector2(1520, FLOOR + 1), 1.5)
+	for x in [1120, 1980]:
+		SurfaceArt.sprite(self, "pillar", Vector2(x, FLOOR + 1), 1.5)
+		SurfaceArt.sprite(self, "vine", Vector2(x + 4, FLOOR - 40), 1.5)
+
+	# The Belfry's outer gate, sealed, frost grown through it
+	SurfaceArt.sprite(self, "arch", Vector2(1760, FLOOR + 1), 3.0)
+	SurfaceArt.sprite(self, "door_frost", Vector2(1760, FLOOR + 1), 2.5).modulate = Color(0.78, 0.82, 0.95)
+	SurfaceArt.sprite(self, "frost_a", Vector2(1712, FLOOR + 1), 1.0).modulate = Color(0.8, 0.85, 1.0, 0.85)
+	SurfaceArt.sprite(self, "frost_b", Vector2(1812, FLOOR + 1), 1.0, true).modulate = Color(0.8, 0.85, 1.0, 0.85)
 	_light(Vector2(1760, 434), VIOLET, 0.7)
 	_gate = _solid(Rect2(1728, 390, 64, 130), "SealedBelfry")
 	# The sealed entrance is in the back wall; the road continues east in
 	# front of it. It blocks entry to the Belfry, not travel to the well.
 	_gate.collision_layer = 0
-	_use(Vector2(1688, FLOOR), "Read the sealed door", _gate_story)
-	# A weathered notice next to the machinery explains the puzzle without
-	# asking the player to know any spell from the later tutorial.
-	SurfaceArt.sprite(self, "wall_lantern", Vector2(718, 478), 1.5)
-	_light(Vector2(718, 448), GOLD)
-	_use(Vector2(726, FLOOR), "Lower the pilgrim bridge", lower_bridge)
-	_bridge = Node2D.new()
-	_bridge.position = Vector2(816, FLOOR)
-	_bridge.rotation = -PI / 2
-	add_child(_bridge)
-	SurfaceArt.tile_block(_bridge, Vector2.ZERO, 10, 1, ["plank_m"], 1.5)
-	_bridge_body = _solid(Rect2(816, FLOOR, 240, 16), "PilgrimBridge", false)
-	# Small optional steps above a continuous, safe path.
-	for spec in [Rect2(1248, 480, 96, 40), Rect2(1344, 450, 72, 70), Rect2(1416, 480, 72, 40)]:
-		SurfaceArt.tile_block(self, spec.position, int(spec.size.x / 24), int(ceil(spec.size.y / 24)), ["bricks_grass_a", "bricks_roots"], 1.5)
-		_solid(spec)
-	SurfaceArt.sprite(self, "well", Vector2(2184, FLOOR), 2.0)
-	SurfaceArt.sprite(self, "crypt", Vector2(2350, FLOOR), 1.5)
+	_use(Vector2(1688, FLOOR), "Read the sealed gate", _gate_story)
+
+	# The bellkeepers' well, east of the gate, and an old crypt
+	SurfaceArt.sprite(self, "well", Vector2(2184, FLOOR + 1), 2.0)
+	SurfaceArt.sprite(self, "crypt", Vector2(2350, FLOOR + 1), 1.5)
+	SurfaceArt.sprite(self, "lantern", Vector2(2120, FLOOR + 1), 1.5)
+	_light(Vector2(2120, FLOOR - 36), GOLD, 0.6)
 	_exit = _use(Vector2(2184, FLOOR), "Climb down the old well", _well_story)
 	_exit.enabled = GameState.has_flag("story.belfry_read")
 	StoryPaint.motes(self, Rect2(1990, 330, 400, 210), Color(0.64, 0.65, 0.95, 0.3), 28)
 
+
+## A backdrop layer that moves `scroll` as far as the camera does (0 = fixed
+## to the screen, 1 = part of the world), unshaded so it keeps its colours.
+func _parallax(layer_name: String, scroll: float, z: int) -> Node2D:
+	var layer := Node2D.new()
+	layer.name = layer_name
+	layer.z_index = z
+	layer.material = MagicLight.unshaded()
+	add_child(layer)
+	_layers.append([layer, scroll])
+	return layer
+
+
+## The rope runs from the winch's drum to the bridge's far end.
+func _update_rope() -> void:
+	if _bridge_rope == null or _bridge == null:
+		return
+	var tip := _bridge.position + Vector2(236, -2).rotated(_bridge.rotation)
+	_bridge_rope.points = PackedVector2Array([Vector2(752, FLOOR - 27), tip])
 func _build_well() -> void:
 	# The service passage descends through three landings. Drops are safe;
 	# the checkpoint advances with the player, including after a restart.
@@ -277,6 +354,9 @@ func _build_well() -> void:
 	_wisp = StoryPaint.glow(self, Vector2(275, 460), 10, Color(0.75, 0.85, 1.0), 1.2)
 	_wisp.z_index = 5
 	StoryPaint.motes(self, Rect2(30, 260, 1900, 420), Color(0.5, 0.6, 0.85, 0.3), 45)
+	# the rope ladder she climbed down, hanging from the well-head far above
+	for y in [492.0, 396.0, 300.0, 204.0]:
+		SurfaceArt.sprite(self, "rope_ladder", Vector2(78, y), 1.5).z_index = -5
 	_light(Vector2(80, 340), Color("aecae0"), 1.0)
 	var cp: String = GameState.get_checkpoint_for(WELL)
 	if cp == "prologue.well.second":
@@ -300,30 +380,24 @@ func _build_ui() -> void:
 	panel.offset_left = -352
 	panel.offset_right = -20
 	panel.offset_top = 22
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.055, 0.04, 0.08, 0.9)
-	style.border_color = Color("706185")
-	style.set_border_width_all(1)
-	style.content_margin_left = 14
-	style.content_margin_right = 14
-	style.content_margin_top = 10
-	style.content_margin_bottom = 10
-	panel.add_theme_stylebox_override("panel", style)
+	panel.add_theme_stylebox_override("panel", DungeonUI.style("panel_lite", 8, Vector4(14, 10, 14, 10)))
 	objective = Label.new()
 	objective.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	objective.add_theme_font_override("font", StoryPaint.label_font())
-	objective.add_theme_font_size_override("font_size", 18)
-	objective.add_theme_color_override("font_color", Color("e4d9ed"))
+	objective.add_theme_font_override("font", Fonts.STORY)
+	objective.add_theme_font_size_override("font_size", 16)
+	objective.add_theme_color_override("font_color", DungeonUI.INK)
 	panel.add_child(objective)
-	objective.text = ["Nan's cottage\nSpeak with Nan.", "The pilgrim road\nLower the bridge. Find the Belfry door.", "The old well\nLight both passage lamps with Nan's lantern.  0 / 2"][stage]
+	objective.text = ["Nan's cottage\nSpeak with Nan.", "The pilgrim road\nLower the bridge. Find the Belfry's gate.", "The old well\nLight both passage lamps with Nan's lantern.  0 / 2"][stage]
 	_heading = Label.new()
 	root.add_child(_heading)
 	_heading.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_heading.position = Vector2(28, 30)
-	_heading.text = ["A NAME TO REMEMBER", "THE PILGRIM ROAD", "ONE FLAME, TWO LAMPS"][stage]
-	_heading.add_theme_font_override("font", StoryPaint.label_font())
-	_heading.add_theme_font_size_override("font_size", 15)
+	_heading.text = ["A Name to Remember", "The Pilgrim Road", "One Flame, Two Lamps"][stage]
+	_heading.add_theme_font_override("font", Fonts.TITLE)
+	_heading.add_theme_font_size_override("font_size", 36)
 	_heading.add_theme_color_override("font_color", GOLD)
+	_heading.add_theme_color_override("font_outline_color", Color("0d0b10"))
+	_heading.add_theme_constant_override("outline_size", 8)
 	_fade = ColorRect.new()
 	root.add_child(_fade)
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -368,11 +442,12 @@ func _opening() -> void:
 			objective.text = "Carry Nan's lantern\nLeave through the cottage door. Follow the pilgrim road."
 		)
 	elif stage == Stage.APPROACH:
-		_talk([["Echidna", "The road the bellkeepers walked every morning. Nan used to hear them from her window."],
+		_talk([["Echidna", "The old pilgrim road. Nan walked it every morning when she was a novice, up to the Choir's bell."],
+			["Echidna", "No wind. No birds. Even the snow stopped halfway down. The Hush lies thicker up here."],
 			["Echidna", "Keep walking. She's waiting for the sound of that bell."]])
 	else:
-		_talk([["Echidna", "A service passage. So this is how the bellkeepers got inside when the great doors were closed."],
-			["Echidna", "Nan's lantern is still warm. One flame can wake both lamps."]])
+		_talk([["Echidna", "The bellkeepers' passage. This is how they reached the tower when the snow closed the road."],
+			["Echidna", "Nan's lantern is still warm in my hand. One flame can wake both lamps."]])
 
 func _talk(pages: Array, after: Callable = Callable()) -> void:
 	if dialogue.active or leaving:
@@ -413,22 +488,23 @@ func lower_bridge() -> void:
 		_bridge_body.collision_layer = 2
 		Sfx.play("crate_thud", _bridge.position, -9)
 		GameState.set_flag("story.bridge_lowered")
-		objective.text = "The pilgrim road\nCross the bridge. Read the seal on the Belfry door."
+		objective.text = "The pilgrim road\nCross the bridge. Read the seal on the Belfry's gate."
 		player.unlock_controls()
 	)
 
 func _gate_story() -> void:
-	_talk([["Echidna", "Four empty words, carved into the seal. My fire won't open this."],
-		["Inscription", "THE BELFRY IS SEALED. Bellkeepers: use the eastern well. Keep the passage lamps burning."],
+	_talk([["Echidna", "The Belfry's outer gate. The frost has grown right through the lock."],
+		["Echidna", "Four hollows cut into the seal, each waiting for a word. I don't know any of them. Not yet."],
+		["Inscription", "SEALED BY THE CHOIR UNTIL THE BELL IS WHOLE. Bellkeepers: take the eastern well, and keep the passage lamps burning."],
 		["Echidna", "The eastern well. Nan remembered the way, even when she couldn't remember me."]], func():
 		GameState.set_flag("story.belfry_read")
 		_exit.enabled = true
-		objective.text = "A way beneath the seal\nFind the old well east of the Belfry door."
+		objective.text = "A way beneath the seal\nFind the old well east of the gate."
 	)
 
 func _well_story() -> void:
-	_talk([["Echidna", "Cold air. Wet stone. And somewhere below, a path to the bell."],
-		["Echidna", "I'm not going down for treasure. I'm going down so Nan can remember who comes home."]], func(): _transition(WELL))
+	_talk([["Echidna", "Cold air rising, and the smell of wet stone. Somewhere below is the way up to the bell."],
+		["Echidna", "I'm not going down for treasure. I'm going down so Nan can say my name again."]], func(): _transition(WELL))
 
 func light_sconce(index: int) -> void:
 	if _sconces[index]["lit"] or leaving:
@@ -469,7 +545,7 @@ func _open_ward(sound: bool) -> void:
 func _undercroft_story() -> void:
 	_talk([["Echidna", "A little light... You know the way, don't you?"],
 		["Echidna", "The bell is above us, but its stairs begin down here. All right. Together."],
-		["The Undercroft", "Beyond the passage are the abbey's forgotten trials. Learn its paths, wake its mechanisms, and reach the bell before Lowbell falls silent."]], func():
+		["The Undercroft", "Beyond the passage lie the Choir's old trials for its novices. Learn their paths, wake their mechanisms, and reach the bell before Lowbell falls silent."]], func():
 		GameState.set_flag("story.undercroft_entered")
 		_transition(Journey.after_story())
 	)
@@ -485,6 +561,14 @@ func _transition(path: String) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	# the distance drifts slower than the road (see _parallax)
+	var view := get_viewport().get_camera_2d()
+	if view and not _layers.is_empty():
+		var centre := view.get_screen_center_position()
+		for entry in _layers:
+			entry[0].position = (centre - Vector2(0, REST_Y)) * (1.0 - entry[1])
+	if _bridge_rope:
+		_update_rope()
 	if stage == Stage.COTTAGE:
 		var viewport_size := get_viewport().get_visible_rect().size
 		var available := Vector2(2.0 * minf(camera.position.x, _width - camera.position.x), 2.0 * minf(camera.position.y - 100.0, 800.0 - camera.position.y))
@@ -555,17 +639,10 @@ func _draw() -> void:
 			draw_colored_polygon(PackedVector2Array([p + Vector2(-5, 0), tip, p + Vector2(5, 0)]), Color("e68b43"))
 			draw_colored_polygon(PackedVector2Array([p + Vector2(-3, 0), p.lerp(tip, 0.7), p + Vector2(3, 0)]), GOLD)
 	elif stage == Stage.APPROACH:
-		# Ropes and winch remain attached to the bridge's stone abutment.
-		draw_line(Vector2(786, 420), Vector2(816, 520), Color("8e7865"), 2)
-		draw_circle(Vector2(726, 492), 13, Color("78604c"))
-		draw_line(Vector2(716, 490), Vector2(738, 476), GOLD, 3)
-		draw_rect(Rect2(1718, 340, 84, 10), Color("4c455b"))
-		RuneFragments.draw_glyph(self, &"space", Vector2(1760, 427), 38, Color(VIOLET, 0.5 + sin(_time) * 0.12), 2)
+		# The seal's word-hollow glows faintly on the frozen gate
+		RuneFragments.draw_glyph(self, &"space", Vector2(1760, 404), 30, Color(VIOLET, 0.5 + sin(_time) * 0.12), 2)
 	else:
-		# The well's rope disappears upward; water glints beneath the landings.
-		draw_line(Vector2(78, 180), Vector2(78, 492), Color("92806b"), 2)
-		for y in range(200, 490, 18):
-			draw_line(Vector2(69, y), Vector2(87, y), Color("6e625a"), 2)
+		# Water glints beneath the landings
 		for x in range(620, 1960, 40):
 			draw_line(Vector2(x, 785), Vector2(x + 22, 785), Color(0.4, 0.5, 0.7, 0.2 + sin(_time + x) * 0.08), 1)
 		if sconces_lit < 2:
