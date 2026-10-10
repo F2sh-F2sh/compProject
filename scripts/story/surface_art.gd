@@ -33,7 +33,7 @@ const STRIPS := {
 	# The Novices' Way (tools/generate_shrine_sprites.gd)
 	"kept_flame": 3, "spring": 3, "echo_stone": 2,
 	# Nan's cottage (tools/generate_cottage_sprites.gd)
-	"nan_seated": 3, "hearth": 3, "table": 1, "shelf_jars": 1, "cellar_door": 2,
+	"nan_seated": 3, "hearth": 3, "table": 1, "cottage_cupboard": 1, "cottage_bookshelf": 1, "cottage_window": 1, "desk_lantern": 3, "cottage_rug": 1, "shelf_jars": 1, "cellar_door": 2,
 	# The Kilnworks (tools/generate_kiln_sprites.gd)
 	"great_kiln": 2, "kiln_chimney": 2, "lamp_fuel": 2, "lamp_air": 2, "lamp_fire": 2, "coal_cart": 1, "heart_crucible": 2,
 	"slag": 4, "slag_crust": 1, "forge_door": 2, "bellows": 1, "anvil": 1, "tool_rack": 1, "coal_heap": 1,
@@ -167,6 +167,8 @@ const TILES := {
 ## Where a grass tile's walkable surface is, below the tile's top (art px).
 const GRASS_SURFACE := 4
 
+const CHARACTER_HEIGHTS := {"tam": 25, "mira": 24, "pip": 18, "edda": 24, "nan": 22, "monk": 26, "ilse": 29, "wren": 19, "nan_seated": 31, "wren_bed": 16}
+
 static var _textures := {}
 static var _frames := {}
 static var _tile_set: TileSet
@@ -239,16 +241,17 @@ static func frames(names: Variant, fps := 6.0) -> SpriteFrames:
 
 
 ## An animated sprite, feet at `foot` (every frame must share a size).
-static func animated(parent: Node, names: Variant, foot: Vector2, fps := 6.0, scale := LANE_SCALE, flip := false) -> AnimatedSprite2D:
+static func animated(parent: Node, names: Variant, foot: Vector2, fps := 6.0, scale := LANE_SCALE, flip := false, world_character := false) -> AnimatedSprite2D:
 	var a := AnimatedSprite2D.new()
 	a.sprite_frames = frames(names, fps)
 	a.centered = false
 	var size := a.sprite_frames.get_frame_texture(&"default", 0).get_size()
-	if names is String and names in ["tam", "mira", "pip", "edda", "nan", "monk", "ilse", "wren"]:
-		# World characters share a 64-pixel height, preserving their aspect
-		# ratio and bottom pivot. Cinematic staging keeps its authored scale.
-		if is_equal_approx(scale, LANE_SCALE):
-			scale = 64.0 / size.y
+	if names is String and CHARACTER_HEIGHTS.has(names):
+		# New 64px art is used directly in gameplay, never enlarged 16px art.
+		if world_character or is_equal_approx(scale, LANE_SCALE):
+			scale = 1.0
+		else:
+			scale *= float(CHARACTER_HEIGHTS[names]) / size.y
 	a.offset = Vector2(-floorf(size.x / 2.0), -size.y)
 	a.position = foot
 	a.scale = Vector2(scale, scale)

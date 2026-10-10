@@ -18,8 +18,8 @@ signal typed
 signal advanced
 
 const ART := "res://assets/sprites/story/portrait_%s.png"
-const ART_SIZE := Vector2(112, 136)
-const SCALE := 2.0
+const ART_SIZE := Vector2(64, 64)
+const SCALE := 3.0
 ## Each portrait strip's frames, in order (as the generator draws them).
 const FACES := {
 	"echidna": ["neutral", "worried", "determined", "sad", "surprised"],
@@ -205,7 +205,7 @@ func _process(delta: float) -> void:
 
 func _portrait_y() -> float:
 	var view := get_viewport().get_visible_rect().size
-	return view.y - BOX_H - 18.0 + 64.0 - ART_SIZE.y * SCALE
+	return view.y - BOX_H - 24.0 - ART_SIZE.y * SCALE
 
 
 func _unhandled_input(event: InputEvent) -> void:

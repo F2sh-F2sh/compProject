@@ -1132,29 +1132,20 @@ func scenario_tours() -> void:
 
 
 func scenario_kindle() -> void:
-	print("SCENARIO a flame to kindle at in every room")
+	print("SCENARIO R reload works without refill posts")
 	UiTour.enabled = false
 	for path in [CHAPTER, "res://scenes/chapter/chapter_2.tscn"]:
 		state().clear_all()
 		state().all_abilities = true
 		await open_scene(path)
 		await frames(5)
-		var flames := get_tree().get_nodes_in_group("kindle_point")
-		var rooms := lvl.find_children("*", "Room", true, false)
-		check("%s: has rooms and kindle points" % path.get_file(), not rooms.is_empty() and not flames.is_empty())
-		for room: Room in rooms:
-			var near := flames.filter(func(f): return f is Node2D and f.has_method("is_kindling") and f.is_kindling() and room.bounds.has_point(f.global_position))
-			check("%s %s has a flame to kindle at" % [path.get_file(), room.title], not near.is_empty())
-		var sample: KindleFlame = lvl.find_children("KindleFlame", "", true, false)[0]
-		check("a room flame is a pixel sprite that kindles", sample.is_kindling() and sample.get_node("Figure") is AnimatedSprite2D
-			and sample.find_children("*", "Polygon2D", true, false).is_empty())
-		# A look at each added flame, from where the player arrives
+		check("no obsolete refill posts", lvl.find_children("*", "KindleFlame", true, false).is_empty())
 		var player: Node2D = lvl.get("player")
-		for flame: KindleFlame in lvl.find_children("KindleFlame", "", true, false):
-			if player != null:
-				player.teleport_to(flame.global_position + Vector2(70, -4))
-				await seconds(3.0)
-				await shot("kindle_%s_%s" % [path.get_file().get_basename(), flame.get_parent().name])
+		player.current_mana = 0
+		Input.action_press("reload")
+		await frames(110)
+		Input.action_release("reload")
+		check("R refills mana at the entrance without a flame", player.current_mana == player.get_mana_cap())
 	state().clear_all()
 	state().all_abilities = true
 

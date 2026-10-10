@@ -32,7 +32,6 @@
 [ext_resource type="PackedScene" path="res://scenes/fx/puddle.tscn" id="30_fgmrj"]
 [ext_resource type="Script" path="res://scripts/fx/puddle.gd" id="31_tu6ku"]
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/bat.png" id="32_363m7"]
-[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="33_hlym1"]
 [ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="34_yeqxp"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/iron_grate.tscn" id="35_t6irw"]
 [ext_resource type="Script" path="res://scripts/puzzle/iron_grate.gd" id="36_r6j25"]
@@ -46,7 +45,6 @@
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/chain_cage.png" id="44_uwln1"]
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/moss_drip_top.png" id="45_eeu2f"]
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/skeleton.png" id="46_p52gs"]
-[ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/rat.png" id="47_et8tp"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/brazier.tscn" id="48_shwy0"]
 [ext_resource type="Script" path="res://scripts/puzzle/brazier.gd" id="49_u7feb"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/mirror.tscn" id="50_avyly"]
@@ -475,10 +473,6 @@ script = ExtResource("7_rek1w")
 position = Vector2(2713.6, 458)
 script = ExtResource("7_rek1w")
 
-[node name="KindleFlame" type="Node2D" parent="R2" unique_id=1169388653 instance=ExtResource("33_hlym1")]
-position = Vector2(1384, 534)
-script = ExtResource("34_yeqxp")
-
 [node name="Grate" type="Node2D" parent="R2" unique_id=1803978868 instance=ExtResource("35_t6irw")]
 position = Vector2(1728, 534)
 script = ExtResource("36_r6j25")
@@ -667,12 +661,6 @@ position = Vector2(2720, 534)
 texture = ExtResource("46_p52gs")
 centered = false
 offset = Vector2(-64, -64)
-
-[node name="Rat8" type="Sprite2D" parent="R2/Decor" unique_id=734100889]
-position = Vector2(1696, 534)
-texture = ExtResource("47_et8tp")
-centered = false
-offset = Vector2(-32, -64)
 
 [node name="Puddle9" type="Node2D" parent="R2/Decor" unique_id=2004932675 instance=ExtResource("30_fgmrj")]
 position = Vector2(1584, 534)
@@ -973,10 +961,6 @@ script = ExtResource("7_rek1w")
 [node name="Waymark3" type="Node2D" parent="R4" unique_id=2112218639 instance=ExtResource("6_4cs54")]
 position = Vector2(5273.6, 458)
 script = ExtResource("7_rek1w")
-
-[node name="KindleFlame" type="Node2D" parent="R4" unique_id=1709372478 instance=ExtResource("33_hlym1")]
-position = Vector2(4192, 534)
-script = ExtResource("34_yeqxp")
 
 [node name="Lever" type="Node2D" parent="R4" unique_id=1753188319 instance=ExtResource("58_aq5ry")]
 position = Vector2(4320, 534)
@@ -2158,10 +2142,6 @@ script = ExtResource("7_rek1w")
 position = Vector2(12377.6, 458)
 script = ExtResource("7_rek1w")
 
-[node name="KindleFlame" type="Node2D" parent="R8" unique_id=490526608 instance=ExtResource("33_hlym1")]
-position = Vector2(11232, 534)
-script = ExtResource("34_yeqxp")
-
 [node name="LeverA" type="Node2D" parent="R8" unique_id=851804499 instance=ExtResource("58_aq5ry")]
 position = Vector2(11296, 534)
 script = ExtResource("59_m2fcc")
@@ -2310,10 +2290,6 @@ script = ExtResource("7_rek1w")
 [node name="Waymark2" type="Node2D" parent="R9" unique_id=1888563250 instance=ExtResource("6_4cs54")]
 position = Vector2(13120, 458)
 script = ExtResource("7_rek1w")
-
-[node name="KindleFlame" type="Node2D" parent="R9" unique_id=1262410249 instance=ExtResource("33_hlym1")]
-position = Vector2(12640, 534)
-script = ExtResource("34_yeqxp")
 
 [node name="Plate" type="Area2D" parent="R9" unique_id=223997368 instance=ExtResource("14_uwbw4")]
 position = Vector2(12704, 534)

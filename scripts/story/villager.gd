@@ -29,7 +29,7 @@ func _ready() -> void:
 	figure = SurfaceArt.animated(self, sprite_name, Vector2.ZERO, 0.0, art_scale)
 	figure.name = "Figure"
 	figure.stop()
-	var height := SurfaceArt.size_of(sprite_name).y * art_scale
+	var height := SurfaceArt.size_of(sprite_name).y * figure.scale.y
 	bubble = SpeechBubble.new()
 	bubble.text = line
 	bubble.position = Vector2(0, -height - 12.0)

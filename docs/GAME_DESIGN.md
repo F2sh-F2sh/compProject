@@ -343,18 +343,18 @@ Active runes drawing upkeep must be switched off first; Echo capacity debt still
 **How you get it back:**
 | Source | Rule | Why |
 |---|---|---|
-| **Reload** | **Hold R anywhere** for 1.5 seconds | No flame dependency or backtracking; refill posts are hidden. |
+| **Reload** | **Hold R anywhere** for 1.5 seconds | No flame dependency or backtracking; obsolete refill posts are removed. |
 | **Spark Motes** | Defeated creatures drop +6 each; breakable spark pods in fight rooms | Rewards fighting well |
 | **Echo** | An Echo re-casts your recorded fireballs **for free** | A clever way to stretch mana (already built) |
 | **Trickle** | Up to 25% of the cap comes back at 4/s when no rune is running | A floor so no one is stuck at 0 |
 
 **Laws that prevent soft-locks** (never break these): (1) every room's solution fits a full bar plus its
-own Kindle point; (2) running dry never destroys anything; (3) Reset Room returns you to the entrance
-(a Kindle point) with the mana you entered with; (4) mana never blocks the way out; (5) a refused
+R reload; (2) running dry never destroys anything; (3) Reset Room returns you to the entrance
+with the mana you entered with; (4) mana never blocks the way out; (5) a refused
 spell costs nothing and says why ("needs 16 in hand"); (6) **Assist: unlimited mana** stays, plus a
-"gentle" option (Kindle in half the time).
+"gentle" option (reload in half the time).
 
-Controls: R is labelled **Kindle**; the action keeps its internal name so rebinds survive.
+Controls: R is labelled **Reload mana**; the action keeps its internal name so rebinds survive.
 
 ---
 
@@ -525,8 +525,7 @@ Passage order is Echo Door first, then the Kept Flame (fire) and the Cells; it e
 no longer in the Passage: **heal returns after the great bell rings, with the third bell picture**, so the
 Observatory is the first part with heal. (3) A one-time UI tour explains health, the Esc menu, mana, the
 spell slots, the Echo tag and the goal card; Observatory room 1 explains the rune cubes (locked words, Tab).
-(4) Every Belfry and Observatory room has a Kindle flame by its entrance, so mana can no longer strand the
-player. New chapters (§5) must keep this rule: a Kindle flame at every room entrance.
+(4) R reload works anywhere. Dedicated refill posts have been removed from all chapters; level builders must not recreate them.
 
 If behind on 14 Oct, cut in this order: Lampworks to 4 rooms; Cistern to 5; the Mirror Knight; the
 Lampmoth; the Stillness ending. Never cut: the Passage, the earned abilities, one boss per chapter,
@@ -553,7 +552,7 @@ grants all abilities for the tests that assume them (66 fireball references toda
 | 120 minutes of tuned rooms is a lot | Ending-first build order; cut lines above; honest 80–90 min for 20 Oct |
 | New art for every region | Pixel-sprite generator; per-region tint first, props second |
 | Rooms too easy again | Targets per room; use the playtest log; add a step before removing hints |
-| Changing mana breaks Chapter 2's rune rooms | A Kindle point at every room entrance; run the rune suite after every step |
+| Changing mana breaks Chapter 2's rune rooms | R reload available everywhere; run the rune suite after every step |
 | Save compatibility | Keep flag names; auto-grant abilities to old saves |
 | Test churn | One grant-all-abilities helper; update tests in the same step |
 

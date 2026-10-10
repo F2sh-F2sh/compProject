@@ -3,7 +3,7 @@ extends SceneTree
 ## Rendered QA only. Run on an isolated desktop through the local launcher,
 ## never on the user's interactive desktop. No OS input is synthesised.
 var started := false
-var out := "res://docs/polish_shots/2026-10-09/"
+var out := "res://docs/polish_shots/2026-10-09-dark/"
 
 func _process(_delta: float) -> bool:
 	if not started:
@@ -22,7 +22,7 @@ func _run() -> void:
 	AudioServer.set_bus_mute(0, true)
 	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_NO_FOCUS, true)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out))
-	for path in ["res://scenes/ui/title_screen.tscn", "res://scenes/story/story_intro.tscn", "res://scenes/story/nan_cottage.tscn", "res://scenes/tutorial_movement.tscn", "res://scenes/tutorial_level.tscn",
+	for path in ["res://scenes/ui/title_screen.tscn", "res://scenes/story/story_intro.tscn", "res://scenes/story/lowbell.tscn", "res://scenes/story/nan_cottage.tscn", "res://scenes/tutorial_movement.tscn", "res://scenes/tutorial_level.tscn",
 			"res://scenes/chapter/chapter_1.tscn", "res://scenes/chapter/chapter_2.tscn", "res://scenes/chapter/landing.tscn", "res://scenes/chapter/wing_kiln.tscn",
 			"res://scenes/chapter/wing_cistern.tscn", "res://scenes/chapter/wing_lamps.tscn", "res://scenes/chapter/wing_galleries.tscn", "res://scenes/chapter/eye.tscn"]:
 		if current_scene:
@@ -32,7 +32,12 @@ func _run() -> void:
 		root.add_child(scene)
 		current_scene = scene
 		await create_timer(0.8).timeout
-		if path.ends_with("story_intro.tscn"):
+		if path.ends_with("lowbell.tscn"):
+			scene._begin_play()
+			scene.player.teleport_to(Vector2(580, 534))
+			scene.camera.call("snap")
+			await create_timer(1.0).timeout
+		elif path.ends_with("story_intro.tscn"):
 			scene._show_picture(4)
 			await create_timer(2.0).timeout
 		elif path.ends_with("nan_cottage.tscn"):
@@ -74,7 +79,7 @@ func _run() -> void:
 			Input.action_release("move_right")
 			var sign := scene.get_node("R3/Signs/Mirrors")
 			player.teleport_to(sign.global_position + Vector2(0, -4))
-			await create_timer(4.0).timeout
+			await create_timer(5.5).timeout
 			await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_png(ProjectSettings.globalize_path(out + "mirror_caption.png"))
 	quit()

@@ -1,17 +1,19 @@
 extends Node2D
 
-## The front door. A slow, moody view of the ruined belfry with Echidna by a
-## candle under a shaft of light; the title; and the menu: Continue (where
+## The front door. A slow, moody view of the ruined belfry behind a glass title and box-art showcase; and the menu: Continue (where
 ## you left off), New Game (the illustrated story, then Lowbell), the Tutorial
 ## ("The Novices' Way": the Passage, the Belfry, the Observatory),
 ## Settings & Controls, and Quit. A line under the menu shows progress.
 
 const FONT := Fonts.UI
+const AERO_BUTTON := preload("res://scripts/ui/aero_menu_button.gd")
+const AERO_CHROME := preload("res://scripts/ui/aero_menu_chrome.gd")
+const BOX_HOME := Vector2(724, 192)
+const TURNING_BOX := preload("res://scripts/ui/turning_game_box.gd")
 const TUTORIAL := Journey.PASSAGE
 const CHAPTER := Journey.BELFRY
 const CHAPTER_2 := Journey.OBSERVATORY
 const STORY := Journey.STORY
-const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
 
 var continue_button: Button
 var new_button: Button
@@ -32,9 +34,10 @@ var _far: Sprite2D
 var _mid: Sprite2D
 var _time := 0.0
 var _wing: TextureRect
-var _portrait: TextureRect
-var _portrait_y := 0.0
 var _starting := false
+var _box_art: TextureRect
+var _description: Label
+var _menu_column: VBoxContainer
 
 
 func _ready() -> void:
@@ -73,9 +76,7 @@ func _build_scenery() -> void:
 	add_child(shaft)
 
 
-## The title's art, laid out like a film poster: a tall crimson banner with
-## Echidna's portrait large before it, the held moment's frozen wing faint
-## behind the name, slow snow over everything.
+## Keep the ruined-belfry background, faint wing and drifting snow.
 func _build_art() -> void:
 	var art := CanvasLayer.new()
 	art.layer = 1
@@ -94,69 +95,6 @@ func _build_art() -> void:
 	wing.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(wing)
 	_wing = wing
-	# The banner: crimson, edged in gold, a faint lattice in it
-	var banner := Control.new()
-	banner.position = Vector2(70, 0)
-	banner.size = Vector2(300, 648)
-	banner.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	banner.offset_left = 70
-	banner.offset_right = 370
-	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	banner.draw.connect(func():
-		var s := banner.size
-		banner.draw_rect(Rect2(Vector2.ZERO, s), Color("4a0f19"))
-		for y in range(0, int(s.y), 28):
-			for x in range(0, int(s.x) + 28, 28):
-				var c := Vector2(x + (14 if (y / 28) % 2 == 1 else 0), y)
-				if c.x < 18.0 or c.x > s.x - 18.0:
-					continue
-				banner.draw_colored_polygon(PackedVector2Array([c + Vector2(0, -6), c + Vector2(6, 0), c + Vector2(0, 6), c + Vector2(-6, 0)]),
-					Color("5e1622"))
-		banner.draw_rect(Rect2(0, 0, 4, s.y), DungeonUI.GOLD_DIM)
-		banner.draw_rect(Rect2(s.x - 4, 0, 4, s.y), DungeonUI.GOLD_DIM)
-		banner.draw_rect(Rect2(8, 0, 2, s.y), Color("7a5f2a"))
-		banner.draw_rect(Rect2(s.x - 10, 0, 2, s.y), Color("7a5f2a"))
-		# a swallowtail at the foot
-		banner.draw_colored_polygon(PackedVector2Array([Vector2(0, s.y - 40), Vector2(s.x / 2.0, s.y - 4), Vector2(s.x, s.y - 40),
-			Vector2(s.x, s.y), Vector2(0, s.y)]), Color(0.02, 0.01, 0.03)))
-	root.add_child(banner)
-	# Down the banner's edge, small capitals, like a poster's side line
-	var side := DungeonUI.caps("A WITCH  ·  A HELD NIGHT  ·  A BELL THAT WILL NOT RING", 16, Color("e6b45c"))
-	side.rotation = -PI / 2.0
-	side.position = Vector2(340, 560)
-	root.add_child(side)
-	# Light behind her, and Echidna herself, large, before the banner
-	var halo := TextureRect.new()
-	halo.texture = preload("res://assets/fx/soft_glow.png")
-	halo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	halo.size = Vector2(560, 560)
-	halo.position = Vector2(-20, 70)
-	halo.modulate = Color(1.0, 0.75, 0.5, 0.35)
-	var add := CanvasItemMaterial.new()
-	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
-	halo.material = add
-	halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(halo)
-	_portrait = TextureRect.new()
-	_portrait.texture = FRAMES.get_frame_texture("idle", 0)
-	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_portrait.size = Vector2(320, 320)
-	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_portrait.position = Vector2(60, 250)
-	_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(_portrait)
-	_portrait_y = _portrait.position.y
-	# Layered stone cards behind the menu, set at slight angles
-	for spec in [[Vector2(700, 196), Vector2(400, 400), -0.05], [Vector2(716, 214), Vector2(380, 380), 0.03]]:
-		var card := Panel.new()
-		card.position = spec[0]
-		card.size = spec[1]
-		card.rotation = spec[2]
-		card.modulate = Color(1, 1, 1, 0.55)
-		card.add_theme_stylebox_override("panel", DungeonUI.lite_style())
-		card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		root.add_child(card)
 	# Snow, slow, over everything
 	var snow := StoryPaint.snow(root, Rect2(-100, -100, 1352, 900), 80)
 	snow.speed_scale = 0.35
@@ -177,8 +115,7 @@ func _process(delta: float) -> void:
 	# A slow drift, as if the fog were breathing
 	_far.position = Vector2(sin(_time * 0.05) * 30.0, -40.0 + sin(_time * 0.08) * 6.0)
 	_mid.position = Vector2(sin(_time * 0.05) * 60.0, 10.0)
-	if _portrait:
-		_portrait.position.y = _portrait_y + roundf(sin(_time * 1.3) * 2.0)
+	if _wing:
 		_wing.position.y = -150.0 + sin(_time * 0.4) * 6.0
 
 
@@ -193,39 +130,48 @@ func _build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_PASS
 	layer.add_child(root)
 
-	# The name, huge, across the top right, with a crimson shadow
-	var title_block := VBoxContainer.new()
-	title_block.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	title_block.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	title_block.offset_right = -56
-	title_block.offset_top = 22
-	title_block.add_theme_constant_override("separation", 0)
+	var chrome := AERO_CHROME.new()
+	chrome.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.add_child(chrome)
+	var title_block := TextureRect.new()
+	title_block.name = "TitleBlock"
+	title_block.texture = preload("res://assets/ui/menu/aero_title.png")
+	title_block.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	title_block.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	title_block.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# Centre the visible logo pixels (including its transparent padding)
+	# on the 485px options column and the header band at y=100.
+	title_block.position = Vector2(140, 14)
+	title_block.size = Vector2(320, 160)
 	title_block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(title_block)
-	for words in ["The Sealed", "Belfry"]:
-		var holder := Control.new()
-		holder.custom_minimum_size = Vector2(520, 86)
-		holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		title_block.add_child(holder)
-		var shadow := _label(words, Fonts.TITLE, 84, Color("7a1f2b"))
-		shadow.position = Vector2(5, 5)
-		shadow.size = holder.custom_minimum_size
-		shadow.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		holder.add_child(shadow)
-		var big := _label(words, Fonts.TITLE, 84, Color("f0d27a"))
-		big.size = holder.custom_minimum_size
-		big.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		holder.add_child(big)
-	title_block.add_child(DungeonUI.divider(520.0))
-	var tagline := _label("A witch, a frozen night, and a bell that has not rung in nine years.", Fonts.BOOK_ITALIC, 20, Color("d9c9a8"))
-	tagline.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	title_block.add_child(tagline)
-
+	var controls := _label("↑ ↓  SELECT     ENTER  CONFIRM\nMOUSE  SELECT     ESC  BACK", FONT, 20, Color("c6e1df"))
+	controls.position = Vector2(688, 38)
+	controls.size = Vector2(424, 60)
+	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	root.add_child(controls)
+	var mode := _label("BEGIN YOUR JOURNEY", FONT, 18, Color("b7c5d2"))
+	mode.position = Vector2(68, 187)
+	root.add_child(mode)
+	_box_art = TURNING_BOX.new()
+	_box_art.name = "BoxArt"
+	_box_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_box_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_box_art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_box_art.position = BOX_HOME
+	_box_art.size = Vector2(256, 384)
+	_box_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_box_art)
+	_description = _label("", FONT, 22, Color("dfedf0"))
+	_description.position = Vector2(68, 598)
+	_description.size = Vector2(1036, 32)
+	_description.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_description)
 	var column := VBoxContainer.new()
-	column.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	column.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	column.offset_right = -100
-	column.offset_top = 250
+	_menu_column = column
+	column.name = "MenuColumn"
+	column.position = Vector2(60, 218)
+	column.size = Vector2(485, 0)
 	column.add_theme_constant_override("separation", 10)
 	root.add_child(column)
 
@@ -240,7 +186,10 @@ func _build_ui() -> void:
 	_menu.add_child(tutorial_button)
 	_menu.add_child(_button("Settings & Controls", func(): _show_settings(true)))
 	_menu.add_child(_button("Quit", func(): get_tree().quit()))
-	_progress = _label("", Fonts.STORY, 16, Color("b9ab90"))
+	_progress = _label("", Fonts.STORY, 20, Color("d4c8b0"))
+	_progress.custom_minimum_size = Vector2(485, 42)
+	_progress.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_progress.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_menu.add_child(_progress)
 
 	# "Choose a Level" opens the levels: Level 1 (the tutorial, the first place
@@ -248,7 +197,7 @@ func _build_ui() -> void:
 	# Long Stair
 	_parts = VBoxContainer.new()
 	_parts.visible = false
-	_parts.add_theme_constant_override("separation", 8)
+	_parts.add_theme_constant_override("separation", 6)
 	column.add_child(_parts)
 	_parts.add_child(_label("The Novices' Way", FONT, 16, Color("c9a24a")))
 	part_1_button = _button("Level 1 · The Passage (tutorial)", _on_part_1)
@@ -265,21 +214,25 @@ func _build_ui() -> void:
 		_parts.add_child(admin_button)
 		_build_admin(column)
 	_parts.add_child(_button("Back", func(): _show_parts(false)))
+	for child in _parts.get_children():
+		if child is Button:
+			child.custom_minimum_size.y = 44
+			child.label_size = 22
 
 	_settings = VBoxContainer.new()
 	_settings.visible = false
 	_settings.add_theme_constant_override("separation", 10)
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", DungeonUI.panel_style())
-	panel.add_child(SettingsPanel.scrolled(400.0))
+	panel.add_child(SettingsPanel.scrolled(250.0))
 	_settings.add_child(panel)
 	_settings.add_child(_button("Back", func(): _show_settings(false)))
 	column.add_child(_settings)
 
 	var foot := _label("F11 fullscreen", FONT, 8, Color("6e6474"))
-	foot.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	foot.offset_left = 18
-	foot.offset_top = -30
+	foot.position = Vector2(906, 145)
+	foot.size = Vector2(205, 24)
+	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	root.add_child(foot)
 
 
@@ -295,18 +248,25 @@ func _label(text: String, font: Font, size: int, color: Color) -> Label:
 
 
 func _button(text: String, on_press: Callable) -> Button:
-	var b := Button.new()
+	var b := AERO_BUTTON.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(340, 46)
+	b.custom_minimum_size = Vector2(485, 52)
 	b.add_theme_font_override("font", FONT)
 	b.add_theme_font_size_override("font_size", 18)
 	b.pressed.connect(func(): Sfx.play("ui_click"); on_press.call())
+	b.mouse_entered.connect(func():
+		if not b.disabled:
+			b.grab_focus()
+			_describe(b.text))
+	b.focus_entered.connect(func(): _describe(b.text))
 	return b
 
 
 func _show_settings(show: bool) -> void:
+	_describe("Settings & Controls" if show else "New Game")
 	_menu.visible = not show
 	_settings.visible = show
+	_menu_column.call_deferred("reset_size")
 	if show:
 		(_settings.get_child(1) as Button).grab_focus()
 	else:
@@ -382,8 +342,10 @@ func _on_tutorial() -> void:
 
 
 func _show_parts(show: bool) -> void:
+	_describe("Choose a Level" if show else "New Game")
 	_menu.visible = not show
 	_parts.visible = show
+	_menu_column.call_deferred("reset_size")
 	if show:
 		part_1_button.grab_focus()
 	else:
@@ -433,13 +395,15 @@ func _build_admin(column: VBoxContainer) -> void:
 	_admin.add_child(grid)
 	for spec in ADMIN_ROOMS:
 		var b := _button(spec[0], _admin_jump.bind(spec[1], spec[2]))
-		b.custom_minimum_size = Vector2(290, 36)
-		b.add_theme_font_size_override("font_size", 18)
+		b.custom_minimum_size = Vector2(296, 36)
+		b.label_size = 17
 		grid.add_child(b)
 	_admin.add_child(_button("Back", func(): _show_admin(false)))
 
 
 func _show_admin(show: bool) -> void:
+	_box_art.visible = not show
+	_menu_column.size.x = 600 if show else 485
 	_parts.visible = not show
 	_admin.visible = show
 	if show:
@@ -459,3 +423,28 @@ func _start(path: String) -> void:
 		return
 	_starting = true
 	SceneFade.change(get_tree(), path)
+
+
+func _describe(option: String) -> void:
+	if not _description: return
+	match option:
+		"Continue": _description.text = "Return to your last shrine and continue Echidna's journey."
+		"New Game", "Press again: start over": _description.text = "A frozen night. A silent bell. Begin Echidna's story."
+		"Choose a Level": _description.text = "Revisit a lesson or enter the chapters you have discovered."
+		"Settings & Controls": _description.text = "Adjust sound, display, controls and accessibility."
+		"Quit": _description.text = "Leave the belfry. Your saved journey will be waiting."
+		"Back": _description.text = "Return to the previous menu."
+		_: _description.text = option
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		if _settings.visible:
+			_show_settings(false)
+		elif _admin and _admin.visible:
+			_show_admin(false)
+		elif _parts.visible:
+			_show_parts(false)
+		else:
+			return
+		get_viewport().set_input_as_handled()

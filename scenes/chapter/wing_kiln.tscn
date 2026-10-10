@@ -15,7 +15,6 @@
 [ext_resource type="Script" path="res://scripts/tutorial_sign.gd" id="13_xoi32"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="14_lixcv"]
 [ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="15_d4yq0"]
-[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="16_tl882"]
 [ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="17_6e4x4"]
 [ext_resource type="PackedScene" path="res://scenes/runes/rune_tablet.tscn" id="18_iepn2"]
 [ext_resource type="Script" path="res://scripts/runes/rune_tablet.gd" id="19_b4dll"]
@@ -559,10 +558,6 @@ position = Vector2(160, 534)
 script = ExtResource("15_d4yq0")
 checkpoint_id = "kiln.cp.start"
 
-[node name="KindleFlame" type="Node2D" parent="R1" unique_id=1794247360 instance=ExtResource("16_tl882")]
-position = Vector2(232, 534)
-script = ExtResource("17_6e4x4")
-
 [node name="TabletFire" type="Node2D" parent="R1" unique_id=89170372 instance=ExtResource("18_iepn2")]
 position = Vector2(296, 534)
 script = ExtResource("19_b4dll")
@@ -800,10 +795,6 @@ script = ExtResource("35_pemjt")
 page_id = "kiln.page.3"
 title = "The Smith's Ledger, iii"
 text = "The Prior's girl came through the hall again. She drew a star on my anvil in chalk and asked why fire is afraid of the cold. I told her it isn't. It is the cold that runs from the fire. She liked that."
-
-[node name="@Node2D@8" type="Node2D" parent="R1" unique_id=1526007182 instance=ExtResource("16_tl882")]
-position = Vector2(2400, 534)
-script = ExtResource("17_6e4x4")
 
 [node name="@Area2D@9" type="Area2D" parent="R1" unique_id=971703550 instance=ExtResource("14_lixcv")]
 position = Vector2(2528, 534)
@@ -1235,10 +1226,6 @@ position = Vector2(2912, 534)
 script = ExtResource("15_d4yq0")
 checkpoint_id = "kiln.cp.heart"
 
-[node name="KindleFlame" type="Node2D" parent="R2" unique_id=84028168 instance=ExtResource("16_tl882")]
-position = Vector2(2976, 534)
-script = ExtResource("17_6e4x4")
-
 [node name="TabletDelay" type="Node2D" parent="R2" unique_id=1361160622 instance=ExtResource("18_iepn2")]
 position = Vector2(3096, 534)
 script = ExtResource("19_b4dll")
@@ -1365,10 +1352,6 @@ script = ExtResource("35_pemjt")
 page_id = "kiln.page.5"
 title = "The Smith's Ledger, v"
 text = "My apprentice crossed the lake on the heat. Up the column, off at the top, never look down. He fell twice and the slag spat him back both times. He did not fall a third time."
-
-[node name="KindleGallery" type="Node2D" parent="R2" unique_id=903436925 instance=ExtResource("16_tl882")]
-position = Vector2(4720, 274)
-script = ExtResource("17_6e4x4")
 
 [node name="ShrineGallery" type="Area2D" parent="R2" unique_id=1766214480 instance=ExtResource("14_lixcv")]
 position = Vector2(4792, 274)

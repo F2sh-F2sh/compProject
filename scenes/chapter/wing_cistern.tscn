@@ -12,7 +12,6 @@
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/cobweb_corner.png" id="10_55h5o"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="11_puhax"]
 [ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="12_k5clp"]
-[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="13_wfybs"]
 [ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="14_c0xv0"]
 [ext_resource type="PackedScene" path="res://scenes/runes/rune_tablet.tscn" id="15_y1i30"]
 [ext_resource type="Script" path="res://scripts/runes/rune_tablet.gd" id="16_8v678"]
@@ -498,10 +497,6 @@ position = Vector2(160, 534)
 script = ExtResource("12_k5clp")
 checkpoint_id = "cistern.cp.start"
 
-[node name="KindleFlame" type="Node2D" parent="R1" unique_id=310399659 instance=ExtResource("13_wfybs")]
-position = Vector2(224, 534)
-script = ExtResource("14_c0xv0")
-
 [node name="TabletIce" type="Node2D" parent="R1" unique_id=786903113 instance=ExtResource("15_y1i30")]
 position = Vector2(288, 534)
 script = ExtResource("16_8v678")
@@ -582,10 +577,6 @@ start_recipe = "wind/push/right/normal"
 position = Vector2(1568, 534)
 script = ExtResource("12_k5clp")
 checkpoint_id = "cistern.cp.hall"
-
-[node name="@Node2D@18" type="Node2D" parent="R1" unique_id=653569069 instance=ExtResource("13_wfybs")]
-position = Vector2(1616, 534)
-script = ExtResource("14_c0xv0")
 
 [node name="TideClock" type="Node2D" parent="R1" unique_id=1340763519 instance=ExtResource("27_b34im")]
 position = Vector2(1728, 534)
@@ -728,10 +719,6 @@ text = "The fountains were the novices' stair. We froze them every morning, all 
 position = Vector2(3040, 534)
 script = ExtResource("12_k5clp")
 checkpoint_id = "cistern.cp.east"
-
-[node name="@Node2D@20" type="Node2D" parent="R1" unique_id=602833572 instance=ExtResource("13_wfybs")]
-position = Vector2(3104, 534)
-script = ExtResource("14_c0xv0")
 
 [node name="SluiceDoor" type="Node2D" parent="R1" unique_id=1952640892 instance=ExtResource("30_m54wu")]
 position = Vector2(3616, 534)
@@ -1137,10 +1124,6 @@ position = Vector2(3744, 534)
 script = ExtResource("12_k5clp")
 checkpoint_id = "cistern.cp.sluice"
 
-[node name="KindleFlame" type="Node2D" parent="R2" unique_id=590073587 instance=ExtResource("13_wfybs")]
-position = Vector2(3808, 534)
-script = ExtResource("14_c0xv0")
-
 [node name="TabletPersist" type="Node2D" parent="R2" unique_id=1818940182 instance=ExtResource("15_y1i30")]
 position = Vector2(3936, 534)
 script = ExtResource("16_8v678")
@@ -1342,10 +1325,6 @@ end_pause = 1.4
 position = Vector2(6368, 534)
 script = ExtResource("12_k5clp")
 checkpoint_id = "cistern.cp.weigh"
-
-[node name="@Node2D@26" type="Node2D" parent="R2" unique_id=1189380590 instance=ExtResource("13_wfybs")]
-position = Vector2(6432, 534)
-script = ExtResource("14_c0xv0")
 
 [node name="WeighPedestal" type="Node2D" parent="R2" unique_id=1006328306 instance=ExtResource("58_fnr46")]
 position = Vector2(6660, 534)

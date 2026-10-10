@@ -81,10 +81,10 @@ static func play_later(host: Node, tour_id: String, seconds: float) -> void:
 ## Where things are on the screen (offsets from the top-left corner): the
 ## health bar and its number, the mana bar and its number. (The health bar's
 ## arrow comes up through the gap between the mana plate and the numbers.)
-const HEALTH_BAR := Rect2(150, 22, 94, 28)
-const HEALTH_NUMBER := Rect2(282, 56, 62, 18)
-const MANA_BAR := Rect2(18, 56, 166, 14)
-const MANA_NUMBER := Rect2(202, 56, 80, 18)
+const HEALTH_BAR := Rect2(150, 22, 310, 28)
+const HEALTH_NUMBER := Rect2(334, 56, 94, 22)
+const MANA_BAR := Rect2(88, 56, 112, 18)
+const MANA_NUMBER := Rect2(222, 56, 112, 22)
 
 ## What each tour says. A step: "corner" ("tl", "tr", "br", "bl" or "" for no
 ## frame), "rect" (offset from that corner, in screen pixels), "title", "text",
@@ -95,7 +95,7 @@ static func steps_for(tour_id: String) -> Array:
 	match tour_id:
 		"basics":
 			return [
-				{"corner": "tl", "rect": Rect2(16, 16, 372, 60), "eyebrow": "THE SCREEN · 1 OF 2", "title": "Health",
+				{"corner": "tl", "rect": Rect2(16, 16, 468, 66), "eyebrow": "THE SCREEN · 1 OF 2", "title": "Health",
 					"arrows": [{"corner": "tl", "rect": HEALTH_BAR}, {"corner": "tl", "rect": HEALTH_NUMBER}],
 					"text": "(1) This bar is your health. Spikes, traps and slimes take it down. (2) The same, in numbers: health left out of the most you can have. If it runs out, you wake at your last candle with it full again."},
 				{"corner": "", "rect": Rect2(), "eyebrow": "THE SCREEN · 2 OF 2", "title": "The menu",
@@ -103,7 +103,7 @@ static func steps_for(tour_id: String) -> Array:
 			]
 		"fire":
 			return [
-				{"corner": "tl", "rect": Rect2(16, 52, 270, 26), "eyebrow": "THE SCREEN · MANA", "title": "Mana is your flame",
+				{"corner": "tl", "rect": Rect2(16, 52, 320, 30), "eyebrow": "THE SCREEN · MANA", "title": "Mana is your flame",
 					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
 					"text": InputLabels.format("(1) This bar is your mana, your lantern's flame. Spells draw on it, and it does not fill by itself. (2) The same, in numbers. To restore it, hold {reload} anywhere. You can keep moving while you reload. Beaten slimes drop sparks that give some back.")},
 				{"corner": "br", "rect": Rect2(-176, -104, 160, 88), "eyebrow": "THE SCREEN · SPELLS", "title": "Your spells",
@@ -129,7 +129,7 @@ static func steps_for(tour_id: String) -> Array:
 					"text": "A word with a padlock and the word LOCKED is carved into the stone: it can never be changed, on any cube. Some cubes have one or two locked words; some are locked completely and can only be switched on and off. Read a cube before you plan with it."},
 				{"corner": "", "rect": Rect2(), "eyebrow": "RUNE CUBES · 4 OF 5", "title": InputLabels.format("{rune_overview}: your runes"),
 					"text": InputLabels.format("Press {rune_overview} at any time to see every cube in the room: what each one does, whether it is on, what it costs and which words are locked. Switch any running cube off from there, from anywhere in the room, or press Inscribe on the cube you are standing at.")},
-				{"corner": "tl", "rect": Rect2(16, 52, 270, 26), "eyebrow": "RUNE CUBES · 5 OF 5", "title": "Running runes use mana",
+				{"corner": "tl", "rect": Rect2(16, 52, 320, 30), "eyebrow": "RUNE CUBES · 5 OF 5", "title": "Running runes use mana",
 					"arrows": [{"corner": "tl", "rect": MANA_BAR}, {"corner": "tl", "rect": MANA_NUMBER}],
 					"text": "A rune you power drains your mana (1) while it runs (2), and a rune that can't be paid for stops. Cubes fed by the dungeon (a groove under them, or standing in a pedestal) cost you nothing. When you run low, hold R to reload. Stop powering a rune first if it is drawing your mana."},
 			]

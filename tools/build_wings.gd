@@ -213,7 +213,6 @@ func build_landing() -> void:
 	shell(0, 31, LOW_CEIL, true, true)
 	var room := mk_room("R1", "The Landing", 0, 31, LOW_CEIL, Vector2(cx(2), 530))
 	shrine(room, "start", cx(2))
-	kindle_flame(room, cx(4))
 	var names := ["Kilnworks", "Cistern", "Lampworks", "Galleries", "The Eye"]
 	for i in 5:
 		inst(PUZZLE + "landing_door.tscn", room, "Door%d" % (i + 1), Vector2(cx(8 + i * 5), FLOOR_Y),
@@ -344,7 +343,6 @@ func kiln_cold_forge() -> void:
 
 	# ---------------------------------------------------- the Cold Hearth
 	shrine(room, "start", cx(2))
-	kindle_flame(room, cx(3) + 8)
 	var tab_fire := tablet(room, "fire", cx(4) + 8, "Heat remembers what was struck.")
 	var tab_proj := tablet(room, "projectile", cx(5) + 16, "A bolt goes where it is thrown, further than a hand can.")
 	var hearth_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleHearth", Vector2(cx(6) + 8, FLOOR_Y))
@@ -434,7 +432,6 @@ func kiln_cold_forge() -> void:
 	inst(RUNES + "burnable.tscn", room, "CellMat", Vector2(2080.0, 192.0), {"size": Vector2(64, 16)})
 	kiln_page(room, 3, Vector2(2010.0, 112.0), "The Smith's Ledger, iii",
 		"The Prior's girl came through the hall again. She drew a star on my anvil in chalk and asked why fire is afraid of the cold. I told her it isn't. It is the cold that runs from the fire. She liked that.")
-	kindle_flame(room, cx(37))
 	shrine(room, "east", cx(39))
 	var door := inst(PUZZLE + "forge_door.tscn", room, "ForgeDoor", Vector2(cx(44), FLOOR_Y), {"persist_id": "kiln.r1.door"})
 	circuit(room, "KilnToDoor", [kiln], [door],
@@ -551,7 +548,6 @@ func kiln_heart() -> void:
 
 	# ---------------------------------------------------- the Shutter Hall (Delay)
 	shrine(room, "heart", cx(45))
-	kindle_flame(room, cx(46))
 	var tab_delay := tablet(room, "delay", 3096.0, "A flame that waits, then flies.")
 	var shutter_plate := plate(room, "ShutterPlate", 3176.0, {"width": 56.0})
 	var shutter_cube := cube(room, "Shutter Cube", cx(51), "fire/projectile/right/normal",
@@ -598,7 +594,6 @@ func kiln_heart() -> void:
 	# ---------------------------------------------------- the gallery and the Coal Racks (Large)
 	# The far gallery, on over the end of the lake to the tower
 	ledge_run(71, 84, 4, false, false, false)
-	inst(PUZZLE + "kindle_flame.tscn", room, "KindleGallery", Vector2(cx(73) + 16, 274.0))
 	inst(PUZZLE + "chapter_checkpoint.tscn", room, "ShrineGallery", Vector2(cx(74) + 24, 274.0), {"checkpoint_id": "kiln.cp.gallery"})
 	var reveal := Area2D.new()
 	reveal.name = "HeartReveal"
@@ -800,7 +795,6 @@ func cistern_still_water() -> void:
 
 	# ---------------------------------------------------- the Cold Stair: Ice, Freeze, Long
 	shrine(room, "start", cx(2))
-	kindle_flame(room, cx(3))
 	var tab_ice := tablet(room, "ice", cx(4), "Cold that holds its shape.")
 	var tab_freeze := tablet(room, "freeze", cx(5) + 8, "What reaches the cold is held still.")
 	var stair_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleStair", Vector2(396.0, FLOOR_Y))
@@ -823,7 +817,6 @@ func cistern_still_water() -> void:
 
 	# ---------------------------------------------------- the Clock Hall
 	shrine(room, "hall", cx(24))
-	kindle_flame(room, 1616.0)
 	var clock := inst(PUZZLE + "tide_clock.tscn", room, "TideClock", Vector2(1728.0, FLOOR_Y), {"persist_id": cold})
 	var reveal := Area2D.new()
 	reveal.name = "ClockReveal"
@@ -875,7 +868,6 @@ func cistern_still_water() -> void:
 
 	# ---------------------------------------------------- the way on: the Sluice Door
 	shrine(room, "east", cx(47))
-	kindle_flame(room, cx(48))
 	var door := gate(room, "SluiceDoor", 56)
 	circuit(room, "ClockToDoor", [clock], [door],
 		{"latch": true, "reveal_target": true, "persist_id": "cistern.r1.door", "channel_y": 96.0, "symbol": 2})
@@ -996,7 +988,6 @@ func cistern_great_sluice() -> void:
 
 	# ---------------------------------------------------- the Silence Gallery: Persist
 	shrine(room, "sluice", cx(o + 2))
-	kindle_flame(room, cx(o + 3))
 	var tab_persist := tablet(room, "persist", cx(o + 5), "The cold that never lets go.")
 	ledge_run(o + 6, o + 6, 6, true)
 	cistern_page(room, 4, Vector2(cx(o + 6), 404.0), "The Warden's Ledger, iv",
@@ -1073,7 +1064,6 @@ func cistern_great_sluice() -> void:
 	inst(TRAPS + "moving_platform.tscn", room, "WeighLift", Vector2((o + 41) * T, FLOOR_Y - 18),
 		{"width_tiles": 2, "travel": Vector2(0, high_walk - FLOOR_Y), "speed": 70.0, "end_pause": 1.4})
 	shrine(room, "weigh", cx(o + 43))
-	kindle_flame(room, cx(o + 44))
 	# The Great Sluice's weigh pan, its socket at the west end
 	var pedestal := inst(RUNES + "rune_pedestal.tscn", room, "WeighPedestal", Vector2((o + 49) * T - 60.0, FLOOR_Y))
 	var pan := inst("res://scenes/pressure_plate.tscn", room, "WeighPan", Vector2((o + 49) * T + 76.0, FLOOR_Y),
@@ -1274,7 +1264,6 @@ func lamps_hall() -> void:
 
 	# ---------------------------------------------------- the Reading Room: Light, Beam
 	shrine(room, "hall", cx(2))
-	kindle_flame(room, cx(3))
 	var tab_light := tablet(room, "light", cx(4), "Holy light, and what it wakes.")
 	var tab_beam := tablet(room, "beam", cx(5) + 20, "A straight ray, to a far place.")
 	var reading := cube(room, "Reading Cube", cx(7), "wind/push/right/normal",
@@ -1314,7 +1303,6 @@ func lamps_hall() -> void:
 
 	# ---------------------------------------------------- the Watchers' Walk: Glow, Self
 	shrine(room, "walk", cx(w + 1))
-	kindle_flame(room, cx(w + 1) + 40)
 	var tab_glow := tablet(room, "glow", cx(w + 2) + 24, "A pool of light, carried.")
 	var tab_self := tablet(room, "self", cx(w + 3) + 24, "It shines on all sides.")
 	var watch_cube := cube(room, "Watch Cube", cx(w + 4) + 24, "wind/push/right/normal")
@@ -1352,7 +1340,6 @@ func lamps_hall() -> void:
 	var p1 := d + 17
 	var pillar := p0 + 4
 	shrine(room, "stacks", cx(d + 1))
-	kindle_flame(room, cx(d + 3))
 	var stacks_candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleStacks", Vector2(cx(d + 4), FLOOR_Y))
 	# Hung high over the edge, so its light clears the stones it lights
 	var near_brazier := inst(PUZZLE + "brazier.tscn", room, "StacksBrazier", Vector2(cx(d + 5), 446.0),
@@ -1492,7 +1479,6 @@ func lamps_stair(o: int) -> void:
 	var room := mk_room("R2", "The Lamp Stair", o + 22, o + 46, LOW_CEIL, Vector2(cx(o + 23), 530))
 	waymarks(room, o + 22, o + 46, false)
 	shrine(room, "stair", cx(o + 24))
-	kindle_flame(room, cx(o + 26))
 	tablet(room, "glow", cx(o + 27) + 16, "A pool of light, carried.")
 	tablet(room, "self", cx(o + 29), "It shines on all sides.")
 	var c := cube(room, "Lamp Cube", cx(o + 31), "wind/push/right/normal")
@@ -1609,7 +1595,6 @@ func galleries_archive() -> void:
 
 	# ---------------------------------------------------- the Sealed Door: Space, Portal
 	shrine(room, "archive", cx(2))
-	kindle_flame(room, cx(3))
 	var tab_space := tablet(room, "space", cx(4), "Distance is only a habit.")
 	var tab_portal := tablet(room, "portal", cx(5) + 16, "A door to somewhere near.")
 	# On a low plinth, so its doorway stands on the floor beyond the wall
@@ -1631,7 +1616,6 @@ func galleries_archive() -> void:
 		"I folded the archive the night the bell cracked. Every star the Choir ever wrote down is still here, in rooms you cannot walk to. The Hush listens for doors. It has never learned to listen for distance.")
 
 	# ---------------------------------------------------- the Tall Stacks: a door in the air
-	kindle_flame(room, cx(b + 1))
 	var archive_cube := cube(room, "Archive Cube", cx(b + 2), "wind/push/right/normal")
 	var lift_socket := inst(RUNES + "rune_pedestal.tscn", room, "LiftSocket", Vector2(cx(b + 7), FLOOR_Y))
 	# The shelf over the socket (196 px up): the doorway Up opens above it
@@ -1650,7 +1634,6 @@ func galleries_archive() -> void:
 
 	# ---------------------------------------------------- the Sealed Reading Room: an Echo through a door
 	shrine(room, "reading", cx(r + 1))
-	kindle_flame(room, cx(r + 2))
 	var reading_socket := inst(RUNES + "rune_pedestal.tscn", room, "ReadingSocket", Vector2(cx(r + 6), FLOOR_Y))
 	# The pocket overhead, sealed all round: its floor 196 px up
 	sealed_pocket(r + 6, r + 7, 2, 5)
@@ -1668,7 +1651,6 @@ func galleries_archive() -> void:
 
 	# ---------------------------------------------------- the Pillar: how far
 	shrine(room, "pillar", cx(p + 2))
-	kindle_flame(room, cx(p + 3))
 	var pillar_cube := cube(room, "Pillar Cube", cx(p + 5), "space/portal/up/normal",
 		{"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM}, FLOOR_Y - 8.0)
 	# The pillar: rock from floor to roof, three tiles thick, a hollow inside
@@ -1694,7 +1676,6 @@ func galleries_archive() -> void:
 
 	# ---------------------------------------------------- the Hearth: fire through a door
 	shrine(room, "hearth", cx(h + 1))
-	kindle_flame(room, cx(h + 2))
 	# The Hearth Cube on a ledge 132 px up (out of reach); its doorway Right opens in the air
 	ledge_run(h + 4, h + 4, 6, false, false, false)
 	# (overhanging its ledge a little, so fire thrown up into its doorway clears the stone)
@@ -1846,7 +1827,6 @@ func galleries_wren() -> void:
 
 	# ---------------------------------------------------- Again: Repeat
 	shrine(room, "wren", cx(e + 1))
-	kindle_flame(room, cx(e + 2))
 	var tab_repeat := tablet(room, "repeat", cx(e + 3) + 16, "Again, while it lasts.")
 	var ember_lock := cube(room, "Ember Lock", cx(e + 6), "fire/projectile/up/normal",
 		{"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM | LOCK_DIRECTION})
@@ -1907,7 +1887,6 @@ func galleries_wren() -> void:
 
 	# ---------------------------------------------------- Two Hearths: two places at once
 	shrine(room, "hearths", cx(t + 1))
-	kindle_flame(room, cx(t + 1) + 44.0)
 	var hearth_a := galleries_hearth(room, "West Hearth Cube", "WestHearth", t + 2,
 		{"dungeon_powered": true, "carryable": false, "mounted": true, "start_active": true, "locked_slots": 15}, {"burn_time": 2.0})
 	var hearth_b := galleries_hearth(room, "East Hearth Cube", "EastHearth", t + 9,
@@ -1919,7 +1898,6 @@ func galleries_wren() -> void:
 
 	# ---------------------------------------------------- The Last Crystal
 	shrine(room, "crystal", cx(l + 1))
-	kindle_flame(room, cx(l + 2))
 	var lens_lock := cube(room, "Lens Lock", cx(l + 3), "light/beam/right/normal",
 		{"dungeon_powered": true, "carryable": false, "mounted": true, "locked_slots": LOCK_ESSENCE | LOCK_FORM | LOCK_DIRECTION})
 	# Right, up, right, down: the low and high mirrors turned from the floor,
@@ -2029,7 +2007,6 @@ func build_eye() -> void:
 	shell(0, 30, HIGH_CEIL, true, true)
 	var room := mk_room("R1", "The Eye", 0, 30, HIGH_CEIL, Vector2(cx(2), 530))
 	shrine(room, "start", cx(2))
-	kindle_flame(room, cx(4))
 	var great := cube(room, "Great Cube", cx(16), "light/glow/self/normal",
 		{"dungeon_powered": true, "carryable": false})
 

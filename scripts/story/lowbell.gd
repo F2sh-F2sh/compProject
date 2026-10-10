@@ -7,7 +7,7 @@ extends Node2D
 ## lane to Nan's cottage. The villagers she passes have lost words to the
 ## Hush. Knocking at Nan's door leads inside, to her cottage (NanCottage).
 ## Everything is built from the surface and town pixel-art packs (SurfaceArt),
-## drawn at 1.5x; the people are the story's pixel sprites.
+## with street scenery at 2x and people sized against Echidna.
 
 const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
 const PUDDLE := preload("res://scenes/fx/puddle.tscn")
@@ -29,6 +29,9 @@ const NAN_DOOR_X := 1836.0
 const LAMP := Color(0.7, 0.84, 1.0)
 ## The scale the packs are drawn at.
 const S := SurfaceArt.LANE_SCALE
+## Integer scale for the street kit; native 64px people stand about 48px tall.
+const STREET_SCALE := 2.0
+const PEOPLE_SCALE := 0.75
 
 var player: CharacterBody2D
 var camera: Camera2D
@@ -189,54 +192,55 @@ func _build_street() -> void:
 	street.name = "Street"
 	street.z_index = -5
 	add_child(street)
-	SurfaceArt.sprite(street, "tree_small", Vector2(34, FLOOR_Y + 2))
+	_street_sprite(street, "tree_small", Vector2(34, FLOOR_Y + 2))
 	# Echidna's house, and her door
 	_house(street, "house_medium", DOOR_X, [Vector2(22, 56)])
 	_door_anim = _opening_door(street, "door_echidna", DOOR_X, "house_medium", Vector2(39, 49))
-	_door_light = StoryPaint.glow(street, Vector2(DOOR_X, FLOOR_Y - 20), 40.0, LAMP, 0.8)
+	_door_light = StoryPaint.glow(street, Vector2(DOOR_X, FLOOR_Y - 28), 40.0, LAMP, 0.8)
 	_door_light.modulate.a = 0.0
 	# The wind chimes on their post, swinging without a sound
 	_chimes(street, 348.0)
 	_lamp(street, 486.0)
 	# The bakery
 	_house(street, "house_shop", 706.0, [Vector2(61, 66)])
-	SurfaceArt.sprite(street, "barrel", Vector2(800, FLOOR_Y + 1))
-	SurfaceArt.sprite(street, "barrel", Vector2(822, FLOOR_Y + 1))
-	SurfaceArt.sprite(street, "crate", Vector2(842, FLOOR_Y + 1))
+	_street_sprite(street, "barrel", Vector2(820, FLOOR_Y + 1))
+	_street_sprite(street, "barrel", Vector2(846, FLOOR_Y + 1))
+	_street_sprite(street, "crate", Vector2(878, FLOOR_Y + 1))
 	# A house gone quiet: no lights at all
 	_house(street, "house_ruined", 928.0, [])
 	# The well, with a crow on its roof, and the signpost for the mountain
-	SurfaceArt.sprite(street, "signpost", Vector2(1118, FLOOR_Y + 1))
-	SurfaceArt.sprite(street, "well", Vector2(1190, FLOOR_Y + 1))
-	_crow = SurfaceArt.animated(street, ["crow"], Vector2(1190, FLOOR_Y - 56), 1.0)
+	_street_sprite(street, "signpost", Vector2(1118, FLOOR_Y + 1))
+	_street_sprite(street, "well", Vector2(1190, FLOOR_Y + 1))
+	_crow = SurfaceArt.animated(street, ["crow"], Vector2(1190, FLOOR_Y + 1 - SurfaceArt.size_of("well").y * STREET_SCALE), 1.0, STREET_SCALE)
 	_crow.name = "Crow"
 	# The square: a little shrine bell under an old arch, silent too
-	SurfaceArt.sprite(street, "arch", Vector2(1276, FLOOR_Y + 1))
+	_street_sprite(street, "arch", Vector2(1276, FLOOR_Y + 1))
 	var hang := Node2D.new()
 	hang.name = "ShrineBell"
-	hang.position = Vector2(1276, FLOOR_Y - 69)
+	hang.position = Vector2(1276, FLOOR_Y - 92)
 	street.add_child(hang)
-	SurfaceArt.sprite(hang, "shrine_bell", Vector2(0, 14 * S))
+	SurfaceArt.sprite(hang, "shrine_bell", Vector2(0, 14 * STREET_SCALE), STREET_SCALE)
 	var sway := create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	sway.tween_property(hang, "rotation", 0.06, 2.1)
 	sway.tween_property(hang, "rotation", -0.06, 2.1)
 	_lamp(street, 1466.0)
-	SurfaceArt.sprite(street, "cart", Vector2(1522, FLOOR_Y + 1))
+	_street_sprite(street, "cart", Vector2(1522, FLOOR_Y + 1))
 	_house(street, "house_tower", 1600.0, [Vector2(26, 31), Vector2(25, 71)])
 	_lamp(street, 1690.0)
 	# Nan's cottage, the biggest on the lane
 	_house(street, "house_big", NAN_DOOR_X + 1.5, [Vector2(54, 44), Vector2(27, 88)])
 	_nan_door_anim = _opening_door(street, "door_nan", NAN_DOOR_X + 1.5, "house_big", Vector2(45, 76))
-	_nan_light = StoryPaint.glow(street, Vector2(NAN_DOOR_X, FLOOR_Y - 22), 46.0, LAMP, 0.9)
+	_nan_light = StoryPaint.glow(street, Vector2(NAN_DOOR_X, FLOOR_Y - 30), 46.0, LAMP, 0.9)
 	_nan_light.modulate.a = 0.0
 	_nan = SurfaceArt.animated(street, "nan", Vector2(NAN_DOOR_X, FLOOR_Y - 1), 0.0)
 	_nan.name = "Nan"
+	_nan.scale = Vector2.ONE * PEOPLE_SCALE
 	_nan.flip_h = true
 	_nan.stop()
 	_nan.visible = false
-	SurfaceArt.sprite(street, "tree_big", Vector2(1968, FLOOR_Y + 2))
-	SurfaceArt.sprite(street, "fence", Vector2(1934, FLOOR_Y + 1))
-	SurfaceArt.sprite(street, "fence_broken", Vector2(1985, FLOOR_Y + 1))
+	_street_sprite(street, "tree_big", Vector2(1968, FLOOR_Y + 2))
+	_street_sprite(street, "fence", Vector2(1934, FLOOR_Y + 1))
+	_street_sprite(street, "fence_broken", Vector2(1985, FLOOR_Y + 1))
 	# Chalk arrows on the walls: the way to Nan's
 	for x in ARROWS_AT:
 		var mark: Node2D = WAYMARK.instantiate()
@@ -259,13 +263,22 @@ func _build_street() -> void:
 	add_child(leaves)
 
 
+## Street props share the same integer pixel scale and painted ground edge.
+func _street_sprite(parent: Node, asset: String, foot: Vector2) -> Sprite2D:
+	var sprite := SurfaceArt.sprite(parent, asset, foot, STREET_SCALE)
+	var image := sprite.texture.get_image()
+	if image:
+		sprite.offset.y = -image.get_used_rect().end.y
+	return sprite
+
+
 ## A house from the town pack, standing on the lane at `x` (its middle);
 ## `lit` lists its lit windows (art pixels from its top-left), which glow.
 func _house(parent: Node, house: String, x: float, lit: Array) -> Sprite2D:
-	var s := SurfaceArt.sprite(parent, house, Vector2(x, FLOOR_Y + 2))
-	var top_left := s.position + s.offset * S
+	var s := _street_sprite(parent, house, Vector2(x, FLOOR_Y + 2))
+	var top_left := s.position + s.offset * STREET_SCALE
 	for w in lit:
-		var at: Vector2 = top_left + w * S
+		var at: Vector2 = top_left + w * STREET_SCALE
 		StoryPaint.glow(parent, at, 18.0, LAMP, 0.55)
 		_light(at, LAMP, 0.35, 0.7)
 	return s
@@ -275,13 +288,14 @@ func _house(parent: Node, house: String, x: float, lit: Array) -> Sprite2D:
 ## tools/generate_story_sprites.gd); hidden while shut.
 func _opening_door(parent: Node, frames_name: String, x: float, house: String, door_at: Vector2) -> AnimatedSprite2D:
 	var size := SurfaceArt.size_of(house)
-	var top_left := Vector2(x - floorf(size.x / 2.0) * S, FLOOR_Y + 2 - size.y * S)
+	var painted_bottom := SurfaceArt.tex(house).get_image().get_used_rect().end.y
+	var top_left := Vector2(x - floorf(size.x / 2.0) * STREET_SCALE, FLOOR_Y + 2 - painted_bottom * STREET_SCALE)
 	var door := AnimatedSprite2D.new()
 	door.name = frames_name.to_pascal_case()
 	door.sprite_frames = SurfaceArt.frames(frames_name, 0.0)
 	door.centered = false
-	door.position = top_left + door_at * S
-	door.scale = Vector2(S, S)
+	door.position = top_left + door_at * STREET_SCALE
+	door.scale = Vector2(STREET_SCALE, STREET_SCALE)
 	door.visible = false
 	parent.add_child(door)
 	return door
@@ -300,16 +314,16 @@ func _light(at: Vector2, color: Color, energy: float, reach: float) -> PointLigh
 
 ## One of the town pack's lamp posts, its two lanterns lit.
 func _lamp(parent: Node, x: float) -> void:
-	var post := SurfaceArt.sprite(parent, "lamp_post", Vector2(x, FLOOR_Y + 1))
-	var top_left := post.position + post.offset * S
+	var post := _street_sprite(parent, "lamp_post", Vector2(x, FLOOR_Y + 1))
+	var top_left := post.position + post.offset * STREET_SCALE
 	for lantern in [Vector2(4.5, 26.5), Vector2(26.5, 26.5)]:
-		StoryPaint.glow(parent, top_left + lantern * S, 22.0, LAMP, 0.6)
-	_light(top_left + Vector2(15.5, 28) * S, LAMP, 0.55, 1.2)
+		StoryPaint.glow(parent, top_left + lantern * STREET_SCALE, 22.0, LAMP, 0.6)
+	_light(top_left + Vector2(15.5, 28) * STREET_SCALE, LAMP, 0.55, 1.2)
 
 
 func _chimes(parent: Node, x: float) -> void:
-	var post := SurfaceArt.sprite(parent, "chime_post", Vector2(x, FLOOR_Y + 1))
-	var top_left := post.position + post.offset * S
+	var post := _street_sprite(parent, "chime_post", Vector2(x, FLOOR_Y + 1))
+	var top_left := post.position + post.offset * STREET_SCALE
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 3
 	for k in 5:
@@ -317,13 +331,13 @@ func _chimes(parent: Node, x: float) -> void:
 		var tube := Node2D.new()
 		tube.name = "Chime%d" % k
 		tube.add_to_group("wind_chime")
-		tube.position = top_left + Vector2(10.5 + k * 4.0, 6.0 + (k % 3)) * S
+		tube.position = top_left + Vector2(10.5 + k * 4.0, 6.0 + (k % 3)) * STREET_SCALE
 		parent.add_child(tube)
 		var piece := Sprite2D.new()
 		piece.texture = SurfaceArt.tex("chime_tube")
 		piece.centered = false
 		piece.offset = Vector2(-1.5, 0)
-		piece.scale = Vector2(S, S)
+		piece.scale = Vector2(STREET_SCALE, STREET_SCALE)
 		tube.add_child(piece)
 		var swing := create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		swing.tween_interval(rng.randf() * 0.6)
@@ -412,6 +426,9 @@ func _villager(parent: Node, villager_name: String, sprite: String, x: float, li
 	v.sprite_name = sprite
 	v.position = Vector2(x, FLOOR_Y + 1)
 	parent.add_child(v)
+	# The new strips are 64px canvases; their world height must match Echidna.
+	v.figure.scale = Vector2.ONE * (0.625 if sprite == "pip" else PEOPLE_SCALE)
+	v.bubble.position.y = -SurfaceArt.size_of(sprite).y * v.figure.scale.y - 12.0
 	_villagers.append(v)
 	return v
 
@@ -505,7 +522,7 @@ func _build_ui() -> void:
 	goal.text = "Go to Grandma Nan's cottage, at the end of the lane. She will know what to do."
 	goal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	goal.add_theme_font_override("font", font)
-	goal.add_theme_font_size_override("font_size", 13)
+	goal.add_theme_font_size_override("font_size", 18)
 	goal.add_theme_color_override("font_color", Color("e4ddf2"))
 	_objective.add_child(goal)
 
@@ -517,7 +534,7 @@ func _build_ui() -> void:
 	_hint.offset_bottom = -44
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint.add_theme_font_override("font", font)
-	_hint.add_theme_font_size_override("font_size", 14)
+	_hint.add_theme_font_size_override("font_size", 18)
 	_hint.add_theme_color_override("font_color", Color("e4ddf2"))
 	_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	_hint.add_theme_constant_override("outline_size", 5)

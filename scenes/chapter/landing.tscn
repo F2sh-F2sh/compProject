@@ -7,7 +7,6 @@
 [ext_resource type="Script" path="res://scripts/audio/reverb_zone.gd" id="5_75jax"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="6_4ut4q"]
 [ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="7_nd5le"]
-[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="8_rnsp7"]
 [ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="9_j8nku"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/landing_door.tscn" id="10_52l27"]
 [ext_resource type="Script" path="res://scripts/puzzle/landing_door.gd" id="11_y16jn"]
@@ -150,10 +149,6 @@ size = Vector2(2048, 448)
 position = Vector2(160, 534)
 script = ExtResource("7_nd5le")
 checkpoint_id = "landing.cp.start"
-
-[node name="KindleFlame" type="Node2D" parent="R1" unique_id=1395731769 instance=ExtResource("8_rnsp7")]
-position = Vector2(288, 534)
-script = ExtResource("9_j8nku")
 
 [node name="Door1" type="Node2D" parent="R1" unique_id=1225409874 instance=ExtResource("10_52l27")]
 position = Vector2(544, 534)

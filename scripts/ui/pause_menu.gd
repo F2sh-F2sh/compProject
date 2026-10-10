@@ -399,7 +399,7 @@ func _build_card() -> void:
 	model.position = Vector2(153, 196)
 	_figure.add_child(model)
 	model.play()
-	_stats = _label("", 12, TEXT_MUTED)
+	_stats = _label("", 18, TEXT_MUTED)
 	_stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_menu_box.add_child(_stats)
 	var notch := Control.new()
@@ -435,7 +435,7 @@ func _build_card() -> void:
 	# The map, the ledger and the rune journal open in the card, on a dark page
 	_map_box = _card_view(stack, "CHAPTER MAP")
 	_map_list = _scroll_list(_map_box, 3)
-	_map_box.add_child(_label("▶ here   ✓ cleared   • visited   ◆ page   ◇ to find", 10, Color("9a8f86")))
+	_map_box.add_child(_label("▶ here  ✓ cleared  • visited\n◆ page  ◇ to find", 16, Color("9a8f86")))
 	_ledger_box = _card_view(stack, "THE BELLKEEPER'S LEDGER")
 	_ledger_list = _scroll_list(_ledger_box, 10)
 	_journal_box = _card_view(stack, "RUNE JOURNAL")
@@ -1060,7 +1060,7 @@ func _refresh_status() -> void:
 		_stats.text = ""
 		return
 	var mana_cap: int = player.get_mana_cap() if player.has_method("get_mana_cap") else 100
-	_stats.text = "HP %d / %d      MANA %d / %d" % [player.current_health, player.MAX_HEALTH, player.current_mana, mana_cap]
+	_stats.text = "HP %d/%d   MANA %d/%d" % [player.current_health, player.MAX_HEALTH, player.current_mana, mana_cap]
 
 
 func _refresh_values() -> void:
@@ -1179,7 +1179,7 @@ func _label(text: String, size: int, color: Color, font: Font = FONT) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font)
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", maxi(size, 16))
 	l.add_theme_color_override("font_color", color)
 	return l
 
@@ -1343,7 +1343,7 @@ class SaoRow extends Button:
 		mouse_filter = Control.MOUSE_FILTER_PASS
 		clip_text = true
 		add_theme_font_override("font", PauseMenu.FONT)
-		add_theme_font_size_override("font_size", 16 if is_dark else 14)
+		add_theme_font_size_override("font_size", 18)
 		mouse_entered.connect(func(): hovered.emit())
 		_restyle()
 

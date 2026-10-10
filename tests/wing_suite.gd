@@ -239,7 +239,7 @@ func inscribe(ids: Array) -> void:
 
 
 ## Mana is the lantern's flame: kindle at the room's flame first.
-func kindle() -> void:
+func reload_mana() -> void:
 	Input.action_press("reload")
 	await wait_until(func(): return player.current_mana >= 100, 3.0)
 	Input.action_release("reload")
@@ -301,7 +301,7 @@ func scenario_smoke() -> void:
 		check("%s: has rooms, a player and a rune manager" % path.get_file(), rooms.size() >= 1 and player != null and manager != null,
 			"%d rooms" % rooms.size())
 		check("%s: every room has a goal" % path.get_file(), rooms.all(func(r): return r.objective != ""))
-		check("%s: every room has a kindle flame" % path.get_file(), _rooms_have_flames(rooms))
+		check("%s: rooms contain no obsolete refill posts" % path.get_file(), _rooms_have_no_refill_posts(rooms))
 		check("%s: arrows show the way on" % path.get_file(), path == Journey.EYE or path == Journey.LANDING
 			or get_tree().get_nodes_in_group("waymark").size() >= 4)
 		for r: Room in rooms:
@@ -442,7 +442,7 @@ func scenario_k2() -> void:
 	check("each burner dies within a second", burners.all(func(b): return not b.is_lit))
 
 	# A. The Shutter Hall: Delay
-	await kindle()
+	await reload_mana()
 	check("A the shutter is down", shutter.open_amount <= 0.0)
 	await walk_to(plate.global_position.x)
 	check("A standing on the plate holds it up", await wait_until(func(): return shutter.open_amount >= 1.0, 2.0))
@@ -604,7 +604,7 @@ func scenario_heart_full() -> void:
 	var frame0 := Engine.get_physics_frames()
 
 	# 1. The Shutter Hall
-	await kindle()
+	await reload_mana()
 	await read_tablet("R2/TabletDelay")
 	check("1 open the Shutter Cube", await open_cube(shutter_cube))
 	inscribe(["delay"])
@@ -763,7 +763,7 @@ func scenario_c1() -> void:
 	check("and it never strikes by itself", not clock.struck and door.open_amount <= 0.0)
 
 	# A. The first pool: Ice and Freeze
-	await kindle()
+	await reload_mana()
 	await read_tablet("R1/TabletIce")
 	await read_tablet("R1/TabletFreeze")
 	check("A the tablets teach Ice and Freeze", RuneManager.knows(&"ice", get_tree()) and RuneManager.knows(&"freeze", get_tree()))
@@ -788,7 +788,7 @@ func scenario_c1() -> void:
 	var short := pool_b.frozen_fraction()
 	check("B a normal freeze reaches well under half the long pool", short > 0.3 and short < 0.5, "%.2f" % short)
 	await seconds(7.5)
-	await kindle_here()
+	await reload_here()
 	check("B open it again", await open_cube(island))
 	inscribe(["long"])
 	check("B it reads ice/freeze/right/long", island.recipe.to_key() == "ice/freeze/right/long", island.recipe.to_key())
@@ -808,7 +808,7 @@ func scenario_c1() -> void:
 	check("C the Warden's cube behind it is hers to carry", await pick_up(warden))
 
 	# D. The gatekeeper: a slime frozen on its plate, through the grate
-	await kindle_here()
+	await reload_here()
 	await walk_to(2190.0)
 	check("D set the cube down on the grate over the slime", await put_down("move_right") and absf(warden.global_position.y - 534.0) < 2.0,
 		"at %s" % warden.global_position.round())
@@ -859,7 +859,7 @@ func scenario_c1() -> void:
 	await wait_until(func(): return clock.is_rising() and clock.level < 120.0, 14.0)
 	check("F open it", await open_here(warden))
 	inscribe(["ice", "freeze", "left", "normal"])
-	await kindle_here()
+	await reload_here()
 	manager.assembly.toggle_cube()
 	check("F the tide rises into the cold and freezes at the hour", await wait_until(func(): return clock.is_frozen and clock.at_hour(), 14.0),
 		"level %.0f, last hold '%s'" % [clock.level, clock.last_hold])
@@ -900,7 +900,7 @@ func scenario_c1_short() -> void:
 	warden.global_position = Vector2(1850.0, 210.0)
 	warden.reset_physics_interpolation()
 	await place(Vector2(1876.0, 206.0))
-	await kindle_here()
+	await reload_here()
 	await face("move_left")
 	RuneManager.learn(&"large")
 	await wait_until(func(): return clock.is_rising() and clock.level < 120.0, 14.0)
@@ -946,7 +946,7 @@ func scenario_c1_full() -> void:
 	var frame0 := Engine.get_physics_frames()
 
 	# 1. The first pool
-	await kindle()
+	await reload_mana()
 	await read_tablet("R1/TabletIce")
 	await read_tablet("R1/TabletFreeze")
 	check("1 open the Brink Cube", await open_cube(cube_named("R1/BrinkCube")))
@@ -968,7 +968,7 @@ func scenario_c1_full() -> void:
 	await walk_to(warden.global_position.x - 30.0)
 	check("3 the plug melted, the Warden's cube in hand", plug.is_cleared and await pick_up(warden))
 	await walk_to(1600.0)
-	await kindle()
+	await reload_mana()
 	# 4. The gatekeeper
 	await walk_to(2190.0)
 	await put_down("move_right")
@@ -1112,7 +1112,7 @@ func _c2_silence(wrong: bool) -> void:
 	var plate: PressurePlate = node("R2/CellPlate")
 	var gate: PortcullisGate = node("R2/SilenceGate")
 	await walk_to(3808.0)
-	await kindle()
+	await reload_mana()
 	await read_tablet("R2/TabletPersist")
 	check("A the tablet teaches Persist", RuneManager.knows(&"persist", get_tree()))
 	check("A open the Keeper Cube on the grate", await open_cube(keeper_cube))
@@ -1185,7 +1185,7 @@ func _c2_weigh() -> void:
 	check("C the pan wants two weights, and there is nothing else to weigh it", pan.weight_needed == 2
 		and lvl.get_node_or_null("R2/Ballast") == null and lvl.get_node_or_null("R2/DroverCube") == null)
 	await walk_to(6432.0)
-	await kindle()
+	await reload_mana()
 	check("C to the pan's socket", await walk_to(6612.0), "at %s" % player.global_position.round())
 	var placed := await put_down("move_right")
 	check("C set the Sluice Cube in the socket", placed and sluice.fed_by_dungeon(),
@@ -1297,7 +1297,7 @@ func scenario_c2_pages() -> void:
 	var lever: RuneCube = cube_named("R2/TideLever")
 	RuneManager.learn(&"persist")
 	await place(Vector2(6154.0, 142.0))
-	await kindle_here()
+	await reload_here()
 	await face("move_right")
 	check("vi the high lectern", await open_here(lever))
 	inscribe(["persist"])
@@ -1489,7 +1489,7 @@ func _l1_arrive() -> void:
 func _l1_reading() -> void:
 	var c: RuneCube = cube_named("R1/ReadingCube")
 	var crystal: LightReceiver = node("R1/ReadingCrystal")
-	await kindle()
+	await reload_mana()
 	await read_tablet("R1/TabletLight")
 	await read_tablet("R1/TabletBeam")
 	check("A the tablets teach Light and Beam", RuneManager.knows(&"light", get_tree()) and RuneManager.knows(&"beam", get_tree()))
@@ -1545,7 +1545,7 @@ func _l1_monks(large_first: bool) -> void:
 	var plate: PressurePlate = node("R1/MonkPlate")
 	var gate: PortcullisGate = node("R1/MonksGate")
 	check("C through the Gallery Gate", await walk_to(2240.0, false, 14.0), "at %s" % player.global_position.round())
-	await kindle()
+	await reload_mana()
 	await read_tablet("R1/TabletGlow")
 	await read_tablet("R1/TabletSelf")
 	check("C the tablets teach Glow and Self", RuneManager.knows(&"glow", get_tree()) and RuneManager.knows(&"self", get_tree()))
@@ -1622,7 +1622,7 @@ func _l1_stacks(large: bool) -> void:
 	var c: RuneCube = cube_named("R1/WatchCube")
 	var lamp: Brazier = node("R1/StacksLamp")
 	await walk_to(3990.0)
-	await kindle()
+	await reload_mana()
 	throw_fire(Vector2(138, -106))
 	check("E her fire lights the brazier over the edge", await wait_until(func(): return node("R1/StacksBrazier").is_lit, 2.0))
 	check("E the first stones show", await wait_until(func(): return [65, 66, 67, 68].all(_stone_lit), 2.0), _solid_stones())
@@ -1733,7 +1733,7 @@ func scenario_l1_pages() -> void:
 	await _l1_watch()
 	# The Dark Stacks with Large, the page stone shown over the walkway
 	await walk_to(3990.0)
-	await kindle()
+	await reload_mana()
 	throw_fire(Vector2(138, -106))
 	await wait_until(func(): return node("R1/StacksBrazier").is_lit, 2.0)
 	await walk_to(4400.0)
@@ -1820,7 +1820,7 @@ func solve_l2() -> void:
 	var crystal = node("R2/Crystal")
 	var gate = node("R2/StairGate")
 	var bell = node("R2/GreatBell")
-	await kindle()
+	await reload_mana()
 	await read_tablet("R2/TabletGlow")
 	await read_tablet("R2/TabletSelf")
 	check("L2 the tablets teach Glow and Self", RuneManager.knows(&"glow", get_tree()) and RuneManager.knows(&"self", get_tree()))
@@ -1857,7 +1857,7 @@ func _g1_arrive() -> void:
 ## The Sealed Door: Space and Portal on the Door Cube; over it into its doorway.
 func _g1_door() -> void:
 	var c: RuneCube = cube_named("R1/DoorCube")
-	await kindle()
+	await reload_mana()
 	await read_tablet("R1/TabletSpace")
 	await read_tablet("R1/TabletPortal")
 	check("A the tablets teach Space and Portal", RuneManager.knows(&"space", get_tree()) and RuneManager.knows(&"portal", get_tree()))
@@ -1913,7 +1913,7 @@ func _g1_reading(alone: bool) -> void:
 	var gate: PortcullisGate = node("R1/ReadingGate")
 	var recorder: Node = player.get_node("EchoRecorder")
 	check("C through the Stacks Gate with the cube", await walk_to(1880.0, false, 14.0) and c.is_carried, "at %s" % player.global_position.round())
-	await kindle()
+	await reload_mana()
 	await walk_to(socket.global_position.x - 40.0)
 	check("C set it in the socket under the pocket", await put_down("move_right") and c.fed_by_dungeon(), "at %s" % c.global_position.round())
 	check("C switch it on (still Space, Portal, Up)", await open_cube(c) and c.recipe.to_key() == "space/portal/up/normal")
@@ -1957,7 +1957,7 @@ func _g1_pillar(wrong: bool) -> void:
 	var c: RuneCube = cube_named("R1/PillarCube")
 	var gate: PortcullisGate = node("R1/PillarGate")
 	var recorder: Node = player.get_node("EchoRecorder")
-	await kindle()
+	await reload_mana()
 	check("D open the Pillar Cube", await open_cube(c))
 	if wrong:
 		inscribe(["right", "long"])
@@ -2012,7 +2012,7 @@ func _g1_hearth(wrong: bool) -> void:
 	var c: RuneCube = cube_named("R1/HearthCube")
 	var lectern: Node2D = node("R1/HearthLectern")
 	var hearth: Brazier = node("R1/HearthBrazier")
-	await kindle()
+	await reload_mana()
 	await walk_to(lectern.global_position.x - 10.0)
 	check("E the lectern works the Hearth Cube", await open_here(c))
 	inscribe(["right"])
@@ -2161,7 +2161,7 @@ func _g2_ember(wrong: bool) -> void:
 	var c: RuneCube = cube_named("R2/EmberLock")
 	var lift: Node2D = node("R2/EmberLift")
 	var ember: Brazier = node("R2/EmberBrazier")
-	await kindle()
+	await reload_mana()
 	await read_tablet("R2/TabletRepeat")
 	check("A the tablet teaches Repeat", RuneManager.knows(&"repeat", get_tree()))
 	check("A open Wren's Ember Lock", await open_cube(c))
@@ -2204,7 +2204,7 @@ func _g2_frost() -> void:
 	await walk_to(5700.0, false, 8.0)
 	await wait_until(func(): return player.is_on_floor(), 2.0)
 	check("B down off the balcony", _on_ledge(534.0), "at %s" % player.global_position.round())
-	await kindle()
+	await reload_mana()
 	await walk_to(lectern.global_position.x - 10.0)
 	check("B the lectern works Wren's Frost Lock", await open_here(c))
 	check("B Wren wrote Ice, Freeze and Long: the way is hers to finish", c.is_slot_locked(RuneFragments.Kind.MODIFIER)
@@ -2236,7 +2236,7 @@ func _g2_hearths(wrong: bool) -> void:
 	var wp: RunePortal = cube_named("R2/WestHearthCube").effect
 	var ep: RunePortal = cube_named("R2/EastHearthCube").effect
 	var recorder: Node = player.get_node("EchoRecorder")
-	await kindle()
+	await reload_mana()
 	check("C both hearth doorways stand open", wp != null and ep != null)
 	if wrong:
 		await walk_to(wp.entrance.x)
@@ -2269,7 +2269,7 @@ func _g2_crystal() -> void:
 	var pocket_cube: RuneCube = cube_named("R2/PocketCube")
 	var crystal: LightReceiver = node("R2/LastCrystal")
 	check("D through the gate", await walk_to(7560.0, false, 10.0), "at %s" % player.global_position.round())
-	await kindle()
+	await reload_mana()
 	check("D open Wren's Lens Lock", await open_cube(c))
 	check("D Wren wrote Light, Beam, Right", c.is_slot_locked(RuneFragments.Kind.DIRECTION) and not c.is_slot_locked(RuneFragments.Kind.MODIFIER))
 	inscribe(["bounce"])
@@ -2544,17 +2544,9 @@ func scenario_loop() -> void:
 	game_state().all_abilities = true
 
 
-## Every room has a lit flame to kindle at inside its bounds.
-func _rooms_have_flames(rooms: Array) -> bool:
-	var flames := get_tree().get_nodes_in_group("kindle_point")
-	for r: Room in rooms:
-		var found := false
-		for f in flames:
-			if f is Node2D and f.has_method("is_kindling") and f.is_kindling() and r.bounds.has_point(f.global_position):
-				found = true
-		if not found:
-			return false
-	return true
+## R reload is independent of environmental flames.
+func _rooms_have_no_refill_posts(rooms: Array) -> bool:
+	return not rooms.is_empty() and lvl.find_children("*", "KindleFlame", true, false).is_empty()
 
 
 func _on_scene(path: String) -> bool:
@@ -2668,7 +2660,7 @@ func scenario_forge_parts() -> void:
 		and lvl.find_children("*", "Polygon2D", true, false).is_empty())
 
 	# The Cold Hearth: Fire and Projectile, two bolts across the slag
-	await kindle()
+	await reload_mana()
 	await read_tablet("R1/TabletFire")
 	await read_tablet("R1/TabletProjectile")
 	check("H the tablets teach Fire and Projectile", RuneManager.knows(&"fire", get_tree()) and RuneManager.knows(&"projectile", get_tree()))
@@ -3126,7 +3118,7 @@ func scenario_forge_page3() -> void:
 	var loft: RuneCube = cube_named("R1/LoftCube")
 	var mat: Burnable = node("R1/CellMat")
 	await place(Vector2(2000, 270))
-	await kindle_here()
+	await reload_here()
 	await walk_to(loft.global_position.x - 26.0)
 	await face("move_right")
 	check("P open the Loft Cube where it stands, under the hole", await open_here(loft))
@@ -3157,7 +3149,7 @@ func _in_the_cell() -> bool:
 
 
 ## Mana for a test that starts away from a flame.
-func kindle_here() -> void:
+func reload_here() -> void:
 	player.current_mana = 100
 
 

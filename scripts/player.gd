@@ -21,9 +21,8 @@ var mana_debt := 0
 const FIREBALL_COST := 5
 const HEAL_COST := 20
 var current_mana := MAX_MANA
-## Kindling the lantern at a lit flame (hold the kindle key, R) takes this long.
+## Hold R anywhere to replenish mana; the channel takes this long.
 const RELOAD_TIME := 1.5
-const KINDLE_RANGE := 70.0
 var is_reloading := false
 var reload_progress := 0.0
 ## Set by the RuneManager while runes she powers are drawing upkeep.
@@ -117,7 +116,6 @@ var _plants_heard := 0
 var _last_step_variant := 0
 var _moving_time := 0.0
 var is_pushing := false
-var _push_hands: Node2D
 
 func _ready() -> void:
 	add_to_group("player")
@@ -140,21 +138,10 @@ func _ready() -> void:
 		var c := Color(1.0, 0.7, 0.4, 0.85)
 		_aim_marker.draw_polyline(PackedVector2Array([Vector2(-4, -5), Vector2(3, 0), Vector2(-4, 5)]), c, 1.5))
 	add_child(_aim_marker)
-	_push_hands = Node2D.new()
-	_push_hands.z_index = 3
-	_push_hands.draw.connect(func():
-		if not is_pushing:
-			return
-		var direction := -1.0 if animated_sprite.flip_h else 1.0
-		for y in [-23.0, -17.0]:
-			_push_hands.draw_line(Vector2(direction * 6, y + 3), Vector2(direction * 19, y), Color("54416f"), 5.0)
-			_push_hands.draw_rect(Rect2(direction * 19 - 2, y - 2, 4, 4), Color("a699ba")))
-	add_child(_push_hands)
 	# While she charges a jump: a light breeze at her feet, and a small bar
 	# over her head that fills and turns gold when the jump is at full power
 	add_child(preload("res://scripts/fx/charge_breeze.gd").new())
 	add_child(preload("res://scripts/fx/charge_bar.gd").new())
-	# "[R] Kindle" over the flames that refill her mana (not wall torches)
 
 	if hurtbox:
 		hurtbox.damage_received.connect(take_damage)
@@ -208,7 +195,7 @@ func shoot_fireball() -> void:
 	update_mana_ui()
 	flash_spell("fireball")
 	if current_mana <= 0:
-		hint_kindle()
+		hint_reload()
 
 
 ## Which way a fireball from `origin` would fly: toward the mouse, or with a
@@ -371,7 +358,6 @@ func _clear_motion_state() -> void:
 ## Walking into a pushable block while standing shoves it along.
 func _push_blocks() -> void:
 	is_pushing = false
-	_push_hands.queue_redraw()
 	if not is_on_floor():
 		return
 	var direction := Input.get_axis("move_left", "move_right")
@@ -382,7 +368,6 @@ func _push_blocks() -> void:
 			if direction * collision.get_normal().x < -0.1:
 				body.push(direction)
 				is_pushing = true
-	_push_hands.queue_redraw()
 
 
 func _flash_hit() -> void:
@@ -478,7 +463,7 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("heal"):
 		heal_player()
 		
-	# Kindling lasts only while the key is held and she stays at the flame
+	# Reloading lasts only while the key is held; movement is allowed
 	if is_reloading and not Input.is_action_pressed("reload"):
 		is_reloading = false
 		reload_progress = 0.0
@@ -906,40 +891,13 @@ func _apply_squash(amount: Vector2) -> void:
 	animated_sprite.scale = sprite_base_scale * amount
 	animated_sprite.position = sprite_base_pos
 
-## Whether she stands at a lit flame that can refill her (a shrine, a lit
-## brazier, a candle, the Kept Flame): nodes in the group "kindle_point" with
-## is_kindling().
-func near_kindle() -> bool:
-	for point in get_tree().get_nodes_in_group("kindle_point"):
-		if point is Node2D and point.has_method("is_kindling") and point.is_kindling() \
-				and absf(point.global_position.x - global_position.x) < KINDLE_RANGE \
-				and absf(point.global_position.y - global_position.y) < 90.0:
-			return true
-	return false
+var _last_reload_hint := -10000
 
-
-## The nearest lit flame she can kindle at, within `max_dist` (null if none).
-func nearest_kindle(max_dist := INF) -> Node2D:
-	var best: Node2D = null
-	var best_d := max_dist
-	for point in get_tree().get_nodes_in_group("kindle_point"):
-		if point is Node2D and point.has_method("is_kindling") and point.is_kindling():
-			var d := (point as Node2D).global_position.distance_to(global_position)
-			if d < best_d:
-				best_d = d
-				best = point
-	return best
-
-
-var _last_kindle_hint := -10000
-
-
-## Tells her which flames refill her mana and which way the nearest one is
-## (not more than once in a while).
-func hint_kindle() -> void:
-	if Settings.assist_infinite_mana or Time.get_ticks_msec() - _last_kindle_hint < 4000:
+## Explain the R reload channel when mana is low.
+func hint_reload() -> void:
+	if Settings.assist_infinite_mana or Time.get_ticks_msec() - _last_reload_hint < 4000:
 		return
-	_last_kindle_hint = Time.get_ticks_msec()
+	_last_reload_hint = Time.get_ticks_msec()
 	var text := "Hold %s to restore mana." % InputLabels.primary("reload")
 	FloatText.spawn(get_parent(), global_position + Vector2(0, -60), text, Color(0.72, 0.9, 1.0), 20.0, 3.6)
 
@@ -1035,7 +993,7 @@ func complete_heal():
 	)
 
 	if current_mana <= 0:
-		hint_kindle()
+		hint_reload()
 
 
 

@@ -243,7 +243,6 @@ func room_2_too_heavy() -> void:
 	curb(30)
 	var room := make_room_2("R2", "Too Heavy for One", 18, 40, LOW_CEIL, Vector2(cx(19), 530))
 	waymarks(room, 18, 40)
-	kindle_flame(room, cx(20))
 
 	var fixed := cube(room, "Fixed Cube", cx(22), "wind/push/right/normal",
 		{"dungeon_powered": true, "carryable": false, "locked_slots": 15})
@@ -299,7 +298,6 @@ func room_3_across_the_teeth() -> void:
 		floor_tile(x, 4)
 	var room := make_room_2("R3", "Across the Teeth", 40, 58, HIGH_CEIL, Vector2(cx(41), 530))
 	waymarks(room, 40, 58)
-	kindle_flame(room, cx(42))
 	var pit_floor := 598.0
 	var candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleEdge", Vector2(cx(44), FLOOR_Y))
 	inst("res://scenes/spike_trap.tscn", room, "PitSpikesL", Vector2(cx(46) + 32, pit_floor),
@@ -390,7 +388,6 @@ func room_5_frozen_crossing() -> void:
 	pit(86, 90)
 	var room := make_room_2("R5", "The Frozen Crossing", 78, 100, LOW_CEIL, Vector2(cx(79), 530), true)
 	waymarks(room, 78, 100)
-	kindle_flame(room, cx(80))
 	var candle := inst("res://scenes/hazard_checkpoint.tscn", room, "CandleEdge", Vector2(cx(84), FLOOR_Y))
 	inst("res://scenes/spike_trap.tscn", room, "PitSpikes", Vector2(5680, 598.0),
 		{"spike_count": 9, "recovery_checkpoint": candle})
@@ -484,7 +481,6 @@ func room_7_limited_circuit() -> void:
 	curb(137)
 	var room := make_room_2("R7", "The Limited Circuit", 122, 144, LOW_CEIL, Vector2(cx(123), 530))
 	waymarks(room, 122, 144)
-	kindle_flame(room, cx(123))
 	room.set("mana_limit", 10)
 	var strong_cube := cube(room, "Strong Cube", cx(124), "wind/push/right/strong", {"locked_slots": 15})
 	var normal_cube := cube(room, "Normal Cube", cx(126), "wind/push/right/normal", {"locked_slots": 15})

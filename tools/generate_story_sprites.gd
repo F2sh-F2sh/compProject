@@ -369,14 +369,6 @@ var _preview_items: Array = []
 
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
-	_person("tam", TAM)
-	_person("mira", MIRA)
-	_person("pip", PIP)
-	_person("edda", EDDA)
-	_person("nan", NAN)
-	_person("monk", MONK)
-	_person("ilse", ILSE)
-	_save_strip("wren_bed", [_map(WREN_BED), _breathe(WREN_BED, 4, 8, 0, 13)])
 	var bell := _map(BELL)
 	var cracked := bell.duplicate()
 	for p in BELL_CRACK:

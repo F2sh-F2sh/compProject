@@ -14,7 +14,7 @@ const CONTROLS := [
 	["Sprint (hold)", "sprint"],
 	["Fireball (aim with the mouse)", "shoot"],
 	["Heal (stand still)", "heal"],
-	["Kindle (mana)", "reload"],
+	["Reload mana (hold R)", "reload"],
 	["Record an Echo (hold: let Echoes fade)", "echo"],
 	["Use / pull / ring / inscribe a cube", "interact"],
 	["Pick up / place a rune cube", "rune_carry"],

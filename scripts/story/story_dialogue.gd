@@ -39,7 +39,7 @@ func _ready() -> void:
 	_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	_panel.offset_left = 32
 	_panel.offset_right = -32
-	_panel.offset_top = -182
+	_panel.offset_top = -222
 	_panel.offset_bottom = -32
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("141121")
@@ -56,7 +56,8 @@ func _ready() -> void:
 	row.add_theme_constant_override("separation", 22)
 	_panel.add_child(row)
 	_portrait = TextureRect.new()
-	_portrait.custom_minimum_size = Vector2(70, 90)
+	_portrait.custom_minimum_size = Vector2(96, 96)
+	_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	row.add_child(_portrait)
@@ -72,10 +73,8 @@ func _ready() -> void:
 	_body = Label.new()
 	_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var serif := SystemFont.new()
-	serif.font_names = PackedStringArray(["Georgia", "Cambria", "Times New Roman", "serif"])
-	_body.add_theme_font_override("font", serif)
-	_body.add_theme_font_size_override("font_size", 21)
+	_body.add_theme_font_override("font", Fonts.STORY)
+	_body.add_theme_font_size_override("font_size", 24)
 	_body.add_theme_color_override("font_color", Color("eee6dc"))
 	words.add_child(_body)
 	var footer := HBoxContainer.new()

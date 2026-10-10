@@ -111,7 +111,7 @@ func _build_player() -> void:
 	aura.color = GOLD
 	aura.energy = 0.75
 	player.add_child(aura)
-	_lantern = SurfaceArt.sprite(player, "wall_lantern", Vector2(19, -17), 0.65)
+	_lantern = SurfaceArt.sprite(player, "desk_lantern", Vector2(19, -17), 0.65)
 	_lantern.z_index = 1
 	_lantern.visible = stage != Stage.COTTAGE
 	player.died.connect(func(): SceneFade.restart(get_tree()))
@@ -136,7 +136,10 @@ func _terrain(x: float, y: float, width: float, outdoor := false) -> void:
 	if outdoor:
 		SurfaceArt.ground(self, x, x + width, y, 1.5, 7)
 	else:
-		SurfaceArt.tile_block(self, Vector2(x, y), int(ceil(width / 24)), 7, ["bricks_a", "bricks_b", "bricks_roots"], 1.5, int(x + y))
+		# The descending camera can see below earlier landings. Paint stone
+		# through its lower bound, while keeping the authored collision depth.
+		var rows := maxi(7, ceili((864.0 - y) / 24.0)) if stage == Stage.WELL else 7
+		SurfaceArt.tile_block(self, Vector2(x, y), int(ceil(width / 24)), rows, ["bricks_a", "bricks_b", "bricks_roots"], 1.5, int(x + y))
 	_solid(Rect2(x, y, width, 168))
 
 func _use(at: Vector2, verb: String, callback: Callable) -> Interactable:
@@ -178,7 +181,7 @@ func _build_cottage() -> void:
 	SurfaceArt.sprite(self, "door_tall", Vector2(798, FLOOR), 1.5)
 	SurfaceArt.sprite(self, "cart", Vector2(208, FLOOR), 1.5)
 	SurfaceArt.sprite(self, "log", Vector2(574, FLOOR), 1.5)
-	SurfaceArt.animated(self, "nan", Vector2(542, FLOOR), 3, 1.75, true)
+	SurfaceArt.animated(self, "nan", Vector2(542, FLOOR), 3, 1.0, true, true)
 	SurfaceArt.animated(self, "candle", Vector2(660, 445), 6, 2)
 	_light(Vector2(628, 450), GOLD, 1.6)
 	StoryPaint.motes(self, Rect2(500, 325, 250, 185), Color(1, 0.72, 0.42, 0.35), 22)
@@ -250,7 +253,7 @@ func _build_well() -> void:
 		_solid(Rect2(at, Vector2(48, 48)))
 	_solid(Rect2(-24, 200, 24, 700))
 	_solid(Rect2(_width, 200, 24, 700))
-	SurfaceArt.tile_block(self, Vector2(0, 180), 82, 20, ["bricks_a", "bricks_b", "bricks_vines"], 1.5, 13).modulate = Color("373245")
+	SurfaceArt.tile_block(self, Vector2(0, 180), 82, 29, ["bricks_a", "bricks_b", "bricks_vines"], 1.5, 13).modulate = Color("373245")
 	# Back wall must stay behind the terrain and the actors.
 	get_child(get_child_count() - 1).z_index = -20
 	for x in range(200, 1900, 192):
@@ -309,7 +312,7 @@ func _build_ui() -> void:
 	objective = Label.new()
 	objective.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	objective.add_theme_font_override("font", StoryPaint.label_font())
-	objective.add_theme_font_size_override("font_size", 13)
+	objective.add_theme_font_size_override("font_size", 18)
 	objective.add_theme_color_override("font_color", Color("e4d9ed"))
 	panel.add_child(objective)
 	objective.text = ["Nan's cottage\nSpeak with Nan.", "The pilgrim road\nLower the bridge. Find the Belfry door.", "The old well\nLight both passage lamps with Nan's lantern.  0 / 2"][stage]

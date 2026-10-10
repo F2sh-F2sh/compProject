@@ -167,37 +167,25 @@ func _build_room() -> void:
 	SurfaceArt.sprite(props, "door_small", Vector2(DOOR_X, FLOOR_Y))
 	SurfaceArt.sprite(props, "barrel", Vector2(DOOR_X + 78, FLOOR_Y))
 	SurfaceArt.sprite(props, "crate", Vector2(DOOR_X + 112, FLOOR_Y))
-	# Everyday belongings occupy distinct floor bays; cups and books sit
-	# on furniture, rather than being scattered at unrelated world heights.
-	SurfaceArt.sprite(props, "bookshelf", Vector2(292, FLOOR_Y), 0.8)
-	SurfaceArt.sprite(props, "table", Vector2(430, FLOOR_Y), S)
-	SurfaceArt.sprite(props, "scroll_rack", Vector2(430, FLOOR_Y - SurfaceArt.size_of("table").y * S + 9), 0.65)
-	SurfaceArt.sprite(props, "bush", Vector2(650, FLOOR_Y), 1.2)
-	SurfaceArt.sprite(props, "barrel", Vector2(996, FLOOR_Y), S)
-	var household := preload("res://scripts/story/cottage_details.gd").new()
-	household.position = Vector2(0, FLOOR_Y)
-	props.add_child(household)
-	SurfaceArt.sprite(props, "shelf_jars", Vector2(SHELF_X, FLOOR_Y - 64))
-	SurfaceArt.sprite(props, "win_arch_lit", Vector2(WINDOW_X, FLOOR_Y - 74), S * 2.8)
-	SurfaceArt.sprite(props, "win_arch_lit", Vector2(240, FLOOR_Y - 74), S * 2.8)
-	SurfaceArt.sprite(props, "table", Vector2(TABLE_X, FLOOR_Y))
-	var tabletop := FLOOR_Y - SurfaceArt.size_of("table").y * S + 6.0 * S
-	household.tabletop = tabletop - FLOOR_Y
-	_lantern = SurfaceArt.sprite(props, "wall_lantern", Vector2(TABLE_X - 24.0, tabletop), 0.85)
+	# Newly drawn household furniture uses one consistent pixel scale.
+	SurfaceArt.sprite(props, "cottage_bookshelf", Vector2(285, FLOOR_Y), S)
+	SurfaceArt.sprite(props, "cottage_cupboard", Vector2(395, FLOOR_Y), S)
+	SurfaceArt.sprite(props, "cottage_window", Vector2(285, FLOOR_Y - 115), S)
+	SurfaceArt.sprite(props, "cottage_window", Vector2(665, FLOOR_Y - 108), S)
+	SurfaceArt.sprite(props, "cottage_rug", Vector2(665, FLOOR_Y), S)
+	SurfaceArt.sprite(props, "table", Vector2(TABLE_X, FLOOR_Y), S)
+	# Table pixels: the surface is 8 rows below its top; lamp feet sit on it.
+	var tabletop := FLOOR_Y - (SurfaceArt.size_of("table").y - 8) * S
+	_lantern = SurfaceArt.sprite(props, "desk_lantern", Vector2(TABLE_X - 21, tabletop), S)
 	_lantern.z_as_relative = false
 	_lantern.z_index = 3
-	_lantern_light = _light(_lantern.position + Vector2(0, -22), COLD, 0.6, 1.1)
+	_lantern_light = _light(_lantern.position + Vector2(0, -18), Color(1.0, 0.76, 0.48), 0.6, 1.1)
 	props.add_child(_lantern_light)
-	# Herbs hung to dry from the beam, candles for warmth
+	# Herbs belong to the ceiling beam, not the walking lane.
 	for hx in [506.0, 531.0, 556.0]:
 		SurfaceArt.sprite(props, "vine_short", Vector2(hx, FLOOR_Y - 11.0 * 16.0 * S + 56.0))
-	var candle_a := SurfaceArt.animated(props, "candle", Vector2(TABLE_X + 22.0, tabletop), 6.0, 0.85)
-	candle_a.z_index = 1
-	var candle_b := SurfaceArt.animated(props, "candle", Vector2(NAN_X - 62.0, FLOOR_Y), 6.0, S)
-	candle_b.z_index = -2
-	props.add_child(_light(candle_b.position + Vector2(0, -16), COLD, 0.45, 0.9))
 	# Nan, in her armchair by the fire, facing the door
-	nan = SurfaceArt.animated(props, "nan_seated", Vector2(NAN_X, FLOOR_Y), 0.0, 64.0 / SurfaceArt.size_of("nan_seated").y, true)
+	nan = SurfaceArt.animated(props, "nan_seated", Vector2(NAN_X, FLOOR_Y), 0.0, 1.0, true, true)
 	nan.name = "Nan"
 	nan.stop()
 	nan.z_index = -1
@@ -325,7 +313,7 @@ func _build_ui() -> void:
 	_hint.offset_bottom = -44
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint.add_theme_font_override("font", StoryPaint.label_font())
-	_hint.add_theme_font_size_override("font_size", 14)
+	_hint.add_theme_font_size_override("font_size", 22)
 	_hint.add_theme_color_override("font_color", Color("e4ddf2"))
 	_hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	_hint.add_theme_constant_override("outline_size", 5)

@@ -39,8 +39,6 @@ const SHEETS := {
 
 ## name: [sheet, loop, [[source frame, ticks], ...]]
 const CLIPS := {
-	# A low, planted stance while bracing against a stone.
-	&"push": [&"air", true, [[0, 15], [1, 15]]],
 	# Breathing with eased holds, and a quick blink (frames 5-8)
 	&"idle": [&"idle", true, [[0, 10], [1, 7], [2, 9], [1, 6], [4, 8], [5, 3], [6, 2], [7, 4], [8, 3],
 		[2, 8], [10, 12], [4, 8], [13, 16], [16, 12]]],
@@ -105,6 +103,17 @@ func _run() -> void:
 			if not atlases.has(key):
 				atlases[key] = _frame_texture(sheet, entry[0])
 			frames.add_frame(clip, atlases[key], float(entry[1]))
+	# New hand-drawn 64px pushing poses on the same 80px output canvas.
+	frames.add_animation(&"push")
+	frames.set_animation_loop(&"push", true)
+	frames.set_animation_speed(&"push", 6.0)
+	for i in 4:
+		var push_texture := AtlasTexture.new()
+		push_texture.atlas = load(DIR + "EchidnaPush.png")
+		push_texture.region = Rect2(i * 64, 0, 64, 64)
+		push_texture.margin = Rect2(8, 8, 16, 16)
+		push_texture.filter_clip = true
+		frames.add_frame(&"push", push_texture)
 	frames.set_meta(&"sprite_offset", Vector2(CANVAS.x / 2.0 - PIVOT.x, CANVAS.y / 2.0 - (PIVOT.y + 1)))
 	frames.set_meta(&"footsteps", FOOTSTEPS)
 	frames.set_meta(&"pivots", _pivots)

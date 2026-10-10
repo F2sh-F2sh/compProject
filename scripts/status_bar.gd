@@ -5,11 +5,11 @@ extends Control
 @export var body_font: Font
 
 const SLOPE := 0.7
-const PLATE_W := 372.0
+const PLATE_W := 468.0
 const PLATE_H := 40.0
-const TAB_X := 186.0
+const TAB_X := 206.0
 const TAB_H := 26.0
-const MANA_PLATE_W := 176.0
+const MANA_PLATE_W := 196.0
 const MANA_PLATE_H := 24.0
 
 const COLOR_PLATE := Color(0.086, 0.075, 0.1, 0.94)
@@ -62,7 +62,7 @@ var time := 0.0
 
 
 func _ready() -> void:
-	name_font = Fonts.TITLE
+	name_font = Fonts.UI_BOLD
 	body_font = Fonts.UI
 	custom_minimum_size = Vector2(PLATE_W, PLATE_H + TAB_H)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -195,7 +195,7 @@ func _draw_mana_plate(border: Color) -> void:
 	var bar_top := top + 5.0
 	var bar_bottom := bottom - 5.0
 	# (room for the word MANA at its left)
-	var x0 := 46.0
+	var x0 := 12.0 + body_font.get_string_size("Mana", HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
 	var x_end := MANA_PLATE_W - 10.0
 	var bar := PackedVector2Array([
 		Vector2(x0, bar_top), Vector2(x_end, bar_top),
@@ -212,7 +212,7 @@ func _draw_mana_plate(border: Color) -> void:
 	_fill_clipped(bar, x0, x_end, mp_ghost, COLOR_GHOST)
 	_fill_clipped(bar, x0, x_end, mp_shown, color)
 	_draw_debt(bar, x0, x_end, bar_top, bar_bottom)
-	draw_string(body_font, Vector2(5, bar_bottom + 1.0), "Mana", HORIZONTAL_ALIGNMENT_LEFT, -1, 16, border)
+	draw_string(body_font, Vector2(5, bar_bottom + 1.0), "Mana", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, border)
 	_draw_echo_indicator(bottom + 4.0, border)
 
 
@@ -281,14 +281,14 @@ func _draw_tab() -> void:
 
 	# Mana's number on the left, beside the mana bar; health's on the right,
 	# under the end of the health bar
-	var divider := TAB_X + 80.0
+	var divider := TAB_X + 112.0
 	draw_line(Vector2(divider, top + 4.0), Vector2(divider, bottom - 3.0), COLOR_TAB_TEXT, 1.0)
 
 	var baseline := bottom - 5.0
 	var mp_text := "Reloading" if mp_restoring else "Mana %d" % mp
-	draw_string(body_font, Vector2(TAB_X, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 18, COLOR_TAB_TEXT)
+	draw_string(body_font, Vector2(TAB_X, baseline), mp_text, HORIZONTAL_ALIGNMENT_CENTER, divider - TAB_X, 20, COLOR_TAB_TEXT)
 	var hp_text := "%d / %d" % [hp, hp_max]
-	draw_string(body_font, Vector2(divider + 2.0, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 18, COLOR_TAB_TEXT)
+	draw_string(body_font, Vector2(divider + 2.0, baseline), hp_text, HORIZONTAL_ALIGNMENT_CENTER, _plate_edge(bottom) - divider - 4.0, 20, COLOR_TAB_TEXT)
 
 
 func _fill_clipped(shape: PackedVector2Array, x0: float, x_max: float, ratio: float, color: Color) -> Array:

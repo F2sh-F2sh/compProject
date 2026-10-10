@@ -11,7 +11,6 @@
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/cobweb_corner.png" id="9_b5x8s"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="10_hbbrd"]
 [ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="11_imufv"]
-[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="12_2phwt"]
 [ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="13_ayf2b"]
 [ext_resource type="PackedScene" path="res://scenes/runes/rune_tablet.tscn" id="14_a27a4"]
 [ext_resource type="Script" path="res://scripts/runes/rune_tablet.gd" id="15_02hn4"]
@@ -475,10 +474,6 @@ position = Vector2(160, 534)
 script = ExtResource("11_imufv")
 checkpoint_id = "galleries.cp.archive"
 
-[node name="KindleFlame" type="Node2D" parent="R1" unique_id=214899809 instance=ExtResource("12_2phwt")]
-position = Vector2(224, 534)
-script = ExtResource("13_ayf2b")
-
 [node name="TabletSpace" type="Node2D" parent="R1" unique_id=786903113 instance=ExtResource("14_a27a4")]
 position = Vector2(288, 534)
 script = ExtResource("15_02hn4")
@@ -512,10 +507,6 @@ script = ExtResource("21_8mata")
 page_id = "galleries.page.1"
 title = "The Archivist's Ledger, i"
 text = "I folded the archive the night the bell cracked. Every star the Choir ever wrote down is still here, in rooms you cannot walk to. The Hush listens for doors. It has never learned to listen for distance."
-
-[node name="@Node2D@41" type="Node2D" parent="R1" unique_id=1443084992 instance=ExtResource("12_2phwt")]
-position = Vector2(928, 534)
-script = ExtResource("13_ayf2b")
 
 [node name="ArchiveCube" type="Node2D" parent="R1" unique_id=988162039 instance=ExtResource("16_flrcd")]
 position = Vector2(992, 534)
@@ -567,10 +558,6 @@ position = Vector2(1824, 534)
 script = ExtResource("11_imufv")
 checkpoint_id = "galleries.cp.reading"
 
-[node name="@Node2D@43" type="Node2D" parent="R1" unique_id=1918435767 instance=ExtResource("12_2phwt")]
-position = Vector2(1888, 534)
-script = ExtResource("13_ayf2b")
-
 [node name="ReadingSocket" type="Node2D" parent="R1" unique_id=2105528001 instance=ExtResource("22_73hkj")]
 position = Vector2(2144, 534)
 script = ExtResource("23_pj5xv")
@@ -619,10 +606,6 @@ flag = "galleries.r1.pocket_seen"
 position = Vector2(2912, 534)
 script = ExtResource("11_imufv")
 checkpoint_id = "galleries.cp.pillar"
-
-[node name="@Node2D@45" type="Node2D" parent="R1" unique_id=311470138 instance=ExtResource("12_2phwt")]
-position = Vector2(2976, 534)
-script = ExtResource("13_ayf2b")
 
 [node name="PillarCube" type="Node2D" parent="R1" unique_id=1759305515 instance=ExtResource("16_flrcd")]
 position = Vector2(3104, 526)
@@ -678,10 +661,6 @@ channel_y = 96.0
 position = Vector2(3744, 534)
 script = ExtResource("11_imufv")
 checkpoint_id = "galleries.cp.hearth"
-
-[node name="@Node2D@47" type="Node2D" parent="R1" unique_id=139770076 instance=ExtResource("12_2phwt")]
-position = Vector2(3808, 534)
-script = ExtResource("13_ayf2b")
 
 [node name="HearthCube" type="Node2D" parent="R1" unique_id=503260363 instance=ExtResource("16_flrcd")]
 position = Vector2(3960, 402)
@@ -1106,10 +1085,6 @@ position = Vector2(4576, 534)
 script = ExtResource("11_imufv")
 checkpoint_id = "galleries.cp.wren"
 
-[node name="KindleFlame" type="Node2D" parent="R2" unique_id=1924555567 instance=ExtResource("12_2phwt")]
-position = Vector2(4640, 534)
-script = ExtResource("13_ayf2b")
-
 [node name="TabletRepeat" type="Node2D" parent="R2" unique_id=753405412 instance=ExtResource("14_a27a4")]
 position = Vector2(4720, 534)
 script = ExtResource("15_02hn4")
@@ -1255,10 +1230,6 @@ position = Vector2(6496, 534)
 script = ExtResource("11_imufv")
 checkpoint_id = "galleries.cp.hearths"
 
-[node name="@Node2D@53" type="Node2D" parent="R2" unique_id=121579290 instance=ExtResource("12_2phwt")]
-position = Vector2(6540, 534)
-script = ExtResource("13_ayf2b")
-
 [node name="WestHearthCube" type="Node2D" parent="R2" unique_id=1124437929 instance=ExtResource("16_flrcd")]
 position = Vector2(6584, 402)
 script = ExtResource("17_50gdu")
@@ -1313,10 +1284,6 @@ symbol = 2
 position = Vector2(7520, 534)
 script = ExtResource("11_imufv")
 checkpoint_id = "galleries.cp.crystal"
-
-[node name="@Node2D@55" type="Node2D" parent="R2" unique_id=1371955139 instance=ExtResource("12_2phwt")]
-position = Vector2(7584, 534)
-script = ExtResource("13_ayf2b")
 
 [node name="LensLock" type="Node2D" parent="R2" unique_id=1505319816 instance=ExtResource("16_flrcd")]
 position = Vector2(7648, 534)

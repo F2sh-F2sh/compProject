@@ -28,7 +28,7 @@ const GRAVITY := 900.0
 
 ## kind: how it moves, health, speeds, sight, contact damage, and its traits.
 const KINDS := {
-	"bat": {"move": "flyer", "health": 8, "speed": 80.0, "rush": 170.0, "sight": 260.0, "damage": 1, "frames": 2, "puff": Color(0.55, 0.4, 0.75)},
+	"bat": {"move": "flyer", "health": 8, "speed": 80.0, "rush": 170.0, "sight": 260.0, "damage": 1, "frames": 4, "puff": Color(0.55, 0.4, 0.75)},
 	"moth": {"move": "flyer", "health": 10, "speed": 45.0, "rush": 120.0, "sight": 210.0, "damage": 1, "frames": 2, "puff": Color(1.0, 0.9, 0.6)},
 	"jelly": {"move": "drifter", "health": 12, "speed": 22.0, "sight": 150.0, "damage": 1, "frames": 2, "puff": Color(0.5, 0.9, 0.95)},
 	"hushling": {"move": "drifter", "health": 10, "speed": 32.0, "sight": 190.0, "damage": 0, "drain": 14.0, "frames": 2, "puff": Color(0.2, 0.2, 0.3)},
@@ -94,7 +94,7 @@ func _build() -> void:
 	var size := Vector2(w, strip.get_height()) * draw_scale
 	var shape := CollisionShape2D.new()
 	var rect := RectangleShape2D.new()
-	rect.size = size * 0.6
+	rect.size = Vector2(18, 24) if kind == "bat" else size * 0.6
 	shape.shape = rect
 	shape.position = Vector2(0, -size.y / 2.0)
 	add_child(shape)
@@ -106,7 +106,7 @@ func _build() -> void:
 	hit.knockback = Vector2(140, -120)
 	var hit_shape := CollisionShape2D.new()
 	var hit_rect := RectangleShape2D.new()
-	hit_rect.size = size * 0.7
+	hit_rect.size = Vector2(16, 20) if kind == "bat" else size * 0.7
 	hit_shape.shape = hit_rect
 	hit_shape.position = shape.position
 	hit.add_child(hit_shape)

@@ -808,7 +808,7 @@ func scenario_room3() -> void:
 	Input.action_press("reload")
 	await wait_until(func(): return player.current_mana >= 100, 3.0)
 	Input.action_release("reload")
-	check("held at the shrine's flame it refills the lantern", player.current_mana == 100, "mana=%d near=%s reloading=%s dist=%.0f" % [player.current_mana, player.near_kindle(), player.is_reloading, shrine.global_position.distance_to(player.global_position)])
+	check("holding R refills mana", player.current_mana == 100, "mana=%d reloading=%s dist=%.0f" % [player.current_mana, player.is_reloading, shrine.global_position.distance_to(player.global_position)])
 	player.current_mana = 40
 	await place(Vector2(shrine.global_position.x, FLOOR))
 	Input.action_press("reload")

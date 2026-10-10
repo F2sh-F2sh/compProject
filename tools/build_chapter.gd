@@ -582,7 +582,6 @@ func room_2_bellkeeper() -> void:
 	curb(35)
 	var room := make_room("R2", "The Bellkeeper's Cell", 20, 44, LOW_CEIL, Vector2(1400, 530), true)
 	waymarks(room, 20, 44)
-	kindle_flame(room, 1384.0)
 	grated_cell(room, 27, 31)
 
 	slime(room, "BellSlime", Vector2(cx(28), 596), {"warded": true, "investigate_time": 12.0})
@@ -623,7 +622,6 @@ func room_2_bellkeeper() -> void:
 	prop(deco, "chain_short", cx(35), 272, true)
 	prop(deco, "moss_drip_top", cx(30), 264, true)
 	prop(deco, "skeleton", cx(42), FLOOR_Y)
-	prop(deco, "rat", cx(26), FLOOR_Y)
 	puddle(deco, 1584.0, 64.0)
 	puddle(deco, cx(40) + 16, 80.0)
 
@@ -713,7 +711,6 @@ func room_4_watcher() -> void:
 	floor_tile(74, 6)
 	var room := make_room("R4", "The Silent Watcher", 64, 84, LOW_CEIL, Vector2(4180, 530))
 	waymarks(room, 64, 84)
-	kindle_flame(room, cx(65))
 
 	var lever := inst(PUZZLE + "lever.tscn", room, "Lever", Vector2(cx(67), FLOOR_Y))
 	var lens := inst(PUZZLE + "light_lens.tscn", room, "Lens", Vector2(cx(79), 284), {"beam_direction": Vector2.DOWN})
@@ -1033,7 +1030,6 @@ func room_8_choir() -> void:
 	shell(173, 195, LOW_CEIL)
 	var room := make_room("R8", "The Choir Loft", 173, 195, LOW_CEIL, Vector2(cx(174), 530))
 	waymarks(room, 173, 195)
-	kindle_flame(room, cx(175))
 	var lever_a := inst(PUZZLE + "lever.tscn", room, "LeverA", Vector2(cx(176), FLOOR_Y), {"spring_time": 2.5})
 	var lever_b := inst(PUZZLE + "lever.tscn", room, "LeverB", Vector2(cx(188), FLOOR_Y), {"spring_time": 2.5})
 	var loft_gate := gate(room, "LoftGate", 192)
@@ -1076,7 +1072,6 @@ func room_9_great_bell() -> void:
 		floor_tile(x, 3)
 	var room := make_room("R9", "The Great Bell", 195, 215, HIGH_CEIL, Vector2(cx(196), 530))
 	waymarks(room, 195, 215, false)
-	kindle_flame(room, cx(197))
 	var plate := inst("res://scenes/pressure_plate.tscn", room, "Plate", Vector2(cx(198), FLOOR_Y))
 	# The hot spring at the foot of the stair: running water the Hush has never
 	# held still. Drinking from it gives back the word SPRING (heal), here at
@@ -1171,12 +1166,6 @@ func place_player_and_ui() -> void:
 	pause.name = "PauseMenu"
 	pause.set_script(load("res://scripts/ui/pause_menu.gd"))
 	add_owned(level, pause)
-
-
-## A flame by a room's entrance where she can kindle her lantern (fill her
-## mana), so running dry never sends her back through earlier rooms.
-func kindle_flame(room: Node, x: float) -> Node:
-	return inst(PUZZLE + "kindle_flame.tscn", room, "KindleFlame", Vector2(x, FLOOR_Y))
 
 
 # ---------------------------------------------------------------- waymarks

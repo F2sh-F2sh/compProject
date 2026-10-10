@@ -27,7 +27,6 @@
 [ext_resource type="Texture2D" uid="uid://cy2hugipjsb71" path="res://assets/TileSet/props/sprites/rocks_b.png" id="36_jyihf"]
 [ext_resource type="Texture2D" uid="uid://bta0ashqjjvy8" path="res://assets/TileSet/props/sprites/tombstone_rubble.png" id="37_32j3l"]
 [ext_resource type="Texture2D" uid="uid://cupenakd0puu" path="res://assets/TileSet/props/sprites/skeleton.png" id="38_5gmr4"]
-[ext_resource type="Texture2D" uid="uid://bjlgywxtviovy" path="res://assets/TileSet/props/sprites/rat.png" id="39_cmrnl"]
 [ext_resource type="Texture2D" uid="uid://bj3dbes5etf3t" path="res://assets/TileSet/props/sprites/gargoyle.png" id="40_cwldd"]
 [ext_resource type="Texture2D" uid="uid://cf7y1tjvq6b2h" path="res://assets/TileSet/props/sprites/wisps_dark_small.png" id="41_ymybq"]
 [ext_resource type="Texture2D" uid="uid://e0i3qjibehey" path="res://assets/TileSet/props/sprites/wisps_dark.png" id="42_qfa3x"]
@@ -815,19 +814,6 @@ position = Vector2(6112, 534)
 texture = ExtResource("38_5gmr4")
 centered = false
 offset = Vector2(-64, -64)
-
-[node name="Rat46" type="Sprite2D" parent="Props" unique_id=1923844224]
-position = Vector2(736, 534)
-texture = ExtResource("39_cmrnl")
-centered = false
-offset = Vector2(-32, -64)
-
-[node name="Rat47" type="Sprite2D" parent="Props" unique_id=1127610570]
-position = Vector2(7584, 534)
-texture = ExtResource("39_cmrnl")
-centered = false
-offset = Vector2(-32, -64)
-flip_h = true
 
 [node name="Gargoyle48" type="Sprite2D" parent="Props" unique_id=1065013159]
 position = Vector2(7901, 533)

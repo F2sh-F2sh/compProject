@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjlgywxtviovy"
-path="res://.godot/imported/rat.png-75993ddecdd796b70d12c523d19d654f.ctex"
+uid="uid://c5l3g1gfhcv34"
+path="res://.godot/imported/portrait_echidna_base.png-f06a4f5c1a5f1ff3c57f99ff4b6c0d06.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/TileSet/props/sprites/rat.png"
-dest_files=["res://.godot/imported/rat.png-75993ddecdd796b70d12c523d19d654f.ctex"]
+source_file="res://assets/sprites/story/portrait_echidna_base.png"
+dest_files=["res://.godot/imported/portrait_echidna_base.png-f06a4f5c1a5f1ff3c57f99ff4b6c0d06.ctex"]
 
 [params]
 

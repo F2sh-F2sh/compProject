@@ -1,0 +1,20 @@
+# Pixel Aero menu refinement
+
+The approved Aero layout and Echidna design are preserved. The title and box cover were edited with the built-in imagegen tool to remove fine texture and excess detail. The cover now uses a broad tower, one bell/rune circle, simple arches, large fog bands and Echidna on a ledge.
+
+Final assets: `assets/ui/menu/aero_title.png` (160×80) and `assets/ui/menu/belfry_box.png` (128×192). Both have at most 24 opaque colours plus transparent pixels and display at exact 2× scale with nearest filtering. Button text uses bundled Pixelify Sans. Tabs, chrome shading, bevels and rune rings use a four-pixel grid with stepped colour bands and no antialiased lines. The existing background is preserved.
+
+Verification: 18 automated title-flow assertions and 17 native rendered menu assertions passed. Final main-menu and submenu screenshots were visually inspected on an isolated desktop without sending OS input. This verifies the menu, not gameplay routes. Existing shutdown cleanup warnings remain. No commit or push.
+
+Built-in edit prompts follow.
+
+## Simplified cover
+
+Edit this game-box artwork into COARSE LOW-RESOLUTION PIXEL ART with far less cover detail. Keep EXACT same witch Echidna design: bent purple hat, gold buckle, black shadow face, two thin white eyes, purple cloak. This character was approved, do not redesign her. Keep upright 3D-box silhouette with left spine visible, exact title THE SEALED BELFRY on front. Simplify cover composition to ONLY one broad bell tower silhouette, one large hanging brass bell with ONE teal rune circle, a plain round moon, two layers of ruined arches, a few large fog bands, and Echidna on a single ledge. REMOVE small bricks, ivy, dense candles/stairs, tiny decorative lettering, tiny stars and ornaments. 16-24 colour dark indigo/plum/teal/silver/muted-gold palette. Big clean square pixel clusters, bold simple shapes, clearly deliberately authored for a 64x96 pixel box image, no texture noise or stippling, no smooth gradients, NO antialiased edges or photorealistic plastic. Box thickness/edge and metallic highlights also drawn as sparse stepped pixel bands; keep 3D read using pixel art perspective. The title remains the same silver/teal Aero letter style but simplified into chunky pixel letterforms. A transparent background alpha=0 outside box silhouette, no studio background, no cast shadows or floor, full case visible. Refined readable minimalist gothic pixel art, matching the gameplay more than a detailed painted poster.
+
+## Pixel title
+
+Edit this logo into carefully authored coarse PIXEL ART while preserving the exact words THE SEALED on top and BELFRY larger below, the elegant letter shapes, small bell in the B, and gold flourish. This is for a dark pixel witch game menu. Match the existing logo design but simplify it for a native 160x80 pixel grid: THICK, SOLID readable letters, clear continuous letter faces in dark indigo with a broad teal highlight band, only 2-3 stepped shading colours per letter, strong 1px pale silver bevel edges, strong dark outlines. Preserve glossy Frutiger Aero feel using sparse stepped pixel highlights. Remove ALL fine textures, grain, noise, dithering, speckled reflections, interior scenery and tiny decorative details. Clean coherent pixel clusters, no broken or threadlike strokes, no antialiasing, no smooth gradients. Letters must remain filled and readable when small, not just thin outlines. Transparent background alpha=0, generous transparent margins, no background panel. Limited muted indigo/plum/teal/silver/gold palette. Render ONE standalone logo, not a sheet or mockup.
+
+
+Box animation clarification: title_screen now uses turning_game_box.gd, a six-face 3D case rendered through a transparent 128×192 SubViewport with nearest filtering. The existing image supplies the front and spine directly. It swings ±24 degrees around its vertical axis over roughly 9.7 seconds, holding the menu position fixed. Reduced Motion holds the initial angle. Both left/right extremes were natively rendered and inspected; a runtime check confirmed the opposite yaw values, fixed menu position and reduced-motion behavior.

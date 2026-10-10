@@ -97,7 +97,7 @@ func _on_used(_by: Node) -> void:
 	else:
 		Sfx.play("ui_click", global_position, -6.0)
 	var host: Node = get_tree().current_scene
-	TitleCard.show_card(host, "YOU REMEMBER A WORD" if first else "THE WORD", word, InputLabels.format(story), 6.0 if first else 4.0)
+	TitleCard.show_card(host, "YOU REMEMBER A WORD" if first else "THE WORD", word, InputLabels.format(story), 6.0 if first else 4.0, 20)
 	if first and TOURS.has(ability):
 		UiTour.play_later(self, TOURS[ability], 6.6)
 

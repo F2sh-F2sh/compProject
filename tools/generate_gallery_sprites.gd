@@ -54,7 +54,6 @@ func _process(_delta: float) -> bool:
 
 
 func _run() -> void:
-	_save("wren", [_wren(0), _wren(1), _wren(2)])
 	_save("archivist_plaque", [_plaque()])
 	_save("scroll_rack", [_scroll_rack()])
 	for kind in ["fire", "ice", "light", "space"]:

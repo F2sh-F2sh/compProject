@@ -98,6 +98,17 @@ static func apply(level: Node) -> String:
 	for light in level.find_children("*", "PointLight2D", true, false):
 		if light.name.begins_with("TorchLight") or light.scene_file_path.ends_with("torch_light.tscn"):
 			_tint_torch(light, t["torch"])
+	# Exit stone and its magic light belong to the surrounding level palette.
+	for exit in level.find_children("*", "LevelExit", true, false):
+		var door := exit.get_node_or_null("Door") as Sprite2D
+		if door:
+			door.material = recolor_material(t, 0.72, 1.7)
+		var glow := exit.get_node_or_null("Glow") as PointLight2D
+		if glow:
+			glow.color = t["shaft"]
+		var wisps := exit.get_node_or_null("Wisps") as CPUParticles2D
+		if wisps:
+			wisps.color = Color(t["shaft"], wisps.color.a)
 	_add_air(level, String(t["air"]))
 	_scatter_props(level, id)
 	CreatureSpawner.populate(level, id)

@@ -21,7 +21,6 @@ var _sheet: Array = []
 
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
-	_save("bat", [_bat(true), _bat(false)])
 	_save("mite", [_mite(0), _mite(1)])
 	_save("hushling", [_hushling(0), _hushling(1)])
 	_save("cinderling", [_slime(0, "ember"), _slime(1, "ember")])

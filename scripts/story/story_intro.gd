@@ -431,7 +431,7 @@ func _build_ui() -> void:
 	spaced.base_font = small
 	spaced.spacing_glyph = 4
 	_era.add_theme_font_override("font", spaced)
-	_era.add_theme_font_size_override("font_size", 11)
+	_era.add_theme_font_size_override("font_size", 18)
 	_era.add_theme_color_override("font_color", Color("b89e6e"))
 	_era.modulate.a = 0.0
 	_era.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -447,7 +447,7 @@ func _build_ui() -> void:
 	_next_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_next_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_next_hint.add_theme_font_override("font", small)
-	_next_hint.add_theme_font_size_override("font_size", 11)
+	_next_hint.add_theme_font_size_override("font_size", 18)
 	_next_hint.add_theme_color_override("font_color", Color("8e86a8"))
 	_next_hint.modulate.a = 0.0
 	ui.add_child(_next_hint)

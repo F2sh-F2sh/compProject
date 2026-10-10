@@ -33,7 +33,6 @@
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/rocks_a.png" id="31_u5t63"]
 [ext_resource type="PackedScene" path="res://scenes/fx/puddle.tscn" id="32_kdtmr"]
 [ext_resource type="Script" path="res://scripts/fx/puddle.gd" id="33_lw2gw"]
-[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="34_iu40x"]
 [ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="35_wfbts"]
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/skull_pile.png" id="36_c3wfo"]
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/chain_hook_ball.png" id="37_wc3ok"]
@@ -376,10 +375,6 @@ script = ExtResource("7_ii7dr")
 position = Vector2(2457.6, 458)
 script = ExtResource("7_ii7dr")
 
-[node name="KindleFlame" type="Node2D" parent="R2" unique_id=2123093793 instance=ExtResource("34_iu40x")]
-position = Vector2(1312, 534)
-script = ExtResource("35_wfbts")
-
 [node name="FixedCube" type="Node2D" parent="R2" unique_id=1540545645 instance=ExtResource("12_w7bdp")]
 position = Vector2(1440, 534)
 script = ExtResource("13_em6g3")
@@ -544,10 +539,6 @@ script = ExtResource("7_ii7dr")
 [node name="Waymark2" type="Node2D" parent="R3" unique_id=1430551224 instance=ExtResource("6_hl3tg")]
 position = Vector2(3609.6, 458)
 script = ExtResource("7_ii7dr")
-
-[node name="KindleFlame" type="Node2D" parent="R3" unique_id=1274447245 instance=ExtResource("34_iu40x")]
-position = Vector2(2720, 534)
-script = ExtResource("35_wfbts")
 
 [node name="CandleEdge" type="Area2D" parent="R3" unique_id=1850101906 instance=ExtResource("38_jl8of")]
 position = Vector2(2848, 534)
@@ -870,10 +861,6 @@ script = ExtResource("7_ii7dr")
 [node name="Waymark3" type="Node2D" parent="R5" unique_id=1868098983 instance=ExtResource("6_hl3tg")]
 position = Vector2(6297.6, 458)
 script = ExtResource("7_ii7dr")
-
-[node name="KindleFlame" type="Node2D" parent="R5" unique_id=1247416562 instance=ExtResource("34_iu40x")]
-position = Vector2(5152, 534)
-script = ExtResource("35_wfbts")
 
 [node name="CandleEdge" type="Area2D" parent="R5" unique_id=1182864640 instance=ExtResource("38_jl8of")]
 position = Vector2(5408, 534)
@@ -1239,10 +1226,6 @@ script = ExtResource("7_ii7dr")
 [node name="Waymark3" type="Node2D" parent="R7" unique_id=582471715 instance=ExtResource("6_hl3tg")]
 position = Vector2(9113.6, 458)
 script = ExtResource("7_ii7dr")
-
-[node name="KindleFlame" type="Node2D" parent="R7" unique_id=2145968228 instance=ExtResource("34_iu40x")]
-position = Vector2(7904, 534)
-script = ExtResource("35_wfbts")
 
 [node name="StrongCube" type="Node2D" parent="R7" unique_id=600750465 instance=ExtResource("12_w7bdp")]
 position = Vector2(7968, 534)

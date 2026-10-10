@@ -109,9 +109,6 @@ func _process(_delta: float) -> bool:
 
 
 func _run() -> void:
-	_save("nan_seated", _nan_frames())
-	_save("hearth", [_hearth(0), _hearth(1), _hearth(2)])
-	_save("table", [_table()])
 	_save("shelf_jars", [_shelf()])
 	_save("cellar_door", [_cellar_door(false), _cellar_door(true)])
 	_save_preview()

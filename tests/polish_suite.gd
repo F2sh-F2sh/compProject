@@ -27,6 +27,7 @@ func open(path: String) -> void:
 	await frames(12)
 
 func run_suite(_filter: String) -> void:
+	await audit_replacement_art()
 	var state := get_tree().root.get_node("GameState")
 	state.clear_all()
 	state.all_abilities = false
@@ -119,7 +120,7 @@ func run_suite(_filter: String) -> void:
 	check("old-save migration keeps Fire and Echo after a new spell", state.has_ability("fire") and state.has_ability("echo") and state.has_ability("heal"))
 	for scene in [Journey.BELFRY, Journey.OBSERVATORY, Journey.KILN, Journey.CISTERN, Journey.LAMPS, Journey.GALLERIES, Journey.EYE]:
 		await open(scene)
-		check("%s has no visible obsolete refill posts" % scene.get_file(), lvl.find_children("*", "KindleFlame", true, false).all(func(n): return not n.is_visible_in_tree()))
+		check("%s contains no obsolete refill posts" % scene.get_file(), lvl.find_children("*", "KindleFlame", true, false).is_empty())
 		await audit_floor_art(scene.get_file())
 	await open("res://scenes/story/nan_cottage.tscn")
 	lvl.dialogue.say("nan", "warm", "The Hush took the words. Read the inscriptions to remember your spells.")
@@ -138,6 +139,38 @@ func run_suite(_filter: String) -> void:
 	state.clear_all()
 	state.all_abilities = true
 	completed = true
+
+
+func audit_replacement_art() -> void:
+	for who in ["nan", "nan_seated", "tam", "mira", "pip", "edda", "monk", "ilse", "wren"]:
+		var image := SurfaceArt.tex(who).get_image()
+		check(who + " is authored on a 64x64 canvas", image.get_size() == Vector2i(64, 64))
+		check(who + " feet reach the bottom pivot", image.get_used_rect().end.y == 64)
+		var hard_pixels := true
+		for y in 64:
+			for x in 64:
+				var alpha := image.get_pixel(x, y).a
+				hard_pixels = hard_pixels and (alpha == 0.0 or alpha == 1.0)
+		check(who + " has hard opaque pixels, no blended edges", hard_pixels)
+	for who in DialogueBox.FACES:
+		check(who + " portrait is at most 64x64", DialogueBox.portrait(who, DialogueBox.FACES[who][0]).get_size() == Vector2(64, 64))
+	var frames_art: SpriteFrames = load("res://assets/sprites/Echidna/echidna_frames.tres")
+	var pose := frames_art.get_frame_texture(&"push", 0) as AtlasTexture
+	check("pushing uses new art, not air or walk frames", pose.atlas.resource_path.ends_with("EchidnaPush.png") and frames_art.get_frame_count(&"push") == 4)
+	for prop in ["table", "hearth", "cottage_cupboard", "cottage_bookshelf", "cottage_window", "desk_lantern", "cottage_rug"]:
+		var size := SurfaceArt.size_of(prop)
+		check(prop + " fits a 64px native art cell", size.x <= 64 and size.y <= 64)
+	await open("res://scenes/ui/title_screen.tscn")
+	var title_block: TextureRect = lvl.find_child("TitleBlock", true, false)
+	check("title uses the glass logo", title_block.texture.resource_path.ends_with("aero_title.png"))
+	check("menu options leave the box artwork unobstructed", lvl.new_button.get_global_rect().end.x < lvl._box_art.get_global_rect().position.x)
+	await open("res://scenes/story/lowbell.tscn")
+	for npc in get_tree().get_nodes_in_group("villager"):
+		check(npc.sprite_name + " draws new art at 1x in the world", npc.figure.scale == Vector2.ONE)
+	var font := Fonts.UI
+	check("mana values fit their HUD cell", font.get_string_size("Mana 100", HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x <= 112)
+	check("reload status fits its HUD cell", font.get_string_size("Reloading", HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x <= 112)
+	check("health values fit their HUD cell", font.get_string_size("10 / 10", HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x <= 98)
 
 
 func audit_floor_art(label: String) -> void:

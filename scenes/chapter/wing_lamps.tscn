@@ -11,7 +11,6 @@
 [ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/cobweb_corner.png" id="9_r728y"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="10_806ny"]
 [ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="11_elavi"]
-[ext_resource type="PackedScene" path="res://scenes/puzzle/kindle_flame.tscn" id="12_07626"]
 [ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="13_are2w"]
 [ext_resource type="PackedScene" path="res://scenes/runes/rune_tablet.tscn" id="14_77ovo"]
 [ext_resource type="Script" path="res://scripts/runes/rune_tablet.gd" id="15_qu8b5"]
@@ -460,10 +459,6 @@ position = Vector2(160, 534)
 script = ExtResource("11_elavi")
 checkpoint_id = "lamps.cp.hall"
 
-[node name="KindleFlame" type="Node2D" parent="R1" unique_id=845898862 instance=ExtResource("12_07626")]
-position = Vector2(224, 534)
-script = ExtResource("13_are2w")
-
 [node name="TabletLight" type="Node2D" parent="R1" unique_id=786903113 instance=ExtResource("14_77ovo")]
 position = Vector2(288, 534)
 script = ExtResource("15_qu8b5")
@@ -624,10 +619,6 @@ position = Vector2(2208, 534)
 script = ExtResource("11_elavi")
 checkpoint_id = "lamps.cp.walk"
 
-[node name="@Node2D@32" type="Node2D" parent="R1" unique_id=744184159 instance=ExtResource("12_07626")]
-position = Vector2(2248, 534)
-script = ExtResource("13_are2w")
-
 [node name="TabletGlow" type="Node2D" parent="R1" unique_id=694511209 instance=ExtResource("14_77ovo")]
 position = Vector2(2296, 534)
 script = ExtResource("15_qu8b5")
@@ -725,10 +716,6 @@ symbol = 1
 position = Vector2(3872, 534)
 script = ExtResource("11_elavi")
 checkpoint_id = "lamps.cp.stacks"
-
-[node name="@Node2D@34" type="Node2D" parent="R1" unique_id=1029118276 instance=ExtResource("12_07626")]
-position = Vector2(4000, 534)
-script = ExtResource("13_are2w")
 
 [node name="CandleStacks" type="Area2D" parent="R1" unique_id=2075561259 instance=ExtResource("18_ntr6t")]
 position = Vector2(4064, 534)
@@ -1141,10 +1128,6 @@ script = ExtResource("49_lvohw")
 position = Vector2(6304, 534)
 script = ExtResource("11_elavi")
 checkpoint_id = "lamps.cp.stair"
-
-[node name="KindleFlame" type="Node2D" parent="R2" unique_id=1355672916 instance=ExtResource("12_07626")]
-position = Vector2(6432, 534)
-script = ExtResource("13_are2w")
 
 [node name="TabletGlow" type="Node2D" parent="R2" unique_id=727069951 instance=ExtResource("14_77ovo")]
 position = Vector2(6512, 534)
