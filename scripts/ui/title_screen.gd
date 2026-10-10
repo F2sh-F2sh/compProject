@@ -1,43 +1,51 @@
 extends Node2D
 
-## The front door. A slow, moody view of the ruined belfry behind a glass title and box-art showcase; and the menu: Continue (where
-## you left off), New Game (the illustrated story, then Lowbell), the Tutorial
-## ("The Novices' Way": the Passage, the Belfry, the Observatory),
-## Settings & Controls, and Quit. A line under the menu shows progress.
+## The front door, composed like a painted establishing shot: a night sky
+## and moon over the monastery on its crag, the woods below it, and on the
+## right a ruined shrine where the cracked bell hangs in lantern light, with
+## Echidna small before it; snow and drifting motes over it all. The glass
+## logo sits top left, the menu is plain words bottom left (no boxes), and the
+## version bottom right. The menu: Continue (where you left off), New Game
+## (the illustrated story, then Lowbell), Choose a Level (the Novices' Way:
+## the Passage, the Belfry, the Observatory, and the Long Stair), Settings &
+## Controls, and Quit. A line under the menu shows progress.
 
 const FONT := Fonts.UI
-const AERO_BUTTON := preload("res://scripts/ui/aero_menu_button.gd")
-const AERO_CHROME := preload("res://scripts/ui/aero_menu_chrome.gd")
-const BOX_HOME := Vector2(724, 192)
-const TURNING_BOX := preload("res://scripts/ui/turning_game_box.gd")
+const MENU_FONT := Fonts.BOOK
+const VERSION := "Version 1.0"
 const TUTORIAL := Journey.PASSAGE
 const CHAPTER := Journey.BELFRY
 const CHAPTER_2 := Journey.OBSERVATORY
 const STORY := Journey.STORY
+## Screen size the scene is composed for (the window grows it, never shrinks).
+const VIEW := Vector2(1152, 648)
+const GOLD := Color("f0d27a")
+const INK := Color("e8dcc0")
 
 var continue_button: Button
 var new_button: Button
 var tutorial_button: Button
+var daily_button: Button
 var part_1_button: Button
 var part_2_button: Button
 var part_3_button: Button
 var landing_button: Button
 var admin_button: Button
 var _parts: VBoxContainer
-## ADMIN (temporary, see Journey.admin_unlock): every wing's rooms and the Eye.
 var _admin: VBoxContainer
 var _menu: VBoxContainer
 var _settings: VBoxContainer
 var _progress: Label
 var _new_armed := false
-var _far: Sprite2D
-var _mid: Sprite2D
 var _time := 0.0
-var _wing: TextureRect
 var _starting := false
+## The shrine on the right: the picture's focus, which the menu leaves clear.
 var _box_art: TextureRect
 var _description: Label
 var _menu_column: VBoxContainer
+var _layers: Array = []
+var _bell: AnimatedSprite2D
+var _echidna: AnimatedSprite2D
 
 
 func _ready() -> void:
@@ -48,75 +56,160 @@ func _ready() -> void:
 	AudioDirector.reset_combat()
 	AudioDirector.duck(0.0, 0.5)
 	Crosshair.arrow()
-	var camera := Camera2D.new()
-	add_child(camera)
-	_build_scenery()
-	_build_art()
+	_build_scene()
 	_build_ui()
 	_refresh()
 
 
-# ------------------------------------------------------------------ scenery
+# ------------------------------------------------------------------ the picture
 
-func _build_scenery() -> void:
-	var sky := ColorRect.new()
-	sky.color = Color(0.03, 0.02, 0.05)
-	sky.size = Vector2(3000, 2000)
-	sky.position = Vector2(-1500, -1000)
-	add_child(sky)
-	_far = _backdrop("res://assets/fx/far_fog.png", Color(0.42, 0.4, 0.56, 0.8), 1.35)
-	_mid = _backdrop("res://assets/fx/mid_ruins.png", Color(0.28, 0.26, 0.38), 1.2)
+## A layer of the picture that drifts `drift` pixels side to side, slowly.
+func _layer(layer_name: String, drift: float) -> Node2D:
+	var layer := Node2D.new()
+	layer.name = layer_name
+	_scene_root.add_child(layer)
+	_layers.append([layer, drift])
+	return layer
+
+
+var _scene_root: Node2D
+
+
+func _build_scene() -> void:
+	var scene := CanvasLayer.new()
+	scene.name = "Scene"
+	scene.layer = 0
+	add_child(scene)
+	_scene_root = Node2D.new()
+	_scene_root.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	scene.add_child(_scene_root)
+	var night := ColorRect.new()
+	night.color = Color("0b0a16")
+	night.size = VIEW * 2.0
+	_scene_root.add_child(night)
+
+	# The sky and the moon
+	var sky := _layer("Sky", 6.0)
+	_painting(sky, "sky", Vector2(-80, -40), 2.1, false)
+	var stars := StoryNodes.Stars.new()
+	stars.area = Rect2(0, 0, VIEW.x / 2.0, 150)
+	stars.count = 70
+	stars.scale = Vector2(2, 2)
+	sky.add_child(stars)
+	# The monastery on its crag, far off between the words and the shrine
+	var hills := _layer("Hills", 12.0)
+	_painting(hills, "hills", Vector2(150, 40), 2.0, false).modulate = Color(0.95, 0.95, 1.1)
+	# The woods, nearer and darker
+	var woods := _layer("Woods", 22.0)
+	_painting(woods, "woods", Vector2(-160, 150), 2.2, false).modulate = Color(0.5, 0.52, 0.7)
+	# Mist lying in the valley
+	_scene_root.add_child(_band(Rect2(0, 430, VIEW.x, 120), Color(0.42, 0.44, 0.62, 0.0), Color(0.42, 0.44, 0.62, 0.35)))
+
+	# The shrine: a ruined arch, the cracked bell hanging in it, lantern light
+	var shrine := _layer("Shrine", 0.0)
+	var ground_y := 560.0
+	var arch := SurfaceArt.sprite(shrine, "hk_arch", Vector2(900, ground_y), 2.0)
+	arch.modulate = Color(0.62, 0.62, 0.8)
+	for x in [722.0, 1078.0]:
+		SurfaceArt.sprite(shrine, "hk_pillar", Vector2(x, ground_y + 6), 1.6).modulate = Color(0.48, 0.48, 0.66)
+	StoryPaint.glow(shrine, Vector2(900, 400), 170, Color(1.0, 0.78, 0.46, 0.22), 0.9)
+	_bell = SurfaceArt.animated(shrine, "great_bell", Vector2(900, 412), 1.2, 2.0)
+	_bell.modulate = Color(1.0, 0.92, 0.78)
+	# Kindled bowls either side of the arch, candles on the stones
+	for x in [800.0, 1000.0]:
+		SurfaceArt.animated(shrine, "kept_flame", Vector2(x, ground_y), 6.0, 1.0)
+		StoryPaint.glow(shrine, Vector2(x, ground_y - 30), 60, Color(1.0, 0.7, 0.4, 0.3), 1.0)
+	SurfaceArt.sprite(shrine, "hk_crystals", Vector2(1110, ground_y + 4), 1.4).modulate = Color(0.6, 0.75, 1.0)
+	# Echidna, small before it, her lantern lit
+	_echidna = AnimatedSprite2D.new()
+	_echidna.sprite_frames = load("res://assets/sprites/Echidna/echidna_frames.tres")
+	_echidna.animation = &"idle"
+	_echidna.play()
+	_echidna.flip_h = false
+	_echidna.scale = Vector2(1.3, 1.3)
+	_echidna.offset = Vector2(0, -32)
+	_echidna.position = Vector2(838, ground_y + 2)
+	shrine.add_child(_echidna)
+	var lantern := SurfaceArt.animated(shrine, "desk_lantern", Vector2(866, ground_y - 22), 6.0, 0.9)
+	lantern.name = "Lantern"
+	StoryPaint.glow(shrine, Vector2(866, ground_y - 34), 44, Color(1.0, 0.8, 0.5, 0.45), 1.0)
+	# Light falling through the arch
 	var shaft := LightShaft.new()
-	shaft.position = Vector2(120, -340)
-	shaft.length = 620.0
-	shaft.width_top = 60.0
-	shaft.width_bottom = 220.0
-	shaft.angle_deg = -10.0
-	shaft.intensity = 0.32
-	add_child(shaft)
+	shaft.position = Vector2(960, -40)
+	shaft.length = 600.0
+	shaft.width_top = 50.0
+	shaft.width_bottom = 230.0
+	shaft.angle_deg = 12.0
+	shaft.intensity = 0.26
+	_scene_root.add_child(shaft)
 
+	# The near ground: rocks and long grass right across, dark as silhouettes
+	var near := _layer("Near", 0.0)
+	var ground := ColorRect.new()
+	ground.color = Color("0d0b14")
+	ground.position = Vector2(0, ground_y)
+	ground.size = Vector2(VIEW.x * 2.0, 200)
+	near.add_child(ground)
+	# (low, at the edges only: they frame the shrine and never hide it)
+	for spec in [[Vector2(80, ground_y + 64), 2.0], [Vector2(1240, ground_y + 58), 2.0]]:
+		SurfaceArt.sprite(near, "hk_rocks", spec[0], spec[1]).modulate = Color(0.16, 0.15, 0.24)
+	for x in range(0, int(VIEW.x * 2.0), 400):
+		SurfaceArt.sprite(near, "hk_grass", Vector2(x + 300, VIEW.y + 14), 2.0).modulate = Color(0.12, 0.12, 0.2)
+	# The left side falls into shadow, so the words read on it
+	_scene_root.add_child(_band_h(Rect2(0, 0, 640, VIEW.y * 2.0), Color(0.03, 0.02, 0.06, 0.78), Color(0.03, 0.02, 0.06, 0.0)))
 
-## Keep the ruined-belfry background, faint wing and drifting snow.
-func _build_art() -> void:
-	var art := CanvasLayer.new()
-	art.layer = 1
-	add_child(art)
-	var root := Control.new()
-	root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	art.add_child(root)
-	# The moth's wing, vast and faint, behind where the name sits
-	var wing := TextureRect.new()
-	wing.texture = SurfaceArt.tex("hk_moth", 0)
-	wing.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	wing.size = Vector2(200, 120) * 4.6
-	wing.position = Vector2(470, -150)
-	wing.modulate = Color(0.55, 0.65, 0.95, 0.16)
-	wing.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	root.add_child(wing)
-	_wing = wing
-	# Snow, slow, over everything
-	var snow := StoryPaint.snow(root, Rect2(-100, -100, 1352, 900), 80)
+	# Snow over everything, and warm motes round the shrine
+	var air := Control.new()
+	air.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	scene.add_child(air)
+	var snow := StoryPaint.snow(air, Rect2(-100, -100, VIEW.x + 300, VIEW.y + 200), 80)
 	snow.speed_scale = 0.35
-	snow.modulate.a = 0.7
+	snow.modulate.a = 0.6
+	StoryPaint.motes(_scene_root, Rect2(720, 330, 380, 230), Color(1.0, 0.8, 0.5, 0.45), 26)
 
 
-func _backdrop(path: String, tint: Color, scale_by: float) -> Sprite2D:
-	var sprite := Sprite2D.new()
-	sprite.texture = load(path)
-	sprite.modulate = tint
-	sprite.scale = Vector2.ONE * scale_by
-	add_child(sprite)
-	return sprite
+## One of the surface pack's 640x320 paintings, scaled, from `at`.
+func _painting(parent: Node2D, name_: String, at: Vector2, scale_by: float, flip: bool) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = SurfaceArt.BACKDROPS[name_]
+	s.centered = false
+	s.position = at
+	s.scale = Vector2(scale_by, scale_by)
+	s.flip_h = flip
+	parent.add_child(s)
+	return s
+
+
+## A vertical fade from `top` to `bottom` over `rect`.
+func _band(rect: Rect2, top: Color, bottom: Color) -> TextureRect:
+	var gradient := Gradient.new()
+	gradient.colors = PackedColorArray([top, bottom])
+	var tex := GradientTexture2D.new()
+	tex.gradient = gradient
+	tex.fill_from = Vector2(0, 0)
+	tex.fill_to = Vector2(0, 1)
+	var t := TextureRect.new()
+	t.texture = tex
+	t.position = rect.position
+	t.size = rect.size
+	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return t
+
+
+## A horizontal fade from `left` to `right` over `rect`.
+func _band_h(rect: Rect2, left: Color, right: Color) -> TextureRect:
+	var t := _band(rect, left, right)
+	(t.texture as GradientTexture2D).fill_to = Vector2(1, 0)
+	return t
 
 
 func _process(delta: float) -> void:
 	_time += delta
-	# A slow drift, as if the fog were breathing
-	_far.position = Vector2(sin(_time * 0.05) * 30.0, -40.0 + sin(_time * 0.08) * 6.0)
-	_mid.position = Vector2(sin(_time * 0.05) * 60.0, 10.0)
-	if _wing:
-		_wing.position.y = -150.0 + sin(_time * 0.4) * 6.0
+	# The distance breathes, very slowly
+	for entry in _layers:
+		entry[0].position.x = sin(_time * 0.05) * entry[1]
+	if _bell:
+		_bell.rotation = sin(_time * 0.6) * 0.03
 
 
 # ------------------------------------------------------------------ menu
@@ -130,53 +223,44 @@ func _build_ui() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_PASS
 	layer.add_child(root)
 
-	var chrome := AERO_CHROME.new()
-	chrome.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.add_child(chrome)
 	var title_block := TextureRect.new()
 	title_block.name = "TitleBlock"
 	title_block.texture = preload("res://assets/ui/menu/aero_title.png")
 	title_block.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	title_block.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	title_block.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	# Centre the visible logo pixels (including its transparent padding)
-	# on the 485px options column and the header band at y=100.
-	title_block.position = Vector2(140, 14)
-	title_block.size = Vector2(320, 160)
+	title_block.position = Vector2(64, 40)
+	title_block.size = Vector2(400, 200)
 	title_block.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(title_block)
-	var controls := _label("↑ ↓  SELECT     ENTER  CONFIRM\nMOUSE  SELECT     ESC  BACK", FONT, 20, Color("c6e1df"))
-	controls.position = Vector2(688, 38)
-	controls.size = Vector2(424, 60)
-	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	root.add_child(controls)
-	var mode := _label("BEGIN YOUR JOURNEY", FONT, 18, Color("b7c5d2"))
-	mode.position = Vector2(68, 187)
-	root.add_child(mode)
-	_box_art = TURNING_BOX.new()
+	# The shrine, kept clear of the menu (the picture's focus)
+	_box_art = TextureRect.new()
 	_box_art.name = "BoxArt"
-	_box_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_box_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_box_art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_box_art.position = BOX_HOME
-	_box_art.size = Vector2(256, 384)
+	_box_art.position = Vector2(700, 300)
+	_box_art.size = Vector2(420, 270)
 	_box_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_box_art)
-	_description = _label("", FONT, 22, Color("dfedf0"))
-	_description.position = Vector2(68, 598)
-	_description.size = Vector2(1036, 32)
+	var version := _label(VERSION, MENU_FONT, 18, Color(INK, 0.55))
+
+	version.position = Vector2(VIEW.x - 200, VIEW.y - 46)
+	version.size = Vector2(168, 28)
+	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	root.add_child(version)
+	_description = _label("", Fonts.BOOK_ITALIC, 18, Color(INK, 0.7))
+	_description.position = Vector2(96, VIEW.y - 54)
+	_description.size = Vector2(620, 28)
 	_description.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(_description)
 	var column := VBoxContainer.new()
 	_menu_column = column
 	column.name = "MenuColumn"
-	column.position = Vector2(60, 218)
-	column.size = Vector2(485, 0)
+	column.position = Vector2(84, 262)
+	column.size = Vector2(440, 0)
 	column.add_theme_constant_override("separation", 10)
 	root.add_child(column)
 
 	_menu = VBoxContainer.new()
-	_menu.add_theme_constant_override("separation", 8)
+	_menu.add_theme_constant_override("separation", 2)
 	column.add_child(_menu)
 	continue_button = _button("Continue", _on_continue)
 	_menu.add_child(continue_button)
@@ -184,11 +268,12 @@ func _build_ui() -> void:
 	_menu.add_child(new_button)
 	tutorial_button = _button("Choose a Level", _on_tutorial)
 	_menu.add_child(tutorial_button)
+	daily_button = _button("Daily Puzzle", _on_daily)
+	_menu.add_child(daily_button)
 	_menu.add_child(_button("Settings & Controls", func(): _show_settings(true)))
 	_menu.add_child(_button("Quit", func(): get_tree().quit()))
-	_progress = _label("", Fonts.STORY, 20, Color("d4c8b0"))
-	_progress.custom_minimum_size = Vector2(485, 42)
-	_progress.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_progress = _label("", MENU_FONT, 18, Color(GOLD, 0.75))
+	_progress.custom_minimum_size = Vector2(440, 30)
 	_progress.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_menu.add_child(_progress)
 
@@ -197,16 +282,16 @@ func _build_ui() -> void:
 	# Long Stair
 	_parts = VBoxContainer.new()
 	_parts.visible = false
-	_parts.add_theme_constant_override("separation", 6)
+	_parts.add_theme_constant_override("separation", 0)
 	column.add_child(_parts)
-	_parts.add_child(_label("The Novices' Way", FONT, 16, Color("c9a24a")))
+	_parts.add_child(_label("The Novices' Way", FONT, 16, GOLD))
 	part_1_button = _button("Level 1 · The Passage (tutorial)", _on_part_1)
 	_parts.add_child(part_1_button)
 	part_2_button = _button("Level 2 · The Belfry", func(): _jump_to(CHAPTER))
 	_parts.add_child(part_2_button)
 	part_3_button = _button("Level 3 · The Observatory", func(): _jump_to(CHAPTER_2))
 	_parts.add_child(part_3_button)
-	_parts.add_child(_label("After it", FONT, 16, Color("c9a24a")))
+	_parts.add_child(_label("After it", FONT, 16, GOLD))
 	landing_button = _button("The Long Stair · the four wings", func(): _jump_to(Journey.LANDING))
 	_parts.add_child(landing_button)
 	if Journey.admin_unlock:
@@ -215,9 +300,8 @@ func _build_ui() -> void:
 		_build_admin(column)
 	_parts.add_child(_button("Back", func(): _show_parts(false)))
 	for child in _parts.get_children():
-		if child is Button:
-			child.custom_minimum_size.y = 44
-			child.label_size = 22
+		if child is MenuWord:
+			child.label_size = 24
 
 	_settings = VBoxContainer.new()
 	_settings.visible = false
@@ -229,18 +313,12 @@ func _build_ui() -> void:
 	_settings.add_child(_button("Back", func(): _show_settings(false)))
 	column.add_child(_settings)
 
-	var foot := _label("F11 fullscreen", FONT, 8, Color("6e6474"))
-	foot.position = Vector2(906, 145)
-	foot.size = Vector2(205, 24)
-	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	root.add_child(foot)
-
 
 func _label(text: String, font: Font, size: int, color: Color) -> Label:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font)
-	l.add_theme_font_size_override("font_size", maxi(size, 18))
+	l.add_theme_font_size_override("font_size", maxi(size, 16))
 	l.add_theme_color_override("font_color", color)
 	l.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	l.add_theme_constant_override("outline_size", 4)
@@ -248,11 +326,8 @@ func _label(text: String, font: Font, size: int, color: Color) -> Label:
 
 
 func _button(text: String, on_press: Callable) -> Button:
-	var b := AERO_BUTTON.new()
+	var b := MenuWord.new()
 	b.text = text
-	b.custom_minimum_size = Vector2(485, 52)
-	b.add_theme_font_override("font", FONT)
-	b.add_theme_font_size_override("font_size", 18)
 	b.pressed.connect(func(): Sfx.play("ui_click"); on_press.call())
 	b.mouse_entered.connect(func():
 		if not b.disabled:
@@ -260,6 +335,47 @@ func _button(text: String, on_press: Callable) -> Button:
 			_describe(b.text))
 	b.focus_entered.connect(func(): _describe(b.text))
 	return b
+
+
+## A menu word: no box, parchment ink; the chosen word turns gold and a small
+## gold diamond appears beside it (like a painted title screen's menu).
+class MenuWord extends Button:
+	var label_size := 32:
+		set(value):
+			label_size = value
+			add_theme_font_size_override("font_size", value)
+			custom_minimum_size.y = value + 14
+
+	func _init() -> void:
+		flat = true
+		alignment = HORIZONTAL_ALIGNMENT_LEFT
+		focus_mode = Control.FOCUS_ALL
+		custom_minimum_size = Vector2(440, label_size + 14)
+		add_theme_font_override("font", MENU_FONT)
+		add_theme_font_size_override("font_size", label_size)
+		var empty := StyleBoxEmpty.new()
+		empty.content_margin_left = 34
+		for state in ["normal", "hover", "pressed", "focus", "disabled", "hover_pressed"]:
+			add_theme_stylebox_override(state, empty)
+		add_theme_color_override("font_color", INK)
+		add_theme_color_override("font_hover_color", GOLD)
+		add_theme_color_override("font_focus_color", GOLD)
+		add_theme_color_override("font_pressed_color", GOLD)
+		add_theme_color_override("font_hover_pressed_color", GOLD)
+		add_theme_color_override("font_disabled_color", Color(INK, 0.32))
+		add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		add_theme_constant_override("outline_size", 5)
+		focus_entered.connect(queue_redraw)
+		focus_exited.connect(queue_redraw)
+
+	func _draw() -> void:
+		if not has_focus() or disabled:
+			return
+		var y := size.y / 2.0
+		var c := Vector2(16, y)
+		draw_colored_polygon(PackedVector2Array([c + Vector2(0, -7), c + Vector2(7, 0), c + Vector2(0, 7), c + Vector2(-7, 0)]), Color(0, 0, 0, 0.6))
+		draw_colored_polygon(PackedVector2Array([c + Vector2(0, -5), c + Vector2(5, 0), c + Vector2(0, 5), c + Vector2(-5, 0)]), GOLD)
+		draw_line(Vector2(34, size.y - 6), Vector2(34 + get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, get_theme_font_size("font_size")).x, size.y - 6), Color(GOLD, 0.45), 1.0)
 
 
 func _show_settings(show: bool) -> void:
@@ -395,8 +511,8 @@ func _build_admin(column: VBoxContainer) -> void:
 	_admin.add_child(grid)
 	for spec in ADMIN_ROOMS:
 		var b := _button(spec[0], _admin_jump.bind(spec[1], spec[2]))
-		b.custom_minimum_size = Vector2(296, 36)
-		b.label_size = 17
+		b.custom_minimum_size = Vector2(300, 30)
+		b.label_size = 18
 		grid.add_child(b)
 	_admin.add_child(_button("Back", func(): _show_admin(false)))
 
@@ -431,6 +547,7 @@ func _describe(option: String) -> void:
 		"Continue": _description.text = "Return to your last shrine and continue Echidna's journey."
 		"New Game", "Press again: start over": _description.text = "A frozen night. A silent bell. Begin Echidna's story."
 		"Choose a Level": _description.text = "Revisit a lesson or enter the chapters you have discovered."
+		"Daily Puzzle": _description.text = "A new puzzle every day, the same for everyone. How many ways can you find?"
 		"Settings & Controls": _description.text = "Adjust sound, display, controls and accessibility."
 		"Quit": _description.text = "Leave the belfry. Your saved journey will be waiting."
 		"Back": _description.text = "Return to the previous menu."
@@ -448,3 +565,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			return
 		get_viewport().set_input_as_handled()
+
+
+## The Daily Puzzle screen (a new puzzle every day, a streak, a board).
+func _on_daily() -> void:
+	var menu := DailyMenu.open(self)
+	menu.closed.connect(func(): daily_button.grab_focus())

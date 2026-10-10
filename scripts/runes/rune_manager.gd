@@ -55,8 +55,16 @@ static func get_for(tree: SceneTree) -> RuneManager:
 	return tree.get_first_node_in_group("rune_manager") as RuneManager if tree else null
 
 
+## Words lent by a daily puzzle (see DailyKit): when set, only these are
+## known, whatever the story has taught, so everyone plays the same puzzle
+## with the same vocabulary.
+static var kit_override := PackedStringArray()
+
+
 ## Whether the player can use this fragment yet.
 static func knows(id: StringName, tree: SceneTree = null) -> bool:
+	if not kit_override.is_empty():
+		return kit_override.has(String(id))
 	if GameState.has_flag("rune.frag.%s" % id):
 		return true
 	var manager := get_for(tree) if tree else null

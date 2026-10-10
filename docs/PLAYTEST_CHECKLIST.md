@@ -625,3 +625,19 @@ counters: nobody has heard them or fought the creatures.
       prompt says "Running: switch off to edit" while it runs; locked slots show a padlock and LOCKED; the Tab list
       repeats the rules and has an Inscribe button; Esc, Echidna, Runes, "How rune cubes work" plays the tour again.
 - [ ] Title: Continue goes to the Landing after the Observatory; the progress line counts bells; the Long Stair is in the parts list.
+
+## Daily puzzle (2026-10-10, needs a human)
+
+- [ ] Title: "Daily Puzzle" sits after "Choose a Level"; all six words fit above the description.
+- [ ] Daily menu shows today's date and difficulty, streak, 14-day strip, board and the buttons; Esc closes it;
+      with a pad, focus lands on "Play today's puzzle" and the arrows reach every button.
+- [ ] Play today: 3 to 5 rooms and a bell hall; every room can be solved with more than one sentence; dying
+      reloads the same puzzle at the furthest room; Reset Room works; hints work and cost points.
+- [ ] End card: stars, score, the deductions, "the ways through", streak, share code; Copy puts
+      "Sealed Belfry ..." text on the clipboard; "Try it again" starts practice of the same day.
+- [ ] A second run of the same day is practice and does not change the streak.
+- [ ] Add a friend: paste a code from another install; the row appears on the board; a typo is refused.
+- [ ] Random trial: a different level each press; difficulty button cycles Gentle, Steady, Hard, Grand.
+- [ ] Back in the story afterwards: Continue, runes and abilities are exactly as they were.
+- [ ] Handheld (640x480): the menu fits, no typing is asked for, friends.txt is read, a 1970 clock says why
+      the daily is closed but practice still works.

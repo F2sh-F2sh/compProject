@@ -1401,6 +1401,100 @@ stay calm), and targets that can be found without hints (with the hints slowed d
 - **Not checked by anyone yet:** how the fonts and UI feel on a real screen, creature difficulty, whether the
   hint waits feel fair, the sound mix (beds, death, stone menus), and each level's timing with creatures in it.
 
+## A handheld build: the Anbernic RG35XX through PortMaster (2026-10-09)
+
+Asked for: a version for the user's Anbernic RG35XX (an H700 model: Plus / H / SP / 2024, on stock firmware).
+
+- **The route:** PortMaster's stock `godot_4.7.1` runtime (a 4.7.2 pck loads on it: same pack format)
+  drawn through `weston_pkg_0.2` with the Compatibility renderer (`opengl3_es`), as the community ports
+  of Dome Keeper and Pathogenic do on the RG35XX H. **Anbernic's stock firmware can't run it** (no
+  OpenGL display for Weston; the stock-OS mod dropped PortMaster): it needs Knulli or muOS.
+- **Package** in `port/` (launcher `Sealed Belfry.sh`, `sealedbelfry.gptk` mapping nothing so the game
+  reads the pad itself, `port.json`, `gameinfo.xml`, `README.md` with install steps and controls,
+  licences); `tools/build_handheld_port.sh` exports the pck with the new "Handheld (Linux arm64)" preset
+  (ETC2/ASTC, excludes tests/tools/docs) and assembles `builds/handheld/ports/` and a zip (8.4 MB).
+  The launcher's controller renumbering is adapted from those ports (MIT, credited).
+- **Handheld mode** (`Settings.handheld`, from `--handheld` after `--`): Low graphics on the first
+  start, pad prompts from the start, the mouse hidden, Rune Carry on L2 (most H700 models have no stick
+  to click for R3; sprint keeps L1), text under 14 px raised to 16. For every controller: with no right
+  stick, the d-pad aims fireballs up, down or diagonally.
+- **Checked:** every level, the title, the rune wheel and the pause menu drawn by the Compatibility
+  renderer at 640×480 on the PC (no shader errors); the exported pck boots on its own with the
+  handheld's flags; wing `handheld` (4 checks + screenshots); the launcher passes `bash -n`.
+- **Not checked (needs the device):** that it starts under Knulli/muOS, the frame rate on the Mali-G31
+  (the reference ports run about 30 fps), the buttons' layout, sound, and whether the text is readable.
+
+## Prompts follow the device, live (2026-10-09)
+
+Asked for: every on-screen key name switches to the controller's button the moment a controller is used
+(for example the fire slot's "LMB"), and back when the keyboard or mouse is used.
+
+- `InputLabels.note_event()` flips on a pad button or a pushed stick/trigger, and back on a key, a click
+  or a real mouse move (over 4 px; a twitch doesn't count). `InputLabels.watch(node, refresh)` re-runs
+  a prompt's text for as long as the node exists; `refresh_all()` runs them on every switch.
+- Watched: tutorial signs (the plate resizes), interact prompts, the kindle prompt, the spell slots'
+  keys (from the real bindings now, not the scene's "Q" / "LMB"), the death screen, page footers, reel
+  hints, Nan's cottage hints, the rune screen's rules ("B: done" / "Esc: done"), the rune overview,
+  the room-broken banner, the pause menu's card and controls list, the UI tours (templates filled in
+  as each card shows; "A: next · B: close" on a pad) and the settings key list. Toasts and title cards
+  that last a few seconds keep the name they were shown with. The rune HUD and Lowbell already redraw
+  every frame.
+- Tests: wing `prompts` (12: a real pad press, key press and mouse move through the input system);
+  all 8 suites pass (2,256).
+
+## Surface, scale, floating props, a painted title, and the status page (2026-10-09)
+
+Asked for: polish the surface after Nan (temp art, the words), fix floating candles and props in the
+dungeons, fix the scale of Nan's house, a title screen like Kena's, and remove the circles round
+Echidna on the status page.
+
+- **The pilgrim road** (`witch_prologue.gd`, APPROACH): rebuilt in the surface pack's art like Lowbell:
+  parallax sky with the moon, the monastery on its crag, bare woods; graves, a signpost and a road lamp;
+  a pixel winch (`tools/generate_surface_props.gd`: `bridge_winch`, `rope`, `rope_ladder`) with a rope
+  that follows the bridge as it lowers; grassy rock steps instead of dungeon bricks; the Belfry's outer
+  gate frozen shut. The code-drawn circle winch, rope line and bar are gone; the camera frames the road
+  (floor 72 px above the bottom, as in Lowbell) instead of half a screen of dirt. The objective panel
+  and heading use the dungeon UI and fonts. The words follow the story: the Choir's pilgrim road, the
+  Hush thicker up the mountain, the gate "sealed by the Choir until the bell is whole", four word-hollows
+  in the seal. The well's drawn rope ladder is a sprite and its camera sits higher.
+- **Nan's cottage at Echidna's scale:** furniture at 1x (a waist-high table, a shelf half again her
+  height), doors 1.8x, the panelling at her waist (`cottage_interior.gd`), a closer camera (2.6), the
+  floating herbs removed.
+- **Floating candles** had one cause: `scripts/fx/world_layout.gd` measured a region sprite's whole
+  texture, lifting every checkpoint candle (and its flame) 18 px. It now measures the drawn region and
+  leaves checkpoint candles where their checkpoint stands. Wing `floating` checks every level (10 levels,
+  nothing floats); the polish suite's floor audit measures regions too.
+- **Title screen** (`title_screen.gd`): a painted night scene (the moon, the monastery, the woods, a ruined
+  shrine with the cracked bell, flame bowls, Echidna with her lantern, light through the arch, snow),
+  the glass logo top left, the menu as plain words with a gold diamond on the chosen one (`MenuWord`),
+  the version bottom right. Same buttons and flow.
+- **Status page:** the ring of twelve empty slots (and the red dot) is gone; Echidna stands in her
+  lantern's glow.
+- **Title cards** sit higher (the top 40% of the screen), clear of the tutorial signs.
+- Tests: all suites pass except four polish checks that also fail on Fisch's commit (villagers drawn at
+  1x; Lowbell scales them to Echidna on purpose). Wing `surface_look` saves screenshots.
+
+## Daily puzzle and generated levels (2026-10-10)
+
+Built for the Congressional App Challenge problem statement (critical thinking and problem solving). Full
+guide: `docs/DAILY_PUZZLE.md`.
+
+- **Generator** (`scripts/daily/`): own RNG and calendar (`DailyRng`), word tiers (`DailyKit`), three puzzle
+  modules (Gust Alley, Dead Weight, Updraft), an oracle that needs two or more working sentences
+  (`DailyOracle`), seeded composition with salted retries and hand-checked fallbacks (`DailyGenerator`), and a
+  runtime port of the builder helpers (`RoomKit`). `DailyRoot extends ChapterRoot`.
+- **Daily Puzzle** on the title screen (`DailyMenu`): today's puzzle by local date, difficulty by weekday,
+  streak with one free mend a week, a 14-day strip, personal bests, a board of friends (pasted share codes or
+  `user://friends.txt` on the handheld), practice days with arrows and a **Random trial** with its own seed.
+- **End card** (`DailyComplete`): stars, score and what was taken off it, "the ways through" (how many
+  sentences could clear each room and which was found), streak and a checksummed share code (`SB1-...`).
+- **Isolation:** `DailyRun.apply/restore` snapshot and put back flags, checkpoints, abilities, calm creatures
+  and `RuneManager.kit_override`; nothing touches the story save.
+- **Tests:** `tests/daily_suite.gd` (rng, calendar, kit, generator 1,600 specs, simulation 140/140 through
+  the real rune cubes, score, code, store, persistence, fairness, cards, level, look). Note: `run_tests.gd`
+  must load `DailyStore` at run time (it reaches autoloads that are not up while the script compiles).
+- **Not built:** modules 4-7, solution codex, medals, Sunday Grand board, online board.
+
 ## Known limitations and decisions
 
 - The title screen is the main scene. Continue goes to the latest shrine or lesson;
