@@ -80,6 +80,11 @@ static func needed(run: int) -> float:
 
 
 func plans(params: Dictionary, kit: PackedStringArray) -> Array:
+	if not DailyVerified.bypass: return DailyVerified.plans(id, params, kit)
+	return raw_plans(params, kit)
+
+
+func raw_plans(params: Dictionary, kit: PackedStringArray) -> Array:
 	var out: Array = []
 	var way := heading(params)
 	for modifier in PUSH_MODIFIERS:

@@ -16,6 +16,8 @@ extends DailyModule
 ##   lock    0: the form and modifier are open (find Lift); 1: Lift is carved
 ##           too, only the modifier is open (the gentlest)
 ##   guided  chalk waymarks on the walls (off at Grand and above)
+##   profile 0: level ridge; 1: descending steps; 2: a lower landing.
+##           The first rise and its wind demand are identical in all three.
 ##
 ## Which sentences are claimed (VERIFIED) was measured in the real physics.
 
@@ -53,6 +55,11 @@ func fallback(_tier: int) -> Dictionary:
 
 
 func plans(params: Dictionary, kit: PackedStringArray) -> Array:
+	if not DailyVerified.bypass: return DailyVerified.plans(id, params, kit)
+	return raw_plans(params, kit)
+
+
+func raw_plans(params: Dictionary, kit: PackedStringArray) -> Array:
 	var out: Array = []
 	var layout := "%d/%d" % [params["rows"], params["dist"]]
 	if not VERIFIED.has(layout) or not kit.has("wind") or not kit.has("lift"):
@@ -98,15 +105,19 @@ func build(k: RoomKit, room: Room, x0: int, x1: int, params: Dictionary, _words:
 	var dist: int = params["dist"]
 	var rows: int = params["rows"]
 	var width: int = params["width"]
+	var profile := int(params.get("profile", 0))
 	var cube_col := x0 + 4
 	var wall_c0 := cube_col + dist
 	var top_row := 8 - rows
 	# The wall: stone down to the floor, a cap on top (walkable)
 	for x in range(wall_c0, wall_c0 + width):
+		var cap := top_row
+		if profile == 1: cap += mini(x - wall_c0, 2)
+		elif profile == 2 and x > wall_c0: cap += 1
 		k.ground.erase_cell(Vector2i(x, 8))
-		for y in range(top_row + 1, 9):
+		for y in range(cap + 1, 9):
 			k.solid(x, y)
-		k.floor_tile(x, top_row)
+		k.floor_tile(x, cap)
 	if params.get("guided", true):
 		k.waymarks(room, x0, x1)
 	var carved := int(params.get("lock", 0)) == 1
@@ -115,7 +126,7 @@ func build(k: RoomKit, room: Room, x0: int, x1: int, params: Dictionary, _words:
 		"locked_slots": RoomKit.LOCK_ESSENCE | RoomKit.LOCK_DIRECTION | (RoomKit.LOCK_FORM if carved else 0)})
 	var top_y := top_row * RoomKit.T + 22.0
 	var area := Rect2(wall_c0 * RoomKit.T, top_y - 90.0, width * RoomKit.T, 90.0)
-	k.guide(room, objective)
+	k.guide(room, "Ride the wind onto the high step." if profile == 1 else ("Ride the wind onto the landing." if profile == 2 else objective))
 	k.step(room, "The wind rises", ObjectiveStep.Condition.POWERED, cube)
 	k.step(room, "On top of the wall", ObjectiveStep.Condition.REACHED, null, {"area": area})
 	var lines := [

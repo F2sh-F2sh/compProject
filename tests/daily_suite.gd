@@ -32,6 +32,7 @@ func seconds(s: float) -> void:
 
 func run_suite(filter: String) -> void:
 	var table := {
+		"endless": scenario_endless,
 		"rng": scenario_rng,
 		"calendar": scenario_calendar,
 		"kit": scenario_kit,
@@ -50,9 +51,36 @@ func run_suite(filter: String) -> void:
 		"assembly": scenario_assembly,
 		"difficulty": scenario_difficulty,
 		"sweep_up": scenario_sweep_up,
+		"module_probe": scenario_module_probe,
+		"render_procgen": scenario_render_procgen,
+		"verified_fresh": scenario_verified_fresh,
+		"new_modules": scenario_new_modules,
+		"chains": scenario_chains,
+		"endless_long": scenario_endless_long,
+		"calibration": scenario_calibration,
+		"endless_persistence": scenario_endless_persistence,
+		"cube_help": scenario_cube_help,
+		"challenge_rules": scenario_challenge_rules,
+		"grand_cheese": scenario_grand_cheese,
+		"grand_corpus": scenario_grand_corpus,
+		"scale_audit": scenario_scale_audit,
+		"all_cheese": scenario_all_cheese,
+		"reset_solutions": scenario_reset_solutions,
+		"all_corpus": scenario_all_corpus,
+		"combo_resets": scenario_combo_resets,
+		"impact_reset": scenario_impact_reset,
+		"portal_handoff": scenario_portal_handoff,
+		"placement_resets": scenario_placement_resets,
+		"unlocked_combos": scenario_unlocked_combos,
+		"portal_limits": scenario_portal_limits,
+		"portal_cargo": scenario_portal_cargo,
+		"portal_reset_spam": scenario_portal_reset_spam,
+		"stage_reset_spam": scenario_stage_reset_spam,
+		"variety": scenario_variety,
+		"gentle_profiles": scenario_gentle_profiles,
 	}
 	for key in table:
-		if (filter == "" and key != "sweep" and key != "look" and key != "sweep_up") or filter == key:
+		if (filter == "" and key != "sweep" and key != "look" and key != "sweep_up" and key != "module_probe" and key != "endless_long" and key != "render_procgen" and key != "grand_corpus" and key != "scale_audit" and key != "all_corpus" and key != "unlocked_combos") or filter == key:
 			await table[key].call()
 	await leave()
 	completed = true
@@ -81,6 +109,1090 @@ func leave() -> void:
 
 
 # ------------------------------------------------------------------ pure logic
+
+func _grand_fixture(second_id: String, second_params: Dictionary) -> Dictionary:
+	return {"reuse": true, "beats": [
+		{"module": "kindling", "params": {"count": 1, "high": false, "lock": 1, "guided": false}},
+		{"module": second_id, "params": second_params}]}
+
+
+func _open_grand_fixture(params: Dictionary) -> void:
+	DailyRun.start("trial", 51515, 0, 4, 4)
+	DailyRun.spec_override = spec_for(params, 4, "chain")
+	await open(DailyRun.SCENE)
+	player.controls_locked = false
+
+
+func _walk_to(x: float, limit := 300, sprint := false) -> void:
+	var direction := "move_right" if x > player.position.x else "move_left"
+	Input.action_press(direction)
+	if sprint: Input.action_press("sprint")
+	for i in limit:
+		await frames(1)
+		if player.is_dead or absf(player.position.x - x) < 4:
+			break
+		if (direction == "move_right" and player.position.x >= x) or (direction == "move_left" and player.position.x <= x): break
+	Input.action_release(direction)
+	Input.action_release("sprint")
+	await frames(8)
+
+
+func _jump_right(charge := false, duration := 80) -> void:
+	if charge:
+		Input.action_press("crouch")
+		await frames(90)
+	Input.action_press("jump")
+	Input.action_press("move_right")
+	Input.action_press("sprint")
+	await frames(3)
+	Input.action_release("jump")
+	Input.action_release("crouch")
+	await frames(duration)
+	Input.action_release("move_right")
+	Input.action_release("sprint")
+	await frames(8)
+
+
+## Teleports only establish an attack's starting fixture; movement, jumps,
+## carrying and drops below use the actual player/physics and carrier API.
+func scenario_grand_cheese() -> void:
+	print("SCENARIO Grand adversarial jumps, cube steps and false milestones")
+	var params := _grand_fixture("dark_hall", {"gaps": 1, "guided": false})
+	await _open_grand_fixture(params)
+	var part: Dictionary = lvl.pieces[0]
+	var cube: RuneCube = part["beats"][0]["cubes"].values()[0]
+	var gate: PortcullisGate = part["beats"][0]["gate"]
+	var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+	player.teleport_to(cube.global_position + Vector2(-28, -2))
+	await frames(8)
+	player.animated_sprite.flip_h = false
+	check("attack picks up the real shared cube", carrier.try_pick_up() == "")
+	await _walk_to(gate.position.x - 68)
+	check("attack can legally place a cube beside the unsolved gate", carrier.try_place() == "")
+	await frames(6)
+	Input.action_press("jump")
+	await frames(1)
+	Input.action_release("jump")
+	await _walk_to(cube.position.x, 30)
+	await frames(60)
+	check("attack stands on the cube as a jumping step", player.is_on_floor() and player.position.y < RoomKit.FLOOR_Y - 20, str(player.position))
+	check("internal doorway renders for inspection", get_viewport().get_texture().get_image().save_png(
+		ProjectSettings.globalize_path("res://.godot/grand-internal-gate.png")) == OK)
+	await _jump_right(true, 60)
+	check("cube-assisted charged jump cannot bypass an unsolved beat gate", player.position.x < gate.position.x and not part["beats"][0]["steps"].all(func(step): return step.done), str(player.position))
+	check("jump attack did not inscribe any runes", DailyRun.casts == 0)
+	player.animated_sprite.flip_h = true
+	check("cube remains recoverable after the blocked jump", carrier.try_pick_up() == "")
+	await _walk_to(gate.position.x - 17, 30)
+	player.animated_sprite.flip_h = false
+	check("a carried cube cannot be placed through the closed internal gate", carrier.try_place() != "" and carrier.held != null)
+	await leave()
+	for gaps in [1, 2]:
+		for charged in [false, true]:
+			params = _grand_fixture("dark_hall", {"gaps": gaps, "guided": false})
+			await _open_grand_fixture(params)
+			part = lvl.pieces[0]
+			var first: Dictionary = part["beats"][0]
+			first["module"].perform(first, first["module"].plans(params["beats"][0]["params"], DailyKit.words(4))[0])
+			await frames(100)
+			check("dark-hall attack starts after legitimately solving the first beat", first["steps"].all(func(step): return step.done))
+			var second: Dictionary = part["beats"][1]
+			var edge: float = second["gap_edges"][0]
+			player.teleport_to(Vector2(edge - 38, RoomKit.FLOOR_Y - 2))
+			await frames(8)
+			await _jump_right(charged, 90)
+			check("unlit gap %d (%s jump) cannot open the exit by touching its landing area" % [gaps, "charged" if charged else "normal"],
+				second["gate"].open_amount < 0.1 and not lvl.rooms[0].is_cleared(), str(player.position))
+			check("unlit jump has no revealed stepping stones", second["stones"].all(func(stone): return not stone.is_solid))
+			await leave()
+	params = _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "mirror": false, "lock": 0, "guided": false})
+	await _open_grand_fixture(params)
+	part = lvl.pieces[0]
+	cube = part["beats"][0]["cubes"].values()[0]
+	cube.recipe = RuneRecipe.from_key("fire/projectile/right/repeat")
+	check("a sustained first-beat rune can be activated", cube.activate(false) == "")
+	await frames(100)
+	check("first-beat Fire cannot pre-complete the second beat's wind objective", not part["beats"][1]["steps"][0].done)
+	await leave()
+	# Walk into the heavy puzzle stones without any rune force.
+	for first_id in ["dead_weight", "burn_through"]:
+		var first_params := DeadWeightModule.new().fallback(4) if first_id == "dead_weight" else {"kind": 1, "distance": 2}
+		params = _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "mirror": false, "lock": 0, "guided": false})
+		params["beats"][0] = {"module": first_id, "params": first_params}
+		await _open_grand_fixture(params)
+		part = lvl.pieces[0]
+		var first: Dictionary = part["beats"][0]
+		var stone: WindBody = first["stone"] if first_id == "dead_weight" else first["impact_stones"][0]
+		var stone_x := stone.position.x
+		player.teleport_to(stone.position + Vector2(-42, -2))
+		await frames(8)
+		await _walk_to(stone_x + 150, 240, true)
+		check("%s heavy stone cannot be shoved by walking or sprinting" % first_id, absf(stone.position.x - stone_x) < 2, str(stone.position.x - stone_x))
+		check("%s cannot clear with manual stone pushing" % first_id, not first["steps"].all(func(step): return step.done) and DailyRun.casts == 0)
+		await leave()
+	# A valid route with real carrying and continuous movement: no driver
+	# teleports, no direct cube placement and no automatic second inscription.
+	params = _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "mirror": false, "lock": 0, "guided": false})
+	await _open_grand_fixture(params)
+	part = lvl.pieces[0]
+	var first: Dictionary = part["beats"][0]
+	first["module"].perform(first, first["module"].plans(params["beats"][0]["params"], DailyKit.words(4))[0])
+	await frames(100)
+	cube = first["cubes"].values()[0]
+	await _walk_to(cube.position.x - 28)
+	carrier = RuneManager.get_for(get_tree()).carrier
+	check("valid route picks up its solved first-beat cube", carrier.try_pick_up() == "")
+	var second: Dictionary = part["beats"][1]
+	await _walk_to(float(second["reuse_position"].x) - RuneCarrier.PLACE_AHEAD, 600, true)
+	check("valid route carries the cube through the open internal doorway", player.position.x > first["gate"].position.x)
+	check("valid route can place the cube beside the wind wall", carrier.try_place() == "")
+	await frames(5)
+	for i in 4: cube.set_slot(i, [&"wind", &"lift", &"up", &"normal"][i])
+	check("valid route can reinscribe and activate Lift", cube.activate(false) == "")
+	await _walk_to(second["gate"].position.x + 40, 600)
+	check("the legitimate carried-cube wind route clears with continuous movement", lvl.rooms[0].is_cleared() and player.position.x > second["gate"].position.x, str(player.position))
+	await leave()
+	var day := DailyRng.day_index(2026, 10, 11)
+	var today := DailyGenerator.generate(DailyGenerator.seed_for_day(day), 4, 4)
+	for i in today["rooms"].size():
+		await _open_grand_fixture(today["rooms"][i]["params"])
+		part = lvl.pieces[0]
+		# Repeated charged jumps and sprinting from the actual entrance.
+		for attempt in 3:
+			await _walk_to(player.position.x + 120, 80, true)
+			await _jump_right(true, 70)
+			if player.is_dead: break
+		check("today's Grand room %d resists entrance jump/sprint spam without inscriptions" % (i + 1), not lvl.rooms[0].is_cleared() and player.position.x < part["gate"].position.x and DailyRun.casts == 0)
+		await leave()
+
+## A deterministic corpus covers each first/second mechanism pairing found
+## in 1,000 Grand seeds. Two distinct full plans must still clear each pair.
+## Additional runtime acceptance: ... -- daily grand_corpus
+func scenario_grand_corpus() -> void:
+	print("SCENARIO Grand mechanism-pair physical corpus")
+	var cases := {}
+	var pairs := {}
+	for seed in 1000:
+		for room in DailyGenerator.generate(seed, 4, 4)["rooms"]:
+			var pair := String(room["beats"][0]["module"]) + " -> " + String(room["beats"][1]["module"])
+			pairs[pair] = true
+			var variant := pair
+			if room["beats"][0]["module"] == "burn_through": variant += " barrier=%d" % int(room["beats"][0]["params"]["kind"])
+			if room["beats"][1]["module"] == "dark_hall": variant += " gaps=%d" % int(room["beats"][1]["params"]["gaps"])
+			if not cases.has(variant): cases[variant] = room["params"]
+	check("the corpus covers varied Grand mechanism pairings with a meaningful first choice", pairs.size() >= 8, str(pairs.keys()))
+	check("the corpus also covers distinct barriers and unlit gap counts", cases.size() > pairs.size(), str(cases.size()))
+	for pair in cases:
+		var params: Dictionary = cases[pair]
+		var plans := DailyChain.new().plans(params, DailyKit.words(4))
+		check(String(pair) + " has multiple verified plans", plans.size() >= 2)
+		for plan in [plans[0], plans[-1]]:
+			check(String(pair) + " clears with " + String(plan["label"]), await try_plan("chain", params, plan, 24, 4))
+	await leave()
+
+
+func scenario_all_corpus() -> void:
+	print("SCENARIO all named difficulties: generated mechanism and barrier corpus")
+	var cases := {}
+	for level in range(1, 6):
+		var tier := DailyDifficulty.tier_for(level)
+		for seed in 1000:
+			for room in DailyGenerator.generate(seed, level, tier)["rooms"]:
+				var variant := "%d" % level
+				var beats: Array = room.get("beats", [{"module": room["module"], "params": room["params"]}])
+				for beat in beats:
+					variant += " / " + String(beat["module"])
+					for field in ["kind", "width", "gaps", "rows", "high", "mirror"]:
+						if beat["params"].has(field): variant += " %s=%s" % [field, str(beat["params"][field])]
+				if not cases.has(variant): cases[variant] = {"room": room, "tier": tier, "level": level}
+	check("all-level corpus contains distinct mechanisms and geometry variants", cases.size() > 30, str(cases.size()))
+	for label in cases:
+		var item: Dictionary = cases[label]
+		var room: Dictionary = item["room"]
+		await _attack_open(room["module"], room["params"], item["tier"], item["level"])
+		for attempt in 2:
+			await _walk_to(player.position.x + 140, 80, true)
+			await _jump_right(attempt == 1, 90)
+			if player.is_dead: break
+		check(String(label) + " rejects movement-only completion", not lvl.rooms[0].is_cleared() and player.position.x < lvl.pieces[0]["gate"].position.x)
+		await leave()
+		var module := DailyModules.make(room["module"])
+		var plans := module.plans(room["params"], DailyKit.words(item["tier"]))
+		check(String(label) + " retains multiple valid plans", plans.size() >= 2)
+		for plan in [plans[0], plans[-1]]:
+			check(String(label) + " remains solvable: " + String(plan["label"]), await try_plan(room["module"], room["params"], plan, 24, item["tier"]))
+	await leave()
+
+
+func _legal_cube_keys(cube: RuneCube, words: PackedStringArray) -> Array[String]:
+	var keys: Array[String] = []
+	# Fixed carvings can use a word above the lent tier (e.g. Up on the
+	# gentle lift cube). They remain fixed, not newly editable vocabulary.
+	var fixed := cube.recipe.to_key().split("/")
+	var available := words.duplicate()
+	for kind in 4:
+		if cube.is_slot_locked(kind) and fixed[kind] != "-" and not available.has(fixed[kind]): available.append(fixed[kind])
+	for key in DailyKit.sentences(available):
+		var parts := key.split("/")
+		var original := cube.recipe.to_key().split("/")
+		var allowed := true
+		for kind in 4:
+			if cube.is_slot_locked(kind) and parts[kind] != original[kind]: allowed = false
+		if allowed: keys.append(key)
+	return keys
+
+
+func _inscribe_legal(cube: RuneCube, key: String) -> void:
+	var parts := key.split("/")
+	for kind in 4: cube.set_slot(kind, StringName(parts[kind]))
+
+
+func scenario_combo_resets() -> void:
+	print("SCENARIO legal unusual inscriptions and resets during live effects")
+	for quarter in 17:
+		var level := 1.0 + quarter * 0.25
+		var tier := DailyDifficulty.tier_for(level)
+		for sample in 4:
+			var drawn := DailyGenerator.draw_room(DailyRng.new(9411 + sample), level, tier, DailyKit.words(tier), "")
+			await _attack_open(drawn["module"], drawn["params"], tier, level)
+			var cubes: Array = lvl.pieces[0]["cubes"].values()
+			var cube: RuneCube = cubes[sample % cubes.size()]
+			var keys := _legal_cube_keys(cube, DailyKit.words(tier))
+			check("%.2f/%d has legal inscriptions without bypassing locked slots" % [level, sample], not keys.is_empty())
+			if not keys.is_empty():
+				_inscribe_legal(cube, keys[(sample * 7 + quarter) % keys.size()])
+				cube.activate(false)
+			await frames([2, 20, 75, 150][sample])
+			var scored := DailyRun.rooms_cleared
+			lvl.reset_current_room()
+			# Spam the actual carry input while the fade owns player controls.
+			Input.action_press("rune_carry")
+			await frames(3)
+			Input.action_release("rune_carry")
+			await frames(70)
+			check("%.2f/%d reset returns every cube, recipe and active effect" % [level, sample], cubes.all(func(c): return not c.is_active and not c.is_carried and c.recipe.to_key() == c.start_recipe and c.global_position.distance_to(c._start_position) < 1))
+			check("%.2f/%d reset restores controls and clears carrier" % [level, sample], not lvl.is_resetting and not player.controls_locked and RuneManager.get_for(get_tree()).carrier.held == null)
+			await frames(180)
+			check("%.2f/%d old spells cannot reopen reset objectives or score" % [level, sample], not lvl.rooms[0].is_cleared() and DailyRun.rooms_cleared == scored and lvl.pieces[0]["gate"].open_amount < 0.1)
+			await leave()
+
+
+func scenario_impact_reset() -> void:
+	print("SCENARIO reset while a rune-driven impact is still travelling")
+	await _attack_open("burn_through", {"kind": 1, "distance": 2}, 2, 3)
+	var cube: RuneCube = lvl.pieces[0]["cubes"].values()[0]
+	_inscribe_legal(cube, "wind/burst/right/strong")
+	check("impact attack uses the legal gust inscription", cube.recipe.to_key() == "wind/burst/right/strong" and cube.activate(false) == "")
+	await frames(1)
+	check("reset is requested before the wall breaks", not lvl.pieces[0]["barrier"].is_open and DailyRun.rooms_cleared == 0)
+	var time_before := DailyRun.time
+	lvl.reset_current_room()
+	await frames(90)
+	check("an impact during the reset fade cannot bank a completed room", DailyRun.rooms_cleared == 0 and DailyRun.solved_with.is_empty(), str(DailyRun.rooms_cleared))
+	check("the reset wall and stones are restored", not lvl.pieces[0]["barrier"].is_open and not lvl.rooms[0].is_cleared())
+	check("the reset cannot freeze the challenge timer", DailyRun.time > time_before + 1.0)
+	check("the parent objective ledger cannot record the abandoned attempt", not GameState.has_flag("%s.clear.%s" % [lvl.chapter_id, lvl.current_room.room_id.get_slice(".", 1)]))
+	check("the reset room can still be solved normally", await _solve_loaded({"cubes": {"Puzzle Cube": "wind/push/right/strong"}}))
+	check("a later real solution earns exactly one clear", DailyRun.rooms_cleared == 1)
+	await leave()
+
+
+func scenario_portal_handoff() -> void:
+	print("SCENARIO continuous Master portal and shared-cube handoff")
+	for width in [2, 3]:
+		var params := _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "lock": 0, "mirror": false})
+		params["beats"][0] = {"module": "folded_wall", "params": {"width": width, "lock": 1}}
+		await _attack_open("chain", params, 5, 5)
+		var first: Dictionary = lvl.pieces[0]["beats"][0]
+		var second: Dictionary = lvl.pieces[0]["beats"][1]
+		var cube: RuneCube = first["cubes"].values()[0]
+		var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+		# Only the initial position is fixture setup. The whole handoff is
+		# movement, pickup, portal traversal and floor placement thereafter.
+		player.teleport_to(cube.global_position + Vector2(-28, 14))
+		await frames(8)
+		player.animated_sprite.flip_h = false
+		cube.set_slot(3, &"normal")
+		check("Master width %d cannot skip discovering the Portal form" % width, cube.activate(false) != "" and not cube.is_active)
+		cube.set_slot(1, &"portal")
+		check("Master width %d activates its portal" % width, cube.activate(false) == "")
+		var portal: RunePortal = cube.effect
+		cube.remove_meta(&"daily_portal_carry")
+		check("an ordinary active portal cube retains its movement restriction", carrier.try_pick_up() != "" and not cube.is_carried)
+		cube.set_meta(&"daily_portal_carry", true)
+		var picked := carrier.try_pick_up()
+		check("Master width %d can take the shared cube through its own doorway" % width, picked == "", picked)
+		if picked != "":
+			await leave()
+			continue
+		await _walk_to(float(second["reuse_position"].x) - RuneCarrier.PLACE_AHEAD, 900, true)
+		check("Master width %d carries cube and player across the portal and internal gate" % width, portal.carried.has(player) and first["steps"].all(func(step): return step.done) and player.position.x > first["gate"].position.x and carrier.held == cube)
+		await _walk_to(cube._start_position.x - 28, 900, true)
+		check("Master width %d carries its owner back without an immediate portal bounce" % width, portal.carried_back.has(player) and player.position.x < portal.entrance.x and carrier.held == cube)
+		await _walk_to(float(second["reuse_position"].x) - RuneCarrier.PLACE_AHEAD, 900, true)
+		check("Master width %d can repeat the forward handoff after reversing" % width, player.position.x > first["gate"].position.x and carrier.held == cube)
+		check("Master width %d places the same cube beside the wind wall" % width, carrier.try_place() == "")
+		await frames(5)
+		cube.deactivate()
+		_inscribe_legal(cube, "wind/lift/up/normal")
+		check("Master width %d can reinscribe actual upward wind" % width, cube.recipe.to_key() == "wind/lift/up/normal" and cube.activate(false) == "")
+		await _walk_to(second["gate"].position.x - 50, 900)
+		check("Master width %d completes with continuous movement and real carrying" % width, lvl.rooms[0].is_cleared())
+		player.teleport_to(cube.position + Vector2(-28, -2))
+		await frames(4)
+		check("the shared portal exception cannot carry an active wind rune", carrier.try_pick_up() != "" and not cube.is_carried)
+		lvl.reset_current_room()
+		await frames(75)
+		check("Master width %d reset restores portal recipe and original slot locks" % width, not cube.is_active and not cube.is_carried and cube.recipe.to_key() == cube.start_recipe and cube.locked_slots == first["original_lock"] and not lvl.rooms[0].is_cleared())
+		await leave()
+
+
+func scenario_placement_resets() -> void:
+	print("SCENARIO placements against closed gates, gaps and resets while carrying")
+	for quarter in 17:
+		var level := 1.0 + quarter * 0.25
+		var tier := DailyDifficulty.tier_for(level)
+		for sample in 3:
+			var drawn := DailyGenerator.draw_room(DailyRng.new(9677 + sample), level, tier, DailyKit.words(tier), "")
+			await _attack_open(drawn["module"], drawn["params"], tier, level)
+			var cube: RuneCube = lvl.pieces[0]["cubes"].values()[0]
+			for candidate in lvl.pieces[0]["cubes"].values():
+				if candidate.carryable and not candidate.mounted: cube = candidate; break
+			var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+			player.teleport_to(cube.position + Vector2(-28, -2))
+			await frames(4)
+			player.animated_sprite.flip_h = false
+			var refusal := carrier.try_pick_up()
+			if not cube.carryable or cube.mounted:
+				check("%.2f/%d fixed cubes cannot be moved" % [level, sample], refusal != "" and carrier.held == null)
+				await leave()
+				continue
+			check("%.2f/%d portable cube can be picked up" % [level, sample], refusal == "", refusal)
+			if refusal != "": await leave(); continue
+			var original := cube.recipe.to_key()
+			cube.set_slot(3, &"strong")
+			check("%.2f/%d carrying cannot edit or activate a rune" % [level, sample], cube.recipe.to_key() == original and cube.activate(false) != "" and not cube.is_active)
+			# Boundary positions are setup for placement-query attacks, not
+			# a claimed traversal of the room's unsolved obstacles.
+			var gate: PortcullisGate = lvl.pieces[0]["gate"]
+			player.teleport_to(Vector2(gate.position.x - 18, RoomKit.FLOOR_Y - 2))
+			await frames(3)
+			player.animated_sprite.flip_h = false
+			check("%.2f/%d cannot place a cube across a closed exit" % [level, sample], carrier.try_place() != "" and carrier.held == cube)
+			var part: Dictionary = lvl.pieces[0]
+			if part.has("beats"): part = part["beats"][-1]
+			if part.has("gap_edges") and not part["gap_edges"].is_empty():
+				player.teleport_to(Vector2(float(part["gap_edges"][0]) + 2, RoomKit.FLOOR_Y - 2))
+				await frames(2)
+				check("%.2f/%d cannot drop the cube onto an unsupported gap" % [level, sample], carrier.try_place() != "" and carrier.held == cube)
+			var resets := DailyRun.resets
+			lvl.reset_current_room()
+			await frames(3)
+			lvl.reset_current_room()
+			await frames(75)
+			check("%.2f/%d reset clears hands and restores the carried cube" % [level, sample], carrier.held == null and not cube.is_carried and not cube.is_active and cube.global_position.distance_to(cube._start_position) < 1 and cube.recipe.to_key() == cube.start_recipe and not player.controls_locked)
+			check("%.2f/%d reset spam counts one reset and leaves the exit closed" % [level, sample], DailyRun.resets == resets + 1 and not lvl.rooms[0].is_cleared() and gate.open_amount < 0.1)
+			await leave()
+
+
+func scenario_unlocked_combos() -> void:
+	print("SCENARIO every unrelated learned rune after a real first-beat unlock")
+	for tier in [4, 5]:
+		var keys := DailyKit.sentences(DailyKit.words(tier))
+		for key in keys:
+			# The intended Lift sentences already have positive continuous
+			# route coverage. Here every other valid learned sentence attacks
+			# the wind milestone after legitimately unlocking all cube slots.
+			if key.begins_with("wind/lift/up/"): continue
+			var params := _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "lock": 0, "mirror": false})
+			await _attack_open("chain", params, tier, tier)
+			var first: Dictionary = lvl.pieces[0]["beats"][0]
+			var second: Dictionary = lvl.pieces[0]["beats"][1]
+			var cube: RuneCube = first["cubes"].values()[0]
+			_inscribe_legal(cube, "fire/projectile/right/normal")
+			cube.activate(false)
+			await frames(110)
+			check("tier %d %s starts from a real first-beat unlock" % [tier, key], first["steps"].all(func(step): return step.done) and cube.locked_slots == 0)
+			await _walk_to(cube.position.x - 28, 150)
+			var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+			var picked := carrier.try_pick_up()
+			await _walk_to(float(second["reuse_position"].x) - RuneCarrier.PLACE_AHEAD, 650, true)
+			var placed := carrier.try_place()
+			check("tier %d %s reaches a legal second-beat placement" % [tier, key], picked == "" and placed == "", picked + placed)
+			_inscribe_legal(cube, key)
+			var casts := DailyRun.casts
+			var refusal := cube.activate(false)
+			if refusal != "":
+				check("tier %d %s blocked activation has no live effect or cast credit" % [tier, key], not cube.is_active and DailyRun.casts == casts, refusal)
+			await frames(24)
+			await _jump_right(false, 70)
+			check("tier %d %s cannot counterfeit the second wind milestone" % [tier, key], not second["steps"][0].done and not lvl.rooms[0].is_cleared() and DailyRun.rooms_cleared == 0)
+			check("tier %d %s cannot bypass the unsolved final gate" % [tier, key], player.position.x < second["gate"].position.x)
+			lvl.reset_current_room()
+			await frames(80)
+			check("tier %d %s reset restores the original puzzle and locks" % [tier, key], not cube.is_active and cube.recipe.to_key() == cube.start_recipe and cube.locked_slots == first["original_lock"] and not lvl.rooms[0].is_cleared() and not player.controls_locked)
+			await leave()
+
+
+func scenario_portal_limits() -> void:
+	print("SCENARIO carried portal cube clearance and reset cancellation")
+	var params := _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "lock": 0, "mirror": false})
+	params["beats"][0] = {"module": "folded_wall", "params": {"width": 2}}
+	await _attack_open("chain", params, 5, 5)
+	var cube: RuneCube = lvl.pieces[0]["beats"][0]["cubes"].values()[0]
+	player.teleport_to(cube.position + Vector2(-28, 14))
+	await frames(8)
+	player.animated_sprite.flip_h = false
+	cube.set_slot(3, &"normal")
+	check("clearance fixture opens a valid portal", cube.activate(false) == "")
+	var portal: RunePortal = cube.effect
+	var portal_ref: WeakRef = weakref(portal)
+	var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+	check("clearance fixture picks up the portal owner", carrier.try_pick_up() == "")
+	# A late obstacle fits above the player's head but through the carried
+	# cube. It represents geometry moving into an already-open exit.
+	var obstacle := StaticBody2D.new()
+	obstacle.collision_layer = 2
+	obstacle.collision_mask = 0
+	obstacle.position = Vector2(portal.exit_point.x, RoomKit.FLOOR_Y - 58)
+	var shape := CollisionShape2D.new()
+	var box := RectangleShape2D.new()
+	box.size = Vector2(80, 20)
+	shape.shape = box
+	obstacle.add_child(shape)
+	lvl.add_child(obstacle)
+	await frames(3)
+	await _walk_to(player.position.x + 150, 120, true)
+	check("the portal cannot clip its carried cube through an obstructed exit", not portal.carried.has(player) and player.position.x < 5 * RoomKit.T)
+	lvl.reset_current_room()
+	await frames(80)
+	check("reset while carrying closes the anchored portal and clears the hands", portal_ref.get_ref() == null and carrier.held == null and not cube.is_active and not cube.is_carried and cube.global_position.distance_to(cube._start_position) < 1)
+	check("reset leaves the first goal and its original slot locks intact", not lvl.rooms[0].is_cleared() and cube.locked_slots == lvl.pieces[0]["beats"][0]["original_lock"] and DailyRun.rooms_cleared == 0)
+	await leave()
+
+
+## Real movement through a portal while holding another stage's portable
+## cube. Starting positions are query fixtures; the receiving obstacle is
+## the level's actual mounted portal cube, not an injected blocker.
+func scenario_portal_cargo() -> void:
+	print("SCENARIO portal clearance applies to every carried cube")
+	for width in [2, 3]:
+		var reverse := true
+		var params := {"reuse": false, "beats": [
+			{"module": "folded_wall", "params": {"width": width}},
+			{"module": "dark_hall", "params": {"gaps": 1}}]}
+		await _attack_open("chain", params, 5, 5)
+		var owner: RuneCube = lvl.pieces[0]["beats"][0]["cubes"].values()[0]
+		var cargo: RuneCube = lvl.pieces[0]["beats"][1]["cubes"].values()[0]
+		owner.set_slot(3, &"normal")
+		check("cargo fixture activates portal", owner.activate(false) == "")
+		var portal: RunePortal = owner.effect
+		var start: Vector2 = portal.exit_point if reverse else portal.entrance
+		var sign_x := -1.0 if reverse else 1.0
+		cargo.global_position = Vector2(start.x - sign_x * 60, RoomKit.FLOOR_Y)
+		player.teleport_to(cargo.position - Vector2(sign_x * 28, 2))
+		await frames(6)
+		player.animated_sprite.flip_h = reverse
+		var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+		check("cargo fixture picks up a different inactive cube", carrier.try_pick_up() == "" and carrier.held == cargo)
+		await _walk_to(start.x + sign_x * 30, 90, true)
+		check("width %d reverse portal cannot overlap different cargo with the mounted owner" % width, not portal.carried.has(player))
+		lvl.reset_current_room()
+		await frames(80)
+		check("cargo reset restores both stage cubes", carrier.held == null and not owner.is_active and not cargo.is_carried and cargo.position.distance_to(cargo._start_position) < 1)
+		await leave()
+
+
+func scenario_portal_reset_spam() -> void:
+	print("SCENARIO shared portal reset spam before and after real warps")
+	for width in [2, 3]:
+		for modifier in [&"normal", &"long"]:
+			for delay in [-1, 0, 1, 18]:
+				var params := _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "lock": 0, "mirror": false})
+				params["beats"][0] = {"module": "folded_wall", "params": {"width": width}}
+				await _attack_open("chain", params, 5, 5)
+				var first: Dictionary = lvl.pieces[0]["beats"][0]
+				var cube: RuneCube = first["cubes"].values()[0]
+				player.teleport_to(cube.position + Vector2(-28, 14))
+				await frames(8)
+				player.animated_sprite.flip_h = false
+				cube.set_slot(3, modifier)
+				check("%d/%s/%d portal opens" % [width, modifier, delay], cube.activate(false) == "")
+				var portal: RunePortal = cube.effect
+				var portal_ref: WeakRef = weakref(portal)
+				var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+				check("portal reset fixture picks up owner", carrier.try_pick_up() == "")
+				Input.action_press("move_right")
+				Input.action_press("sprint")
+				if delay >= 0:
+					for tick in 120:
+						await frames(1)
+						if portal.carried.has(player): break
+					check("%d/%s/%d reaches a real warp before reset" % [width, modifier, delay], portal.carried.has(player))
+					await frames(delay)
+				else:
+					await frames(1)
+					check("pre-warp reset starts before portal transport", not portal.carried.has(player))
+				var count := DailyRun.resets
+				for tick in 12:
+					lvl.reset_current_room()
+					await frames(1)
+				Input.action_release("move_right")
+				Input.action_release("sprint")
+				await frames(100)
+				check("portal spam restores one reset, hands, controls and anchored effect", DailyRun.resets == count + 1 and carrier.held == null and portal_ref.get_ref() == null and not lvl.is_resetting and not player.controls_locked, "resets=%d expected=%d resetting=%s locked=%s" % [DailyRun.resets, count + 1, lvl.is_resetting, player.controls_locked])
+				check("portal spam cannot retain a stage unlock or finish credit", cube.locked_slots == first["original_lock"] and cube.recipe.to_key() == cube.start_recipe and cube.position.distance_to(cube._start_position) < 1 and not lvl.rooms[0].is_cleared() and DailyRun.rooms_cleared == 0 and first["steps"].all(func(step): return not step.done))
+				await leave()
+
+
+func scenario_stage_reset_spam() -> void:
+	print("SCENARIO every quarter difficulty resets during stage transitions")
+	for quarter in 17:
+		var level := 1.0 + quarter * 0.25
+		var tier := DailyDifficulty.tier_for(level)
+		var drawn := DailyGenerator.draw_room(DailyRng.new(12977), level, tier, DailyKit.words(tier), "")
+		await _attack_open(drawn["module"], drawn["params"], tier, level)
+		var part: Dictionary = lvl.pieces[0]
+		var module := DailyModules.make(drawn["module"])
+		var plan: Dictionary = module.plans(drawn["params"], DailyKit.words(tier))[0]
+		if part.has("beats"):
+			part = part["beats"][0]
+			module = part["module"]
+			plan = plan["beats"][0]
+		check("%.2f first-stage inscription activates" % level, module.perform(part, plan) == "")
+		var drive := module.drive(part)
+		if not drive.is_empty():
+			player.teleport_to(drive["teleport"])
+			await frames(4)
+			for action in drive.get("hold", []): Input.action_press(action)
+		for tick in 120:
+			module.advance(part, player, tick * 0.1)
+			await frames(6)
+			var done: bool = part["steps"].all(func(step): return step.done) if part.has("steps") else lvl.rooms[0].is_cleared()
+			if done or player.is_dead: break
+		for action in ["move_left", "move_right", "jump", "sprint"]: Input.action_release(action)
+		check("%.2f reaches a genuine first-stage clear" % level, not player.is_dead and (part["steps"].all(func(step): return step.done) if part.has("steps") else lvl.rooms[0].is_cleared()))
+		# Boundary setup isolates the reset race; not a claimed manual solve.
+		player.teleport_to(Vector2(part["gate"].position.x - 35, RoomKit.FLOOR_Y - 2))
+		await frames(3)
+		var scored := DailyRun.rooms_cleared
+		var count := DailyRun.resets
+		Input.action_press("move_right")
+		Input.action_press("sprint")
+		for tick in 12:
+			lvl.reset_current_room()
+			await frames(1)
+		Input.action_release("move_right")
+		Input.action_release("sprint")
+		await frames(100)
+		check("%.2f transition spam counts one reset and restores controls" % level, DailyRun.resets == count + 1 and not lvl.is_resetting and not player.controls_locked)
+		check("%.2f transition reset cannot leak completion or cube state" % level, DailyRun.rooms_cleared == scored and not lvl.rooms[0].is_cleared() and lvl.pieces[0]["gate"].open_amount < 0.1 and lvl.pieces[0]["cubes"].values().all(func(c): return not c.is_active and not c.is_carried and c.recipe.to_key() == c.start_recipe and c.position.distance_to(c._start_position) < 1))
+		await leave()
+
+
+func scenario_gentle_profiles() -> void:
+	print("SCENARIO Gentle ridge, terrace and landing without extra difficulty")
+	var module := UpdraftModule.new()
+	for profile in [0, 1, 2]:
+		for rows in [3, 4]:
+			for width in [3, 4]:
+				var params := {"dist": 1, "rows": rows, "width": width, "mirror": false, "lock": 1, "profile": profile}
+				var original := params.duplicate()
+				original["profile"] = 0
+				var label := "profile %d rows %d width %d" % [profile, rows, width]
+				check(label + " retains the original difficulty and rune choices", is_equal_approx(DailyDifficulty.room_score({"module": "updraft", "params": params}, DailyKit.words(1)), DailyDifficulty.room_score({"module": "updraft", "params": original}, DailyKit.words(1))) and module.open_slots(params) == module.open_slots(original) and module.plans(params, DailyKit.words(1)).size() == module.plans(original, DailyKit.words(1)).size())
+				await _attack_open("updraft", params, 1, 1.25)
+				var cube: RuneCube = lvl.pieces[0]["cubes"].values()[0]
+				await _walk_to(cube.position.x - 28, 180)
+				await _jump_right(true, 70)
+				check(label + " cannot be skipped with a charged jump", not lvl.rooms[0].is_cleared() and DailyRun.casts == 0)
+				await _walk_to(cube.position.x - 28, 180)
+				cube.set_slot(3, &"normal")
+				check(label + " uses the same one-word modifier choice", cube.recipe.to_key() == "wind/lift/up/normal" and cube.activate(false) == "")
+				var area: Rect2 = lvl.pieces[0]["area"]
+				await _walk_to(area.end.x + 50, 900)
+				check(label + " clears through continuous walking and actual wind", lvl.rooms[0].is_cleared() and not player.is_dead)
+				lvl.reset_current_room()
+				await frames(80)
+				check(label + " resets its gate, cube and controls", not lvl.rooms[0].is_cleared() and not cube.is_active and cube.recipe.to_key() == cube.start_recipe and not player.controls_locked and lvl.pieces[0]["gate"].open_amount < 0.1)
+				await leave()
+	# Each of the three fractional Gentle stages previously had too few
+	# configurations for four-room history. Check the actual sequence now.
+	for seed in 50:
+		var previous := ""
+		var recent: Array = []
+		var repeats := 0
+		var profiles := {}
+		for k in 20:
+			var spec := DailyGenerator.endless_room(seed, k, 1, previous, recent)
+			var room: Dictionary = spec["rooms"][0]
+			var key := DailyGenerator.layout_key(room)
+			repeats += int(recent.has(key))
+			if room["module"] == "updraft": profiles[int(room["params"].get("profile", 0))] = true
+			recent.append(key)
+			if recent.size() > 4: recent.pop_front()
+			previous = DailyGenerator.last_module(room)
+		check("Gentle seed %d has no recent configuration repeats" % seed, repeats == 0, str(repeats))
+		check("Gentle seed %d includes different ground shapes" % seed, profiles.size() >= 2, str(profiles.keys()))
+	await leave()
+
+
+func scenario_variety() -> void:
+	print("SCENARIO difficulty floors, meaningful choices and recent layout variety")
+	for level in range(1, 6):
+		var low := 0
+		var duplicates := 0
+		var trivial := 0
+		for seed in 50:
+			var spec := DailyGenerator.generate(seed, level, DailyDifficulty.tier_for(level))
+			var seen := {}
+			for room in spec["rooms"]:
+				low += int(float(room["r"]) < DailyDifficulty.band(level).x - 0.011)
+				var key := DailyGenerator.layout_key(room)
+				duplicates += int(seen.has(key))
+				seen[key] = true
+				if level >= 4:
+					var first: Dictionary = room["beats"][0]
+					trivial += int(not DailyGenerator.meaningful_choice(DailyModules.make(first["module"]), first["params"]))
+				elif level == 3:
+					var beats: Array = room.get("beats", [{"module": room["module"], "params": room["params"]}])
+					trivial += int(not beats.any(func(beat): return DailyGenerator.meaningful_choice(DailyModules.make(beat["module"]), beat["params"])))
+		check("level %d never substitutes a room below its band" % level, low == 0, str(low))
+		check("level %d avoids duplicate layouts inside one Daily run" % level, duplicates == 0, str(duplicates))
+		if level >= 3: check("level %d requires choosing important rune words" % level, trivial == 0, str(trivial))
+	for start in range(1, 5):
+		var low := 0
+		var adjacent := 0
+		for seed in 20:
+			var previous := ""
+			var recent: Array = []
+			for k in 40:
+				var spec := DailyGenerator.endless_room(seed, k, start, previous, recent)
+				var room: Dictionary = spec["rooms"][0]
+				var key := DailyGenerator.layout_key(room)
+				low += int(float(room["r"]) < DailyDifficulty.band(spec["level"]).x - 0.011)
+				adjacent += int(not recent.is_empty() and recent[-1] == key)
+				if k in [0, 5, 20, 39]:
+					var replay := DailyGenerator.endless_room(seed, k, start, previous, recent)
+					check("start %d seed %d room %d regenerates identically without banking history" % [start, seed, k], replay["digest"] == spec["digest"])
+				recent.append(key)
+				if recent.size() > 4: recent.pop_front()
+				previous = DailyGenerator.last_module(room)
+		check("Endless start %d keeps every room above its difficulty floor" % start, low == 0, str(low))
+		check("Endless start %d never immediately repeats a layout" % start, adjacent == 0, str(adjacent))
+	await leave()
+
+
+func _scale_measure(room: Dictionary, words: PackedStringArray) -> Dictionary:
+	var parts := DailyDifficulty.parts(DailyModules.make(room["module"]), room["params"], words)
+	var ids: Array = []
+	var guided := bool(room["params"].get("guided", true))
+	if room.has("beats"):
+		for beat in room["beats"]:
+			ids.append(beat["module"])
+			guided = guided and bool(beat["params"].get("guided", true))
+	else: ids.append(room["module"])
+	return {"r": DailyDifficulty.total(parts), "parts": parts, "ids": ids,
+		"chain": room.has("beats"), "reuse": room.get("reuse", false),
+		"personal_fire": room.get("personal_fire", false), "guided": guided}
+
+
+func _scale_summary(rows: Array, band: Vector2) -> Dictionary:
+	var scores: Array = []
+	var parts := {"search": 0.0, "steps": 0.0, "concept": 0.0, "execution": 0.0, "decoys": 0.0}
+	var ids := {}
+	var counts := {"inside": 0, "chain": 0, "reuse": 0, "personal_fire": 0, "guided": 0}
+	var sum := 0.0
+	var min_plans := 1000000
+	for row in rows:
+		var r: float = row["r"]
+		scores.append(r)
+		sum += r
+		counts["inside"] += int(DailyDifficulty.miss(r, band) < 0.001)
+		for key in ["chain", "reuse", "personal_fire", "guided"]: counts[key] += int(row[key])
+		for key in parts: parts[key] += float(row["parts"][key])
+		min_plans = mini(min_plans, int(row["parts"]["plans"]))
+		for id in row["ids"]: ids[id] = int(ids.get(id, 0)) + 1
+	var n := float(rows.size())
+	scores.sort()
+	for key in parts: parts[key] /= n
+	var out := {"rooms": rows.size(), "band": [band.x, band.y], "mean_r": sum / n,
+		"min_r": scores[0], "max_r": scores[-1], "median_r": scores[int(n * 0.5)],
+		"p10_r": scores[int(n * 0.1)], "p90_r": scores[int(n * 0.9)],
+		"mean_parts": parts, "mechanisms": ids, "minimum_plans": min_plans}
+	for key in counts: out[key + "_percent"] = 100.0 * float(counts[key]) / n
+	return out
+
+
+## Audit both the named choices and EVERY Endless quarter step. This is a
+## structural model audit; solver speed is not a human difficulty measure.
+func scenario_scale_audit() -> void:
+	print("SCENARIO full puzzle difficulty scale audit")
+	await leave()
+	var report := {"generator_version": DailyGenerator.GEN_VERSION, "seeds_per_named_level": 500,
+		"seeds_per_quarter_level": 250, "named": [], "quarters": [],
+		"scope": "Generated structural difficulty, engine solutions and menu wiring; not measured human solve times."}
+	var representatives := {}
+	var all_valid := true
+	var scores_match := true
+	for level in range(1, 6):
+		var rows: Array = []
+		var tier := DailyDifficulty.tier_for(level)
+		var low := INF
+		var high := -INF
+		for seed in 500:
+			var value := DailyRng.fnv("scale-audit-%d" % seed)
+			var spec := DailyGenerator.endless_room(value, 20, 4) if level == 5 else DailyGenerator.generate(value, level, tier)
+			all_valid = all_valid and DailyOracle.validate(spec)["ok"]
+			for room in spec["rooms"]:
+				var row := _scale_measure(room, spec["kit"])
+				rows.append(row)
+				var r: float = row["r"]
+				scores_match = scores_match and absf(r - float(room["r"])) <= 0.011
+				if r < low: low = r; representatives["%d low" % level] = room
+				if r > high: high = r; representatives["%d high" % level] = room
+		var summary := _scale_summary(rows, DailyDifficulty.band(level))
+		summary["name"] = DailyDifficulty.name_of(level)
+		summary["tier"] = tier
+		report["named"].append(summary)
+		print("  SCALE %s mean=%.3f p10=%.3f median=%.3f p90=%.3f in-band=%.1f%% chain=%.1f%% reuse=%.1f%%" %
+			[summary["name"], summary["mean_r"], summary["p10_r"], summary["median_r"], summary["p90_r"], summary["inside_percent"], summary["chain_percent"], summary["reuse_percent"]])
+		check(summary["name"] + " meets its band in at least 90% of sampled rooms", summary["inside_percent"] >= 90)
+		check(summary["name"] + " has at least two verified plans in every room", summary["minimum_plans"] >= 2)
+		check(summary["name"] + " follows its chalk-guidance rule", summary["guided_percent"] == (100 if level < 4 else 0))
+		if level >= 4:
+			check(summary["name"] + " consistently uses two beats, reinscription and sealed personal Fire", summary["chain_percent"] == 100 and summary["reuse_percent"] == 100 and summary["personal_fire_percent"] == 0)
+	check("all named specs pass the oracle", all_valid)
+	check("stored difficulty matches recomputed difficulty", scores_match)
+	for i in range(1, 5):
+		check("%s has higher mean and median difficulty than %s" % [report["named"][i]["name"], report["named"][i - 1]["name"]],
+			report["named"][i]["mean_r"] > report["named"][i - 1]["mean_r"] and report["named"][i]["median_r"] > report["named"][i - 1]["median_r"])
+	var previous_mean := -INF
+	for quarter in 17:
+		var level := 1.0 + float(quarter) * 0.25
+		var tier := DailyDifficulty.tier_for(level)
+		var words := DailyKit.words(tier)
+		var rows: Array = []
+		var low := INF
+		var high := -INF
+		for seed in 250:
+			var room := DailyGenerator.draw_room(DailyRng.new(DailyRng.fnv("quarter-audit-%d" % seed)), level, tier, words, "")
+			DailyGenerator.set_spell_rule(room, level)
+			var row := _scale_measure(room, words)
+			rows.append(row)
+			var r: float = row["r"]
+			if quarter % 4 != 0:
+				if r < low: low = r; representatives["%.2f quarter low" % level] = room
+				if r > high: high = r; representatives["%.2f quarter high" % level] = room
+		var summary := _scale_summary(rows, DailyDifficulty.band(level))
+		summary["level"] = level
+		summary["name"] = DailyDifficulty.name_of(level)
+		report["quarters"].append(summary)
+		print("  QUARTER %.2f mean=%.3f in-band=%.1f%%" % [level, summary["mean_r"], summary["inside_percent"]])
+		check("%.2f quarter-step rooms meet the band" % level, summary["inside_percent"] >= 90)
+		check("%.2f quarter-step mean does not regress" % level, float(summary["mean_r"]) + 0.02 >= previous_mean)
+		if quarter > 0:
+			check("%.2f quarter-step mean increases measurably" % level, float(summary["mean_r"]) > previous_mean + 0.05)
+		previous_mean = summary["mean_r"]
+	check("the physics verification table is fresh", DailyVerified.fresh())
+	# Real sequential runs include the previous-module exclusion, which a
+	# direct draw cannot exercise. Audit each five-room ramp window too.
+	report["sequential_endless"] = []
+	for start in range(1, 5):
+		var windows: Array = [[], [], [], [], []]
+		for seed in 150:
+			var previous := ""
+			var recent: Array = []
+			var value := DailyRng.fnv("sequence-audit-%d" % seed)
+			for k in 25:
+				var spec := DailyGenerator.endless_room(value, k, start, previous, recent)
+				var room: Dictionary = spec["rooms"][0]
+				windows[int(k / 5.0)].append(_scale_measure(room, spec["kit"]))
+				previous = DailyGenerator.last_module(room)
+				recent.append(DailyGenerator.layout_key(room))
+				if recent.size() > 4: recent.pop_front()
+		var earlier := -INF
+		for window in 5:
+			var level := DailyDifficulty.ramp(start, window * 5)
+			var summary := _scale_summary(windows[window], DailyDifficulty.band(level))
+			summary["start"] = start
+			summary["level"] = level
+			report["sequential_endless"].append(summary)
+			print("  SEQUENCE start=%d level=%.2f mean=%.3f in-band=%.1f%%" % [start, level, summary["mean_r"], summary["inside_percent"]])
+			check("Endless start %d at %.2f meets its band with previous-room constraints" % [start, level], summary["inside_percent"] >= 90)
+			if window > 0:
+				check("Endless start %d at %.2f gets harder in actual sequences" % [start, level], float(summary["mean_r"]) > earlier + 0.02)
+			earlier = summary["mean_r"]
+	# Buttons must dispatch the chosen difficulty, not a captured loop value.
+	for start in range(1, 5):
+		await open("res://scenes/ui/title_screen.tscn")
+		var menu := DailyMenu.open(lvl)
+		await frames(5)
+		check("menu button %d carries its correct label" % start, menu.endless_buttons[start - 1].text == DailyDifficulty.name_of(start))
+		menu.endless_buttons[start - 1].pressed.emit()
+		await seconds(1.5)
+		lvl = get_tree().current_scene
+		player = lvl.get_node_or_null("Player")
+		check("menu choice %d starts the selected difficulty, vocabulary and HUD" % start,
+			lvl is DailyRoot and DailyRun.endless_start == start and lvl.spec["level"] == start and lvl.spec["tier"] == DailyDifficulty.tier_for(start) and lvl.endless_label.text.contains(DailyDifficulty.name_of(start)))
+		await leave()
+	# Real-physics acceptance at the low and high ends of every named scale.
+	for label in representatives:
+		var level := float(String(label).split(" ")[0])
+		var room: Dictionary = representatives[label]
+		var module := DailyModules.make(room["module"])
+		var tier := DailyDifficulty.tier_for(level)
+		var plans := module.plans(room["params"], DailyKit.words(tier))
+		for plan in [plans[0], plans[-1]]:
+			check("scale %s extreme has a real-physics solution: %s" % [label, plan["label"]], await try_plan(room["module"], room["params"], plan, 24 if room.has("beats") else 10, tier))
+	await leave()
+	report["passed"] = passed
+	report["failed"] = failed
+	var file := FileAccess.open("res://.godot/difficulty-scale-audit.json", FileAccess.WRITE)
+	if file: file.store_string(JSON.stringify(report, "\t")); file.close()
+
+
+func _attack_open(id: String, params: Dictionary, tier: int, level: float) -> void:
+	DailyRun.start("trial", 72727, 0, int(floor(level)), tier)
+	DailyRun.spec_override = spec_for(params, tier, id)
+	DailyGenerator.set_spell_rule(DailyRun.spec_override["rooms"][0], level)
+	await open(DailyRun.SCENE)
+	player.controls_locked = false
+
+
+func scenario_all_cheese() -> void:
+	print("SCENARIO all difficulties adversarial movement, resets and portals")
+	# Lower-level standalone crossings must enforce the same prerequisites
+	# as Grand chains, including advanced templates used by supplied specs.
+	for id in ["dark_hall", "frozen_crossing", "still_piston"]:
+		var module := DailyModules.make(id)
+		var params := module.fallback(module.min_tier)
+		await _attack_open(id, params, module.min_tier, 3)
+		var part: Dictionary = lvl.pieces[0]
+		var start := RoomKit.cx(2)
+		if id == "dark_hall": start = float(part["gap_edges"][0]) - 38
+		if id == "frozen_crossing": start = 5 * RoomKit.T - 38
+		if id == "still_piston": start = float(part["cubes"].values()[0].position.x) + 20
+		player.teleport_to(Vector2(start, RoomKit.FLOOR_Y - 2))
+		await frames(8)
+		await _jump_right(true, 120)
+		check(id + " cannot open its exit solely by touching the far-side objective", part["gate"].open_amount < 0.1 and not lvl.rooms[0].is_cleared(), str(player.position))
+		await leave()
+	# Updraft used to rely on an open back gate rather than a goal exit.
+	await _attack_open("updraft", UpdraftModule.new().fallback(1), 1, 1)
+	check("a standalone wind room keeps its exit closed until solved", lvl._gates_into(1).all(func(gate): return gate.open_amount < 0.1))
+	await leave()
+	# Use the real carrier to put a Master portal cube on ordinary ground.
+	var params := _grand_fixture("updraft", {"dist": 1, "rows": 3, "width": 3, "lock": 0, "mirror": false})
+	params["beats"][0] = {"module": "folded_wall", "params": {"width": 2}}
+	await _attack_open("chain", params, 5, 5)
+	var cube: RuneCube = lvl.pieces[0]["beats"][0]["cubes"].values()[0]
+	player.teleport_to(cube.position + Vector2(-28, 0))
+	await frames(8)
+	player.animated_sprite.flip_h = false
+	var carrier: RuneCarrier = RuneManager.get_for(get_tree()).carrier
+	check("Master portal cube can be picked up", carrier.try_pick_up() == "")
+	check("Master portal cube can be legally set on the floor", carrier.try_place() == "")
+	await frames(4)
+	cube.set_slot(3, &"normal")
+	var refusal := cube.activate(false)
+	check("a carried portal cube works after a legal floor placement", refusal == "", refusal)
+	await _jump_right(false, 100)
+	check("Master can physically enter the floor portal and reach the next beat", lvl.pieces[0]["beats"][0]["steps"].all(func(step): return step.done), str(player.position))
+	await RenderingServer.frame_post_draw
+	get_viewport().get_texture().get_image().save_png("res://.godot/master-floor-portal.png")
+	await leave()
+	DailyRun.start_endless(4, 8181)
+	DailyRun.spec_override = spec_for({"gaps": 1}, 4, "dark_hall")
+	DailyRun.spec_override["endless"] = true
+	DailyRun.spec_override["bell"] = {}
+	var end: int = DailyRun.spec_override["rooms"][0]["x1"]
+	DailyRun.spec_override["exit"] = {"x0": end, "x1": end + DailyGenerator.EXIT_COLUMNS - 1}
+	await open(DailyRun.SCENE)
+	player.controls_locked = false
+	player.teleport_to(Vector2(5 * RoomKit.T - 20, RoomKit.FLOOR_Y - 2))
+	await frames(8)
+	await _walk_to(player.position.x + 200, 180, true)
+	check("falling into an Endless pit ends the fall and consumes exactly one life", player.is_dead and DailyRun.lives == 2 and DailyRun.deaths == 1, str(player.position))
+	await leave()
+	# Each available quarter level, three independent room draws. No test
+	# driver advances or teleports between beats during these attacks.
+	for quarter in 17:
+		var level := 1.0 + quarter * 0.25
+		var tier := DailyDifficulty.tier_for(level)
+		for seed in 3:
+			var room := DailyGenerator.draw_room(DailyRng.new(8100 + seed), level, tier, DailyKit.words(tier), "")
+			await _attack_open(room["module"], room["params"], tier, level)
+			for attempt in 2:
+				await _walk_to(player.position.x + 150, 100, true)
+				await _jump_right(attempt == 1, 85)
+				if player.is_dead: break
+			check("%.2f room %d cannot clear by walking, sprinting and jump spam alone" % [level, seed], not lvl.rooms[0].is_cleared() and DailyRun.casts == 0)
+			check("%.2f room %d keeps the player before the exit" % [level, seed], player.position.x < RoomKit.cx(lvl.spec["rooms"][0]["x1"]))
+			if not player.is_dead:
+				lvl.reset_current_room()
+				await frames(70)
+				check("%.2f room %d reset restores unsolved objectives and player controls" % [level, seed], not lvl.rooms[0].is_cleared() and not player.controls_locked and not lvl.is_resetting)
+			await leave()
+
+
+func _solve_loaded(plan: Dictionary) -> bool:
+	var module := DailyModules.make(lvl.spec["rooms"][0]["module"])
+	if module.perform(lvl.pieces[0], plan) != "": return false
+	var drive := module.drive(lvl.pieces[0])
+	if not drive.is_empty():
+		player.teleport_to(drive["teleport"])
+		await frames(4)
+		for action in drive.get("hold", []): Input.action_press(action)
+	for tick in 120:
+		module.advance(lvl.pieces[0], player, tick * 0.1)
+		await frames(6)
+		if lvl.rooms[0].is_cleared() or player.is_dead: break
+	for action in drive.get("hold", []): Input.action_release(action)
+	Input.action_release("jump")
+	Input.action_release("sprint")
+	await frames(60)
+	return lvl.rooms[0].is_cleared()
+
+
+func scenario_reset_solutions() -> void:
+	print("SCENARIO solved rooms reset and re-solve without duplicate scoring")
+	for level in [1.0, 2.0, 3.0, 4.0, 5.0]:
+		var tier := DailyDifficulty.tier_for(level)
+		var drawn := DailyGenerator.draw_room(DailyRng.new(9234), level, tier, DailyKit.words(tier), "")
+		# Include the previously ungated standalone wind mechanism.
+		if level == 1: drawn = {"module": "updraft", "params": UpdraftModule.new().fallback(tier)}
+		await _attack_open(drawn["module"], drawn["params"], tier, level)
+		var module := DailyModules.make(drawn["module"])
+		var plans := module.plans(drawn["params"], DailyKit.words(tier))
+		check("%.0f initial valid solution clears" % level, await _solve_loaded(plans[0]))
+		check("%.0f solved exit opens" % level, lvl.pieces[0]["gate"].open_amount > 0.9)
+		lvl.reset_current_room()
+		await frames(70)
+		check("%.0f reset closes exit and restores controls" % level, not lvl.rooms[0].is_cleared() and lvl.pieces[0]["gate"].open_amount < 0.1 and not player.controls_locked)
+		check("%.0f a different valid inscription re-solves" % level, await _solve_loaded(plans[1]))
+		check("%.0f exit reopens without scoring twice" % level, lvl.pieces[0]["gate"].open_amount > 0.9 and DailyRun.rooms_cleared == 1)
+		await leave()
+
+
+func scenario_challenge_rules() -> void:
+	print("SCENARIO rune requirements and optional personal magic")
+	await leave()
+	var story_flags := GameState.flags.duplicate(true)
+	var story_abilities := GameState.all_abilities
+	var pad_before := InputLabels.use_pad
+	var params := {"kind": 0, "distance": 2}
+	for optional in [false, true]:
+		DailyRun.start("trial", 4242, 0, 3, 2)
+		DailyRun.spec_override = spec_for(params, 2, "burn_through")
+		DailyRun.spec_override["rooms"][0]["personal_fire"] = optional
+		await open(DailyRun.SCENE)
+		var part: Dictionary = lvl.pieces[0]
+		var barrier: Burnable = part["barrier"]
+		player.controls_locked = false
+		player.teleport_to(barrier.global_position + Vector2(-90, -2))
+		await frames(6)
+		InputLabels.use_pad = true
+		player.animated_sprite.flip_h = false
+		var mana_before: float = player.current_mana
+		player.shoot_fireball()
+		await seconds(1.0)
+		check("personal Fire follows the room rule (%s)" % optional, GameState.has_ability("fire") == optional)
+		check("brambles resist a denied spell, but accept an explicitly allowed Fire route (%s)" % optional,
+			barrier.is_cleared == optional and (player.current_mana < mana_before if optional else player.current_mana == mana_before))
+		check("the optional Fire route needs no cube cast (%s)" % optional, DailyRun.casts == 0)
+		check("Heal is available and Echo cannot substitute for rune machinery", GameState.has_ability("heal") and not GameState.has_ability("echo"))
+		await shot("spell_rule_%s" % optional)
+		lvl._on_room_entered(lvl.rooms[-1])
+		check("leaving an optional room seals personal Fire again", not GameState.has_ability("fire"))
+		await leave()
+		check("room spell rules leave story progress intact", GameState.flags == story_flags and GameState.all_abilities == story_abilities)
+	InputLabels.use_pad = pad_before
+	var module := BurnThroughModule.new()
+	for plan in module.plans(params, DailyKit.words(2)).slice(0, 2):
+		check("a required bramble room still has a working rune solution: " + plan["label"], await try_plan("burn_through", params, plan, 6, 2))
+	await leave()
+	var strict := true
+	var optional_count := 0
+	var second_mechanisms := {}
+	var grand_tier := DailyDifficulty.tier_for(4)
+	for seed in 100:
+		var grand := DailyGenerator.generate(seed, 4, grand_tier)
+		for room in grand["rooms"]:
+			strict = strict and room.has("beats") and room.get("reuse", false) and not room.get("personal_fire", true)
+			var second_id := String(room["beats"][1]["module"])
+			strict = strict and second_id in ["updraft", "dark_hall", "prism_relay"]
+			second_mechanisms[second_id] = true
+		for room in DailyGenerator.generate(seed, 3, 2)["rooms"]:
+			optional_count += int(room.get("personal_fire", false))
+	check("Grand always requires reused-cube magic and a non-bypassable mechanism", strict)
+	check("Grand varies vertical wind, hidden stones and reflected light", second_mechanisms.size() == 3)
+	check("Hard still includes intentional personal Fire alternatives", optional_count > 0, str(optional_count))
+	# Reproduce today's complete Grand, proving two working solutions per room.
+	var today := DailyRng.day_index(2026, 10, 11)
+	var today_spec := DailyGenerator.generate(DailyGenerator.seed_for_day(today), 4, grand_tier)
+	check("the reported date is Grand and its new spec is oracle-valid", DailyGenerator.difficulty_for_day(today) == 4 and DailyOracle.validate(today_spec)["ok"])
+	DailyRun.start_day(today)
+	await open(DailyRun.SCENE)
+	await seconds(0.6)
+	check("Grand rule screen renders to an inspection image", get_viewport().get_texture().get_image().save_png(
+		ProjectSettings.globalize_path("res://.godot/challenge-grand.png")) == OK)
+	await leave()
+	for i in today_spec["rooms"].size():
+		var room: Dictionary = today_spec["rooms"][i]
+		for plan in DailyChain.new().plans(room["params"], today_spec["kit"]).slice(0, 2):
+			check("today's Grand room %d clears with %s" % [i + 1, plan["label"]], await try_plan("chain", room["params"], plan, 22, grand_tier))
+	await leave()
+
+## Exercise onboarding with tours enabled: the normal runner disables them.
+func scenario_cube_help() -> void:
+	print("SCENARIO challenge cube help stays optional")
+	await leave()
+	var original_flags := GameState.flags.duplicate(true)
+	var tours_enabled := UiTour.enabled
+	UiTour.enabled = true
+	GameState.flags.erase("ui.tour.runes")
+	for mode in ["daily", "practice", "endless"]:
+		if mode == "endless":
+			DailyRun.start_endless(1, 12345)
+		else:
+			DailyRun.start(mode, 12345, 300, 1, 1)
+		await open(DailyRun.SCENE)
+		for attempt in 2:
+			var cube := get_tree().get_first_node_in_group("rune_cube") as RuneCube
+			player.teleport_to(cube.global_position + Vector2(-140, -2))
+			await frames(10)
+			player.teleport_to(cube.global_position + Vector2(-30, -2))
+			await seconds(1.5)
+			check("%s cube approach %d does not open or pause a tutorial" % [mode, attempt + 1],
+				not is_instance_valid(UiTour.current) and not get_tree().paused)
+			if is_instance_valid(UiTour.current):
+				UiTour.current.close()
+				await frames(3)
+		# Reload the generated scene as a death/restart does.
+		await open(DailyRun.SCENE)
+		var reloaded_cube := get_tree().get_first_node_in_group("rune_cube") as RuneCube
+		reloaded_cube._on_reached(player)
+		await seconds(1.5)
+		check("%s reload does not bring automatic cube help back" % mode,
+			not is_instance_valid(UiTour.current) and not get_tree().paused)
+		if is_instance_valid(UiTour.current):
+			UiTour.current.close()
+			await frames(3)
+		var help := UiTour.play(lvl, "runes", true)
+		check("%s explicit rune help still opens" % mode, is_instance_valid(help) and get_tree().paused)
+		if is_instance_valid(help):
+			help.close()
+			await frames(3)
+		await leave()
+		check("%s leaves story rune onboarding unseen" % mode, not GameState.has_flag("ui.tour.runes"))
+	GameState.flags["ui.tour.runes"] = true
+	DailyRun.start("daily", 12345, 300, 1, 1)
+	await open(DailyRun.SCENE)
+	await leave()
+	check("an existing story rune tutorial flag is preserved", GameState.has_flag("ui.tour.runes"))
+	GameState.flags = original_flags
+	UiTour.enabled = tours_enabled
 
 func scenario_rng() -> void:
 	print("SCENARIO the daily random numbers")
@@ -251,7 +1363,7 @@ func scenario_level() -> void:
 	var spec: Dictionary = lvl.spec
 	check("it built one room per module plus the bell hall", lvl.rooms.size() == spec["rooms"].size() + 1, str(lvl.rooms.size()))
 	check("the player stands in the first room", lvl.current_room != null and lvl.current_room.room_id == "daily.r1")
-	check("everyone has the three abilities", state.has_ability("fire") and state.has_ability("heal") and state.has_ability("echo"))
+	check("rune rooms lend Heal but seal personal Fire and Echo", not state.has_ability("fire") and state.has_ability("heal") and not state.has_ability("echo"))
 	check("the story's save is not written during the run", not state.persist_to_disk)
 	check("the lent vocabulary replaces the story's", RuneManager.knows(&"right") and not RuneManager.knows(&"fire"))
 	var cubes := get_tree().get_nodes_in_group("rune_cube")
@@ -306,11 +1418,14 @@ func try_plan(module_id: String, params: Dictionary, plan: Dictionary, wait := 7
 	var cleared := false
 	var t := 0.0
 	while t < wait and not cleared:
+		module.advance(lvl.pieces[0], player, t)
 		await frames(6)
 		t += 0.1
 		cleared = room.is_cleared()
 	for action in drive.get("hold", []):
 		Input.action_release(action)
+	Input.action_release("jump")
+	Input.action_release("sprint")
 	return cleared
 
 
@@ -740,6 +1855,12 @@ func scenario_difficulty() -> void:
 		var module := DailyModules.make(id)
 		for tier in range(1, DailyKit.MAX_TIER + 1):
 			var kit := DailyKit.words(tier)
+			if module is DailyMechanism:
+				if tier < module.min_tier: continue
+				var params := DailyVerified.sample(id, DailyRng.new(205).fork(id + str(tier)), tier)
+				var measured := module.score_parts(params, kit)
+				print("  R %s tier %d: %.2f, %d verified ways, %s" % [id, tier, DailyDifficulty.total(measured), measured["plans"], params])
+				continue
 			var line := "  R %-12s tier %d:" % [id, tier]
 			for lock in [0, 1, 2]:
 				var p := module.fallback(tier)
@@ -804,3 +1925,339 @@ func scenario_difficulty() -> void:
 	var room := DailyGenerator.endless_room(77, 3, 2)
 	check("an Endless room is one room and a stair out", room["rooms"].size() == 1 and room.has("exit") and room["endless"])
 	check("the same run seed and room number give the same room", DailyGenerator.endless_room(77, 3, 2)["digest"] == room["digest"])
+
+
+func scenario_endless() -> void:
+	print("SCENARIO Endless lifecycle, records and sharing")
+	var story_canvas := get_tree().root.content_scale_size
+	var story_abilities := GameState.all_abilities
+	var story_kit := RuneManager.kit_override.duplicate()
+	var story_flags := GameState.flags.duplicate(true)
+	DailyStore.persist = false
+	DailyRun.start_endless(2, 1234)
+	check("Endless starts with three lives and a stair spec", DailyRun.mode == "endless" and DailyRun.lives == 3 and DailyRun.endless_k == 0 and DailyRun.spec_override.has("exit"))
+	await open(DailyRun.SCENE)
+	check("puzzle and stair are built", lvl.rooms.size() == 2 and lvl.exit_door != null and lvl.bell == null)
+	check("Endless HUD shows the room and lives", lvl.endless_label.text.contains("Room 1") and lvl.endless_label.text.contains("Lives 3"))
+	check("generated UI uses the physical window size", get_viewport().get_visible_rect().size == Vector2(get_tree().root.size))
+	await seconds(1.5)
+	await shot("endless_hud")
+	var entry: Dictionary = lvl.spec["rooms"][0]
+	var module := DailyModules.make(entry["module"])
+	var plan: Dictionary = module.plans(entry["params"], lvl.spec["kit"])[0]
+	check("first Endless room solves in physics", await try_plan(module.id, entry["params"], plan, 9, DailyRun.tier))
+	await leave()
+	DailyRun.start_endless(2, 1234)
+	await open(DailyRun.SCENE)
+	entry = lvl.spec["rooms"][0]
+	module = DailyModules.make(entry["module"])
+	plan = module.plans(entry["params"], lvl.spec["kit"])[0]
+	module.perform(lvl.pieces[0], plan)
+	var drive := module.drive(lvl.pieces[0])
+	if not drive.is_empty():
+		player.teleport_to(drive["teleport"])
+		for action in drive.get("hold", []): Input.action_press(action)
+	await seconds(9)
+	for action in drive.get("hold", []): Input.action_release(action)
+	var rune_hud: RuneHud = lvl.get_node("RuneManager").hud
+	check("active rune status and Endless HUD occupy separate rows", lvl.endless_label.get_global_rect().position.y >= rune_hud._panel.get_global_rect().end.y + 2)
+	shot("endless_hud_active")
+	var digest: int = lvl.spec["digest"]
+	player.teleport_to(lvl.exit_door.global_position)
+	await seconds(2)
+	lvl = get_tree().current_scene
+	player = lvl.get_node("Player")
+	check("door advances and generates a fresh room without counting the old room again", DailyRun.rooms_cleared == 0 and DailyRun.endless_k == 1 and DailyRun.run_rooms == 1 and lvl.spec["digest"] != digest)
+	digest = lvl.spec["digest"]
+	for life in [2, 1]:
+		player.die()
+		await seconds(2)
+		check("death removes one life", DailyRun.lives == life)
+		lvl.death_screen.restart_level()
+		await seconds(2)
+		lvl = get_tree().current_scene
+		player = lvl.get_node("Player")
+		check("death rebuilds the same room", lvl.spec["digest"] == digest)
+		check("observation baseline survives death", DailyRun.room_started.has(0) and DailyRun.room_started[0]["deaths"] == 0)
+	player.die()
+	await seconds(2)
+	var card: EndlessCard
+	for child in lvl.get_children():
+		if child is EndlessCard: card = child
+	check("third death ends the climb without restart input", card != null and card.kind == "over" and not lvl.death_screen.is_processing_input())
+	await seconds(1)
+	await shot("endless_over")
+	check("Endless share code round trips and the board refuses it", bool(DailyScore.decode(card.code).get("endless", false)) and DailyStore.add_friend("Test", card.code).contains("Endless"))
+	get_tree().paused = false
+	await leave()
+	DailyRun.start_endless(2, 1234)
+	DailyRun.endless_k = 9
+	DailyRun.run_rooms = 9
+	DailyRun.lives = 1
+	DailyRun.prepare_endless_room()
+	await open(DailyRun.SCENE)
+	entry = lvl.spec["rooms"][0]
+	module = DailyModules.make(entry["module"])
+	plan = module.plans(entry["params"], lvl.spec["kit"])[0]
+	module.perform(lvl.pieces[0], plan)
+	drive = module.drive(lvl.pieces[0])
+	if not drive.is_empty():
+		player.teleport_to(drive["teleport"])
+		for action in drive.get("hold", []): Input.action_press(action)
+	await seconds(9)
+	for action in drive.get("hold", []): Input.action_release(action)
+	player.teleport_to(lvl.exit_door.global_position)
+	await seconds(1)
+	card = null
+	for child in lvl.get_children():
+		if child is EndlessCard: card = child
+	check("tenth room gives a rest and one life back", card != null and card.kind == "rest" and DailyRun.lives == 2 and DailyRun.endless_k == 10)
+	await seconds(1)
+	await shot("endless_rest")
+	if card: card.keep_button.pressed.emit()
+	await seconds(2)
+	lvl = get_tree().current_scene
+	check("keep climbing loads room eleven", lvl is DailyRoot and lvl.endless_label.text.contains("Room 11"))
+	DailyStore.endless_best = {}
+	check("record keeps rooms before score and resolves ties", DailyStore.record_endless(2, 10, 8000, 2.5) and not DailyStore.record_endless(2, 9, 9000, 2.5) and DailyStore.record_endless(2, 10, 8100, 2.5) and not DailyStore.record_endless(2, 10, 8000, 2.5))
+	await leave()
+	check("leaving restores the story canvas size", get_tree().root.content_scale_size == story_canvas)
+	check("leaving Endless restores story abilities, vocabulary and flags", GameState.all_abilities == story_abilities and RuneManager.kit_override == story_kit and GameState.flags == story_flags)
+
+
+func scenario_module_probe() -> void:
+	var measured := {}
+	for id in ["folded_wall", "together", "burn_through", "dark_hall"]:
+		var module := DailyModules.make(id) as DailyMechanism
+		var entries: Array = []
+		for params in module.parameter_grid():
+			var working: Array = []
+			for plan in module.plans(params, DailyKit.words(5)):
+				var cleared: bool = await try_plan(id, params, plan, 9.0, 5)
+				print("PROBE ", id, " ", params, " ", plan["label"], " ", cleared)
+				if cleared: working.append(plan)
+			entries.append({"params": params, "plans": working})
+		measured[id] = entries
+		var file := FileAccess.open("res://.godot/module-probe.json", FileAccess.WRITE)
+		file.store_string(JSON.stringify(measured, "\t"))
+		file.close()
+
+
+func scenario_verified_fresh() -> void:
+	check("the verified table is complete and matches the current physics sources", DailyVerified.fresh() and bool(DailyVerified.table.get("complete", false)))
+	for id in DailyModules.IDS:
+		var module := DailyModules.make(id)
+		check("%s has a layout with two physics-verified solutions at its first tier" % id, DailyVerified.has_module(id, module.min_tier))
+
+func scenario_new_modules() -> void:
+	for id in DailyModules.IDS.slice(3):
+		var module := DailyModules.make(id)
+		var params := DailyVerified.sample(id, DailyRng.new(4142).fork(id), module.min_tier)
+		check("%s samples a verified layout" % id, not params.is_empty())
+		if params.is_empty(): continue
+		for plan in module.plans(params, DailyKit.words(module.min_tier)):
+			check("%s: %s clears in real physics" % [id, plan["label"]], await try_plan(id, params, plan, 9, module.min_tier))
+		var wrong: Dictionary = module.non_plans(params, DailyKit.words(module.min_tier))[0]
+		check("%s rejects an unrelated rune" % id, not await try_plan(id, params, wrong, 9, module.min_tier))
+
+	var impact := DailyModules.make("burn_through")
+	var impact_params := {"kind": 1, "distance": 2}
+	var impact_plans := impact.plans(impact_params, DailyKit.words(2))
+	check("cracked masonry offers sustained-wind and burst routes", impact_plans.size() >= 2)
+	for plan in impact_plans:
+		check("cracked wall: %s clears in rendered physics" % plan["label"], await try_plan("burn_through", impact_params, plan, 9, 2))
+
+func scenario_chains() -> void:
+	for level in [3.0, 4.0, 5.0]:
+		var entry := DailyGenerator.draw_room(DailyRng.new(221), level, DailyDifficulty.tier_for(level), DailyKit.words(DailyDifficulty.tier_for(level)), "")
+		if level == 3.0 and not entry.has("beats"): continue
+		check("level %.0f has two beats with the required reuse rule" % level, entry["beats"].size() == 2 and bool(entry.get("reuse", false)) == (level >= 4))
+		var module := DailyChain.new()
+		var plans := module.plans(entry["params"], DailyKit.words(DailyDifficulty.tier_for(level)))
+		check("chain has multiple verified combinations", plans.size() >= 2)
+		if level >= 4:
+			var first_module := DailyModules.make(entry["beats"][0]["module"])
+			var second_module := DailyModules.make(entry["beats"][1]["module"])
+			var first_name := String(first_module.open_slots(entry["beats"][0]["params"]).keys()[0])
+			var second_name := String(second_module.open_slots(entry["beats"][1]["params"]).keys()[0])
+			var different := true
+			for plan in plans:
+				if plan["beats"][0]["cubes"].get(first_name, "") == plan["beats"][1]["cubes"].get(second_name, ""): different = false
+			check("Grand and Master require a new inscription on the reused cube", different)
+		for plan in plans.slice(0,2):
+			check("chain %.0f: %s clears end to end" % [level, plan["label"]], await try_plan("chain", entry["params"], plan, 22, DailyDifficulty.tier_for(level)))
+
+func scenario_endless_long() -> void:
+	for start in range(1,5):
+		DailyRun.start_endless(start, 51454)
+		for room_number in 30:
+			var tick := Time.get_ticks_usec()
+			DailyRun.prepare_endless_room()
+			var generation_ms := (Time.get_ticks_usec() - tick) / 1000.0
+			check("%d/%d generates in under 50 ms" % [start,room_number + 1], generation_ms < 50, str(generation_ms))
+			check("%d/%d follows the ramp" % [start,room_number + 1], DailyRun.spec_override["level"] == DailyDifficulty.ramp(start,room_number))
+			await open(DailyRun.SCENE)
+			var room: Dictionary = lvl.spec["rooms"][0]
+			var module := DailyModules.make(room["module"])
+			var plan: Dictionary = module.plans(room["params"], lvl.spec["kit"])[0]
+			module.perform(lvl.pieces[0], plan)
+			var drive := module.drive(lvl.pieces[0])
+			if not drive.is_empty():
+				player.teleport_to(drive["teleport"])
+				for action in drive.get("hold", []): Input.action_press(action)
+			var elapsed := 0.0
+			while elapsed < 22 and not lvl.rooms[0].is_cleared():
+				module.advance(lvl.pieces[0], player, elapsed)
+				await frames(6)
+				elapsed += 0.1
+			for action in ["move_left", "move_right", "jump", "sprint"]: Input.action_release(action)
+			check("%d/%d solves in real physics" % [start,room_number + 1], lvl.rooms[0].is_cleared(), room["module"])
+			var old: WeakRef = weakref(lvl)
+			var nodes := get_tree().get_node_count()
+			check("%d/%d keeps a bounded scene tree" % [start,room_number + 1], nodes < 2400, str(nodes))
+			player.teleport_to(lvl.exit_door.global_position)
+			await seconds(1.5)
+			lvl = get_tree().current_scene
+			var rest: EndlessCard
+			for child in lvl.get_children():
+				if child is EndlessCard: rest = child
+			if rest:
+				rest.keep_button.pressed.emit()
+				await seconds(1.5)
+				lvl = get_tree().current_scene
+			check("old room is freed on transition", old.get_ref() == null)
+			check("room completion counted once", DailyRun.run_rooms == room_number + 1 and DailyRun.endless_k == room_number + 1)
+		await leave()
+
+func scenario_calibration() -> void:
+	var previous := DailyCalibration.file_path
+	DailyCalibration.file_path = "user://calibration-test.cfg"
+	DailyCalibration.persist = true
+	var file := ConfigFile.new()
+	var rows: Array = []
+	for i in 2005:
+		rows.append({"module": "gust_alley", "params": {}, "tier": 1, "r": 2.0, "time": float(i), "resets": 0, "hints": 0, "deaths": 0})
+	rows.append({"module": "damaged"})
+	file.set_value("stats", "rows", rows)
+	file.save(DailyCalibration.file_path)
+	DailyCalibration.append({"module": "updraft", "params": {}, "tier": 1, "r": 3.0, "time": 40.0, "resets": 1, "hints": 1, "deaths": 0})
+	file.load(DailyCalibration.file_path)
+	var stored := DailyCalibration.read_rows(file)
+	check("calibration stores only the last 2000 valid local observations", stored.size() == 2000 and stored[-1]["module"] == "updraft")
+	DailyCalibration.file_path = previous
+	DailyCalibration.persist = false
+
+
+func scenario_endless_persistence() -> void:
+	var previous := DailyStore.file_path
+	DailyStore.file_path = "user://endless-test.cfg"
+	DailyStore.persist = true
+	DailyStore.forget()
+	DailyStore._loaded = true
+	DailyStore.record_endless(2, 12, 11450, 2.5)
+	DailyStore.forget()
+	DailyStore._loaded = false
+	var saved := DailyStore.endless_best_for(2)
+	check("Endless record survives a save/load round trip", saved.get("rooms") == 12 and saved.get("score") == 11450 and saved.get("level") == 2.5)
+	var file := ConfigFile.new()
+	file.set_value("daily", "endless_best", {"1": 42, "2": {"rooms": 12}, "5": {"rooms": 10, "score": 9000, "level": 3}, "3": {"rooms": -3, "score": "bad", "level": INF}})
+	file.save(DailyStore.file_path)
+	DailyStore.forget()
+	DailyStore.load_file()
+	check("damaged Endless entries are dropped and unsafe fields clamped", not DailyStore.endless_best.has("1") and not DailyStore.endless_best.has("2") and not DailyStore.endless_best.has("5") and DailyStore.endless_best_for(3) == {"rooms": 0, "score": 0, "level": 1.0})
+	DailyStore.file_path = previous
+	DailyStore.persist = false
+	DailyStore.forget()
+	DailyStore._loaded = true
+
+
+## Native screenshots and focus navigation at both desktop and handheld sizes.
+func scenario_render_procgen() -> void:
+	set_today(300)
+	await open("res://scenes/ui/title_screen.tscn")
+	var story_canvas := get_tree().root.content_scale_size
+	var menu := DailyMenu.open(lvl)
+	await seconds(1.5)
+	check("Daily menu uses a native-size canvas", get_viewport().get_visible_rect().size == Vector2(get_tree().root.size))
+	menu.endless_buttons[0].grab_focus()
+	await frames(2)
+	shot("procgen_menu")
+	for device in ["keyboard", "pad"]:
+		menu.endless_buttons[0].grab_focus()
+		await frames(2)
+		for i in range(1,4):
+			var event: InputEvent
+			if device == "keyboard":
+				var key := InputEventKey.new()
+				key.keycode = KEY_RIGHT
+				key.pressed = true
+				event = key
+			else:
+				var button := InputEventJoypadButton.new()
+				button.button_index = JOY_BUTTON_DPAD_RIGHT
+				button.pressed = true
+				event = button
+			Input.parse_input_event(event)
+			await frames(2)
+			event.set("pressed", false)
+			Input.parse_input_event(event)
+			check("%s focus moves right to choice %d" % [device, i + 1], menu.endless_buttons[i].has_focus())
+		for direction in ["down", "up", "up"]:
+			var event: InputEvent
+			if device == "keyboard":
+				var key := InputEventKey.new()
+				key.keycode = KEY_DOWN if direction == "down" else KEY_UP
+				key.pressed = true
+				event = key
+			else:
+				var button := InputEventJoypadButton.new()
+				button.button_index = JOY_BUTTON_DPAD_DOWN if direction == "down" else JOY_BUTTON_DPAD_UP
+				button.pressed = true
+				event = button
+			Input.parse_input_event(event)
+			await frames(3)
+			event.set("pressed", false)
+			Input.parse_input_event(event)
+			if direction == "down":
+				check("%s reaches Back from Endless" % device, menu.back_button.has_focus())
+				shot("procgen_menu_back")
+		check("%s returns through Endless to the practice button" % device, menu.play_button.has_focus())
+	menu.queue_free()
+	await frames(2)
+	check("closing Daily menu restores the title canvas size", get_tree().root.content_scale_size == story_canvas)
+	await leave()
+	for visual_id in DailyModules.IDS.slice(3) + ["burn_through_cracked"]:
+		var id: String = "burn_through" if visual_id == "burn_through_cracked" else visual_id
+		var module := DailyModules.make(id)
+		var params := {"kind": 1, "distance": 2} if visual_id == "burn_through_cracked" else DailyVerified.sample(id, DailyRng.new(321).fork(id), module.min_tier)
+		if params.is_empty(): continue
+		DailyRun.start("trial", 321, 0, 1, module.min_tier)
+		DailyRun.spec_override = spec_for(params, module.min_tier, id)
+		await open(DailyRun.SCENE)
+		var cube: Node2D = lvl.pieces[0]["cubes"].values()[0]
+		player.teleport_to(cube.global_position + Vector2(-80,0))
+		await seconds(2)
+		shot("module_" + visual_id)
+		# Inspect the complete world geometry separately from close-up HUD renders.
+		lvl.get_node("HUD").visible = false
+		lvl.get_node("AmmoUI").visible = false
+		lvl._title.visible = false
+		lvl._objective.visible = false
+		player.get_node("Camera2D").enabled = false
+		var overview := Camera2D.new()
+		overview.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
+		var bounds: Rect2 = lvl.rooms[0].bounds
+		var view := get_viewport().get_visible_rect().size
+		var zoom := minf((view.x - 32.0) / bounds.size.x, (view.y - 32.0) / bounds.size.y)
+		overview.zoom = Vector2(zoom, zoom)
+		overview.position = bounds.get_center()
+		lvl.add_child(overview)
+		overview.make_current()
+		await frames(6)
+		shot("overview_" + visual_id)
+		var plan: Dictionary = module.plans(params, lvl.spec["kit"])[0]
+		module.perform(lvl.pieces[0], plan)
+		await seconds(1)
+		shot("active_" + visual_id)
+		await leave()
+	DailyStore.now_provider = Callable()

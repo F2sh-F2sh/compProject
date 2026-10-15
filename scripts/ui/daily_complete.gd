@@ -52,13 +52,22 @@ func _build() -> void:
 	card.set_anchors_preset(Control.PRESET_CENTER)
 	card.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	card.grow_vertical = Control.GROW_DIRECTION_BOTH
-	card.custom_minimum_size = Vector2(600, 0)
+	var height := get_viewport().get_visible_rect().size.y - 40
+	card.offset_left = -300
+	card.offset_right = 300
+	card.offset_top = -height / 2
+	card.offset_bottom = height / 2
 	_root.add_child(card)
 	DungeonUI.decorate(card)
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 7)
-	card.add_child(box)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	card.add_child(scroll)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(box)
 
 	var heading: String = {"daily": "TODAY'S PUZZLE SOLVED", "practice": "PRACTICE RUN", "trial": "TRIAL SOLVED"}.get(mode, "PUZZLE SOLVED")
 	box.add_child(_line(heading, Fonts.UI, 16, GOLD_DIM))
@@ -100,7 +109,10 @@ func _build() -> void:
 
 	box.add_child(_line("THE WAYS THROUGH", Fonts.UI, 16, DIM))
 	for line in data.get("ways", []):
-		box.add_child(_line(String(line), FONT, 16, INK))
+		var way := _line(String(line), FONT, 16, INK)
+		way.custom_minimum_size.x = 540
+		way.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(way)
 
 	var streak_text := ""
 	if mode == "daily" and bool(info.get("ranked", false)):
@@ -188,6 +200,7 @@ func _again() -> void:
 
 
 func _to(scene: String) -> void:
+	if get_parent() is DailyRoot: get_parent()._transitioning = true
 	get_tree().paused = false
 	SceneFade.change(get_tree(), scene)
 

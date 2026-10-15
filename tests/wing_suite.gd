@@ -30,6 +30,8 @@ func run_suite(filter: String) -> void:
 		"smoke": scenario_smoke,
 		"landing": scenario_landing,
 		"k1": scenario_forge_parts,
+		"kiln_collisions": scenario_kiln_collisions,
+		"cutscene_speaker": scenario_cutscene_speaker,
 		"forge_broken": scenario_forge_broken,
 		"forge_full": scenario_forge_full,
 		"forge_page3": scenario_forge_page3,
@@ -3383,6 +3385,41 @@ func scenario_g2_look() -> void:
 ## Pages through one story reel and saves every line twice, partway through
 ## its movement and near its end (user://test_shots/reel_<kind>_<picture>_<line><a|b>.png),
 ## for looking at by eye.
+func scenario_kiln_collisions() -> void:
+	await load_scene(Journey.KILN)
+	for layer_name in ["Ground", "GroundHalf"]:
+		var layer := lvl.get_node(layer_name) as TileMapLayer
+		var shelves := 0
+		for cell in layer.get_used_cells():
+			var data := layer.get_cell_tile_data(cell)
+			if layer.get_cell_atlas_coords(cell).y == 1:
+				shelves += 1
+				check("%s shelf %s allows ascent from below" % [layer_name, cell], data.is_collision_polygon_one_way(0, 0))
+			else:
+				check("%s floor %s stays solid" % [layer_name, cell], not data.is_collision_polygon_one_way(0, 0))
+		check("%s contains shelves" % layer_name, shelves > 0)
+	var shared := load("res://assets/TileSet/dungeon_tileset.tres") as TileSet
+	var source := shared.get_source(0) as TileSetAtlasSource
+	check("other chapters retain solid shelves", not source.get_tile_data(Vector2i(1, 1), 0).is_collision_polygon_one_way(0, 0))
+
+
+func scenario_cutscene_speaker() -> void:
+	var reel := StoryIntro.new()
+	add_child(reel)
+	await seconds(1.2)
+	reel._show_speaker("echidna", "neutral")
+	await seconds(0.4)
+	check("Echidna's cutscene overlay is hidden", not reel._speaker_art.visible)
+	check("her speaker name remains", reel._speaker_plate.modulate.a > 0.99)
+	reel._show_speaker("nan", "calm")
+	await seconds(0.4)
+	check("the next speaker's portrait returns", reel._speaker_art.visible and reel._speaker_art.modulate.a > 0.99)
+	reel._show_speaker("echidna", "determined")
+	check("returning to Echidna hides her overlay immediately", not reel._speaker_art.visible)
+	reel.queue_free()
+	await get_tree().process_frame
+
+
 func scenario_reel_look(kind: String) -> void:
 	print("SCENARIO look at the %s reel" % kind)
 	ChapterComplete.pending = {}

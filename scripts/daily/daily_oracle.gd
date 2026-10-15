@@ -30,6 +30,14 @@ static func validate(spec: Dictionary) -> Dictionary:
 			continue
 		if module.min_tier > int(spec["tier"]):
 			reasons.append("room %d: %s needs vocabulary tier %d" % [i + 1, module.id, module.min_tier])
+		if room.has("beats"):
+			if room["beats"].size() != 2: reasons.append("room %d: a chain needs two beats" % (i + 1))
+			for beat in room["beats"]:
+				var beat_module := DailyModules.make(String(beat["module"]))
+				if beat_module == null or beat_module.min_tier > int(spec["tier"]):
+					reasons.append("room %d: invalid beat vocabulary" % (i + 1))
+				elif beat_module.plans(beat["params"], kit).size() < MIN_PLANS:
+					reasons.append("room %d: unverified beat" % (i + 1))
 		var plans := module.plans(room["params"], kit)
 		all_plans.append(plans)
 		if plans.size() < MIN_PLANS:

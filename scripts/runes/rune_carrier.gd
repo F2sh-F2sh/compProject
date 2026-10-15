@@ -87,7 +87,8 @@ func try_pick_up() -> String:
 	var why := ""
 	if cube.mounted or not cube.carryable:
 		why = "This cube is fixed in place."
-	elif cube.is_active:
+	elif cube.is_active and not (bool(cube.get_meta(&"daily_portal_carry", false))
+			and is_instance_valid(cube.effect) and cube.effect is RunePortal):
 		why = "Switch the cube off before you move it."
 	if why != "":
 		_say(cube.centre() + Vector2(0, -30), why, true)

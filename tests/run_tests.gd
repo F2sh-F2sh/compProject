@@ -18,12 +18,14 @@ func _process(_delta: float) -> bool:
 
 
 func _run() -> void:
-	root.size = Vector2i(1152, 648)
 	if DisplayServer.get_name() == "headless":
 		print("BACKGROUND: no desktop input or screenshots; targeted projectile helpers bypass mouse aiming, cost and cooldown.")
 	var args := OS.get_cmdline_user_args()
 	var suite_name: String = args[0] if args.size() > 0 else "all"
 	var scenario: String = args[1] if args.size() > 1 else ""
+	# Keep the authored viewport used by the existing story regressions.
+	# Daily acceptance also exercises the actual handheld window size.
+	root.size = DisplayServer.window_get_size() if suite_name == "daily" and DisplayServer.get_name() != "headless" else Vector2i(1152, 648)
 	# Tests must never read or overwrite a player's real save file
 	var game_state := root.get_node("GameState")
 	game_state.persist_to_disk = false
@@ -44,6 +46,7 @@ func _run() -> void:
 	# (loaded at run time for the same reason: it reaches the autoloads)
 	var daily_store: GDScript = load("res://scripts/daily/daily_store.gd")
 	daily_store.set("persist", false)
+	load("res://scripts/daily/daily_calibration.gd").set("persist", false)
 	# hint skulls answer at once (one wing scenario checks the wait)
 	settings.assist_instant_hints = true
 	# The player's own settings file must not change what the tests see

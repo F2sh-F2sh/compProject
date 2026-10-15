@@ -47,6 +47,11 @@ func fallback(_tier: int) -> Dictionary:
 
 
 func plans(params: Dictionary, kit: PackedStringArray) -> Array:
+	if not DailyVerified.bypass: return DailyVerified.plans(id, params, kit)
+	return raw_plans(params, kit)
+
+
+func raw_plans(params: Dictionary, kit: PackedStringArray) -> Array:
 	var out: Array = []
 	var layout := "%d/%d" % [params["gap"], params["run"]]
 	if not VERIFIED.has(layout) or not kit.has("wind") or not kit.has("push") or not kit.has("right"):

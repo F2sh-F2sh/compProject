@@ -164,3 +164,16 @@ static func words_of_kind(kit: PackedStringArray, kind: int) -> int:
 		if RuneFragments.kind_of(StringName(w)) == kind:
 			n += 1
 	return n
+
+
+## A beat owns its own puzzle gate, but never builds another shell.
+func build_beat(k: RoomKit, room: Room, c0: int, c1: int, params: Dictionary, words: PackedStringArray) -> Dictionary:
+	return build(k, room, c0, c1, params, words)
+
+## Optional deterministic physical driver, used only by verification tools.
+func advance(_pieces: Dictionary, _player: CharacterBody2D, _elapsed: float) -> void:
+	pass
+
+
+func update_runtime(_pieces: Dictionary) -> void:
+	pass

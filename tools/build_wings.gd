@@ -238,6 +238,8 @@ const KILN_ROAR_FLAG := "kiln.r1.kiln"
 
 func build_kiln() -> void:
 	begin("Kiln", "kiln", "The Kilnworks", Journey.KILN_INTERLUDE, Journey.WINGS[0]["words"])
+	for platforms in [ground, ground_half]:
+		platforms.set_script(load("res://scripts/puzzle/kiln_platforms.gd"))
 	level.set("total_pages", 6)
 	(level.get_node("Darkness") as CanvasModulate).color = KILN_COLD
 	kiln_cold_forge()

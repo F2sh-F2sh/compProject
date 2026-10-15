@@ -42,7 +42,10 @@ static func par_seconds(spec: Dictionary) -> float:
 	for room in spec["rooms"]:
 		var module := DailyModules.make(String(room["module"]))
 		if module:
-			total += module.par_seconds
+			if room.has("beats"):
+				for beat in room["beats"]: total += DailyModules.make(beat["module"]).par_seconds
+			else:
+				total += module.par_seconds
 	return total
 
 
@@ -79,7 +82,7 @@ static func encode(result: Dictionary) -> String:
 	var day := clampi(int(result.get("day", 0)), 0, 65535)
 	bytes.append(day >> 8)
 	bytes.append(day & 255)
-	bytes.append((clampi(int(result.get("version", 1)), 0, 15) << 4) | (clampi(int(result.get("difficulty", 1)) - 1, 0, 3) << 2) | 0)
+	bytes.append((clampi(int(result.get("version", 1)), 0, 15) << 4) | (clampi(int(result.get("difficulty", 1)) - 1, 0, 3) << 2) | (1 if bool(result.get("endless", false)) else 0))
 	bytes.append(clampi(int(result.get("tier", 1)), 0, 15))
 	var score := clampi(int(result.get("score", 0)), 0, 1023)
 	bytes.append(score >> 8)
@@ -113,6 +116,7 @@ static func decode(code: String) -> Dictionary:
 	if _checksum(body) != sum:
 		return {}
 	return {
+		"endless": bool(body[2] & 1),
 		"day": (body[0] << 8) | body[1],
 		"version": body[2] >> 4,
 		"difficulty": ((body[2] >> 2) & 3) + 1,
@@ -129,6 +133,8 @@ static func decode(code: String) -> Dictionary:
 
 ## A line to paste into a chat.
 static func share_text(result: Dictionary, code: String) -> String:
+	if bool(result.get("endless", false)):
+		return "The Sealed Belfry Endless, %s: %d rooms, %d pts a room  %d hint(s)\n%s" % [DailyDifficulty.name_of(float(result["difficulty"])), int(result["day"]), int(result["score"]), int(result["hints"]), code]
 	var stars := "*".repeat(int(result["stars"])) + "-".repeat(3 - int(result["stars"]))
 	var seconds := int(round(float(result["time"])))
 	return "The Sealed Belfry daily %s  [%s]  %d pts  %d:%02d  %d hint(s)\n%s" % [

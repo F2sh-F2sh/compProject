@@ -189,6 +189,9 @@ func _clamp_offset(wanted: Vector2) -> Vector2:
 
 
 func _apply() -> void:
+	# A chapter can be detached before its queued deletion. Restoring the
+	# story canvas during that gap still emits the viewport resize signal.
+	if not is_inside_tree(): return
 	_set_limits(bounds)
 	var view := get_viewport_rect().size
 	var fit := maxf(view.x / bounds.size.x, view.y / bounds.size.y)

@@ -1,0 +1,1431 @@
+{
+	"failed": 0,
+	"generator_version": 10,
+	"named": [
+		{
+			"band": [
+				1.5,
+				3.0
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"max_r": 2.3,
+			"mean_parts": {
+				"concept": 1.0,
+				"decoys": 0.0,
+				"execution": 0.666666666666667,
+				"search": 0.0,
+				"steps": 1.0
+			},
+			"mean_r": 2.13333333333338,
+			"mechanisms": {
+				"gust_alley": 500,
+				"updraft": 1000
+			},
+			"median_r": 2.3,
+			"min_r": 1.8,
+			"minimum_plans": 2,
+			"name": "Gentle",
+			"p10_r": 1.8,
+			"p90_r": 2.3,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 1500,
+			"tier": 1
+		},
+		{
+			"band": [
+				3.0,
+				4.0
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"max_r": 3.8,
+			"mean_parts": {
+				"concept": 1.5,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.23382394648912,
+				"steps": 1.0
+			},
+			"mean_r": 3.53382394648913,
+			"mechanisms": {
+				"dead_weight": 1000,
+				"gust_alley": 1000
+			},
+			"median_r": 3.47807190511264,
+			"min_r": 3.38496250072116,
+			"minimum_plans": 2,
+			"name": "Steady",
+			"p10_r": 3.38496250072116,
+			"p90_r": 3.8,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 2000,
+			"tier": 1
+		},
+		{
+			"band": [
+				4.5,
+				6.69999980926514
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"max_r": 6.62192809488736,
+			"mean_parts": {
+				"concept": 1.6935,
+				"decoys": 0.0,
+				"execution": 0.26,
+				"search": 2.90035261378784,
+				"steps": 1.0
+			},
+			"mean_r": 5.52385261378796,
+			"mechanisms": {
+				"dead_weight": 523,
+				"gust_alley": 613,
+				"kindling": 344,
+				"updraft": 520
+			},
+			"median_r": 5.12192809488736,
+			"min_r": 4.70689059560852,
+			"minimum_plans": 3,
+			"name": "Hard",
+			"p10_r": 4.70689059560852,
+			"p90_r": 6.62192809488736,
+			"personal_fire_percent": 17.2,
+			"reuse_percent": 0.0,
+			"rooms": 2000,
+			"tier": 2
+		},
+		{
+			"band": [
+				8.0,
+				12.0
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 96.88,
+			"max_r": 14.0699250014423,
+			"mean_parts": {
+				"concept": 4.1708,
+				"decoys": 0.0,
+				"execution": 0.3436,
+				"search": 4.35540466320769,
+				"steps": 3.0
+			},
+			"mean_r": 11.0980046632078,
+			"mechanisms": {
+				"burn_through": 20,
+				"dark_hall": 1230,
+				"dead_weight": 1013,
+				"kindling": 201,
+				"prism_relay": 1677,
+				"updraft": 859
+			},
+			"median_r": 11.0699250014423,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"name": "Grand",
+			"p10_r": 10.5699250014423,
+			"p90_r": 11.747996906555,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 2500,
+			"tier": 4
+		},
+		{
+			"band": [
+				10.0,
+				15.0
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 100.0,
+			"max_r": 14.9875420036439,
+			"mean_parts": {
+				"concept": 4.164,
+				"decoys": 0.0,
+				"execution": 0.354,
+				"search": 6.21591385224333,
+				"steps": 3.0
+			},
+			"mean_r": 12.9569138522434,
+			"mechanisms": {
+				"burn_through": 48,
+				"dark_hall": 209,
+				"dead_weight": 150,
+				"folded_wall": 64,
+				"kindling": 66,
+				"prism_relay": 286,
+				"updraft": 177
+			},
+			"median_r": 13.2398500028846,
+			"min_r": 10.7808217839409,
+			"minimum_plans": 4,
+			"name": "Master",
+			"p10_r": 10.8918530963297,
+			"p90_r": 14.713781191217,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 500,
+			"tier": 5
+		}
+	],
+	"passed": 186,
+	"quarters": [
+		{
+			"band": [
+				1.5,
+				3.0
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.0,
+			"max_r": 2.3,
+			"mean_parts": {
+				"concept": 1.0,
+				"decoys": 0.0,
+				"execution": 0.64,
+				"search": 0.0,
+				"steps": 1.0
+			},
+			"mean_r": 2.12000000000001,
+			"mechanisms": {
+				"gust_alley": 90,
+				"updraft": 160
+			},
+			"median_r": 2.3,
+			"min_r": 1.8,
+			"minimum_plans": 2,
+			"name": "Gentle",
+			"p10_r": 1.8,
+			"p90_r": 2.3,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				1.875,
+				3.25
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.25,
+			"max_r": 2.3,
+			"mean_parts": {
+				"concept": 1.0,
+				"decoys": 0.0,
+				"execution": 1.0,
+				"search": 0.0,
+				"steps": 1.0
+			},
+			"mean_r": 2.3,
+			"mechanisms": {
+				"updraft": 250
+			},
+			"median_r": 2.3,
+			"min_r": 2.3,
+			"minimum_plans": 2,
+			"name": "Gentle +1",
+			"p10_r": 2.3,
+			"p90_r": 2.3,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				2.25,
+				3.5
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.5,
+			"max_r": 3.47807190511264,
+			"mean_parts": {
+				"concept": 1.008,
+				"decoys": 0.0,
+				"execution": 0.18,
+				"search": 1.29241412582648,
+				"steps": 1.0
+			},
+			"mean_r": 3.19041412582647,
+			"mechanisms": {
+				"dead_weight": 2,
+				"gust_alley": 203,
+				"updraft": 45
+			},
+			"median_r": 3.38496250072116,
+			"min_r": 2.3,
+			"minimum_plans": 2,
+			"name": "Gentle +2",
+			"p10_r": 2.3,
+			"p90_r": 3.38496250072116,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				2.625,
+				3.75
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.75,
+			"max_r": 3.47807190511264,
+			"mean_parts": {
+				"concept": 1.056,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.53417662736707,
+				"steps": 1.0
+			},
+			"mean_r": 3.39017662736707,
+			"mechanisms": {
+				"dead_weight": 14,
+				"gust_alley": 236
+			},
+			"median_r": 3.38496250072116,
+			"min_r": 3.38496250072116,
+			"minimum_plans": 2,
+			"name": "Gentle +3",
+			"p10_r": 3.38496250072116,
+			"p90_r": 3.38496250072116,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				3.0,
+				4.0
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.0,
+			"max_r": 3.8,
+			"mean_parts": {
+				"concept": 1.452,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.28461785131572,
+				"steps": 1.0
+			},
+			"mean_r": 3.53661785131572,
+			"mechanisms": {
+				"dead_weight": 113,
+				"gust_alley": 137
+			},
+			"median_r": 3.47807190511264,
+			"min_r": 3.38496250072116,
+			"minimum_plans": 2,
+			"name": "Steady",
+			"p10_r": 3.38496250072116,
+			"p90_r": 3.8,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				3.375,
+				4.67500019073486
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.25,
+			"max_r": 3.8,
+			"mean_parts": {
+				"concept": 1.052,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.93125973906586,
+				"steps": 1.0
+			},
+			"mean_r": 3.78325973906584,
+			"mechanisms": {
+				"dead_weight": 13,
+				"gust_alley": 237
+			},
+			"median_r": 3.8,
+			"min_r": 3.47807190511264,
+			"minimum_plans": 2,
+			"name": "Steady +1",
+			"p10_r": 3.8,
+			"p90_r": 3.8,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				3.75,
+				5.34999990463257
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.5,
+			"max_r": 4.9926450779424,
+			"mean_parts": {
+				"concept": 2.0,
+				"decoys": 0.0,
+				"execution": 0.932,
+				"search": 1.6262849159722,
+				"steps": 1.0
+			},
+			"mean_r": 4.89228491597221,
+			"mechanisms": {
+				"dead_weight": 17,
+				"updraft": 233
+			},
+			"median_r": 4.88496250072116,
+			"min_r": 4.88496250072116,
+			"minimum_plans": 2,
+			"name": "Steady +2",
+			"p10_r": 4.88496250072116,
+			"p90_r": 4.88496250072116,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				4.125,
+				6.02499961853027
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.75,
+			"max_r": 4.9926450779424,
+			"mean_parts": {
+				"concept": 2.0,
+				"decoys": 0.0,
+				"execution": 0.016,
+				"search": 2.18292215670686,
+				"steps": 1.0
+			},
+			"mean_r": 4.99092215670684,
+			"mechanisms": {
+				"dead_weight": 246,
+				"updraft": 4
+			},
+			"median_r": 4.9926450779424,
+			"min_r": 4.88496250072116,
+			"minimum_plans": 2,
+			"name": "Steady +3",
+			"p10_r": 4.9926450779424,
+			"p90_r": 4.9926450779424,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				4.5,
+				6.69999980926514
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.0,
+			"max_r": 6.62192809488736,
+			"mean_parts": {
+				"concept": 1.66,
+				"decoys": 0.0,
+				"execution": 0.244,
+				"search": 2.90765479249227,
+				"steps": 1.0
+			},
+			"mean_r": 5.48965479249228,
+			"mechanisms": {
+				"dead_weight": 64,
+				"gust_alley": 85,
+				"kindling": 40,
+				"updraft": 61
+			},
+			"median_r": 5.12192809488736,
+			"min_r": 4.70689059560852,
+			"minimum_plans": 3,
+			"name": "Hard",
+			"p10_r": 4.70689059560852,
+			"p90_r": 6.62192809488736,
+			"personal_fire_percent": 16.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				5.375,
+				8.02499961853027
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.25,
+			"max_r": 7.09021923516002,
+			"mean_parts": {
+				"concept": 2.0,
+				"decoys": 0.0,
+				"execution": 0.12,
+				"search": 3.84104682403162,
+				"steps": 1.0
+			},
+			"mean_r": 6.70104682403163,
+			"mechanisms": {
+				"burn_through": 152,
+				"dead_weight": 3,
+				"kindling": 65,
+				"updraft": 30
+			},
+			"median_r": 6.70689059560852,
+			"min_r": 6.62192809488736,
+			"minimum_plans": 2,
+			"name": "Hard +1",
+			"p10_r": 6.62192809488736,
+			"p90_r": 6.70689059560852,
+			"personal_fire_percent": 26.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				6.25,
+				9.35000038146973
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.5,
+			"max_r": 8.59185309632968,
+			"mean_parts": {
+				"concept": 3.396,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 3.49243055434498,
+				"steps": 2.0
+			},
+			"mean_r": 8.48843055434499,
+			"mechanisms": {
+				"dead_weight": 39,
+				"gust_alley": 211,
+				"kindling": 26,
+				"together": 224
+			},
+			"median_r": 8.59185309632968,
+			"min_r": 7.92888808360725,
+			"minimum_plans": 8,
+			"name": "Hard +2",
+			"p10_r": 7.92888808360725,
+			"p90_r": 8.59185309632968,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				7.125,
+				10.6750001907349
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.75,
+			"max_r": 9.66585367777345,
+			"mean_parts": {
+				"concept": 2.5,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 5.15942893852816,
+				"steps": 2.0
+			},
+			"mean_r": 9.2594289385282,
+			"mechanisms": {
+				"dead_weight": 250,
+				"gust_alley": 228,
+				"kindling": 22
+			},
+			"median_r": 9.25081617849461,
+			"min_r": 9.25081617849461,
+			"minimum_plans": 27,
+			"name": "Hard +3",
+			"p10_r": 9.25081617849461,
+			"p90_r": 9.25081617849461,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				8.0,
+				12.0
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 99.2,
+			"level": 4.0,
+			"max_r": 13.5699250014423,
+			"mean_parts": {
+				"concept": 4.24,
+				"decoys": 0.0,
+				"execution": 0.344,
+				"search": 4.19167269944856,
+				"steps": 3.0
+			},
+			"mean_r": 11.0036726994486,
+			"mechanisms": {
+				"dark_hall": 133,
+				"dead_weight": 88,
+				"kindling": 8,
+				"prism_relay": 185,
+				"updraft": 86
+			},
+			"median_r": 11.0699250014423,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"name": "Grand",
+			"p10_r": 10.5699250014423,
+			"p90_r": 11.747996906555,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				8.5,
+				12.75
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 99.6,
+			"level": 4.25,
+			"max_r": 13.5699250014423,
+			"mean_parts": {
+				"concept": 4.328,
+				"decoys": 0.0,
+				"execution": 0.168,
+				"search": 4.6048915889922,
+				"steps": 3.0
+			},
+			"mean_r": 11.4168915889922,
+			"mechanisms": {
+				"dark_hall": 117,
+				"dead_weight": 98,
+				"kindling": 36,
+				"prism_relay": 207,
+				"updraft": 42
+			},
+			"median_r": 11.7398500028846,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"name": "Grand +1",
+			"p10_r": 11.0699250014423,
+			"p90_r": 11.747996906555,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				9.0,
+				13.5
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 99.6,
+			"level": 4.5,
+			"max_r": 13.5699250014423,
+			"mean_parts": {
+				"concept": 4.072,
+				"decoys": 0.0,
+				"execution": 0.18,
+				"search": 5.25250781725101,
+				"steps": 3.0
+			},
+			"mean_r": 11.814507817251,
+			"mechanisms": {
+				"burn_through": 19,
+				"dark_hall": 126,
+				"dead_weight": 78,
+				"kindling": 89,
+				"prism_relay": 143,
+				"updraft": 45
+			},
+			"median_r": 11.747996906555,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"name": "Grand +2",
+			"p10_r": 11.0699250014423,
+			"p90_r": 12.7398500028846,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				9.5,
+				14.25
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 100.0,
+			"level": 4.75,
+			"max_r": 13.5699250014423,
+			"mean_parts": {
+				"concept": 3.844,
+				"decoys": 0.0,
+				"execution": 0.336,
+				"search": 6.18925237195362,
+				"steps": 3.0
+			},
+			"mean_r": 12.6012523719537,
+			"mechanisms": {
+				"burn_through": 48,
+				"dark_hall": 94,
+				"dead_weight": 61,
+				"kindling": 127,
+				"prism_relay": 86,
+				"updraft": 84
+			},
+			"median_r": 12.7398500028846,
+			"min_r": 11.0699250014423,
+			"minimum_plans": 4,
+			"name": "Grand +3",
+			"p10_r": 11.747996906555,
+			"p90_r": 13.2398500028846,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 250
+		},
+		{
+			"band": [
+				10.0,
+				15.0
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 100.0,
+			"level": 5.0,
+			"max_r": 14.9875420036439,
+			"mean_parts": {
+				"concept": 4.148,
+				"decoys": 0.0,
+				"execution": 0.336,
+				"search": 6.23624696761307,
+				"steps": 3.0
+			},
+			"mean_r": 12.9522469676131,
+			"mechanisms": {
+				"burn_through": 22,
+				"dark_hall": 106,
+				"dead_weight": 77,
+				"folded_wall": 30,
+				"kindling": 35,
+				"prism_relay": 146,
+				"updraft": 84
+			},
+			"median_r": 13.6076022045862,
+			"min_r": 10.7808217839409,
+			"minimum_plans": 4,
+			"name": "Master",
+			"p10_r": 10.8918530963297,
+			"p90_r": 14.561778097772,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 250
+		}
+	],
+	"scope": "Generated structural difficulty, engine solutions and menu wiring; not measured human solve times.",
+	"seeds_per_named_level": 500,
+	"seeds_per_quarter_level": 250,
+	"sequential_endless": [
+		{
+			"band": [
+				1.5,
+				3.0
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.0,
+			"max_r": 2.3,
+			"mean_parts": {
+				"concept": 1.0,
+				"decoys": 0.0,
+				"execution": 0.516,
+				"search": 0.0,
+				"steps": 1.0
+			},
+			"mean_r": 2.05799999999997,
+			"mechanisms": {
+				"gust_alley": 363,
+				"updraft": 387
+			},
+			"median_r": 2.3,
+			"min_r": 1.8,
+			"minimum_plans": 2,
+			"p10_r": 1.8,
+			"p90_r": 2.3,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 1
+		},
+		{
+			"band": [
+				1.875,
+				3.25
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.25,
+			"max_r": 2.3,
+			"mean_parts": {
+				"concept": 1.0,
+				"decoys": 0.0,
+				"execution": 1.0,
+				"search": 0.0,
+				"steps": 1.0
+			},
+			"mean_r": 2.29999999999997,
+			"mechanisms": {
+				"updraft": 750
+			},
+			"median_r": 2.3,
+			"min_r": 2.3,
+			"minimum_plans": 2,
+			"p10_r": 2.3,
+			"p90_r": 2.3,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 1
+		},
+		{
+			"band": [
+				2.25,
+				3.5
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.5,
+			"max_r": 3.47807190511264,
+			"mean_parts": {
+				"concept": 1.04266666666667,
+				"decoys": 0.0,
+				"execution": 0.388,
+				"search": 0.931303051695386,
+				"steps": 1.0
+			},
+			"mean_r": 2.96796971836206,
+			"mechanisms": {
+				"dead_weight": 32,
+				"gust_alley": 427,
+				"updraft": 291
+			},
+			"median_r": 3.38496250072116,
+			"min_r": 2.3,
+			"minimum_plans": 2,
+			"p10_r": 2.3,
+			"p90_r": 3.38496250072116,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 1
+		},
+		{
+			"band": [
+				2.625,
+				3.75
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 1.75,
+			"max_r": 3.47807190511264,
+			"mean_parts": {
+				"concept": 1.57066666666667,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.06743026749391,
+				"steps": 1.0
+			},
+			"mean_r": 3.43809693416056,
+			"mechanisms": {
+				"dead_weight": 428,
+				"gust_alley": 322
+			},
+			"median_r": 3.47807190511264,
+			"min_r": 3.38496250072116,
+			"minimum_plans": 2,
+			"p10_r": 3.38496250072116,
+			"p90_r": 3.47807190511264,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 1
+		},
+		{
+			"band": [
+				3.0,
+				4.0
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.0,
+			"max_r": 3.8,
+			"mean_parts": {
+				"concept": 1.42933333333333,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.31734847146171,
+				"steps": 1.0
+			},
+			"mean_r": 3.54668180479503,
+			"mechanisms": {
+				"dead_weight": 322,
+				"gust_alley": 428
+			},
+			"median_r": 3.47807190511264,
+			"min_r": 3.38496250072116,
+			"minimum_plans": 2,
+			"p10_r": 3.38496250072116,
+			"p90_r": 3.8,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 1
+		},
+		{
+			"band": [
+				3.0,
+				4.0
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.0,
+			"max_r": 3.8,
+			"mean_parts": {
+				"concept": 1.48266666666667,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.25569977305233,
+				"steps": 1.0
+			},
+			"mean_r": 3.53836643971898,
+			"mechanisms": {
+				"dead_weight": 362,
+				"gust_alley": 388
+			},
+			"median_r": 3.47807190511264,
+			"min_r": 3.38496250072116,
+			"minimum_plans": 2,
+			"p10_r": 3.38496250072116,
+			"p90_r": 3.8,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 2
+		},
+		{
+			"band": [
+				3.375,
+				4.67500019073486
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.25,
+			"max_r": 3.8,
+			"mean_parts": {
+				"concept": 1.51733333333333,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 1.31556914891258,
+				"steps": 1.0
+			},
+			"mean_r": 3.6329024822459,
+			"mechanisms": {
+				"dead_weight": 388,
+				"gust_alley": 362
+			},
+			"median_r": 3.47807190511264,
+			"min_r": 3.38496250072116,
+			"minimum_plans": 2,
+			"p10_r": 3.47807190511264,
+			"p90_r": 3.8,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 2
+		},
+		{
+			"band": [
+				3.75,
+				5.34999990463257
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.5,
+			"max_r": 4.9926450779424,
+			"mean_parts": {
+				"concept": 1.98266666666667,
+				"decoys": 0.0,
+				"execution": 0.594666666666667,
+				"search": 1.82793732400383,
+				"steps": 1.0
+			},
+			"mean_r": 4.90793732400384,
+			"mechanisms": {
+				"dead_weight": 291,
+				"gust_alley": 13,
+				"updraft": 446
+			},
+			"median_r": 4.88496250072116,
+			"min_r": 3.8,
+			"minimum_plans": 2,
+			"p10_r": 4.88496250072116,
+			"p90_r": 4.9926450779424,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 2
+		},
+		{
+			"band": [
+				4.125,
+				6.02499961853027
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 2.75,
+			"max_r": 4.9926450779424,
+			"mean_parts": {
+				"concept": 2.0,
+				"decoys": 0.0,
+				"execution": 0.408,
+				"search": 1.94471058643613,
+				"steps": 1.0
+			},
+			"mean_r": 4.94871058643616,
+			"mechanisms": {
+				"dead_weight": 444,
+				"updraft": 306
+			},
+			"median_r": 4.9926450779424,
+			"min_r": 4.88496250072116,
+			"minimum_plans": 2,
+			"p10_r": 4.88496250072116,
+			"p90_r": 4.9926450779424,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 2
+		},
+		{
+			"band": [
+				4.5,
+				6.69999980926514
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.0,
+			"max_r": 6.62192809488736,
+			"mean_parts": {
+				"concept": 1.66,
+				"decoys": 0.0,
+				"execution": 0.252,
+				"search": 2.92305713955068,
+				"steps": 1.0
+			},
+			"mean_r": 5.50905713955061,
+			"mechanisms": {
+				"dead_weight": 179,
+				"gust_alley": 255,
+				"kindling": 127,
+				"updraft": 189
+			},
+			"median_r": 5.12192809488736,
+			"min_r": 4.70689059560852,
+			"minimum_plans": 3,
+			"p10_r": 4.70689059560852,
+			"p90_r": 6.62192809488736,
+			"personal_fire_percent": 16.9333333333333,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 2
+		},
+		{
+			"band": [
+				4.5,
+				6.69999980926514
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.0,
+			"max_r": 6.62192809488736,
+			"mean_parts": {
+				"concept": 1.69066666666667,
+				"decoys": 0.0,
+				"execution": 0.265333333333333,
+				"search": 2.92158628604421,
+				"steps": 1.0
+			},
+			"mean_r": 5.54491961937747,
+			"mechanisms": {
+				"dead_weight": 178,
+				"gust_alley": 232,
+				"kindling": 141,
+				"updraft": 199
+			},
+			"median_r": 5.12192809488736,
+			"min_r": 4.70689059560852,
+			"minimum_plans": 3,
+			"p10_r": 4.70689059560852,
+			"p90_r": 6.62192809488736,
+			"personal_fire_percent": 18.8,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 3
+		},
+		{
+			"band": [
+				5.375,
+				8.02499961853027
+			],
+			"chain_percent": 0.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.25,
+			"max_r": 7.40432782558809,
+			"mean_parts": {
+				"concept": 2.0,
+				"decoys": 0.0,
+				"execution": 0.384,
+				"search": 3.71241760340306,
+				"steps": 1.0
+			},
+			"mean_r": 6.70441760340298,
+			"mechanisms": {
+				"burn_through": 150,
+				"dead_weight": 133,
+				"kindling": 179,
+				"updraft": 288
+			},
+			"median_r": 6.70689059560852,
+			"min_r": 5.70689059560852,
+			"minimum_plans": 2,
+			"p10_r": 6.62192809488736,
+			"p90_r": 7.0591923395394,
+			"personal_fire_percent": 23.8666666666667,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 3
+		},
+		{
+			"band": [
+				6.25,
+				9.35000038146973
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.5,
+			"max_r": 8.59185309632968,
+			"mean_parts": {
+				"concept": 3.34666666666667,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 3.5594429546842,
+				"steps": 2.0
+			},
+			"mean_r": 8.50610962135095,
+			"mechanisms": {
+				"dead_weight": 97,
+				"gust_alley": 653,
+				"kindling": 115,
+				"together": 635
+			},
+			"median_r": 8.59185309632968,
+			"min_r": 7.92888808360725,
+			"minimum_plans": 8,
+			"p10_r": 7.92888808360725,
+			"p90_r": 8.59185309632968,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 3
+		},
+		{
+			"band": [
+				7.125,
+				10.6750001907349
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 100.0,
+			"inside_percent": 100.0,
+			"level": 3.75,
+			"max_r": 9.66585367777345,
+			"mean_parts": {
+				"concept": 2.52266666666667,
+				"decoys": 0.0,
+				"execution": 0.0,
+				"search": 5.12758775787798,
+				"steps": 2.0
+			},
+			"mean_r": 9.25025442454461,
+			"mechanisms": {
+				"dead_weight": 732,
+				"gust_alley": 613,
+				"kindling": 138,
+				"together": 17
+			},
+			"median_r": 9.25081617849461,
+			"min_r": 8.59185309632968,
+			"minimum_plans": 6,
+			"p10_r": 9.25081617849461,
+			"p90_r": 9.25081617849461,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 0.0,
+			"rooms": 750,
+			"start": 3
+		},
+		{
+			"band": [
+				8.0,
+				12.0
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 97.7333333333333,
+			"level": 4.0,
+			"max_r": 13.2398500028846,
+			"mean_parts": {
+				"concept": 4.19733333333333,
+				"decoys": 0.0,
+				"execution": 0.372,
+				"search": 4.25813458353839,
+				"steps": 3.0
+			},
+			"mean_r": 11.0414679168717,
+			"mechanisms": {
+				"burn_through": 4,
+				"dark_hall": 371,
+				"dead_weight": 270,
+				"kindling": 53,
+				"prism_relay": 523,
+				"updraft": 279
+			},
+			"median_r": 11.0699250014423,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"p10_r": 10.5699250014423,
+			"p90_r": 11.747996906555,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 750,
+			"start": 3
+		},
+		{
+			"band": [
+				8.0,
+				12.0
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 95.2,
+			"level": 4.0,
+			"max_r": 13.5768849901622,
+			"mean_parts": {
+				"concept": 4.17333333333333,
+				"decoys": 0.0,
+				"execution": 0.321333333333333,
+				"search": 4.38852783201021,
+				"steps": 3.0
+			},
+			"mean_r": 11.1225278320102,
+			"mechanisms": {
+				"burn_through": 5,
+				"dark_hall": 384,
+				"dead_weight": 307,
+				"kindling": 58,
+				"prism_relay": 505,
+				"updraft": 241
+			},
+			"median_r": 11.0699250014423,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"p10_r": 10.5699250014423,
+			"p90_r": 11.747996906555,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 750,
+			"start": 4
+		},
+		{
+			"band": [
+				8.5,
+				12.75
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 96.8,
+			"level": 4.25,
+			"max_r": 14.0699250014423,
+			"mean_parts": {
+				"concept": 4.13466666666667,
+				"decoys": 0.0,
+				"execution": 0.249333333333333,
+				"search": 4.90081843730558,
+				"steps": 3.0
+			},
+			"mean_r": 11.560151770639,
+			"mechanisms": {
+				"burn_through": 11,
+				"dark_hall": 274,
+				"dead_weight": 367,
+				"kindling": 185,
+				"prism_relay": 476,
+				"updraft": 187
+			},
+			"median_r": 11.7398500028846,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"p10_r": 10.9179219079973,
+			"p90_r": 11.8135852481825,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 750,
+			"start": 4
+		},
+		{
+			"band": [
+				9.0,
+				13.5
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 99.6,
+			"level": 4.5,
+			"max_r": 14.4069599887199,
+			"mean_parts": {
+				"concept": 3.984,
+				"decoys": 0.0,
+				"execution": 0.189333333333333,
+				"search": 5.49253444134622,
+				"steps": 3.0
+			},
+			"mean_r": 11.971201108013,
+			"mechanisms": {
+				"burn_through": 53,
+				"dark_hall": 333,
+				"dead_weight": 293,
+				"kindling": 316,
+				"prism_relay": 363,
+				"updraft": 142
+			},
+			"median_r": 11.8135852481825,
+			"min_r": 10.4179219079973,
+			"minimum_plans": 4,
+			"p10_r": 11.0699250014423,
+			"p90_r": 12.7398500028846,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 750,
+			"start": 4
+		},
+		{
+			"band": [
+				9.5,
+				14.25
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 100.0,
+			"level": 4.75,
+			"max_r": 14.0699250014423,
+			"mean_parts": {
+				"concept": 3.832,
+				"decoys": 0.0,
+				"execution": 0.385333333333333,
+				"search": 6.18703316377499,
+				"steps": 3.0
+			},
+			"mean_r": 12.6116998304418,
+			"mechanisms": {
+				"burn_through": 131,
+				"dark_hall": 240,
+				"dead_weight": 193,
+				"kindling": 398,
+				"prism_relay": 249,
+				"updraft": 289
+			},
+			"median_r": 12.7398500028846,
+			"min_r": 11.0699250014423,
+			"minimum_plans": 4,
+			"p10_r": 11.747996906555,
+			"p90_r": 13.2398500028846,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 750,
+			"start": 4
+		},
+		{
+			"band": [
+				10.0,
+				15.0
+			],
+			"chain_percent": 100.0,
+			"guided_percent": 0.0,
+			"inside_percent": 100.0,
+			"level": 5.0,
+			"max_r": 14.9875420036439,
+			"mean_parts": {
+				"concept": 4.10933333333333,
+				"decoys": 0.0,
+				"execution": 0.312,
+				"search": 6.47640917242359,
+				"steps": 3.0
+			},
+			"mean_r": 13.1417425057569,
+			"mechanisms": {
+				"burn_through": 66,
+				"dark_hall": 311,
+				"dead_weight": 246,
+				"folded_wall": 130,
+				"kindling": 136,
+				"prism_relay": 377,
+				"updraft": 234
+			},
+			"median_r": 13.713781191217,
+			"min_r": 10.7808217839409,
+			"minimum_plans": 4,
+			"p10_r": 11.2808217839409,
+			"p90_r": 14.713781191217,
+			"personal_fire_percent": 0.0,
+			"reuse_percent": 100.0,
+			"rooms": 750,
+			"start": 4
+		}
+	]
+}

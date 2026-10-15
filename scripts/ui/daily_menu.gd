@@ -21,13 +21,16 @@ static var trial_difficulty := 2
 ## The day shown: today, or an earlier one to practise.
 var day := 0
 var play_button: Button
-var trial_button: Button
+var endless_buttons: Array[Button] = []
+var _endless_record: Label
 var back_button: Button
 var friend_name: LineEdit
 var friend_code: LineEdit
 var _root: Control
+var _panel: PanelContainer
 var _body: VBoxContainer
 var _status: Label
+var _canvas_size := Vector2i.ZERO
 
 
 static func open(host: Node) -> DailyMenu:
@@ -38,6 +41,8 @@ static func open(host: Node) -> DailyMenu:
 
 
 func _build() -> void:
+	_canvas_size = get_tree().root.content_scale_size
+	get_tree().root.content_scale_size = Vector2i.ZERO
 	layer = 4
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	DailyStore.note_today()
@@ -64,20 +69,39 @@ func _close() -> void:
 	queue_free()
 
 
+func _exit_tree() -> void:
+	get_tree().root.content_scale_size = _canvas_size
+
+
 ## (Re)builds the card for `day`.
 func _rebuild() -> void:
-	if _body and is_instance_valid(_body.get_parent()):
-		_body.get_parent().queue_free()
+	if is_instance_valid(_panel):
+		_panel.queue_free()
+	var compact := get_viewport().get_visible_rect().size.x < 900
 	var card := PanelContainer.new()
+	_panel = card
 	card.set_anchors_preset(Control.PRESET_CENTER)
 	card.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	card.grow_vertical = Control.GROW_DIRECTION_BOTH
-	card.custom_minimum_size = Vector2(880, 0)
+	card.custom_minimum_size = Vector2(880, 0) if not compact else Vector2.ZERO
 	_root.add_child(card)
 	DungeonUI.decorate(card)
 	_body = VBoxContainer.new()
 	_body.add_theme_constant_override("separation", 8)
-	card.add_child(_body)
+	if compact:
+		card.set_anchors_preset(Control.PRESET_FULL_RECT)
+		card.offset_left = 16
+		card.offset_right = -16
+		card.offset_top = 16
+		card.offset_bottom = -16
+		var scroll := ScrollContainer.new()
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.follow_focus = true
+		card.add_child(scroll)
+		_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		scroll.add_child(_body)
+	else:
+		card.add_child(_body)
 
 	var today := DailyStore.today()
 	var clock := DailyStore.clock_status()
@@ -85,7 +109,7 @@ func _rebuild() -> void:
 	var difficulty := DailyGenerator.difficulty_for_day(day)
 	var result := DailyStore.result_for(day)
 
-	_body.add_child(_label("Daily Puzzle", Fonts.TITLE, 46, GOLD, HORIZONTAL_ALIGNMENT_CENTER))
+	_body.add_child(_label("Daily Puzzle", Fonts.TITLE, 32 if compact else 46, GOLD, HORIZONTAL_ALIGNMENT_CENTER))
 	var date_row := HBoxContainer.new()
 	date_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	date_row.add_theme_constant_override("separation", 14)
@@ -99,13 +123,14 @@ func _rebuild() -> void:
 	date_row.add_child(next)
 	_body.add_child(DungeonUI.divider(520.0))
 
-	var columns := HBoxContainer.new()
+	var columns: BoxContainer = VBoxContainer.new() if compact else HBoxContainer.new()
 	columns.add_theme_constant_override("separation", 36)
 	_body.add_child(columns)
 
 	# ---- left: status, streak, buttons
 	var left := VBoxContainer.new()
 	left.custom_minimum_size = Vector2(400, 0)
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.add_theme_constant_override("separation", 8)
 	columns.add_child(left)
 	if clock == "too_early":
@@ -144,15 +169,36 @@ func _rebuild() -> void:
 		label_text = "Practise today's puzzle"
 	play_button = _button(label_text, func(): _play(ranked_today and result.is_empty()))
 	left.add_child(play_button)
-	trial_button = _button("Random trial", _trial)
-	left.add_child(trial_button)
-	left.add_child(_small_button("Trial difficulty: %s" % DIFFICULTY_NAMES[trial_difficulty - 1], func():
-		trial_difficulty = trial_difficulty % 4 + 1
-		_rebuild()))
+	left.add_child(_label("ENDLESS", Fonts.UI, 16, DIM))
+	var endless_row := HBoxContainer.new()
+	endless_row.add_theme_constant_override("separation", 6)
+	left.add_child(endless_row)
+	endless_buttons.clear()
+	for i in 4:
+		var start: int = i + 1
+		var button := _small_button(DIFFICULTY_NAMES[i], func(): _endless(start))
+		button.custom_minimum_size = Vector2(96, 36)
+		endless_row.add_child(button)
+		endless_buttons.append(button)
+		button.focus_entered.connect(func(): _show_endless_record(start))
+		button.mouse_entered.connect(func(): _show_endless_record(start))
+	_endless_record = _label("No Endless run yet.", Fonts.STORY, 14, DIM)
+	left.add_child(_endless_record)
+	var overall := 2
+	var most_rooms := -1
+	var best_score := -1
+	for start in range(1,5):
+		var best := DailyStore.endless_best_for(start)
+		if int(best.get("rooms", -1)) > most_rooms or (int(best.get("rooms", -1)) == most_rooms and int(best.get("score", -1)) > best_score):
+			overall = start
+			most_rooms = int(best.get("rooms", -1))
+			best_score = int(best.get("score", -1))
+	_show_endless_record(overall)
 
 	# ---- right: the board
 	var right := VBoxContainer.new()
 	right.custom_minimum_size = Vector2(400, 0)
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	right.add_theme_constant_override("separation", 6)
 	columns.add_child(right)
 	right.add_child(_label("THE BOARD, %s" % DailyRng.label_of(day), Fonts.UI, 16, DIM))
@@ -196,6 +242,16 @@ func _rebuild() -> void:
 	_body.add_child(foot)
 	back_button = _button("Back", _close)
 	foot.add_child(back_button)
+	for i in endless_buttons.size():
+		var button := endless_buttons[i]
+		button.focus_neighbor_top = button.get_path_to(play_button)
+		button.focus_neighbor_bottom = button.get_path_to(back_button)
+		if i > 0:
+			button.focus_neighbor_left = button.get_path_to(endless_buttons[i - 1])
+		if i < 3:
+			button.focus_neighbor_right = button.get_path_to(endless_buttons[i + 1])
+	play_button.focus_neighbor_bottom = play_button.get_path_to(endless_buttons[0])
+	back_button.focus_neighbor_top = back_button.get_path_to(endless_buttons[0])
 	play_button.grab_focus.call_deferred()
 
 
@@ -276,3 +332,13 @@ class StreakStrip extends Control:
 			draw_rect(rect, Color("c9a24a") if solved else Color("4a4250"), false, 1.0)
 			if d == today:
 				draw_rect(rect.grow(2.0), Color("e8dcc0"), false, 1.5)
+
+
+func _endless(start: int) -> void:
+	DailyRun.start_endless(start, DailyRng.mix(Time.get_ticks_usec()))
+	SceneFade.change(get_tree(), DailyRun.SCENE)
+
+
+func _show_endless_record(start: int) -> void:
+	var best := DailyStore.endless_best_for(start)
+	_endless_record.text = "No Endless run yet." if best.is_empty() else "Best: %s, %d rooms, %d points" % [DIFFICULTY_NAMES[start - 1], int(best["rooms"]), int(best["score"])]

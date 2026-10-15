@@ -228,6 +228,9 @@ func _show_line(n: int) -> void:
 ## Cuts in the portrait of `who` (with `face`), on their side of the frame,
 ## its foot behind the bottom bar; slides in when the speaker changes.
 func _show_speaker(who: String, face: String) -> void:
+	# The oversized Echidna overlay is cropped by the reel's letterbox.
+	# Keep her spoken captions; ordinary gameplay dialogue uses DialogueBox.
+	_speaker_art.visible = who != "echidna"
 	if not DialogueBox.FACES.has(who):
 		_hide_speaker()
 		return

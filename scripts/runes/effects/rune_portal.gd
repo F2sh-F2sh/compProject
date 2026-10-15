@@ -37,7 +37,10 @@ var carried_back: Array[Node] = []
 
 
 static func door_centre(c: RuneCube, dir: Vector2) -> Vector2:
-	return c.get_face_point(dir) + dir * (DOOR_SIZE.y / 2.0 + 2.0 if absf(dir.y) > 0.5 and absf(dir.x) < 0.5 else DOOR_SIZE.x / 2.0 + 2.0)
+	var at := c.get_face_point(dir) + dir * (DOOR_SIZE.y / 2.0 + 2.0 if absf(dir.y) > 0.5 and absf(dir.x) < 0.5 else DOOR_SIZE.x / 2.0 + 2.0)
+	if absf(dir.y) < 0.001:
+		at.y -= float(c.get_meta(&"daily_portal_floor_clearance", 0.0))
+	return at
 
 
 static func far_centre(c: RuneCube, spell: Dictionary) -> Vector2:
@@ -198,6 +201,18 @@ func _carry(body: CharacterBody2D, from: Area2D = null, to: Area2D = null) -> vo
 	query.exclude = [body.get_rid()]
 	if not body.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
 		return
+	# Clearance applies to whatever Echidna is holding, including another
+	# stage's cube brought back through a stationary portal.
+	var held: RuneCube = cube.manager.carrier.held if body.is_in_group("player") else null
+	if is_instance_valid(held) and held.is_carried:
+		var held_feet := body.global_position + to.global_position - from.global_position + RuneCarrier.HOLD_OFFSET
+		var held_box := Rect2(held_feet - Vector2(RuneCube.SIZE / 2.0, RuneCube.SIZE), Vector2.ONE * RuneCube.SIZE)
+		if cube.home_room and not cube.home_room.bounds.encloses(held_box): return
+		if held.home_room and not held.home_room.bounds.encloses(held_box): return
+		box.size = held_box.size
+		query.transform = Transform2D(0.0, held_box.get_center())
+		query.exclude.append(held.body.get_rid())
+		if not body.get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty(): return
 	for hazard in get_tree().get_nodes_in_group("hazard_zone"):
 		if hazard.has_method("get_hazard_rect") and hazard.get_hazard_rect().intersects(destination):
 			return

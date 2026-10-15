@@ -637,7 +637,83 @@ counters: nobody has heard them or fought the creatures.
       "Sealed Belfry ..." text on the clipboard; "Try it again" starts practice of the same day.
 - [ ] A second run of the same day is practice and does not change the streak.
 - [ ] Add a friend: paste a code from another install; the row appears on the board; a typo is refused.
-- [ ] Random trial: a different level each press; difficulty button cycles Gentle, Steady, Hard, Grand.
+- [ ] Endless: Gentle, Steady, Hard and Grand each start a fresh seeded run; the row is reachable from the
+      practice button and leads down to Back with keyboard/controller focus.
 - [ ] Back in the story afterwards: Continue, runes and abilities are exactly as they were.
 - [ ] Handheld (640x480): the menu fits, no typing is asked for, friends.txt is read, a 1970 clock says why
       the daily is closed but practice still works.
+
+## Generated puzzles and Endless
+
+- Run `daily verified_fresh`, `new_modules`, `chains`, `endless`, `endless_persistence` and `calibration`, then the complete daily suite.
+- Run `daily endless_long`: 30 rooms per starting difficulty, using real physics, checking room freeing, one-time completion, generation latency and the ramp.
+- Run daily, polish, prologue, tutorial, experience, presentation, rune, chapter, adversarial and wing suites sequentially. Check script-error lines as well as result counts; distinguish the four documented baseline NPC-scale checks from new regressions.
+- Render the Daily Puzzle menu, stair HUD, tenth-room rest card and third-death run-over card at normal size and native 640×480. Inspect text wrapping, panel bounds, focus visibility, floors, gates, torches, cubes and platform spacing.
+- Keyboard/controller manual acceptance: complete an Endless run to a rest stop and game over, navigate each difficulty button and return to the title. Automated action injection and screenshots are not manual controller playtesting.
+- Confirm story checkpoint, flags, vocabulary, abilities and save-persistence rules are restored after leaving. Confirm records are kept after each room and corrupted records do not crash loading.
+- Collect actual participant solve observations before presenting a calibration chart as evidence from a playtest group. The local fitting tool does not manufacture study data.
+
+### Automated/render acceptance recorded 2026-10-10
+
+- [x] Complete version-3 table: 76 layouts; retained inscriptions pass three physics runs; runtime excludes layouts with fewer than two minimal solutions.
+- [x] Full Daily 404/0; Endless 20/0 at both resolutions; freshness 12/0; native keyboard/injected-pad focus 12/0 per resolution.
+- [x] Repeated 120-room endurance: 720/0, scene roots freed and generation below 50 ms on the Windows QA machine.
+- [x] Inspected normal and native 640×480 menus/cards, active-rune HUD separation, full module geometry and active effects. Scrolling follows focus to Back and the end-card buttons.
+- [x] All listed story suites run sequentially. Windows D3D12 presentation passes 111/0; four documented NPC-scale failures remain in polish. Extra OpenGL presentation runs retain an intermittent spike-contrast assertion failure; see IMPLEMENTATION_PROGRESS.
+- [x] Exported handheld resource pack contains the complete verified table. This is a packaging check, not an ARM hardware run.
+- [ ] Physical keyboard/controller acceptance and actual ARM handheld performance.
+- [ ] Participant calibration data and a chart based on their solve observations.
+
+### All-difficulty automated acceptance recorded 2026-10-11
+
+- [x] Version-7 standalone exits, floor-placed Master portals, pit death/life accounting and bounded score caching regressions.
+- [x] All 17 difficulty steps attacked with normal/charged jumps and sprinting; compact native run 162/0.
+- [x] 204 observed mechanism/geometry cases across 1,000 seeds per named difficulty: movement attacks and two distinct solutions each, 817/0.
+- [x] Every named difficulty solves, resets and re-solves with a different inscription; exits reopen and scoring is not duplicated, 25/0.
+- [x] Full Daily 673/0; updated difficulty audit 186/0; optimized 120-room Endless 720/0; authored Folded Galleries 77/0.
+- [x] 460 before/after generator outputs identical; final generation maximum 34.993 ms across 120 rooms after repeated Hard timing failures were fixed.
+- [x] Final full-size/compact native render inspection and scene/script loading; existing load-helper shutdown warnings remain documented.
+- [ ] Manual player/controller acceptance and additional creative routes beyond the automated corpus.
+
+### Rune/reset adversarial acceptance recorded 2026-10-12
+
+- [x] Legal live-effect reset sweep at all 17 difficulty steps, including fixed carvings above the lent word tier: 272/0.
+- [x] Fixed/portable cube restrictions, closed exits, unsupported gaps, held-cube resets and reset spam: 150/0.
+- [x] Gust impact during reset cannot credit an abandoned clear; timer keeps running and a later solution remains valid: 8/0.
+- [x] Master shared portal cube has a continuous handoff route; ordinary active-cube restrictions remain: 18/0.
+- [x] Carried portal cube cannot clip through a late exit obstruction; reset cleans its anchored portal: 5/0.
+- [x] All 334 valid learned non-Lift sentences tried after Grand/Master first-stage unlock and real carrying/placement: 1,684/0.
+- [x] Full native Daily 1,126/0; Endless 720/0; updated scale audit 186/0; authored story portal route 77/0.
+- [x] Complete version-8 verification metadata and native 640×480 carried-portal render inspection.
+- [ ] Manual controller testing and further unusual timings/object arrangements beyond these fixtures.
+
+### Portal and stage-transition stress recorded 2026-10-12
+
+- [x] Carrying another stage's cube backward cannot overlap the mounted portal owner; old rule reproduces two failures, corrected rule 8/0.
+- [x] Shared portal owner can reverse through its fold and repeat the forward handoff; extended continuous route 22/0.
+- [x] Reset spam before warp and 0/1/18 frames after normal/long warps through two-/three-column walls: 80/0.
+- [x] Genuine first-stage clears followed by moving/reset spam at the gate across all 17 difficulty settings: 68/0.
+- [x] Full rendered Daily assertions 1,286/0. Detached camera errors found during its Endless transitions were fixed; targeted Endless lifecycle 20/0 and ordinary camera tracking 7/0 have clean error logs.
+- [x] Authored Folded Galleries second level 39/0; affected portal proofs repeated three times and complete metadata refreshed.
+- [x] Fresh compact native render inspected and 306 resources loaded; pre-existing load-helper shutdown warnings remain.
+- [ ] Manual controller acceptance and arrangements/timings beyond the automated fixtures.
+
+### Difficulty and configuration variety recorded 2026-10-12 (version 9)
+
+- [x] Same-corpus comparison: 2,100 Daily and 8,000 Endless configurations; below-floor rooms 10 → 0, same-run Daily duplicates 96 → 0, immediate Endless repeats 161 → 0, recent repeats 1,004 → 85.
+- [x] Hard requires meaningful rune-word choice; Grand/Master first stages do too. Form-open portal handoff and legacy portal recipes remain valid.
+- [x] Repeated/reset/death regeneration preserves the same puzzle; history changes only on completed-room banking.
+- [x] Final named/quarter/sequential-history scale audit 186/0, with physical solutions and increasing means throughout the ramp.
+- [x] Final rendered Daily 1,633/0; meaningful Grand corpus 44/0 over 10 pairings/14 variants; 120-room Endless 720/0, generation maximum 28.893 ms.
+- [x] Complete version-9 physics proof metadata and machine-readable variety/difficulty reports saved; 306 resources load.
+- [ ] Human difficulty calibration, further creative routes, and additional mechanisms for constrained Gentle ramp bands. Existing mechanisms still recur.
+
+### Gentle ground-shape variety recorded 2026-10-12 (version 10)
+
+- [x] Qualifying Gentle Updraft configurations expanded from 4 to 12 with ridge, descending terraces and lower landing geometry.
+- [x] Same first rise, rune vocabulary, modifier choices and structural score; no added hazards or timing requirements. Legacy ridge lookups remain valid.
+- [x] All twelve configurations: continuous normal-wind solve, charged-jump attack, cube/gate reset and unchanged-score checks; focused scenario 160/0.
+- [x] Same-corpus 8,000-room Endless audit has zero four-room-history repeats, including Gentle; 2,100 Daily configurations have no same-run duplicates or below-floor rooms.
+- [x] Complete three-run Updraft physics proofs and version-10 metadata; final rendered Daily 1,790/0, scale audit 186/0, 120-room Endless 720/0.
+- [x] Native ridge/terrace/landing geometry captures inspected with a fixed QA camera; ordinary gameplay-camera tests rendered separately. All 306 resources load.
+- [ ] Human beginner difficulty calibration and routes beyond the automated corpus. Finite configurations and mechanic types can recur later.

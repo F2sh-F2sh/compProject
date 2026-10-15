@@ -1,9 +1,10 @@
 class_name DailyDifficulty
 extends RefCounted
 
-## How hard a generated room is, measured from its data (no playtest needed),
+## A structural difficulty estimate computed from a generated room's data,
 ## and what each named difficulty asks for. The game is about reasoning, so
-## difficulty mostly means how much thinking a room needs:
+## difficulty mostly means how much thinking a room needs. Human playtesting
+## is still needed to calibrate perceived difficulty and learning effects:
 ##   search     bits of guessing: log2(the sentences the open slots allow /
 ##              the ones that work). Locks shrink it; a bigger vocabulary
 ##              grows it; more ways through shrink it.
@@ -24,11 +25,13 @@ const WEIGHTS := {"search": 1.0, "steps": 0.8, "concept": 1.0, "execution": 0.5,
 ## The band of R each difficulty aims its rooms at, 1 (Gentle) to 5 (Master).
 ## Calibrated against what the module library can make at each word tier
 ## (tests/daily_suite.gd, "difficulty", prints the spread).
-const BANDS := [Vector2(1.5, 3.0), Vector2(3.0, 4.0), Vector2(4.5, 6.7), Vector2(5.3, 7.0), Vector2(6.0, 9.5)]
+const BANDS := [Vector2(1.5, 3.0), Vector2(3.0, 4.0), Vector2(4.5, 6.7), Vector2(8.0, 12.0), Vector2(10.0, 15.0)]
 ## The word tier each difficulty lends (DailyKit). More words mean more to
 ## search, so R jumps with the tier; Gentle and Steady share the first and
 ## differ by how much of each sentence is carved.
-const TIERS := [1, 1, 2, 3, 4]
+const TIERS := [1, 1, 2, 4, 5]
+const EXTRA_BEAT_CONCEPT := 0.5
+const REUSED_CUBE_CONCEPT := 1.0
 const MAX_LEVEL := 5.0
 ## The Endless ramp: a quarter step every RAMP_EVERY rooms, at most a full step
 ## above the difficulty picked.

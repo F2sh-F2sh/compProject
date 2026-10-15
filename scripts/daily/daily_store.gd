@@ -162,6 +162,8 @@ static func add_friend(friend_name: String, code: String) -> String:
 	var result := DailyScore.decode(code)
 	if result.is_empty():
 		return "That doesn't look like a result code (check for typos)."
+	if bool(result.get("endless", false)):
+		return "That is an Endless run; the board is for daily puzzles."
 	var clean := _clean_name(friend_name)
 	if clean == "":
 		clean = "Friend"
@@ -245,6 +247,7 @@ static func _ensure_loaded() -> void:
 
 ## Forgets everything in memory (tests); the next use loads again.
 static func forget() -> void:
+	endless_best = {}
 	_loaded = false
 	days = {}
 	practice = {}
@@ -261,6 +264,7 @@ static func save() -> void:
 	if not persist:
 		return
 	var file := ConfigFile.new()
+	file.set_value("daily", "endless_best", endless_best)
 	file.set_value("daily", "days", days)
 	file.set_value("daily", "practice", practice)
 	file.set_value("daily", "streak", streak)
@@ -281,6 +285,20 @@ static func load_file(path := "") -> void:
 	var file := ConfigFile.new()
 	if file.load(path if path != "" else file_path) != OK:
 		return
+	endless_best = {}
+	var raw_best: Variant = file.get_value("daily", "endless_best", {})
+	if raw_best is Dictionary:
+		for key in raw_best:
+			if not key in ["1", "2", "3", "4"] or not raw_best[key] is Dictionary:
+				continue
+			var entry: Dictionary = raw_best[key]
+			if not entry.has_all(["rooms", "score", "level"]):
+				continue
+			var value: Variant = entry["level"]
+			var level_value := float(value) if (value is int or value is float) else 1.0
+			if not is_finite(level_value):
+				level_value = 1.0
+			endless_best[key] = {"rooms": _int_in(entry["rooms"], 0, 100000), "score": _int_in(entry["score"], 0, 100000000), "level": snappedf(clampf(level_value, 1.0, 5.0), 0.25)}
 	days = _clean_results(file.get_value("daily", "days", {}))
 	var p = file.get_value("daily", "practice", {})
 	practice = {}
@@ -301,7 +319,7 @@ static func load_file(path := "") -> void:
 		for entry in f:
 			if entry is Dictionary and entry.has("name") and entry.has("code"):
 				var decoded := DailyScore.decode(String(entry["code"]))
-				if not decoded.is_empty() and friends.size() < MAX_FRIENDS:
+				if not decoded.is_empty() and not bool(decoded.get("endless", false)) and friends.size() < MAX_FRIENDS:
 					friends.append({"name": _clean_name(String(entry["name"])), "code": String(entry["code"]),
 						"day": int(decoded["day"]), "score": int(decoded["score"]), "time": float(decoded["time"]), "stars": 0})
 
@@ -337,3 +355,21 @@ static func _clean_results(raw: Variant) -> Dictionary:
 		clean["day"] = int(k)
 		out[str(k)] = clean
 	return out
+
+
+static var endless_best := {}
+
+static func endless_best_for(start: int) -> Dictionary:
+	_ensure_loaded()
+	return endless_best.get(str(start), {}).duplicate(true)
+
+static func record_endless(start: int, rooms: int, score: int, level: float) -> bool:
+	_ensure_loaded()
+	if start < 1 or start > 4 or rooms <= 0:
+		return false
+	var best := endless_best_for(start)
+	if not best.is_empty() and (rooms < int(best["rooms"]) or (rooms == int(best["rooms"]) and score <= int(best["score"]))):
+		return false
+	endless_best[str(start)] = {"rooms": rooms, "score": score, "level": snappedf(level, 0.25)}
+	save()
+	return true

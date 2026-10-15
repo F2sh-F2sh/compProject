@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-12",
+  "scope": "Automated generation, native engine solutions, unchanged Gentle structural score and fixed-camera terrain render inspection; not human difficulty calibration.",
+  "daily_seeds_per_level": 100,
+  "daily_rooms": 2100,
+  "endless_seeds_per_start": 50,
+  "endless_rooms_per_seed": 40,
+  "endless_rooms": 8000,
+  "recent_window": 4,
+  "signature": "Mechanic, geometry and rune locks; excludes guidance and decoration.",
+  "before_version": 9,
+  "after_version": 10,
+  "gentle_qualifying_updraft_layouts_before": 4,
+  "gentle_qualifying_updraft_layouts_after": 12,
+  "before": {
+    "daily_below_band": 0.0,
+    "daily_same_run_repeats": 0.0,
+    "endless_below_band": 0.0,
+    "endless_adjacent_repeats": 0.0,
+    "endless_recent_repeats": 85.0
+  },
+  "after": {
+    "daily_below_band": 0.0,
+    "daily_same_run_repeats": 0.0,
+    "endless_below_band": 0.0,
+    "endless_adjacent_repeats": 0.0,
+    "endless_recent_repeats": 0.0
+  },
+  "validation": {
+    "daily_rendered_passed": 1790,
+    "daily_rendered_failed": 0,
+    "gentle_profiles_passed": 160,
+    "gentle_profiles_failed": 0,
+    "scale_audit_passed": 186,
+    "scale_audit_failed": 0,
+    "endless_120_rooms_passed": 720,
+    "endless_120_rooms_failed": 0
+  },
+  "residual": "Mechanic types and configurations can recur outside the four-room history window. No added vocabulary, timing constraints or hazards; same first-rise height, modifier choices and Gentle structural score. Human difficulty has not been measured.",
+  "previous_revision": {
+    "date": "2026-10-12",
+    "scope": "Automated generation, native engine solutions and structural difficulty; not measured human solve difficulty.",
+    "daily_seeds_per_level": 100,
+    "daily_rooms": 2100,
+    "endless_seeds_per_start": 50,
+    "endless_rooms_per_seed": 40,
+    "endless_rooms": 8000,
+    "recent_window": 4,
+    "signature": "Mechanic, geometry and rune locks; excludes chalk guidance and decoration.",
+    "before_version": 8,
+    "after_version": 9,
+    "before": {
+      "daily_below_band": 2.0,
+      "daily_same_run_repeats": 96.0,
+      "endless_below_band": 8.0,
+      "endless_adjacent_repeats": 161.0,
+      "endless_recent_repeats": 1004.0
+    },
+    "after": {
+      "daily_below_band": 0.0,
+      "daily_same_run_repeats": 0.0,
+      "endless_below_band": 0.0,
+      "endless_adjacent_repeats": 0.0,
+      "endless_recent_repeats": 85.0
+    },
+    "validation": {
+      "daily_rendered_passed": 1633,
+      "daily_rendered_failed": 0,
+      "scale_audit_passed": 186,
+      "scale_audit_failed": 0,
+      "endless_120_rooms_passed": 720,
+      "endless_120_rooms_failed": 0,
+      "grand_corpus_passed": 44,
+      "grand_corpus_failed": 0,
+      "grand_pairings": 10,
+      "grand_variants": 14
+    },
+    "residual": "84 recent repeats occurred in Gentle starts, where narrow fractional bands have few qualifying verified configurations; 1 occurred in Hard starts. No immediate repeats. Mechanic types still recur."
+  }
+}
