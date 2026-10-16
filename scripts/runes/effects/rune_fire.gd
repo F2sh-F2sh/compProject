@@ -7,7 +7,7 @@ extends Node2D
 ## lands, reaching anything within `explode_radius` that it can see
 ## (creatures take damage, braziers light, fire-reactive things react).
 
-const FIREBALL := preload("res://scenes/FireBall.tscn")
+const FIREBALL := preload("res://scenes/player/fireball.tscn")
 const SPEED := 420.0
 const RANGE := 560.0
 const FAN := 0.26

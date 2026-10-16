@@ -15,7 +15,7 @@ const TOURS := {"fire": "fire", "echo": "echo"}
 
 ## "fire", "heal" or "echo" (GameState.ABILITIES).
 @export var ability := "fire"
-## A strip in assets/sprites/story (tools/generate_shrine_sprites.gd).
+## A strip in assets/sprites/story (tools/art/generate_shrine_sprites.gd).
 @export var sprite_name := "kept_flame"
 ## The word, as the card shows it.
 @export var word := "FLAME"

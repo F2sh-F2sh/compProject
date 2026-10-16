@@ -7,7 +7,7 @@ extends AnimatableBody2D
 ## PistonTrap's job). If `requires_power` is set it only moves while powered.
 ## The node marks the platform's top-left corner.
 
-const TILE := preload("res://assets/TileSet/platforms/tiles/08_cap_mid.png")
+const TILE := preload("res://assets/tileset/platforms/tiles/08_cap_mid.png")
 const TILE_TOP := 18.0
 
 @export var width_tiles := 2:

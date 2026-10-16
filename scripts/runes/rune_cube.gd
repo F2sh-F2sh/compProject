@@ -24,7 +24,7 @@ signal power_changed(powered: bool)
 enum State { INACTIVE, ACTIVE, OBSTRUCTED, NO_MANA, INVALID, CARRIED }
 
 const SIZE := 32.0
-## The carved block (tools/generate_rune_ui_sprites.gd).
+## The carved block (tools/art/generate_rune_ui_sprites.gd).
 const BLOCK := preload("res://assets/sprites/story/rune_block.png")
 const STATE_NAMES := ["off", "on", "blocked", "no mana", "broken", "carried"]
 

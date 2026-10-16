@@ -1,7 +1,7 @@
 class_name Villager
 extends Node2D
 
-## A villager of Lowbell: a pixel-art figure (tools/generate_story_sprites.gd)
+## A villager of Lowbell: a pixel-art figure (tools/art/generate_story_sprites.gd)
 ## with Echidna's kind of face, dark with two pale eyes, who breathes,
 ## blinks, and turns to look at her when she comes close, then says their
 ## line. The Hush has taken some of their words: write those as {n} in `line`

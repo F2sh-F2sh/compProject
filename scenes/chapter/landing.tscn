@@ -1,37 +1,25 @@
-[gd_scene format=4]
+[gd_scene format=4 uid="uid://c0m1bpxhtewmn"]
 
-[ext_resource type="Script" path="res://scripts/puzzle/chapter_root.gd" id="1_2du45"]
-[ext_resource type="TileSet" path="res://assets/TileSet/dungeon_tileset.tres" id="2_enu5v"]
+[ext_resource type="Script" uid="uid://bh0xopw0bhtyq" path="res://scripts/puzzle/chapter_root.gd" id="1_2du45"]
+[ext_resource type="TileSet" uid="uid://biqt50kbculv7" path="res://assets/tileset/dungeon_tileset.tres" id="2_enu5v"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/room.tscn" id="3_k85qp"]
-[ext_resource type="Script" path="res://scripts/puzzle/room.gd" id="4_3jv44"]
-[ext_resource type="Script" path="res://scripts/audio/reverb_zone.gd" id="5_75jax"]
+[ext_resource type="Script" uid="uid://ctj7qul5q133w" path="res://scripts/audio/reverb_zone.gd" id="5_75jax"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/chapter_checkpoint.tscn" id="6_4ut4q"]
-[ext_resource type="Script" path="res://scripts/puzzle/chapter_checkpoint.gd" id="7_nd5le"]
-[ext_resource type="Script" path="res://scripts/puzzle/kindle_flame.gd" id="9_j8nku"]
 [ext_resource type="PackedScene" path="res://scenes/puzzle/landing_door.tscn" id="10_52l27"]
-[ext_resource type="Script" path="res://scripts/puzzle/landing_door.gd" id="11_y16jn"]
-[ext_resource type="PackedScene" path="res://scenes/tutorial_sign.tscn" id="12_nveny"]
-[ext_resource type="Script" path="res://scripts/tutorial_sign.gd" id="13_4dxdr"]
-[ext_resource type="Script" path="res://scripts/puzzle/room_sprite.gd" id="14_40et1"]
-[ext_resource type="PackedScene" path="res://scenes/torch_light.tscn" id="15_ta0bg"]
-[ext_resource type="Script" path="res://scripts/flicker_light.gd" id="16_hj5i6"]
-[ext_resource type="Texture2D" path="res://assets/TileSet/props/sprites/skull_pile.png" id="17_plvb7"]
-[ext_resource type="Script" path="res://scripts/fx/dungeon_atmosphere.gd" id="18_ukpbs"]
-[ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="19_ou1tt"]
-[ext_resource type="Script" path="res://scripts/player.gd" id="20_kkkkp"]
-[ext_resource type="PackedScene" path="res://scenes/FireBall.tscn" id="21_xsgs4"]
-[ext_resource type="Script" path="res://scripts/camera_bounds.gd" id="22_07adr"]
-[ext_resource type="Script" path="res://scripts/post_fx.gd" id="23_n4g8g"]
-[ext_resource type="Shader" path="res://assets/shaders/dungeon_post.gdshader" id="24_squyc"]
-[ext_resource type="PackedScene" path="res://scenes/hud.tscn" id="25_x2asp"]
-[ext_resource type="Script" path="res://scripts/hud.gd" id="26_2uhcl"]
-[ext_resource type="PackedScene" path="res://scenes/ammo_ui.tscn" id="27_0d247"]
-[ext_resource type="Script" path="res://scripts/MagicUI.gd" id="28_ohpsk"]
-[ext_resource type="PackedScene" path="res://scenes/death_screen.tscn" id="29_feqg5"]
-[ext_resource type="Script" path="res://scripts/death_screen.gd" id="30_0awuf"]
-[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="31_m0mpg"]
+[ext_resource type="PackedScene" path="res://scenes/world/tutorial_sign.tscn" id="12_nveny"]
+[ext_resource type="Script" uid="uid://yoc2be05t4c0" path="res://scripts/puzzle/room_sprite.gd" id="14_40et1"]
+[ext_resource type="PackedScene" path="res://scenes/world/torch_light.tscn" id="15_ta0bg"]
+[ext_resource type="Texture2D" uid="uid://dd6l2gtpos6v2" path="res://assets/tileset/props/sprites/skull_pile.png" id="17_plvb7"]
+[ext_resource type="Script" uid="uid://df61ba772ac5w" path="res://scripts/fx/dungeon_atmosphere.gd" id="18_ukpbs"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="19_ou1tt"]
+[ext_resource type="Script" uid="uid://cv6bwccwjybxk" path="res://scripts/world/camera_bounds.gd" id="22_07adr"]
+[ext_resource type="Script" uid="uid://c8y423m7spv4e" path="res://scripts/fx/post_fx.gd" id="23_n4g8g"]
+[ext_resource type="Shader" uid="uid://djnwt56t4u1f1" path="res://assets/shaders/dungeon_post.gdshader" id="24_squyc"]
+[ext_resource type="PackedScene" uid="uid://br3pry1hhjl3j" path="res://scenes/ui/hud.tscn" id="25_x2asp"]
+[ext_resource type="PackedScene" uid="uid://ba7s5y6fc2bel" path="res://scenes/ui/ammo_ui.tscn" id="27_0d247"]
+[ext_resource type="PackedScene" uid="uid://bdrl0xcn0b4aa" path="res://scenes/ui/death_screen.tscn" id="29_feqg5"]
+[ext_resource type="Script" uid="uid://bn2cem5mhqp7f" path="res://scripts/ui/pause_menu.gd" id="31_m0mpg"]
 [ext_resource type="PackedScene" path="res://scenes/runes/rune_manager.tscn" id="32_fsxh6"]
-[ext_resource type="Script" path="res://scripts/runes/rune_manager.gd" id="33_cqpe3"]
 
 [sub_resource type="Gradient" id="Gradient_y7qyc"]
 offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
@@ -59,27 +47,27 @@ fill_to = Vector2(0.5, 0)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tbgvx"]
 shader = ExtResource("24_squyc")
-shader_parameter/world_origin = null
-shader_parameter/world_size = null
-shader_parameter/lantern_uv = null
-shader_parameter/lantern_inner = null
-shader_parameter/lantern_outer = null
-shader_parameter/lantern_darkness = null
-shader_parameter/keep_bright_from = null
-shader_parameter/keep_bright_to = null
-shader_parameter/bloom_strength = null
-shader_parameter/bloom_threshold = null
-shader_parameter/fog_color = null
-shader_parameter/fog_strength = null
+shader_parameter/world_origin = Vector2(0, 0)
+shader_parameter/world_size = Vector2(576, 324)
+shader_parameter/lantern_uv = Vector2(0.5, 0.6)
+shader_parameter/lantern_inner = 150.0
+shader_parameter/lantern_outer = 620.0
+shader_parameter/lantern_darkness = 0.22
+shader_parameter/keep_bright_from = 0.08
+shader_parameter/keep_bright_to = 0.24
+shader_parameter/bloom_strength = 0.55
+shader_parameter/bloom_threshold = 0.3
+shader_parameter/fog_color = Color(0.27, 0.36, 0.48, 1)
+shader_parameter/fog_strength = 0.22
 shader_parameter/fog_floor_y = 534.0
-shader_parameter/shadow_tint = null
-shader_parameter/highlight_tint = null
-shader_parameter/contrast = null
-shader_parameter/shadow_lift = null
-shader_parameter/saturation = null
-shader_parameter/vignette = null
-shader_parameter/vignette_softness = null
-shader_parameter/grain = null
+shader_parameter/shadow_tint = Color(0.9, 0.96, 1.06, 1)
+shader_parameter/highlight_tint = Color(1.02, 1.04, 1.06, 1)
+shader_parameter/contrast = 1.04
+shader_parameter/shadow_lift = 1.0
+shader_parameter/saturation = 0.86
+shader_parameter/vignette = 0.24
+shader_parameter/vignette_softness = 0.7
+shader_parameter/grain = 0.022
 
 [node name="Landing" type="Node2D" unique_id=40639882]
 script = ExtResource("1_2du45")
@@ -88,7 +76,6 @@ chapter_title = "The Long Stair"
 unit_name = "wing"
 complete_heading = "THE BELL HAS RUNG"
 next_label = "Continue"
-grants_words = PackedStringArray()
 
 [node name="Darkness" type="CanvasModulate" parent="." unique_id=577953088]
 color = Color(0.5, 0.48, 0.64, 1)
@@ -128,14 +115,12 @@ tile_set = ExtResource("2_enu5v")
 position = Vector2(0, 32)
 tile_set = ExtResource("2_enu5v")
 
-[node name="R1" type="Node2D" parent="." unique_id=1371402519 instance=ExtResource("3_k85qp")]
-script = ExtResource("4_3jv44")
+[node name="R1" parent="." unique_id=1371402519 instance=ExtResource("3_k85qp")]
 room_id = "landing.r1"
 title = "The Landing"
 bounds = Rect2(0, 128, 2048, 448)
 entry_spawn = Vector2(160, 530)
 objective = "Ring the bell in each of the four wings."
-page_ids = PackedStringArray()
 glance_at = NodePath("Door1")
 mood_highlight = Color(1, 1.02, 1.06, 1)
 mood_fog = Color(0.3, 0.32, 0.5, 1)
@@ -145,55 +130,49 @@ position = Vector2(0, 128)
 script = ExtResource("5_75jax")
 size = Vector2(2048, 448)
 
-[node name="Shrine" type="Area2D" parent="R1" unique_id=1987904416 instance=ExtResource("6_4ut4q")]
+[node name="Shrine" parent="R1" unique_id=1987904416 instance=ExtResource("6_4ut4q")]
 position = Vector2(160, 534)
-script = ExtResource("7_nd5le")
 checkpoint_id = "landing.cp.start"
 
-[node name="Door1" type="Node2D" parent="R1" unique_id=1225409874 instance=ExtResource("10_52l27")]
+[node name="Door1" parent="R1" unique_id=1225409874 instance=ExtResource("10_52l27")]
 position = Vector2(544, 534)
-script = ExtResource("11_y16jn")
 tint = Color(1, 0.7, 0.4, 1)
 label_text = "Kilnworks"
 
-[node name="Door2" type="Node2D" parent="R1" unique_id=1409764518 instance=ExtResource("10_52l27")]
+[node name="Door2" parent="R1" unique_id=1409764518 instance=ExtResource("10_52l27")]
 position = Vector2(864, 534)
-script = ExtResource("11_y16jn")
 index = 1
 tint = Color(0.5, 0.8, 1, 1)
 label_text = "Cistern"
 
-[node name="Door3" type="Node2D" parent="R1" unique_id=1981188051 instance=ExtResource("10_52l27")]
+[node name="Door3" parent="R1" unique_id=1981188051 instance=ExtResource("10_52l27")]
 position = Vector2(1184, 534)
-script = ExtResource("11_y16jn")
 index = 2
 tint = Color(1, 0.92, 0.55, 1)
 label_text = "Lampworks"
 
-[node name="Door4" type="Node2D" parent="R1" unique_id=1486879759 instance=ExtResource("10_52l27")]
+[node name="Door4" parent="R1" unique_id=1486879759 instance=ExtResource("10_52l27")]
 position = Vector2(1504, 534)
-script = ExtResource("11_y16jn")
 index = 3
 tint = Color(0.8, 0.65, 1, 1)
 label_text = "Galleries"
 
-[node name="Door5" type="Node2D" parent="R1" unique_id=1252691598 instance=ExtResource("10_52l27")]
+[node name="Door5" parent="R1" unique_id=1252691598 instance=ExtResource("10_52l27")]
 position = Vector2(1824, 534)
-script = ExtResource("11_y16jn")
 index = 4
 label_text = "The Eye"
 
 [node name="Signs" type="Node2D" parent="R1" unique_id=1855893233]
 
-[node name="Choir" type="Node2D" parent="R1/Signs" unique_id=1507923509 instance=ExtResource("12_nveny")]
+[node name="Choir" parent="R1/Signs" unique_id=1507923509 instance=ExtResource("12_nveny")]
+z_index = -1
 position = Vector2(390.4, 456)
-script = ExtResource("13_4dxdr")
 text = "The Choir's last note: We sealed the Eye with four bells, so only one who has walked every wing, and learned every word, can open it. Ring the Forge Bell first: its heat runs in the pipes behind every door and thaws the next."
 width = 210.0
 
-[node name="Chalk" type="Node2D" parent="R1/Signs" unique_id=559825643 instance=ExtResource("12_nveny")]
+[node name="Chalk" parent="R1/Signs" unique_id=559825643 instance=ExtResource("12_nveny")]
+z_index = -1
 position = Vector2(1920, 456)
-script = ExtResource("13_4dxdr")
 text = "A chalk star, and below it: if you get lost, look up. And don't be afraid of the cold. -W"
 width = 170.0
 handwritten = true
@@ -229,57 +208,21 @@ unshaded = true
 
 [node name="Decor" type="Node2D" parent="R1" unique_id=1482386135]
 
-[node name="Torch3_6" type="PointLight2D" parent="R1/Decor" unique_id=1181303131 instance=ExtResource("15_ta0bg")]
+[node name="Torch3_6" parent="R1/Decor" unique_id=1181303131 instance=ExtResource("15_ta0bg")]
 position = Vector2(224, 420)
-color = Color(0.42, 0.6, 1, 1)
-energy = 1.3
-shadow_enabled = true
-shadow_color = Color(0, 0, 0, 0.92)
-shadow_filter = 1
 texture = SubResource("GradientTexture2D_abhov")
-texture_scale = 2.1
-height = 40.0
-script = ExtResource("16_hj5i6")
-base_energy = 1.3
 
-[node name="Torch12_6" type="PointLight2D" parent="R1/Decor" unique_id=2064798646 instance=ExtResource("15_ta0bg")]
+[node name="Torch12_6" parent="R1/Decor" unique_id=2064798646 instance=ExtResource("15_ta0bg")]
 position = Vector2(800, 420)
-color = Color(0.42, 0.6, 1, 1)
-energy = 1.3
-shadow_enabled = true
-shadow_color = Color(0, 0, 0, 0.92)
-shadow_filter = 1
 texture = SubResource("GradientTexture2D_abhov")
-texture_scale = 2.1
-height = 40.0
-script = ExtResource("16_hj5i6")
-base_energy = 1.3
 
-[node name="Torch22_6" type="PointLight2D" parent="R1/Decor" unique_id=952668592 instance=ExtResource("15_ta0bg")]
+[node name="Torch22_6" parent="R1/Decor" unique_id=952668592 instance=ExtResource("15_ta0bg")]
 position = Vector2(1440, 420)
-color = Color(0.42, 0.6, 1, 1)
-energy = 1.3
-shadow_enabled = true
-shadow_color = Color(0, 0, 0, 0.92)
-shadow_filter = 1
 texture = SubResource("GradientTexture2D_abhov")
-texture_scale = 2.1
-height = 40.0
-script = ExtResource("16_hj5i6")
-base_energy = 1.3
 
-[node name="Torch28_6" type="PointLight2D" parent="R1/Decor" unique_id=1272232226 instance=ExtResource("15_ta0bg")]
+[node name="Torch28_6" parent="R1/Decor" unique_id=1272232226 instance=ExtResource("15_ta0bg")]
 position = Vector2(1824, 420)
-color = Color(0.42, 0.6, 1, 1)
-energy = 1.3
-shadow_enabled = true
-shadow_color = Color(0, 0, 0, 0.92)
-shadow_filter = 1
 texture = SubResource("GradientTexture2D_abhov")
-texture_scale = 2.1
-height = 40.0
-script = ExtResource("16_hj5i6")
-base_energy = 1.3
 
 [node name="SkullPile4" type="Sprite2D" parent="R1/Decor" unique_id=675712503]
 position = Vector2(1888, 534)
@@ -296,13 +239,10 @@ extra_shafts = PackedVector2Array()
 reference_center = Vector2(704, 400)
 seed = 13
 
-[node name="Player" type="CharacterBody2D" parent="." unique_id=973951145 node_paths=PackedStringArray("hurtbox") groups=["player"] instance=ExtResource("19_ou1tt")]
+[node name="Player" parent="." unique_id=973951145 instance=ExtResource("19_ou1tt")]
 z_index = 1
 position = Vector2(380, 530)
 collision_mask = 2
-script = ExtResource("20_kkkkp")
-fireball_scene = ExtResource("21_xsgs4")
-hurtbox = NodePath("Hurtbox")
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=2135101815]
 zoom = Vector2(2, 2)
@@ -327,28 +267,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="HUD" type="CanvasLayer" parent="." unique_id=1164875932 groups=["gameplay_ui", "hud"] instance=ExtResource("25_x2asp")]
-script = ExtResource("26_2uhcl")
+[node name="HUD" parent="." unique_id=1164875932 instance=ExtResource("25_x2asp")]
 
-[node name="AmmoUI" type="CanvasLayer" parent="." unique_id=1170242058 groups=["gameplay_ui"] instance=ExtResource("27_0d247")]
-script = ExtResource("28_ohpsk")
+[node name="AmmoUI" parent="." unique_id=1170242058 instance=ExtResource("27_0d247")]
 
 [node name="DeathUI" type="CanvasLayer" parent="." unique_id=1105489665]
 layer = 2
 
-[node name="DeathScreen" type="Control" parent="DeathUI" unique_id=905570687 groups=["death_screen"] instance=ExtResource("29_feqg5")]
-visible = false
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("30_0awuf")
+[node name="DeathScreen" parent="DeathUI" unique_id=905570687 instance=ExtResource("29_feqg5")]
 
 [node name="PauseMenu" type="CanvasLayer" parent="." unique_id=11067669]
 script = ExtResource("31_m0mpg")
 
-[node name="RuneManager" type="Node2D" parent="." unique_id=659081104 instance=ExtResource("32_fsxh6")]
-script = ExtResource("33_cqpe3")
-starting_fragments = PackedStringArray("wind", "push", "left", "normal")
+[node name="RuneManager" parent="." unique_id=659081104 instance=ExtResource("32_fsxh6")]
+starting_fragments = ["wind", "push", "left", "normal"]

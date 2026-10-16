@@ -9,7 +9,7 @@ const DIALOGUE := preload("res://scripts/story/story_dialogue.gd")
 const COTTAGE := "res://scenes/story/nan_lantern_cottage.tscn"
 const APPROACH := "res://scenes/story/pilgrims_path.tscn"
 const WELL := "res://scenes/story/well_descent.tscn"
-const TUTORIAL := "res://scenes/tutorial_level.tscn"
+const TUTORIAL := "res://scenes/tutorial/tutorial_level.tscn"
 const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
 const GOLD := Color("edbc78")
 const VIOLET := Color("9989d7")
@@ -100,7 +100,7 @@ func _exit_tree() -> void:
 	AudioDirector.duck(0.0, 0.8)
 
 func _build_player() -> void:
-	player = preload("res://scenes/Player.tscn").instantiate()
+	player = preload("res://scenes/player/player.tscn").instantiate()
 	player.name = "Player"
 	player.position = Vector2(332, FLOOR - 2) if stage == Stage.COTTAGE else _checkpoint
 	player.collision_mask = 2

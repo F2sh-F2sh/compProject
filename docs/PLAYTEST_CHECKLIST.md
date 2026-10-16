@@ -19,7 +19,7 @@ what a script can't judge: clarity, feel, sound, fairness and comfort.
 - [ ] Resize Nan's cottage to wide and tall windows during dialogue and movement; inspect the framing and backdrop edges.
 - [ ] Try picking up a cube beside walls and using a portal while its exit becomes blocked; check that refusal is clear and movement feels natural.
 
-The October 7 background pass is documented in `BUG_HUNT.md`. Headless gameplay,
+The October 7 background pass was documented in `BUG_HUNT.md` (removed in the release cleanup; see the git history). Headless gameplay,
 physics and layout assertions are separate from the visual checks above. Rendered
 light/bloom/glow and graphics-quality checks are skipped in headless mode, and
 targeted projectile helpers bypass mouse aim, shoot input, cost and cooldown.

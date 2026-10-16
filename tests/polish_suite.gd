@@ -154,7 +154,7 @@ func audit_replacement_art() -> void:
 		check(who + " has hard opaque pixels, no blended edges", hard_pixels)
 	for who in DialogueBox.FACES:
 		check(who + " portrait is at most 64x64", DialogueBox.portrait(who, DialogueBox.FACES[who][0]).get_size() == Vector2(64, 64))
-	var frames_art: SpriteFrames = load("res://assets/sprites/Echidna/echidna_frames.tres")
+	var frames_art: SpriteFrames = load("res://assets/sprites/echidna/echidna_frames.tres")
 	var pose := frames_art.get_frame_texture(&"push", 0) as AtlasTexture
 	check("pushing uses new art, not air or walk frames", pose.atlas.resource_path.ends_with("EchidnaPush.png") and frames_art.get_frame_count(&"push") == 4)
 	for prop in ["table", "hearth", "cottage_cupboard", "cottage_bookshelf", "cottage_window", "desk_lantern", "cottage_rug"]:
@@ -162,11 +162,13 @@ func audit_replacement_art() -> void:
 		check(prop + " fits a 64px native art cell", size.x <= 64 and size.y <= 64)
 	await open("res://scenes/ui/title_screen.tscn")
 	var title_block: TextureRect = lvl.find_child("TitleBlock", true, false)
-	check("title uses the glass logo", title_block.texture.resource_path.ends_with("aero_title.png"))
+	check("title uses the glass logo", title_block.texture.resource_path.ends_with("title_logo.png"))
 	check("menu options leave the box artwork unobstructed", lvl.new_button.get_global_rect().end.x < lvl._box_art.get_global_rect().position.x)
 	await open("res://scenes/story/lowbell.tscn")
 	for npc in get_tree().get_nodes_in_group("villager"):
-		check(npc.sprite_name + " draws new art at 1x in the world", npc.figure.scale == Vector2.ONE)
+		# Lowbell scales the 64 px villager strips to Echidna's height (Pip is a child)
+		var expected := Vector2.ONE * (0.625 if npc.sprite_name == "pip" else Lowbell.PEOPLE_SCALE)
+		check(npc.sprite_name + " is drawn at Echidna's scale", npc.figure.scale.is_equal_approx(expected))
 	var font := Fonts.UI
 	check("mana values fit their HUD cell", font.get_string_size("Mana 100", HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x <= 112)
 	check("reload status fits its HUD cell", font.get_string_size("Reloading", HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x <= 112)

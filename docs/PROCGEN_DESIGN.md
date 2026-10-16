@@ -13,12 +13,12 @@ What is already built and tested is marked **[DONE]**; what is left is marked **
 1. **Engine:** Godot 4.7.2, GDScript. Project root: `C:\Games\CompProject\compProject`.
    Console exe: `C:\Users\Ishaan\Downloads\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe`.
 2. **Never edit the story's levels or their builders** (`scenes/chapter*`, `tools/build_chapter*.gd`,
-   `tools/build_wings.gd`, story scripts). The generated content lives only in `scripts/daily/`, `scenes/daily/`,
+   `tools/levels/build_wings.gd`, story scripts). The generated content lives only in `scripts/daily/`, `scenes/daily/`,
    `scripts/ui/daily_*.gd` and `tests/daily_suite.gd`. Small additive hooks elsewhere are allowed only where this
    doc names them.
 3. **Do not commit or push** without the project owner's explicit OK.
 4. **Art rule:** use the pixel-art assets and fonts that exist (`Fonts.TITLE`, `Fonts.UI`, `Fonts.STORY`,
-   `DungeonUI.decorate(panel)`, `DungeonUI.divider(width)`, the tiles in `assets/TileSet/`). Do not invent new
+   `DungeonUI.decorate(panel)`, `DungeonUI.divider(width)`, the tiles in `assets/tileset/`). Do not invent new
    drawn shapes for world art.
 5. **GDScript is strict here:** warnings are errors. `var x := something_that_returns_Variant` fails to parse. Give
    a type (`var x: float = d["k"]`) whenever the right side is a Dictionary/Array lookup or a Variant.
@@ -243,9 +243,9 @@ lost, flash "Lives" red (`Color("b23a48")`) for 0.6 s.
 
 **The stair hall (after the puzzle room):** `EXIT_COLUMNS = 7` tiles wide, low ceiling, two torches
 (`k.torch`). At column `x1 - 2` stands the door: a `Sprite2D` with
-`res://assets/TileSet/walls/tiles/10_door_wood.png` (`centered = false`, `offset = Vector2(-32, -64)`, positioned
+`res://assets/tileset/walls/tiles/10_door_wood.png` (`centered = false`, `offset = Vector2(-32, -64)`, positioned
 on the floor at `FLOOR_Y`), a blue `PointLight2D` glow (`color (0.5, 0.62, 1)`, energy 1.2, `texture_scale` 1.1,
-using `LightTextures.radial(256)`), and optionally the wisps from `scenes/level_exit.tscn` (copy its
+using `LightTextures.radial(256)`), and optionally the wisps from `scenes/world/level_exit.tscn` (copy its
 CPUParticles2D settings). Objective panel: `k.guide(hall, "Go through the door.")`.
 
 **Rest card (every 10 rooms) and run-over card:** same frame as `DailyComplete` (dim backdrop, a
@@ -351,7 +351,7 @@ static func lose_life() -> bool:
    - `var hall := kit.make_room("R%d" % (index + 1), "The Stair", e.x0, e.x1, RoomKit.LOW_CEIL, Vector2(RoomKit.cx(e.x0 + 2), 530), index, index)`.
    - Add the door (section 3.2) as children of `hall`.
    - Add `exit_door := Area2D` with a `CollisionShape2D` (`RectangleShape2D` size 64×128), centred on the door,
-     `collision_mask` covering the player's layer. Check `scenes/Player.tscn` (a `collision_layer = 2` appears
+     `collision_mask` covering the player's layer. Check `scenes/player/player.tscn` (a `collision_layer = 2` appears
      there; verify which node). In `body_entered`, compare `body == player`.
    - `kit.guide(hall, "Go through the door.")` and torches.
 2. **Deaths.** Replace `player.died.connect(func(): DailyRun.deaths += 1)` with `_on_player_died()`, which does
@@ -468,7 +468,7 @@ words.
 ## 5. Verified tables [TO BUILD; needed before many new modules]
 
 Hand-written `plans()` and `VERIFIED` lists don't scale. Instead:
-- **`tools/verify_modules.gd`** (a SceneTree script, run windowed like the tests) loops over every module,
+- **`tools/procgen/verify_modules.gd`** (a SceneTree script, run windowed like the tests) loops over every module,
   every parameter set on its grid and every tier 1–5. For each **sentence the open slots allow**, it builds the
   room (reuse the test helpers' approach: `DailyRun.start("trial", …)`, `DailyRun.spec_override = spec_for(...)`,
   open `DailyRun.SCENE`, `module.perform`, `module.drive`, wait up to 9 s for `room.is_cleared()`). It writes
@@ -492,13 +492,13 @@ and copy its setup.**
 
 | Module | Tier | Idea and pieces | Knobs | Concept | Story room to copy |
 |---|---|---|---|---|---|
-| **Frozen Crossing** | 3 (ice) | A pit too wide to jump; an ice cube carved `ice/-/right/-` builds a bridge (`ice/bridge`), *long* for a wide pit | pit width 3–5 tiles; lock (form open / form+modifier open) | 2 | `tools/build_chapter2.gd` ~line 395 ("Edge Cube", `ice/-/right/long`) |
-| **Kindling** | 2 (fire) | Light one or two braziers (`scenes/puzzle/brazier.tscn`, `Brazier.power_changed`) with `fire/projectile`; *split* hits two at once, *up* for a high one; braziers feed a `Circuit` (mode ALL) to the gate | brazier count 1–2, heights, lock | 2 | `tools/build_wings.gd` `kiln_cold_forge()` (~337) |
+| **Frozen Crossing** | 3 (ice) | A pit too wide to jump; an ice cube carved `ice/-/right/-` builds a bridge (`ice/bridge`), *long* for a wide pit | pit width 3–5 tiles; lock (form open / form+modifier open) | 2 | `tools/levels/build_chapter2.gd` ~line 395 ("Edge Cube", `ice/-/right/long`) |
+| **Kindling** | 2 (fire) | Light one or two braziers (`scenes/puzzle/brazier.tscn`, `Brazier.power_changed`) with `fire/projectile`; *split* hits two at once, *up* for a high one; braziers feed a `Circuit` (mode ALL) to the gate | brazier count 1–2, heights, lock | 2 | `tools/levels/build_wings.gd` `kiln_cold_forge()` (~337) |
 | **Burn Through** | 2 | A `Burnable` (brambles; signal `cleared`) or `CrackedWall` (signal `broken`, `break_momentum` 660) blocks the way; fire projectile vs *explode* (or a strong wind burst for the cracked wall) | barrier kind, distance | 2 | `scripts/runes/burnable.gd`, `cracked_wall.gd`; Kiln rooms |
-| **Prism Relay** | 4 (light) | A `light/beam` must reach a `LightReceiver` via a fixed `Mirror` (`facing` NE/NW/…, `rotatable=false`) or *bounce* | mirror placement, receiver height | 3 | `tools/build_wings.gd` `lamps_hall()` (~1248), "Gallery Cube" (~1282) |
-| **Folded Wall** | 5 (space) | A thick wall with a pocket beyond; `space/portal` through it, *long* for a thicker wall | wall thickness 2–4 | 3 | `tools/build_wings.gd` `galleries_archive()` (~1581), "Pillar Cube" (~1654) |
+| **Prism Relay** | 4 (light) | A `light/beam` must reach a `LightReceiver` via a fixed `Mirror` (`facing` NE/NW/…, `rotatable=false`) or *bounce* | mirror placement, receiver height | 3 | `tools/levels/build_wings.gd` `lamps_hall()` (~1248), "Gallery Cube" (~1282) |
+| **Folded Wall** | 5 (space) | A thick wall with a pocket beyond; `space/portal` through it, *long* for a thicker wall | wall thickness 2–4 | 3 | `tools/levels/build_wings.gd` `galleries_archive()` (~1581), "Pillar Cube" (~1654) |
 | Together | 2 | `delay` so two things happen at once (a plate and a timed gate) | timing window | 3 | Kiln Heart |
-| Still Piston | 3 | `ice/freeze` a piston (`scenes/piston_trap.tscn`) long enough to pass | piston speed | 2 | Cistern rooms |
+| Still Piston | 3 | `ice/freeze` a piston (`scenes/traps/piston_trap.tscn`) long enough to pass | piston speed | 2 | Cistern rooms |
 | Dark Hall | 4 | `light/glow` reveals `SpectralPlatform`s (`mode` REVEALED) | gap count | 2 | Lampworks |
 
 Each new module raises the variety at Hard and above, and lets the bands be tightened later.
@@ -532,7 +532,7 @@ Each new module raises the variety at Hard and above, and lets the bands be tigh
 
 - After every finished room (daily or Endless), append `{module, params, tier, r, time, resets, hints, deaths}` to
   `user://puzzle_stats.cfg` (local only, capped at 2,000 rows).
-- `tools/fit_difficulty.gd` reads it and prints, per module, the mean solve time against R. It also prints a
+- `tools/procgen/fit_difficulty.gd` reads it and prints, per module, the mean solve time against R. It also prints a
   least-squares fit of time ≈ a + b·R and suggests new `WEIGHTS` and `par_seconds`.
 - For the submission: a chart of "predicted difficulty vs real solve time" from a playtest group shows the
   measure is real.
@@ -588,7 +588,7 @@ about 30 minutes. Run suites one after another, never two at once (they share `/
 
 **By hand:**
 - An Endless run to a rest stop and to game over on Windows with keyboard and with a pad.
-- The handheld build at 640×480 (`bash tools/build_handheld_port.sh`): the Endless row fits, pad focus moves
+- The handheld build at 640×480 (`bash tools/release/build_handheld_port.sh`): the Endless row fits, pad focus moves
   through it, and room loads are quick.
 
 **Definition of done for the Endless mode:**

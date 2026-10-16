@@ -76,7 +76,7 @@ full run (2026-09-29) was 561 checks in four suites.
   spells and words of everything before it (nothing is marked finished). Set it to false before release.
   The tests always turn it off (`tests/run_tests.gd`); wing `admin` tests it.
 - Rebuild the chapter after changing the builder:
-  `godot --headless --path . --script res://tools/build_chapter.gd`
+  `godot --headless --path . --script res://tools/levels/build_chapter.gd`
   (this **overwrites** `scenes/chapter/chapter_1.tscn` and the component scenes in
   `scenes/puzzle`, `scenes/creatures`, `scenes/traps`).
 - Tests (need a window, not `--headless`, because they take screenshots and aim the mouse):
@@ -89,10 +89,10 @@ full run (2026-09-29) was 561 checks in four suites.
   `forge_full`, `forge_broken`, `forge_page3`, `k2`, `heart_full`, `heart_broken`, `c1`, `c1_full`, `c1_short`,
   `c1_broken`, `c2`, `c2_full`, `c2_pages`, `c2_broken`, and `forge_look`, `heart_look`, `c1_look` and `c2_look`
   (screenshots, not run by default).
-- Rebuild the Long Stair and its wings after changing `tools/build_wings.gd`:
-  `godot --headless --path . --script res://tools/build_wings.gd`, then
+- Rebuild the Long Stair and its wings after changing `tools/levels/build_wings.gd`:
+  `godot --headless --path . --script res://tools/levels/build_wings.gd`, then
   `git checkout -- scenes/puzzle scenes/runes scenes/traps scenes/creatures` to drop the builder's noise.
-- Regenerate the sound effects: `godot --headless --path . --script res://tools/generate_sfx.gd`
+- Regenerate the sound effects: `godot --headless --path . --script res://tools/audio/generate_sfx.gd`
   then let the editor import them.
 
 ## Architecture
@@ -204,10 +204,10 @@ Driven by beta-tester feedback and an audit of what made the game less fun. Plan
   them; the slimes are warded.
 - Visible hazards: an additive glint on spike tips (`assets/shaders/hazard_glint.gdshader`),
   a red floor glow, a warning flare on rising spikes, glowing piston teeth.
-- Floating wall tiles: `tools/wall_tile_audit.gd` + `tools/audit_wall_tiles.gd` found 7
+- Floating wall tiles: `tools/levels/wall_tile_audit.gd` + `tools/levels/audit_wall_tiles.gd` found 7
   (3 chapter, 4 tutorial) and fixed them; the audit is now a test.
 - Tutorial sprint gap: 128 px over a shallow pit (`FallCatcher`) that fades you back
-  without damage (`tools/patch_tutorial.gd`).
+  without damage (`tools/levels/patch_tutorial.gd`).
 - Pistons send you back like spikes (R5 has its own candle); healing is a 1.2 s channel
   (`scripts/player/heal_channel.gd`) that moving, jumping, casting or a hit breaks, with
   no heal for 3 s after a hit.
@@ -267,7 +267,7 @@ removing the 7 tracked `.tmp` files and bundling a serif font (need approval).
 
 The rune-cube magic system and an eight-room Chapter 2, "The Sealed Observatory", are
 implemented and pass automated tests; nobody has playtested them. Everything about them
-(design decisions, tuning, files, test record, gaps) is in `docs/RUNE_SYSTEM_PROGRESS.md`;
+(design decisions, tuning, files, test record, gaps) was in `docs/RUNE_SYSTEM_PROGRESS.md` (removed in the release cleanup; see the git history);
 room solutions and the full list of accepted runes are in `docs/CHAPTER2_SOLUTIONS.md`.
 Chapter 1's ending now offers "Continue to the next chapter", and the title screen has a
 Chapter 2 entry.
@@ -385,7 +385,7 @@ build and will replace those cards.
 
 Entering Lowbell sets the Continue point; the opening plays only once per save. The cave
 ambience fades out under the sky and a soft wind loop plays; new sounds `door_creak` and
-`knock` (appended to `tools/generate_sfx.gd`; the other 95 sounds are byte-identical).
+`knock` (appended to `tools/audio/generate_sfx.gd`; the other 95 sounds are byte-identical).
 `AudioDirector.fade_ambience()` is new. The title screen's old four-line text intro is gone.
 
 **Checks:** automated: experience `title` 14/14, `story` 6/6, `lowbell` 15/15; the whole
@@ -444,7 +444,7 @@ Lowbell changes:
   the charge pose starts (a quick crouch never shows it) and fills as the jump gains power.
   At full power it turns gold, flashes once and plays a new `charge_full` chime once. It fades
   when she leaps or stands up.
-- The new sound was appended to `tools/generate_sfx.gd`; the other sounds are byte-identical.
+- The new sound was appended to `tools/audio/generate_sfx.gd`; the other sounds are byte-identical.
 - The old `scripts/charge_wind.gd` (the removed streaks) is still on disk, unused, and was left
   in place (no deletions without approval).
 
@@ -475,7 +475,7 @@ helpers to:
 - lay ground and walls from the 16 px tiles (a `TileMapLayer`);
 - repeat the parallax paintings sideways.
 
-**Hand-made pixel sprites for what the packs lack.** `tools/generate_story_sprites.gd` draws
+**Hand-made pixel sprites for what the packs lack.** `tools/art/generate_story_sprites.gd` draws
 them from pixel maps in the packs' own 57-colour palette, with dark faces and pale eyes like
 Echidna, and writes PNG strips to `assets/sprites/story/`:
 - Tam, Mira, Pip, Edda and Nan (with her lantern), the Choir's monks, Ilse, and Wren in her
@@ -542,7 +542,7 @@ placeholder).
 ## The game plan v2, a brighter dungeon, the Room 7 flame, fewer hints (2026-09-30)
 
 **The plan.** `docs/GAME_DESIGN.md` is now the v2 plan (about two hours of new game after a
-tutorial section; the old 6 to 7 hour version is kept unchanged as `GAME_DESIGN_v1_long.md`).
+tutorial section; the old 6 to 7 hour version is kept as `GAME_DESIGN_v1_long.md`, since removed; see the git history).
 The early game becomes one tutorial section, "The Novices' Way" (Part 1 The Passage, Part 2
 The Sealed Belfry, Part 3 The Sealed Observatory), followed by five new chapters. It covers the
 story, the grandma scene, earned fireball/heal/Echo, finite mana, the combat rework, new
@@ -556,7 +556,7 @@ yet except the four fixes below.
   `assets/shaders/dungeon_post.gdshader`, and the player's light. **Dim is the old look**,
   Normal is the default. The builders' ambient went from (0.2, 0.18, 0.3) to (0.5, 0.48, 0.64),
   tile tints and torches are brighter, and the tutorial (hand-built) was brightened by an
-  idempotent step in `tools/patch_tutorial.gd`. `Room.mood_ambient` keeps the three watcher
+  idempotent step in `tools/levels/patch_tutorial.gd`. `Room.mood_ambient` keeps the three watcher
   rooms darker (Belfry 4 and 7, Observatory 6). Lowbell was meant to keep its own look but did not until the 2026-10-01 fix below (`PostFX.follows_brightness`).
 - **Room 7 flame.** Every unlit brazier is now a small warm-gold pilot flame with a ring that
   opens every two seconds and a gold light (energy 0.7, was 0.15); the lit fire is still blue.
@@ -593,8 +593,8 @@ yet except the four fixes below.
   `docs/PLAYTEST_CHECKLIST.md`.
 
 **Notes.** Rebuilding the chapters rewrites many unrelated scenes with noise (stripped uids,
-new node ids); only `scenes/chapter/*.tscn`, `scenes/torch_light.tscn` and
-`scenes/tutorial_level.tscn` were kept. `chapter_1.tscn` and `chapter_2.tscn` lost their scene
+new node ids); only `scenes/chapter/*.tscn`, `scenes/world/torch_light.tscn` and
+`scenes/tutorial/tutorial_level.tscn` were kept. `chapter_1.tscn` and `chapter_2.tscn` lost their scene
 uids in the rebuild (nothing refers to them by uid). In headless runs `PostFX._apply_quality`
 prints an old, harmless Nil*float error (no shader defaults without a renderer). Nothing is
 committed.
@@ -613,7 +613,7 @@ and Kindle points, the glue moments after the bell and the dome, a chapter-selec
   only sputters, Nan explains the Hush, the bell and the monks' words, gives her the lantern (it flies
   to her and her light grows), and she goes down the cellar door to the Passage. The scene runs as one
   coroutine and `stage` says where it is. A save that already has her spells skips the fire beat.
-  The room and Nan are pixel art: `tools/generate_cottage_sprites.gd` makes Nan seated, the hearth, the
+  The room and Nan are pixel art: `tools/art/generate_cottage_sprites.gd` makes Nan seated, the hearth, the
   table, the jar shelf and the cellar door in the packs' palette; the wall, floor, window, door, barrel,
   crate, lantern and candles are pack sprites. The scene has no drawn shapes (tested).
 - **Earned spells.** `GameState.has_ability("fire" | "heal" | "echo")`: saved flags `ability.*`; a save
@@ -626,8 +626,8 @@ and Kindle points, the glue moments after the bell and the dome, a chapter-selec
   Flame (fire, phase 4, before the pistons that need it), the Spring (heal, phase 5, after them) and the
   Echo stone (echo, phase 7, before the Echo lesson). Using one grants the spell, flares a ring of
   light, floats "+ FLAME" and shows a card ("YOU REMEMBER A WORD / FLAME" and what it does). Their
-  pixel sprites come from `tools/generate_shrine_sprites.gd`. The lesson cards now read "PHASE n · name"
-  (a new `LessonZone.eyebrow`; a new phase-5 zone, id `lesson.10`). All done in `tools/patch_tutorial.gd`
+  pixel sprites come from `tools/art/generate_shrine_sprites.gd`. The lesson cards now read "PHASE n · name"
+  (a new `LessonZone.eyebrow`; a new phase-5 zone, id `lesson.10`). All done in `tools/levels/patch_tutorial.gd`
   (idempotent); the pistons, Echo and Slimes signs were shortened or removed because the cards say it.
 - **`scripts/story/journey.gd`** holds the scene order (`LOWBELL`, `COTTAGE`, `PASSAGE`, `BELFRY`,
   `OBSERVATORY`, `after_cottage()`, `next_after()`, `skipping_to()`); Lowbell, the title screen and the
@@ -715,7 +715,7 @@ a short explanation; and stop mana from ever stranding the player.
   done). The last picture now mentions the Novices' Way and that the Hush took some of her spells.
   Lowbell and Nan's cottage are no longer in the flow (their scenes and tests remain; nothing else
   was deleted). `Journey.after_story()` replaces `after_cottage()`.
-- **The Passage is reordered** (`tools/patch_tutorial.gd`, step `_fire_last`): 1 The Cellar, 2 The Broken
+- **The Passage is reordered** (`tools/levels/patch_tutorial.gd`, step `_fire_last`): 1 The Cellar, 2 The Broken
   Stair, 3 The Novices' Traps, **4 The Echo Door** (Echo stone, plate, gate), **5 The Kept Flame** (fireball
   and the pistons that need it), **6 The Cells** (slimes), then the exit. The Passage ends with fire. The
   Spring and its lesson are gone from the Passage.
@@ -759,12 +759,12 @@ a short explanation; and stop mana from ever stranding the player.
 
 Requested: make the map easier to understand with arrows that fit the game.
 - **The Choir's waymarks** (`scripts/puzzle/waymark.gd`, `scenes/puzzle/waymark.tscn`): a small carved stone slab
-  with a softly glowing arrow, pixel art from `tools/generate_waymark_sprites.gd` (`waymark.png`, 3 frames, in the
+  with a softly glowing arrow, pixel art from `tools/art/generate_waymark_sprites.gd` (`waymark.png`, 3 frames, in the
   packs' palette), a dim blue light that breathes, behind the player (z -1), no collision. In the story the monks
   cut them for novices, so they are part of the dungeon, not the interface. `direction` is right, left, up or down.
-- **Where:** 11 along the Passage (`tools/patch_tutorial.gd`, step `_waymarks`) and, in every Belfry and
+- **Where:** 11 along the Passage (`tools/levels/patch_tutorial.gd`, step `_waymarks`) and, in every Belfry and
   Observatory room, one soon after the way in, one in the middle of a long room and one before the way out
-  (`waymarks()` in `tools/build_chapter.gd`, used by both builders). 26 in the Belfry, 21 in the Observatory.
+  (`waymarks()` in `tools/levels/build_chapter.gd`, used by both builders). 26 in the Belfry, 21 in the Observatory.
   They are hidden when guidance is off. New chapters should use the same helper.
 - Test: experience `waymarks` (each is a pixel sprite with a known direction, none drawn from shapes, hidden with
   guidance off) and a contact sheet of every arrow in context (`user://test_shots/waymarks_*.png`).
@@ -782,7 +782,7 @@ two endings. It is deliberately rough: playable and tested end to end, but the p
   Stair: five doors, a bell-light over each, a Kindle flame, a shrine) -> **four wings**, each two rooms ending
   in a bell, each followed by two or three story pictures and back to the Landing -> when all four bells have
   rung, the fifth door opens the pictures that lead to **the Eye** -> the great cube and **two endings**.
-- **Built by** `tools/build_wings.gd` (extends the Chapter 2 builder; run it to regenerate): `landing.tscn`,
+- **Built by** `tools/levels/build_wings.gd` (extends the Chapter 2 builder; run it to regenerate): `landing.tscn`,
   `wing_kiln.tscn`, `wing_cistern.tscn`, `wing_lamps.tscn`, `wing_galleries.tscn`, `eye.tscn` in
   `scenes/chapter/`. Flags: `kiln.`, `cistern.`, `lamps.`, `galleries.`, `eye.`, and `game.complete`.
 - **Rooms** (rough versions of docs/STORY_PLAYTHROUGH.md; all solved by the tests with real input):
@@ -864,13 +864,13 @@ hint stone beside them (`Interactable.use_priority`).
   next"), frost on the sealed Landing doors and warm light spilling from under the open one.
 - **The room:** 45 columns on two levels (the hearth and a slag pit; the hall with the Smith's bench and alcove, a
   perch, the bellows shaft, the Great Kiln, the coal loft and its lift, a cell above it; the Forge Door). Built by
-  `kiln_cold_forge()` in `tools/build_wings.gd`; the Kiln Heart moved east (columns 44-68, its cube is "Heart Cube").
+  `kiln_cold_forge()` in `tools/levels/build_wings.gd`; the Kiln Heart moved east (columns 44-68, its cube is "Heart Cube").
 - **New pieces:** `GreatKiln` (scripts/puzzle/great_kiln.gd: fuel bay, pipe inlet, firebox, three lamps, feedback
   when a try fails, the roar: light, sound, camera, the hall warms, the frost melts, a kindle spot on its roof),
   `SlagPool` (scripts/traps/slag_pool.gd), `ForgeDoor`, `MeltingFrost`, `RevealTrigger`; `WindBody` sprites,
   burning and the kiln taking its coal; hanging braziers; `CrackedWall` sprites; fire rides wind (`FireBall`: a
   bolt that enters a running current turns with it and its range starts again). All new art is pixel sprites from
-  `tools/generate_kiln_sprites.gd`. Five hint stones (three stages each) and three ledger pages.
+  `tools/art/generate_kiln_sprites.gd`. Five hint stones (three stages each) and three ledger pages.
 
 **Fixes found while playing it through with real input.** An updraft now brakes a fall through it
 (`PlayerWind.FALL_BRAKE_PER_FORCE`): at the top of a column she settles within about 35 px instead of bobbing about
@@ -918,11 +918,11 @@ from the start, and ledges a hand's width from each column); the Coal Racks (**L
 of the gallery, a normal gust tips the middle skip of coal into the Heart, a Large one all three); the Heart (**Split**:
 `Fire · Projectile · Up-Right · Split` from the pedestal beside it lights its three hanging burners together; each
 burns only half a second, so one at a time does nothing); the hoist, the only way up to the Forge Bell. Built by
-`kiln_heart()` in `tools/build_wings.gd`.
+`kiln_heart()` in `tools/levels/build_wings.gd`.
 - **New pieces:** `HeartCrucible` (scripts/puzzle/heart_crucible.gd: coal in its mouth, three lamps, "it's cold: n of 3
   skips" when the burners flare over an empty Heart, the beat: light, sound, camera, a title card, the frost melting,
   its burners burning steady, a kindle point; saved); its pixel sprite (`_heart_crucible` in
-  tools/generate_kiln_sprites.gd). `WindBody.persist_id` (a skip the Heart took stays taken), `Brazier.persist_id`
+  tools/art/generate_kiln_sprites.gd). `WindBody.persist_id` (a skip the Heart took stays taken), `Brazier.persist_id`
   (the Ash Lamp stays lit), a frost patch can melt on any flag. **Iron grates now let wind through** (their bars join
   `wind_permeable`, which WindField's rays already skipped, but nothing had joined it): without it a gust from the
   gallery could never reach the top rack's skip. Running "machinery" cubes (the vents and the Cold Forge's shaft:
@@ -988,7 +988,7 @@ as a trap?).
 Requested: rework the Drowned Cistern's first room completely, to take about 30 minutes like the Cold Forge, with
 a whole new theme based on freezing things.
 
-**The room** (`cistern_still_water()` in `tools/build_wings.gd`, cols 0-56; the Sluice moved east to cols 56-80).
+**The room** (`cistern_still_water()` in `tools/levels/build_wings.gd`, cols 0-56; the Sluice moved east to cols 56-80).
 Everything in it is about freezing things, each kind useful in its own way, with one rule: rising water freezes
 where it first meets the cold. Water frozen into a floor (two pools: Ice, Freeze, Long); old ice melted by fire
 (a plug in the doorway, the Warden's cube behind it); a creature frozen to stone-weight through an iron grate (the
@@ -1010,7 +1010,7 @@ stays in the Sluice, "the word that made the silence").
 - `FreezeField` now asks anything in the group "freezable" each frame (`chill_from(field)`); `covers(rect)` samples
   the shape on a 10 px grid and needs a clear line from the cube; ice (the group "ice": frozen water, ice bridges)
   never blocks the cold, iron grates let it through.
-- Pixel sprites from `tools/generate_cistern_sprites.gd`: the water, the fountain basin, the tide clock's frame and
+- Pixel sprites from `tools/art/generate_cistern_sprites.gd`: the water, the fountain basin, the tide clock's frame and
   float, the Warden's carving, a bronze pipe. The water in the jets and the clock and all the ice are drawn
   effects, like the Ice Bridge.
 
@@ -1041,7 +1041,7 @@ the switch-on-as-the-tide-rises timing at the clock.
 Requested: rework the second room to take around an hour to beat. Taken to mean the Drowned Cistern's second room
 (the Sluice, after the Still Water), since the request before it was about the Cistern's first room.
 
-**The room** (`cistern_great_sluice()` in `tools/build_wings.gd`, cols 56-119, replacing the Sluice). The Warden's
+**The room** (`cistern_great_sluice()` in `tools/levels/build_wings.gd`, cols 56-119, replacing the Sluice). The Warden's
 sluice works. The Tide Bell is drowned in its well; the Great Sluice that drains it is balanced on two
 counterweights, a weight of three held still on a pan and the tide held at its high mark. It teaches **Persist**
 (the cold that never lets go) and uses it four ways, then reuses the room's one free cube:
@@ -1125,7 +1125,7 @@ view bobbed up and down with every hop.
   and her camera stay interpolated), floating text, damage numbers, the forge door's slide, a ledger page's bob, a
   candle's flame and the parallax backgrounds. Teleports reset the interpolation (spawn placement and Reset Room in
   ChapterRoot; teleport_to, portals, cubes and wind bodies already did).
-- **Camera** (`scripts/camera_bounds.gd`): with smooth motion, the follow and its offsets (shake, the look at a
+- **Camera** (`scripts/world/camera_bounds.gd`): with smooth motion, the follow and its offsets (shake, the look at a
   distant point) run in the physics step, so the engine draws camera and world consistently and the offset clamp is
   exact (an earlier version set the offset every drawn frame and could show 1-7 px past a room's edge; the chapter
   suite's camera checks caught it). Without smooth motion it follows every drawn frame as before. New `hop_band`
@@ -1172,7 +1172,7 @@ the steadier camera on high ledges feels better or hides anything you need to se
 ## Merged GitHub main, an instant charged jump, a simpler Great Sluice (2026-10-07)
 
 **Merge.** GitHub `main` had three new commits from a teammate (a playable witch prologue with story dialogue, a
-bell aftermath between the Belfry and the Observatory, a background bug hunt with ten fixes in `docs/BUG_HUNT.md`,
+bell aftermath between the Belfry and the Observatory, a background bug hunt with ten fixes (once in `docs/BUG_HUNT.md`, removed in the release cleanup),
 headless-friendly tests and two new suites, `prologue` and `adversarial`). The local smooth-motion work was set
 aside, `teammate-work` fast-forwarded to `main` (33692f0), and the local work reapplied. One conflict
 (`scripts/ui/chapter_complete.gd`): both kept, the bell-aftermath redirect then the scene fade. The new story scenes
@@ -1204,7 +1204,7 @@ rune 304, wing 496, prologue 38, adversarial 18 (1,727 checks).
 
 Requested: rework the Lampworks' first room around light so that it takes about an hour to beat. *The Dark
 Reading Room* (one beam across one pit, a minute's work) is replaced by **The Hall of Lamps** (`lamps_hall()` in
-`tools/build_wings.gd`, columns 0-96; the Lamp Stair moved east with it, `lamps_stair(o)`). One long room in five
+`tools/levels/build_wings.gd`, columns 0-96; the Lamp Stair moved east with it, `lamps_stair(o)`). One long room in five
 parts, each teaching one thing about light and ending with a lamp lit that opens the way on. No timing anywhere.
 The story of each part is in docs/STORY_PLAYTHROUGH.md (Chapter 3, item 1).
 
@@ -1225,7 +1225,7 @@ The story of each part is in docs/STORY_PLAYTHROUGH.md (Chapter 3, item 1).
   by this room; other rooms still go back to their entrance); the gates behind her are saved open, so nothing is
   out of reach.
 - **New pieces.** `HallLamp` (`scripts/puzzle/hall_lamp.gd`, `scenes/puzzle/hall_lamp.tscn`): a hanging pixel-art
-  lamp, dark until a circuit lights it. Sprites by `tools/generate_lamp_sprites.gd`: `hall_lamp`, `great_lamp`,
+  lamp, dark until a circuit lights it. Sprites by `tools/art/generate_lamp_sprites.gd`: `hall_lamp`, `great_lamp`,
   `bookshelf`, `lamplighter_plaque` (registered in `SurfaceArt.STRIPS`). `SpectralPlatform.casts_shadow` (default
   true): when false, a light-revealed platform never shades another one like it (lit stones were shading the
   stones beyond them); it is still solid and still blocks light for everything else. Three Lamplighter's ledger
@@ -1241,7 +1241,7 @@ The story of each part is in docs/STORY_PLAYTHROUGH.md (Chapter 3, item 1).
 
 Requested: fully rework the Galleries so the whole wing takes about two hours, with the detail and depth of the
 other three wings. The two one-minute rooms (*The First Door*, *The Fold Bell*) are replaced by two long rooms
-built by `galleries_archive()` (cols 0-70) and `galleries_wren()` (cols 70-134) in `tools/build_wings.gd`. Their
+built by `galleries_archive()` (cols 0-70) and `galleries_wren()` (cols 70-134) in `tools/levels/build_wings.gd`. Their
 story is in docs/STORY_PLAYTHROUGH.md (Chapter 4). Words taught: Space and Portal (the Archive), Repeat and
 Down-Left (Wren's Test).
 
@@ -1266,7 +1266,7 @@ Down-Left (Wren's Test).
   not keep a short-burning brazier lit).
 - **New pieces:** `WrenMeeting` (`scripts/story/wren_meeting.gd`): Wren, who breathes, blinks, turns to look,
   and the first time Echidna is near talks line by line (her bubble, Echidna's thought); saved by
-  `galleries.wren_spoke`. Sprites by `tools/generate_gallery_sprites.gd`: `wren` (3 frames), `archivist_plaque`,
+  `galleries.wren_spoke`. Sprites by `tools/art/generate_gallery_sprites.gd`: `wren` (3 frames), `archivist_plaque`,
   `scroll_rack`, `seal_fire/ice/space/light` (2 frames each, shown by `HallLamp`), `chalk_hands`. Five
   Archivist's ledger pages (`galleries.page.1-5`).
 - **Found and fixed on the way:** a sideways portal from a cube on the floor is always refused (its far doorway
@@ -1303,10 +1303,10 @@ the two bell aftermaths merged into one.
   colour grade and vignette (`assets/shaders/story_grade.gdshader`); silent beats (`""` lines); story music cues
   per shot (`"music"`). `AudioDirector.play_cue()/stop_cue()` play a cue once, duck the loops and open the Music
   bus low-pass. The Hush shader can run backwards (`thaw`).
-- **New pixel art** `tools/generate_story_hk_sprites.gd`: the moth (3 frames) and folded moth, chain link, four
+- **New pixel art** `tools/art/generate_story_hk_sprites.gd`: the moth (3 frames) and folded moth, chain link, four
   word plates, Ilse kneeling (3), the lore-card ornament, and silhouettes (stalactites, rocks, crystals, arch,
   pillar, grass, the mountain with the monastery, Lowbell's roofs, the dome's rim).
-- **Music cues** `tools/generate_story_music.gd`: `lullaby.wav` (music box over piano, 19 s), `bell_peal.wav`
+- **Music cues** `tools/audio/generate_story_music.gd`: `lullaby.wav` (music box over piano, 19 s), `bell_peal.wav`
   (the four notes as bell strikes, 12 s), `ending_swell.wav` (the motif, a rising pad, turning to A major, 46 s).
 - **Every reel rewritten and restaged** (shot lists in `docs/STORY_PLAYTHROUGH.md`): the opening 9 → 8, the
   bell 2 → 4 (with the teammate's beats: half a name, the Bellkeeper's last note), the dome 3, the wings 2 each,
@@ -1341,13 +1341,13 @@ stay calm), and targets that can be found without hints (with the hints slowed d
 - **Fonts** (Google Fonts, SIL OFL, each folder has its `OFL.txt`): Jacquard 12 (titles, YOU DIED), Silkscreen
   (HUD, menus, prompts), Pixelify Sans (dialogue, captions), IM Fell English (lore pages, notes), Patrick Hand
   (Wren's chalk). Roles in `scripts/ui/fonts.gd` (`Fonts`); every Orbitron/SystemFont use moved to a role.
-- **The dungeon UI kit:** `tools/generate_ui_sprites.gd` draws the 9-slice stone panel with gold filigree and
+- **The dungeon UI kit:** `tools/art/generate_ui_sprites.gd` draws the 9-slice stone panel with gold filigree and
   crimson gems, lighter panel, parchment, button plates, banner, name plate, dividers, slider, checkbox,
   scrollbar and bar frame (`assets/ui/`), and saves the project theme `assets/ui/dungeon_theme.tres` (set in
   `project.godot`). `scripts/ui/dungeon_ui.gd` (`DungeonUI`): palette, styles, corner crests, dividers. Every
   screen reskinned: HUD, pause menu (stone ring and plates), settings, toasts, prompts, signs, page reader
   (parchment), tours, chapter card, death screen, title cards, rune overview and journal.
-- **Portraits and the dialogue box:** `tools/generate_portraits.gd` (112×136, shown 3×): Echidna (5 faces), Nan
+- **Portraits and the dialogue box:** `tools/art/generate_portraits.gd` (112×136, shown 3×): Echidna (5 faces), Nan
   (4), Wren (4), Ilse (3). `scripts/ui/dialogue_box.gd` (`DialogueBox`): the speaker's portrait on their side, a
   gold name plate, typewriter text with the forgotten-name gaps. Used in Nan's cottage, Wren's meeting, the Eye
   (door talk and Ilse's plea) and in reels (a line can be `{"who", "face", "text"}`).
@@ -1359,7 +1359,7 @@ stay calm), and targets that can be found without hints (with the hints slowed d
 - **Title screen:** a full-screen composition: Echidna's portrait large over a crimson lattice banner, the moth's
   wing behind, "The Sealed Belfry" in Jacquard at 84, a gold rule, an italic tagline, angled stone panels and
   snow; the menu as stone plates on the right.
-- **Runes:** the rune screen rebuilt as a carved serpent wheel (`tools/generate_rune_ui_sprites.gd`) with four
+- **Runes:** the rune screen rebuilt as a carved serpent wheel (`tools/art/generate_rune_ui_sprites.gd`) with four
   sockets, a stone eye that opens when the sentence is whole, fragments as tablets, a "WHERE IT GOES" view of
   the aim path, and a parchment info plate (same API, all rune tests pass). `RuneFragments.combo_glow()` gives
   each combination its colour, pattern, size and pulse (broken runes flicker); cubes are carved stone sprites
@@ -1367,17 +1367,17 @@ stay calm), and targets that can be found without hints (with the hints slowed d
 - **Each level its own feel:** `scripts/fx/level_theme.gd` (`LevelTheme`, applied from `PostFX`): a tile
   recolour shader (`assets/shaders/tile_recolor.gdshader`) maps the shared tileset to three tones per level,
   plus mist, shadow/highlight tints, saturation, torch and shaft colours, drifting air (fireflies, snow, stars,
-  frost, embers, drips, dust, paper) and props (`tools/generate_level_props.gd`). Passage mossy teal, Belfry
+  frost, embers, drips, dust, paper) and props (`tools/art/generate_level_props.gd`). Passage mossy teal, Belfry
   cold blue, Observatory indigo, Landing dusk violet, Kilnworks ember, Cistern aqua, Lampworks sepia gold,
   Galleries pastel pink, the Eye blue-black. Rooms keep their own moods, leaning toward the level's.
 - **Creatures** (`scripts/creatures/creature.gd`, `creature_spawner.gd`, sprites from
-  `tools/generate_creature_sprites.gd`, shown 3×): bats and star mites (Belfry, Observatory), cinderlings
+  `tools/art/generate_creature_sprites.gd`, shown 3×): bats and star mites (Belfry, Observatory), cinderlings
   (fire-proof) and clinkers (armour cracks first) in the Kilnworks, frostlings and brine jellies in the Cistern,
   lampmoths (Lampworks, Galleries), foldmites that blink (Galleries), hushlings that drain mana (the Eye). They
   are scattered on open floor in each room, never within 170 px of anything with an Area2D or a rune cube, nor
   300 px of a room's way in; a room's own slimes count toward its share. The Passage (the movement lesson)
   keeps only its taught slimes, and the Landing is the safe hub. Tests run with `GameState.calm_creatures`.
-- **Sound** (`tools/generate_sfx.gd`, appended so every earlier sound is byte-identical apart from the menu
+- **Sound** (`tools/audio/generate_sfx.gd`, appended so every earlier sound is byte-identical apart from the menu
   sounds re-voiced in stone): creature alert/hurt/die/hop/crack/drain; a full death (`death_fall`: the blow,
   the fall, a minor chord, a heartbeat that stops), a toll under YOU DIED (`death_sting`) and `respawn`;
   footsteps on ash (Kilnworks), wet stone (Cistern) and paper (Galleries); a page turn; the hint skull's
@@ -1411,7 +1411,7 @@ Asked for: a version for the user's Anbernic RG35XX (an H700 model: Plus / H / S
   OpenGL display for Weston; the stock-OS mod dropped PortMaster): it needs Knulli or muOS.
 - **Package** in `port/` (launcher `Sealed Belfry.sh`, `sealedbelfry.gptk` mapping nothing so the game
   reads the pad itself, `port.json`, `gameinfo.xml`, `README.md` with install steps and controls,
-  licences); `tools/build_handheld_port.sh` exports the pck with the new "Handheld (Linux arm64)" preset
+  licences); `tools/release/build_handheld_port.sh` exports the pck with the new "Handheld (Linux arm64)" preset
   (ETC2/ASTC, excludes tests/tools/docs) and assembles `builds/handheld/ports/` and a zip (8.4 MB).
   The launcher's controller renumbering is adapted from those ports (MIT, credited).
 - **Handheld mode** (`Settings.handheld`, from `--handheld` after `--`): Low graphics on the first
@@ -1450,7 +1450,7 @@ Echidna on the status page.
 
 - **The pilgrim road** (`witch_prologue.gd`, APPROACH): rebuilt in the surface pack's art like Lowbell:
   parallax sky with the moon, the monastery on its crag, bare woods; graves, a signpost and a road lamp;
-  a pixel winch (`tools/generate_surface_props.gd`: `bridge_winch`, `rope`, `rope_ladder`) with a rope
+  a pixel winch (`tools/art/generate_surface_props.gd`: `bridge_winch`, `rope`, `rope_ladder`) with a rope
   that follows the bridge as it lowers; grassy rock steps instead of dungeon bricks; the Belfry's outer
   gate frozen shut. The code-drawn circle winch, rope line and bar are gone; the camera frames the road
   (floor 72 px above the bottom, as in Lowbell) instead of half a screen of dirt. The objective panel
@@ -1500,10 +1500,10 @@ guide: `docs/DAILY_PUZZLE.md`.
 
 - The title screen is the main scene. Continue goes to the latest shrine or lesson;
   New Game (press twice if there is progress) starts over but keeps a finished tutorial.
-- `chapter_1.tscn` is generated. Tune rooms in `tools/build_chapter.gd`, or stop using the
+- `chapter_1.tscn` is generated. Tune rooms in `tools/levels/build_chapter.gd`, or stop using the
   builder before editing the scene by hand.
 - `tutorial_level.tscn` is hand-edited; its original builder is not in the repository.
-  Structural edits go through `tools/patch_tutorial.gd` (idempotent patches that change
+  Structural edits go through `tools/levels/patch_tutorial.gd` (idempotent patches that change
   only the affected tile-data lines and append nodes).
 - Piston heads are solid but fireballs pass through them (so the tutorial's "shoot the
   switch through the running pistons" still works); beams and bolts are stopped.
@@ -1513,7 +1513,7 @@ guide: `docs/DAILY_PUZZLE.md`.
 
 - If a usage limit interrupts work, resume from this file. Model selection cannot be
   changed from inside the session; use `/model` in the Claude Code UI if needed.
-- To add a room: add a `room_N_*()` function to `tools/build_chapter.gd` (shell →
+- To add a room: add a `room_N_*()` function to `tools/levels/build_chapter.gd` (shell →
   features → `make_room` → pieces → circuits → hint/page/signs/decor), a `solve_rN()` and
   `scenario_roomN()` to `tests/chapter_suite.gd`, and chain it into `scenario_full_run`.
 

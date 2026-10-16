@@ -23,7 +23,7 @@ extends CanvasLayer
 const FONT := Fonts.STORY
 const FONT_BODY := Fonts.STORY
 const TITLE_SCENE := "res://scenes/ui/title_screen.tscn"
-const FRAMES := "res://assets/sprites/Echidna/echidna_frames.tres"
+const FRAMES := "res://assets/sprites/echidna/echidna_frames.tres"
 const SOUNDS := "res://assets/audio/sfx/sao_%s.wav"
 
 const ORANGE := Color("b23a48")
@@ -1118,7 +1118,7 @@ func _show(view: Control) -> void:
 				label.custom_minimum_size.x = 270.0
 
 
-## Kept for the tests and older callers.
+## Opens the room map (or goes back to the main list).
 func _show_map(show: bool) -> void:
 	_show(_map_box if show else _menu_box)
 

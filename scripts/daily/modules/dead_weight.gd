@@ -1,24 +1,15 @@
 class_name DeadWeightModule
 extends DailyModule
 
-## Dead Weight: a stone block that one normal wind only strains against (a
-## stone needs 1470 force to start, a normal wind is 1200), a plate that only
-## stone presses, a fixed cube blowing at it and a loose cube lying past the
-## plate (the story's Observatory Room 2, "Too Heavy for One").
+## Dead Weight: a stone block on its way to a stone-only plate. One normal
+## wind (1200) can't start it (it needs 1470), so it takes either one Strong
+## wind (2400) or two normal winds: carry the loose cube beside the fixed one
+## and switch both on (based on the Observatory's "Too Heavy for One").
 ##
-## Two ways to move it, and both are real:
-##   one strong wind (2400) from the fixed cube, or
-##   two winds stacked: carry the loose cube beside the fixed one and switch
-##   both on (1200 + 1200).
-##
-## Parameters
-##   gap  columns from the fixed cube to the stone (2..3)
-##   run  columns from the stone to the kerb (3..5)
-##   lock 0: only the fixed cube's modifier is open; 1: its direction too
-##   guided  chalk waymarks on the walls (off at Grand and above)
-##
-## The layouts a plan is claimed for are the ones the physics sweep
-## (tests/daily_suite.gd) measured to work with room to spare; see VERIFIED.
+## Parameters: gap (fixed cube to stone, 2-3 columns), run (stone to kerb,
+## 3-5), lock (0: only the fixed cube's modifier is open, 1: its direction
+## too), guided (chalk waymarks). Only layouts the physics sweep proved are
+## used; see VERIFIED.
 
 ## "gap/run" of the layouts proven to work, for both plans.
 const VERIFIED := ["2/3", "2/4", "2/5", "3/3", "3/4", "3/5"]
@@ -135,7 +126,7 @@ func build(k: RoomKit, room: Room, x0: int, x1: int, params: Dictionary, _words:
 		"Either inscribe Strong on the fixed cube, or carry the far cube ({rune_carry}) beside it, point it the same way, and switch both on.",
 	], [fixed, block, loose])
 	var signs := k.group(room, "Signs")
-	k.inst("res://scenes/tutorial_sign.tscn", signs, "Carry", Vector2(RoomKit.cx(loose_col - 2), RoomKit.FLOOR_Y - 78.0),
+	k.inst("res://scenes/world/tutorial_sign.tscn", signs, "Carry", Vector2(RoomKit.cx(loose_col - 2), RoomKit.FLOOR_Y - 78.0),
 		{"text": "{rune_carry}: pick up a cube that is off, and set it down where its outline shows.", "width": 190.0})
 	var deco := k.group(room, "Decor")
 	for col in [x0 + 3, x0 + 9, x1 - 3]:

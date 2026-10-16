@@ -2,7 +2,7 @@ class_name DialogueBox
 extends CanvasLayer
 
 ## A conversation told the Persona way: the speaker's large portrait
-## (tools/generate_portraits.gd, shown 3x) slides in on their side of the
+## (tools/art/generate_portraits.gd, shown 3x) slides in on their side of the
 ## screen and whoever they are talking to dims on the other; a gold name
 ## plate; the words type out in a dungeon panel along the bottom, in the
 ## story face, with glyph gaps where a forgotten name should be (write {n}

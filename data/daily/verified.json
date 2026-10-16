@@ -1,17 +1,17 @@
 {
 	"complete": true,
 	"module_hashes": {
-		"burn_through": 1131123567,
-		"dark_hall": 1461660490,
-		"dead_weight": 2164765506,
-		"folded_wall": 4112176257,
-		"frozen_crossing": 2975362415,
-		"gust_alley": 27874726,
-		"kindling": 2178015513,
-		"prism_relay": 717597251,
-		"still_piston": 3462020064,
-		"together": 2026863381,
-		"updraft": 3465348076
+		"burn_through": 1550871317,
+		"dark_hall": 139239402,
+		"dead_weight": 2344847018,
+		"folded_wall": 1472773287,
+		"frozen_crossing": 3062864149,
+		"gust_alley": 2631786638,
+		"kindling": 2704592587,
+		"prism_relay": 3677012337,
+		"still_piston": 2087400252,
+		"together": 819034447,
+		"updraft": 1069621366
 	},
 	"modules": {
 		"burn_through": {
@@ -23788,7 +23788,7 @@
 		}
 	},
 	"repeats": 3,
-	"source_hash": 1091830042,
+	"source_hash": 365312979,
 	"verification_rules": 2,
 	"version": 10
 }

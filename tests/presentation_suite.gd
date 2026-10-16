@@ -5,9 +5,9 @@ extends Node
 ## the adaptive audio. Run through tests/run_tests.gd:  -- presentation [scenario]
 
 const CHAPTER := "res://scenes/chapter/chapter_1.tscn"
-const TUTORIAL := "res://scenes/tutorial_level.tscn"
-const FRAMES := "res://assets/sprites/Echidna/echidna_frames.tres"
-const SHEETS := "res://assets/sprites/Echidna/"
+const TUTORIAL := "res://scenes/tutorial/tutorial_level.tscn"
+const FRAMES := "res://assets/sprites/echidna/echidna_frames.tres"
+const SHEETS := "res://assets/sprites/echidna/"
 const SHOTS := "user://test_shots/"
 const DT := 1.0 / 60.0
 const FLOOR := 530.0

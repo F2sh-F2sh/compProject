@@ -7,6 +7,12 @@ extends Node
 signal flag_changed(id: String, value: Variant)
 
 const SAVE_PATH := "user://savegame.cfg"
+## Scenes that have moved since older saves were written (old path -> new).
+const MOVED_SCENES := {
+	"res://scenes/tutorial_level.tscn": "res://scenes/tutorial/tutorial_level.tscn",
+	"res://scenes/tutorial_movement.tscn": "res://scenes/tutorial/tutorial_movement.tscn",
+	"res://scenes/TestingPlayerMovement.tscn": "res://scenes/tutorial/movement_sandbox.tscn",
+}
 
 var flags := {}
 ## The most recent checkpoint anywhere (where "Continue" goes).
@@ -56,7 +62,6 @@ func set_flag(id: String, value: Variant = true) -> void:
 	if id == "" or (typeof(old) == typeof(value) and old == value):
 		return
 	flags[id] = value
-	_earlier = -1
 	flag_changed.emit(id, value)
 	save_game()
 
@@ -81,11 +86,10 @@ var all_abilities := false
 ## Tests turn this on: the roaming creatures (CreatureSpawner) stay away, so
 ## the scripted puzzle routes are not chased about. Their own tests turn it off.
 var calm_creatures := false
-var _earlier := -1
 
 
-## Whether Echidna has this spell. A save from before spells had to be earned
-## (the tutorial or a chapter already played) has them all.
+## Whether Echidna has this spell (older saves are given every spell when
+## they load; see load_game).
 func has_ability(id: String) -> bool:
 	return id in ABILITIES and (all_abilities or has_flag("ability." + id))
 
@@ -99,12 +103,6 @@ func grant_ability(id: String) -> void:
 func grant_all_abilities() -> void:
 	for id in ABILITIES:
 		grant_ability(id)
-
-
-func _has_earlier_progress() -> bool:
-	if _earlier == -1:
-		_earlier = 1 if (count_flags("ability.") == 0 and (has_flag("tutorial.done") or count_flags("ch1.") > 0 or count_flags("ch2.") > 0)) else 0
-	return _earlier == 1
 
 
 func set_checkpoint(scene_path: String, id: String) -> void:
@@ -132,7 +130,6 @@ func clear_checkpoint(scene_path: String) -> void:
 
 ## Forgets all progress made in one scene (flags are prefixed with a scene key).
 func clear_progress(prefix: String) -> void:
-	_earlier = -1
 	for id in flags.keys():
 		if String(id).begins_with(prefix):
 			flags.erase(id)
@@ -147,7 +144,6 @@ func clear_progress(prefix: String) -> void:
 
 func clear_all() -> void:
 	flags.clear()
-	_earlier = -1
 	checkpoints.clear()
 	session.clear()
 	checkpoint_scene = ""
@@ -223,17 +219,16 @@ func load_game(path := SAVE_PATH) -> void:
 			var value = loaded_flags[key]
 			if key is String and (value is bool or value is int or (value is float and is_finite(value))):
 				flags[key] = value
-	_earlier = -1
 	var scene = file.get_value("progress", "checkpoint_scene", "")
 	var id = file.get_value("progress", "checkpoint_id", "")
-	checkpoint_scene = scene if scene is String else ""
+	checkpoint_scene = MOVED_SCENES.get(scene, scene) if scene is String else ""
 	checkpoint_id = id if id is String else ""
 	var loaded_checkpoints = file.get_value("progress", "checkpoints", {})
 	checkpoints = {}
 	if loaded_checkpoints is Dictionary:
 		for key in loaded_checkpoints:
 			if key is String and loaded_checkpoints[key] is String:
-				checkpoints[key] = loaded_checkpoints[key]
+				checkpoints[MOVED_SCENES.get(key, key)] = loaded_checkpoints[key]
 	# Saves from before per-scene checkpoints
 	if checkpoints.is_empty() and checkpoint_scene != "":
 		checkpoints[checkpoint_scene] = checkpoint_id

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="dungeon" cx="50%" cy="45%" r="76%">
+      <stop stop-color="#29213b"/>
+      <stop offset=".58" stop-color="#151222"/>
+      <stop offset="1" stop-color="#07070d"/>
+    </radialGradient>
+    <linearGradient id="slab" x1=".12" y1=".08" x2=".92" y2=".95">
+      <stop stop-color="#756b82"/>
+      <stop offset=".32" stop-color="#51475f"/>
+      <stop offset=".72" stop-color="#393245"/>
+      <stop offset="1" stop-color="#211d2c"/>
+    </linearGradient>
+    <linearGradient id="cutstone" x1="0" y1="0" x2="0.8" y2="1">
+      <stop stop-color="#aaa1b1"/>
+      <stop offset=".5" stop-color="#766d81"/>
+      <stop offset="1" stop-color="#4a4355"/>
+    </linearGradient>
+    <radialGradient id="sigilglow">
+      <stop stop-color="#8beaff" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#a266ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="appmask"><rect x="8" y="8" width="496" height="496" rx="72"/></clipPath>
+  </defs>
+  <g clip-path="url(#appmask)">
+    <!-- Polished obsidian masonry -->
+    <rect width="512" height="512" fill="url(#dungeon)"/>
+    <g fill="#100f1b" stroke="#30283c" stroke-width="3" opacity=".9">
+      <path d="M0 20h118v62H0zM124 20h132v62H124zM262 20h127v62H262zM395 20h117v62H395z"/>
+      <path d="M-55 88h130v60H-55zM81 88h126v60H81zM213 88h136v60H213zM355 88h132v60H355z"/>
+      <path d="M0 364h124v62H0zM130 364h126v62H130zM262 364h127v62H262zM395 364h117v62H395z"/>
+      <path d="M-55 432h130v80H-55zM81 432h126v80H81zM213 432h136v80H213zM355 432h132v80H355z"/>
+    </g>
+    <g stroke="#4b405c" stroke-width="2" opacity=".45">
+      <path d="M28 34h72M151 34h91M286 34h81M418 34h73M97 104h96M232 104h105M378 104h91M23 389h86M151 389h88M284 389h85M416 389h75M97 457h96M232 457h105M378 457h91"/>
+    </g>
+
+    <!-- Mechanical time ring: gear teeth, paired piston blocks, and a quiet halo -->
+    <circle cx="256" cy="250" r="215" fill="none" stroke="#5b4c70" stroke-width="3" opacity=".65"/>
+    <circle cx="256" cy="250" r="202" fill="none" stroke="#8a70b1" stroke-width="2" stroke-dasharray="2 12" opacity=".58"/>
+    <g fill="#282334" stroke="#817094" stroke-width="3">
+      <path d="M247 20h18v20h-18zM247 460h18v32h-18zM20 241h29v18H20zM463 241h29v18h-29z"/>
+      <path d="M91 73h22v16H91zM399 73h22v16h-22zM91 411h22v16H91zM399 411h22v16h-22z" transform="rotate(45 256 250)"/>
+    </g>
+    <g fill="none" stroke="#a58ac2" stroke-width="3" opacity=".74">
+      <circle cx="256" cy="30" r="9"/><circle cx="256" cy="470" r="9"/>
+      <circle cx="30" cy="250" r="9"/><circle cx="482" cy="250" r="9"/>
+      <path d="M239 44h34v20h-34zM239 436h34v20h-34zM44 233h20v34H44zM448 233h20v34h-20z"/>
+      <path d="M247 44v20m18-20v20m-26 372v20m18-20v20m-210-214h20m-20 18h20m392-18h20m-20 18h20"/>
+    </g>
+
+    <!-- Central carved block and beveled face -->
+    <path d="M112 94 256 66l144 28 31 38v234l-31 38-144 28-144-28-31-38V132z" fill="#08070e" opacity=".75" transform="translate(0 9)"/>
+    <path d="M112 88 256 60l144 28 31 38v234l-31 38-144 28-144-28-31-38V126z" fill="#17131f" stroke="#9a83b0" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M121 99 256 73l135 26 27 33v222l-27 33-135 26-135-26-27-33V132z" fill="url(#slab)" stroke="#4f455c" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M121 99 256 73v340l-135-26-27-33V132z" fill="#877b8d" opacity=".16"/>
+    <path d="M121 99 256 73m-135 26-27 33v222l27 33m270-288 27 33v222l-27 33m-270-33 135 26 135-26" fill="none" stroke="#c1afc6" stroke-opacity=".33" stroke-width="3"/>
+    <circle cx="256" cy="244" r="142" fill="url(#sigilglow)"/>
+
+    <!-- Fine cracks in the old carved face -->
+    <g fill="none" stroke="#1d1828" stroke-width="4" opacity=".8" stroke-linecap="square">
+      <path d="m141 143 15 12-8 17 13 12m210-26-17 10 4 17-14 10M119 323l19-8 6 16 16 8m226-16-15-12 6-15-13-13M187 105l-8 15 8 7-9 13m149-30 10 13-7 12 10 10"/>
+    </g>
+    <g fill="none" stroke="#b1a2b2" stroke-opacity=".52" stroke-width="2">
+      <path d="m143 143 13 11m219 1-15 9m-241 158 17-7m224-9-13-10"/>
+    </g>
+
+    <!-- Small etched rune marks around the central carving -->
+    <g fill="none" stroke="#b896dd" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".82">
+      <path d="M155 205v-18l10 8 10-8v18m161-3h18m-9-9v18M157 294h17m-9-9v18m160 1 9-17 9 17m-14-8h10"/>
+      <path d="m182 146 8-8 8 8-8 8zM316 145l8-8 8 8-8 8zM186 342l7-7 7 7-7 7zM313 342l7-7 7 7-7 7z"/>
+    </g>
+
+    <!-- Recorded echoes: same wizard-and-staff mark, offset and pale cyan. -->
+    <g fill="#92eaff" fill-opacity=".055" stroke="#8eeaff" stroke-width="3" stroke-opacity=".34" stroke-linejoin="round" transform="translate(-15 7)">
+      <path d="M188 328V183h-14v-14h14v-16h12v-16h20l-10-16 31 11 15-28 16 28 30-11-10 16h21v16h13v16h14v14h-15v145c0 13 13 22 25 35H163c12-13 25-22 25-35z"/>
+      <path d="M188 164h-18v-8h18m0-10h-13v-8h13m-8-8 12 8" fill="none"/>
+    </g>
+    <g fill="#a3f0ff" fill-opacity=".06" stroke="#9aebff" stroke-width="3" stroke-opacity=".42" stroke-linejoin="round" transform="translate(14 -7)">
+      <path d="M188 328V183h-14v-14h14v-16h12v-16h20l-10-16 31 11 15-28 16 28 30-11-10 16h21v16h13v16h14v14h-15v145c0 13 13 22 25 35H163c12-13 25-22 25-35z"/>
+      <path d="M188 164h-18v-8h18m0-10h-13v-8h13m-8-8 12 8" fill="none"/>
+    </g>
+
+    <!-- Primary wizard sigil: pointed hat, staff, and cloak in a single bold mark. -->
+    <path d="M188 328V183h-14v-14h14v-16h12v-16h20l-10-16 31 11 15-28 16 28 30-11-10 16h21v16h13v16h14v14h-15v145c0 13 13 22 25 35H163c12-13 25-22 25-35z" fill="url(#cutstone)" stroke="#d8c8e5" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M245 111 256 91l12 22 21-8-11 19h-43l-11-19z" fill="#aa91c6"/>
+    <path d="M202 168h108v11H202z" fill="#3a3149" stroke="#bba3d5" stroke-width="3"/>
+    <path d="M202 168h108v5H202z" fill="#d0b4e8" opacity=".7"/>
+    <path d="M192 184h126v142c0 15 15 25 27 37H163c12-12 29-22 29-37z" fill="#514960"/>
+    <path d="M192 184h64v173H163c12-12 29-22 29-37z" fill="#766d81" opacity=".56"/>
+    <path d="M257 184h61v142c0 15 15 25 27 37H257z" fill="#393244" opacity=".72"/>
+    <path d="M190 196v124m134-124v124" stroke="#c5b4d4" stroke-opacity=".65" stroke-width="3"/>
+    <path d="M256 203v103m-21-54h42m-21-21 21 21-21 21-21-21z" fill="none" stroke="#bca0e2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M184 142v190m-7-175h14m-14-12h14m-14 24h14" fill="none" stroke="#dfd4e6" stroke-width="5" stroke-linecap="square"/>
+    <path d="M184 129 174 142h20z" fill="#c4a8e8" stroke="#e0d1f0" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="184" cy="126" r="8" fill="#bc91ff" stroke="#efe0ff" stroke-width="3" filter="url(#glow)"/>
+    <path d="M173 332h166" stroke="#d8cae0" stroke-width="5" stroke-linecap="square"/>
+
+    <!-- Restrained electric-lavender motes -->
+    <g fill="#d5b4ff" filter="url(#glow)">
+      <circle cx="141" cy="252" r="3"/><circle cx="366" cy="230" r="3"/><circle cx="155" cy="365" r="2.5"/><circle cx="352" cy="154" r="2.5"/>
+    </g>
+    <g fill="#9a72d3">
+      <path d="m137 276 4-4 4 4-4 4zM374 282l4-4 4 4-4 4zM224 377l4-4 4 4-4 4zM287 116l3-3 3 3-3 3z"/>
+    </g>
+    <rect x="10" y="10" width="492" height="492" rx="70" fill="none" stroke="#9b7bbb" stroke-opacity=".58" stroke-width="4"/>
+  </g>
+</svg>

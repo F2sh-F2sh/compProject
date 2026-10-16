@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="field" cx="48%" cy="43%" r="75%">
+      <stop stop-color="#38245f"/>
+      <stop offset=".58" stop-color="#1b1236"/>
+      <stop offset="1" stop-color="#080710"/>
+    </radialGradient>
+    <linearGradient id="stone" x1=".12" y1=".12" x2=".88" y2=".9">
+      <stop stop-color="#766b8d"/>
+      <stop offset=".28" stop-color="#39304f"/>
+      <stop offset=".72" stop-color="#211b35"/>
+      <stop offset="1" stop-color="#100e1c"/>
+    </linearGradient>
+    <linearGradient id="brim" x1="0" y1="0" x2=".95" y2=".8">
+      <stop stop-color="#665284"/>
+      <stop offset=".4" stop-color="#382b57"/>
+      <stop offset="1" stop-color="#171323"/>
+    </linearGradient>
+    <radialGradient id="aura">
+      <stop stop-color="#a66dff" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#8e54e8" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="round"><rect width="512" height="512" rx="84"/></clipPath>
+  </defs>
+  <g clip-path="url(#round)">
+    <rect width="512" height="512" fill="url(#field)"/>
+    <circle cx="256" cy="245" r="208" fill="url(#aura)"/>
+
+    <!-- Quiet time echoes: nested, broken rings rather than a busy frame. -->
+    <circle cx="256" cy="250" r="190" fill="none" stroke="#8f69c4" stroke-opacity=".23" stroke-width="3"/>
+    <circle cx="256" cy="250" r="164" fill="none" stroke="#b18aee" stroke-opacity=".24" stroke-width="2" stroke-dasharray="95 18 34 24"/>
+    <circle cx="256" cy="250" r="136" fill="none" stroke="#aa7be9" stroke-opacity=".19" stroke-width="2" stroke-dasharray="48 15 80 28"/>
+    <path d="M73 237a184 184 0 0 1 13-54M421 323a184 184 0 0 1-28 42M119 396a184 184 0 0 1-26-31" fill="none" stroke="#c3a0fa" stroke-opacity=".44" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- The same hat appears in three translucent positions, like recorded actions. -->
+    <g fill="#b28aff" opacity=".13" transform="translate(-28 12) scale(.88)">
+      <path d="M177 311c30-38 47-81 49-128 1-28-7-49-27-67 34 17 60 9 77-22 10 37 35 55 73 53-25 25-35 54-27 88 9 38 31 62 67 80-49-9-86-8-117 4-32 12-61 18-95 12Z"/>
+      <path d="M118 322c47-38 99-54 154-49 40 4 78 22 119 19-5 25-24 41-56 45-68 8-129-7-184 16-32 13-55 0-33-31Z"/>
+    </g>
+    <g fill="#c5a4ff" opacity=".10" transform="translate(31 -7) scale(.82)">
+      <path d="M177 311c30-38 47-81 49-128 1-28-7-49-27-67 34 17 60 9 77-22 10 37 35 55 73 53-25 25-35 54-27 88 9 38 31 62 67 80-49-9-86-8-117 4-32 12-61 18-95 12Z"/>
+      <path d="M118 322c47-38 99-54 154-49 40 4 78 22 119 19-5 25-24 41-56 45-68 8-129-7-184 16-32 13-55 0-33-31Z"/>
+    </g>
+    <g fill="#9c71e9" opacity=".12" transform="translate(1 25) scale(.72)">
+      <path d="M177 311c30-38 47-81 49-128 1-28-7-49-27-67 34 17 60 9 77-22 10 37 35 55 73 53-25 25-35 54-27 88 9 38 31 62 67 80-49-9-86-8-117 4-32 12-61 18-95 12Z"/>
+      <path d="M118 322c47-38 99-54 154-49 40 4 78 22 119 19-5 25-24 41-56 45-68 8-129-7-184 16-32 13-55 0-33-31Z"/>
+    </g>
+
+    <!-- Main hat: angular, stone-carved crown with a strong readable brim. -->
+    <ellipse cx="256" cy="278" rx="158" ry="111" fill="#090711" opacity=".58"/>
+    <path d="M174 302c31-39 48-83 51-129 2-31-8-54-29-72 35 17 62 7 79-27 10 40 37 58 77 55-27 26-38 56-30 91 8 39 33 67 72 86-49-9-88-8-121 5-34 13-66 19-99 12Z" fill="#0d0a17" stroke="#aa8be2" stroke-opacity=".68" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M183 295c27-37 43-78 47-119 3-29-4-49-21-67 30 13 54 4 70-26 10 33 33 49 66 49-23 24-31 52-23 83 8 34 28 58 60 77-42-6-77-4-107 7-31 12-59 17-92 10Z" fill="url(#stone)"/>
+    <path d="M211 224c27-9 48-28 63-58 13 29 32 46 59 53-10 18-12 39-6 64 6 24 19 44 39 61-36-3-67 1-94 12-23 9-46 12-70 8 19-35 29-73 29-111 0-11-1-20-3-29Z" fill="#211a32" opacity=".72"/>
+    <path d="M238 161c13-4 25-14 36-31 7 22 20 36 40 43-15 18-22 40-20 66-18-13-39-20-65-20 14-19 17-39 9-58Z" fill="#8b72a8" opacity=".36"/>
+    <path d="M191 294c28-37 44-80 48-126" fill="none" stroke="#c3a9dc" stroke-opacity=".64" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Broad flared brim, lifted at each end for an unmistakable wizard-hat silhouette. -->
+    <path d="M105 307c40-31 88-47 145-47 56 0 103 18 157 9 2 24-17 42-54 50-54 12-109 1-158 17-37 12-69 14-96 3-17-7-15-19 6-32Z" fill="#0b0913" stroke="#a98ad8" stroke-opacity=".82" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M119 307c39-25 82-37 130-37 55 0 102 18 148 12-7 16-24 27-51 32-52 10-102 0-151 15-37 11-67 12-88 4-12-5-8-14 12-26Z" fill="url(#brim)"/>
+    <path d="M133 308c37-20 76-29 116-29 31 0 60 6 88 12-39 3-75 4-109 15-37 12-68 17-95 10Z" fill="#806a9d" opacity=".36"/>
+    <path d="M354 291c16 0 31-2 44-5-7 16-24 27-51 32-15 3-30 4-44 4 25-6 42-16 51-31Z" fill="#171221"/>
+
+    <!-- Minimal arcane marks: three small runes and a few restrained particles. -->
+    <g fill="none" stroke="#c19aff" stroke-width="3" stroke-linecap="square" opacity=".82">
+      <path d="M111 197v-13l8 7 8-7v13M386 201h17m-9-9v18M247 91v13m-7-7h14"/>
+      <path d="M93 284h12m-6-6v12M410 278h12m-6-6v12" opacity=".6"/>
+    </g>
+    <g fill="#d9c1ff">
+      <circle cx="146" cy="147" r="3"/><circle cx="371" cy="157" r="3"/>
+      <circle cx="86" cy="332" r="2.5"/><circle cx="427" cy="344" r="2.5"/>
+      <circle cx="324" cy="103" r="2"/><circle cx="194" cy="407" r="2"/>
+    </g>
+    <g fill="#8f62d0" opacity=".85">
+      <path d="m132 232 5-5 5 5-5 5zM386 235l4-4 4 4-4 4zM354 389l5-5 5 5-5 5z"/>
+    </g>
+    <rect x="2" y="2" width="508" height="508" rx="82" fill="none" stroke="#8060a8" stroke-opacity=".42" stroke-width="4"/>
+  </g>
+</svg>

@@ -1,0 +1,70 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/player/echo.gd" id="1_qgr1w"]
+[ext_resource type="Shader" path="res://assets/shaders/echo_ghost.gdshader" id="2_11v73"]
+
+[sub_resource type="Gradient" id="Gradient_y7qyc"]
+offsets = PackedFloat32Array(0, 0.35, 0.7, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0.15, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_abhov"]
+gradient = SubResource("Gradient_y7qyc")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rctu3"]
+shader = ExtResource("2_11v73")
+shader_parameter/tint = null
+shader_parameter/rim_color = null
+shader_parameter/opacity = null
+shader_parameter/materialize = null
+shader_parameter/flicker_speed = null
+shader_parameter/frame_top = null
+shader_parameter/frame_bottom = null
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xoa2a"]
+size = Vector2(10, 32)
+
+[node name="Echo" type="Node2D" unique_id=852110706]
+z_index = 1
+script = ExtResource("1_qgr1w")
+
+[node name="Glow" type="PointLight2D" parent="." unique_id=1916169366]
+position = Vector2(0, -20)
+color = Color(0.66, 0.42, 1, 1)
+energy = 0.9
+texture = SubResource("GradientTexture2D_abhov")
+texture_scale = 0.75
+height = 40.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=926743357]
+material = SubResource("ShaderMaterial_rctu3")
+position = Vector2(-1, -21)
+scale = Vector2(0.812, 0.812)
+
+[node name="Motes" type="CPUParticles2D" parent="." unique_id=68707686]
+position = Vector2(0, -20)
+emitting = false
+amount = 10
+lifetime = 1.4
+emission_shape = 3
+emission_rect_extents = Vector2(9, 16)
+direction = Vector2(0, -1)
+spread = 30.0
+gravity = Vector2(0, -10)
+initial_velocity_min = 4.0
+initial_velocity_max = 10.0
+scale_amount_max = 2.0
+color = Color(0.78, 0.58, 1, 0.75)
+
+[node name="Presser" type="Area2D" parent="." unique_id=1214653242]
+collision_layer = 4
+collision_mask = 0
+monitoring = false
+
+[node name="@CollisionShape2D@2" type="CollisionShape2D" parent="Presser" unique_id=1589371026]
+position = Vector2(-1, -18)
+shape = SubResource("RectangleShape2D_xoa2a")

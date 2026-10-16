@@ -14,7 +14,7 @@ extends Node2D
 const DOOR_SIZE := Vector2(26, 44)
 ## How long a body that has just come through is held to the side it came out of.
 const SETTLE := 0.3
-## A bolt of fire's own radius (scenes/FireBall.tscn), so one brushing a doorway counts.
+## A bolt of fire's own radius (scenes/player/fireball.tscn), so one brushing a doorway counts.
 const FIRE_RADIUS := 9.0
 
 var cube: RuneCube

@@ -6,7 +6,7 @@ extends Node2D
 ## stars are in the same chalk), so they belong to the dungeon rather than to
 ## the interface: no slab, no glow of their own, only the faintest light so
 ## they can still be read in a dark room. Pixel art
-## (tools/generate_waymark_sprites.gd). Hidden when guidance is off.
+## (tools/art/generate_waymark_sprites.gd). Hidden when guidance is off.
 
 @export_enum("right", "left", "up", "down") var direction := "right"
 

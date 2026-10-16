@@ -13,8 +13,8 @@ var _time := 0.0
 
 
 func _ready() -> void:
-	# Retained for old packed-scene compatibility. Mana is restored with R
-	# anywhere; obsolete refill posts no longer clutter the playable rooms.
+	# Hidden: mana is restored by holding R anywhere. The node is still placed
+	# in the generated level scenes.
 	visible = false
 	z_index = -1
 	var figure := SurfaceArt.animated(self, SPRITE, Vector2.ZERO, 6.0, 1.0)

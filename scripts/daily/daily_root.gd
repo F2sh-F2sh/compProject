@@ -122,12 +122,12 @@ func _build_rooms() -> void:
 func _build_player_and_ui() -> void:
 	var rooms_spec: Array = spec["rooms"]
 	var start_room: Room = kit.rooms["R%d" % (clampi(DailyRun.respawn_room, 0, rooms_spec.size()) + 1)]
-	var p := kit.inst("res://scenes/Player.tscn", self, "Player", start_room.entry_spawn,
+	var p := kit.inst("res://scenes/player/player.tscn", self, "Player", start_room.entry_spawn,
 		{"z_index": 1, "collision_mask": 2})
 	var camera := Camera2D.new()
 	camera.name = "Camera2D"
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
-	camera.set_script(load("res://scripts/camera_bounds.gd"))
+	camera.set_script(load("res://scripts/world/camera_bounds.gd"))
 	camera.set("bounds", start_room.bounds)
 	camera.set("base_zoom", Vector2(2, 2))
 	camera.zoom = Vector2(2, 2)
@@ -145,7 +145,7 @@ func _build_player_and_ui() -> void:
 	var post := CanvasLayer.new()
 	post.name = "PostFX"
 	post.layer = 1
-	post.set_script(load("res://scripts/post_fx.gd"))
+	post.set_script(load("res://scripts/fx/post_fx.gd"))
 	var screen := ColorRect.new()
 	screen.name = "Screen"
 	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -157,13 +157,13 @@ func _build_player_and_ui() -> void:
 	post.add_child(screen)
 	add_child(post)
 
-	kit.inst("res://scenes/hud.tscn", self, "HUD", Vector2.ZERO)
-	kit.inst("res://scenes/ammo_ui.tscn", self, "AmmoUI", Vector2.ZERO)
+	kit.inst("res://scenes/ui/hud.tscn", self, "HUD", Vector2.ZERO)
+	kit.inst("res://scenes/ui/ammo_ui.tscn", self, "AmmoUI", Vector2.ZERO)
 	var death_ui := CanvasLayer.new()
 	death_ui.name = "DeathUI"
 	death_ui.layer = 2
 	add_child(death_ui)
-	death_screen = load("res://scenes/death_screen.tscn").instantiate()
+	death_screen = load("res://scenes/ui/death_screen.tscn").instantiate()
 	death_ui.add_child(death_screen)
 	if DailyRun.mode == "endless":
 		_build_endless_hud()
@@ -323,7 +323,7 @@ func _build_stair(index: int) -> void:
 		Vector2(RoomKit.cx(x0 + 2), 530), index, index)
 	var door := Sprite2D.new()
 	door.name = "StairDoor"
-	door.texture = load("res://assets/TileSet/walls/tiles/10_door_wood.png")
+	door.texture = load("res://assets/tileset/walls/tiles/10_door_wood.png")
 	door.centered = false
 	door.offset = Vector2(-32, -64)
 	door.position = Vector2(RoomKit.cx(x1 - 2), RoomKit.FLOOR_Y)

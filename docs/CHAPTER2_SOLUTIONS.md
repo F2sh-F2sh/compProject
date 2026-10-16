@@ -2,7 +2,7 @@
 
 Eight rooms built around rune cubes. Every solution below is played by `tests/rune_suite.gd`
 with simulated input and Echidna's real movement (scenario names in brackets; `full` plays
-all eight in a row). Layout and tuning live in `tools/build_chapter2.gd`; rebuild after
+all eight in a row). Layout and tuning live in `tools/levels/build_chapter2.gd`; rebuild after
 changes. Open `scenes/chapter/chapter_2.tscn` and press F6 to play it directly, or choose
 "Chapter 2" on the title screen.
 

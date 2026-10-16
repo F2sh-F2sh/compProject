@@ -2,7 +2,7 @@
 class_name HallLamp
 extends Node2D
 
-## A hanging lamp of the Lampworks (pixel art: tools/generate_lamp_sprites.gd),
+## A hanging lamp of the Lampworks (pixel art: tools/art/generate_lamp_sprites.gd),
 ## dark until a circuit powers it, then lit with a warm glow and light. It is a
 ## circuit target (set_powered) and reads as powered while lit, so a room's
 ## steps can follow it. Purely a sign of progress: it lights nothing else.

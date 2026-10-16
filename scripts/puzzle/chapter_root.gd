@@ -353,7 +353,7 @@ func _add_back_gates() -> void:
 		if down.is_empty() or up.is_empty():
 			continue
 		var floor_y: float = down["position"].y
-		var gate := preload("res://scenes/portcullis_gate.tscn").instantiate() as PortcullisGate
+		var gate := preload("res://scenes/puzzle/portcullis_gate.tscn").instantiate() as PortcullisGate
 		gate.name = "BackGate"
 		gate.height = floor_y - float(up["position"].y)
 		gate.start_open = true

@@ -3186,23 +3186,10 @@ func scenario_admin() -> void:
 	await load_scene(Journey.LANDING, false)
 	var doors: Array = get_tree().get_nodes_in_group("landing_door")
 	check("every door on the Long Stair is open", doors.size() == 5 and doors.all(func(d): return d.is_open()))
-	# The title's admin page
-	if is_instance_valid(get_tree().current_scene):
-		get_tree().current_scene.queue_free()
-	await get_tree().process_frame
-	var title: Node = load(Journey.TITLE).instantiate()
-	get_tree().root.add_child(title)
-	get_tree().current_scene = title
-	await frames(10)
-	check("Choose a Level has the admin page", title.admin_button != null and title._admin != null)
-	title._show_parts(true)
-	title._show_admin(true)
-	await frames(4)
-	await shot("admin_title_page")
-	var heart_button := _button_titled(title._admin, "Kilnworks · The Kiln Heart")
-	check("it lists the Kiln Heart", heart_button != null)
-	if heart_button:
-		heart_button.pressed.emit()
+	# Any room can be started directly, with the words of everything before it
+	Journey.admin_prepare(Journey.KILN, "R2")
+	Journey.admin_start_room = "R2"
+	get_tree().change_scene_to_file(Journey.KILN)
 	check("which starts the Kilnworks", await wait_until(_on_scene.bind(Journey.KILN), 6.0))
 	await frames(20)
 	lvl = get_tree().current_scene
@@ -3222,12 +3209,6 @@ func _all_wings_open() -> bool:
 			return false
 	return true
 
-
-func _button_titled(parent: Node, text: String) -> Button:
-	for b in parent.find_children("*", "Button", true, false):
-		if (b as Button).text == text:
-			return b
-	return null
 
 
 ## The shrine with this checkpoint id.
@@ -3398,7 +3379,7 @@ func scenario_kiln_collisions() -> void:
 			else:
 				check("%s floor %s stays solid" % [layer_name, cell], not data.is_collision_polygon_one_way(0, 0))
 		check("%s contains shelves" % layer_name, shelves > 0)
-	var shared := load("res://assets/TileSet/dungeon_tileset.tres") as TileSet
+	var shared := load("res://assets/tileset/dungeon_tileset.tres") as TileSet
 	var source := shared.get_source(0) as TileSetAtlasSource
 	check("other chapters retain solid shelves", not source.get_tile_data(Vector2i(1, 1), 0).is_collision_polygon_one_way(0, 0))
 

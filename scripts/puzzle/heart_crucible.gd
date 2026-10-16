@@ -14,7 +14,7 @@ extends Node2D
 ## hoist). It says why when the
 ## burners flare together over an empty crucible. Saved once it beats; each
 ## skip it has taken stays taken (WindBody.persist_id). Its coal is solid
-## underfoot. Pixel art (tools/generate_kiln_sprites.gd).
+## underfoot. Pixel art (tools/art/generate_kiln_sprites.gd).
 ## The node sits on the pit floor, centred on the crucible (128 px wide).
 
 signal power_changed(powered: bool)

@@ -73,13 +73,13 @@ func run_suite(_filter: String) -> void:
 		if child is Sprite2D and child.position.is_equal_approx(Vector2(1700, 664)) and child.texture is AtlasTexture and child.texture.region == Rect2(SurfaceArt.REGIONS["door_tall"][1]) and child.is_visible_in_tree():
 			closed_door = true
 	check("open ward removes its closed door artwork", not closed_door)
-	var fire: Area2D = load("res://scenes/FireBall.tscn").instantiate()
+	var fire: Area2D = load("res://scenes/player/fireball.tscn").instantiate()
 	fire.position = Vector2(350, 485)
 	fire.direction = Vector2.DOWN
 	lvl.add_child(fire)
 	await frames(15)
 	check("fireballs collide with prologue terrain", not is_instance_valid(fire))
-	var slime: CharacterBody2D = load("res://scenes/slime.tscn").instantiate()
+	var slime: CharacterBody2D = load("res://scenes/creatures/slime.tscn").instantiate()
 	slime.respawn_on_room_reset = true
 	slime.position = Vector2(1400, 650)
 	lvl.add_child(slime)

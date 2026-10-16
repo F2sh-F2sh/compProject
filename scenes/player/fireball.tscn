@@ -1,0 +1,72 @@
+[gd_scene format=3 uid="uid://wpjrw02mbhji"]
+
+[ext_resource type="Script" uid="uid://boph78vo4cdpk" path="res://scripts/player/fireball.gd" id="1_jo5r4"]
+[ext_resource type="Texture2D" uid="uid://cewqixivw8vtl" path="res://assets/sprites/magic/fireball.png" id="2_qp0ep"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dtcai"]
+atlas = ExtResource("2_qp0ep")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r4wgh"]
+atlas = ExtResource("2_qp0ep")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_20er5"]
+atlas = ExtResource("2_qp0ep")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7qiox"]
+atlas = ExtResource("2_qp0ep")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iqi4s"]
+atlas = ExtResource("2_qp0ep")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u4gwe"]
+atlas = ExtResource("2_qp0ep")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dmxia"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dtcai")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r4wgh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_20er5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qiox")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iqi4s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u4gwe")
+}],
+"loop": 1,
+"name": &"FireBall",
+"speed": 20.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gg87n"]
+radius = 9.0
+
+[node name="Fireball" type="Area2D" unique_id=1080433012]
+script = ExtResource("1_jo5r4")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=390432839]
+sprite_frames = SubResource("SpriteFrames_dmxia")
+animation = &"FireBall"
+autoplay = "FireBall"
+frame_progress = 0.8900864
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=516783859]
+position = Vector2(-1, -3)
+shape = SubResource("CircleShape2D_gg87n")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

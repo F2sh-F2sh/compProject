@@ -3,7 +3,7 @@ extends RefCounted
 
 ## The surface pixel-art packs (assets/surface, assets/town), cut into named
 ## sprites, and the story's hand-made sprites (assets/sprites/story, made by
-## tools/generate_story_sprites.gd in the packs' palette). The story pictures
+## tools/art/generate_story_sprites.gd in the packs' palette). The story pictures
 ## and Lowbell are built entirely from these.
 ##
 ## Sprites are placed by their feet (bottom centre). In Lowbell the packs are
@@ -30,26 +30,26 @@ const STRIPS := {
 	"tam": 3, "mira": 3, "pip": 3, "edda": 3, "nan": 3, "monk": 3, "ilse": 3,
 	"wren_bed": 2, "great_bell": 2, "shrine_bell": 1, "candle": 3, "chime_tube": 1, "chime_post": 1,
 	"rune_cube": 1, "rune_cube_great": 1, "door_echidna": 2, "door_nan": 2,
-	# The Novices' Way (tools/generate_shrine_sprites.gd)
+	# The Novices' Way (tools/art/generate_shrine_sprites.gd)
 	"kept_flame": 3, "spring": 3, "echo_stone": 2,
-	# Nan's cottage (tools/generate_cottage_sprites.gd)
+	# Nan's cottage (tools/art/generate_cottage_sprites.gd)
 	"nan_seated": 3, "hearth": 3, "table": 1, "cottage_cupboard": 1, "cottage_bookshelf": 1, "cottage_window": 1, "desk_lantern": 3, "cottage_rug": 1, "shelf_jars": 1, "cellar_door": 2,
-	# The Kilnworks (tools/generate_kiln_sprites.gd)
+	# The Kilnworks (tools/art/generate_kiln_sprites.gd)
 	"great_kiln": 2, "kiln_chimney": 2, "lamp_fuel": 2, "lamp_air": 2, "lamp_fire": 2, "coal_cart": 1, "heart_crucible": 2,
 	"slag": 4, "slag_crust": 1, "forge_door": 2, "bellows": 1, "anvil": 1, "tool_rack": 1, "coal_heap": 1,
 	"smith_plaque": 1, "chalk_steps": 1, "chalk_route": 1, "chalk_star": 1, "frost_a": 1, "frost_b": 1, "door_frost": 1,
-	# The Drowned Cistern (tools/generate_cistern_sprites.gd)
+	# The Drowned Cistern (tools/art/generate_cistern_sprites.gd)
 	"cistern_water": 4, "fountain_nozzle": 1, "tide_clock": 1, "tide_float": 1, "warden_plaque": 1, "cistern_pipe": 1,
-	# The Lampworks (tools/generate_lamp_sprites.gd)
+	# The Lampworks (tools/art/generate_lamp_sprites.gd)
 	"hall_lamp": 2, "great_lamp": 2, "bookshelf": 1, "lamplighter_plaque": 1,
-	# The Folded Galleries (tools/generate_gallery_sprites.gd)
+	# The Folded Galleries (tools/art/generate_gallery_sprites.gd)
 	"wren": 3, "archivist_plaque": 1, "scroll_rack": 1, "chalk_hands": 1,
 	"seal_fire": 2, "seal_ice": 2, "seal_light": 2, "seal_space": 2,
-	# The story reels, staged like Hollow Knight (tools/generate_story_hk_sprites.gd)
+	# The story reels, staged like Hollow Knight (tools/art/generate_story_hk_sprites.gd)
 	"hk_moth": 3, "hk_moth_folded": 1, "hk_chain_link": 1, "hk_chain_plate": 4, "hk_ilse_kneel": 3, "hk_ornament": 1,
 	"hk_stalactites": 1, "hk_rocks": 1, "hk_crystals": 1, "hk_arch": 1, "hk_pillar": 1, "hk_grass": 1,
 	"hk_mountain": 1, "hk_roofs": 1, "hk_dome": 1,
-	# The Choir's waymarks (tools/generate_waymark_sprites.gd)
+	# The Choir's waymarks (tools/art/generate_waymark_sprites.gd)
 	"waymark": 3,
 	"bridge_winch": 1, "rope_ladder": 1,
 }

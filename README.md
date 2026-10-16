@@ -1,32 +1,23 @@
 # The Sealed Belfry
 
-A 2D puzzle-platformer about Echidna, a young witch, going down into a sealed abbey to ring
-its great bell. Built with **Godot 4.7.2** (Forward+).
+A 2D puzzle-platformer about Echidna, a young witch who goes down into a sealed abbey to
+ring its great bell. You solve rooms by writing four-word rune sentences (essence, form,
+direction, modifier) onto stone cubes: wind to push and lift, fire, ice bridges, light and
+portals. Most rooms can be solved more than one way.
 
-- **Movement tutorial**: six lessons, with no spells or spell shrines. The abbey entry
-  passage then restores Echo and Fire through explained inscriptions; Heal returns at the Belfry spring.
-- **Chapter 1 · The Sealed Belfry**: nine puzzle rooms in four acts, ending at the great
-  bell. Seven pages of the Bellkeeper's Ledger are hidden along the way.
-- **Chapter 2 · The Sealed Observatory**: eight rooms built around **rune cubes**: stone
-  cubes carved with a four-part rune (essence, form, direction, modifier) that you inscribe,
-  carry and switch on to push and lift things with wind, throw fire, freeze, build ice
-  bridges, shine light and open portals. Reach it from the title screen or after Chapter 1.
-- **Story route**: the illustrated introduction and Lowbell lead into **Nan's cottage**,
-  **The Pilgrim Road**, and **One Flame, Two Lamps**, a descending passage beneath the old
-  well. Nan's failing memory gives Echidna a reason to ring the bell; the sealed Belfry
-  door explains why she must enter the dungeon. A short bell aftermath cinematic connects
-  Chapter 1 to the Observatory and shows why the journey continues.
+Made with **Godot 4.7.2**. Play it on itch.io: <https://ish2601.itch.io/the-sealed-belfry>
 
-New Game follows this route. Players who already finished the tutorial proceed from the
-well to Chapter 1; everyone else enters the movement-only tutorial. The separate Tutorial and
-Chapter 2 menu entries remain available. Conversations use a left mouse click, the bound Interact or Jump key,
-Enter, or the Continue button. Hold Escape or use Skip to finish a conversation immediately.
-Skipping still grants the lantern and advances the story. Continue restores the bridge,
-passage lamps, and the last well landing.
+## What's in the game
 
-## Playing
+- **The story**: Lowbell and Nan's cottage, the Pilgrim Road, the movement tutorial, the
+  Sealed Belfry, the Sealed Observatory, the Long Stair and its four wings (the Kilnworks,
+  the Drowned Cistern, the Lampworks, the Folded Galleries), and the Eye.
+- **Daily Puzzle**: a new generated puzzle every day, the same for everyone, with a score,
+  stars, a streak and a board you share with friends by code. Nothing is sent online.
+- **Endless**: pick a difficulty and play generated rooms one after another. The rooms get
+  harder as you go; three deaths end the run.
 
-Open the project in Godot 4.7.2 and press **F5** (the title screen is the main scene).
+## Controls
 
 | Action | Keyboard / mouse | Controller |
 |---|---|---|
@@ -36,81 +27,82 @@ Open the project in Godot 4.7.2 and press **F5** (the title screen is the main s
 | Sprint | hold Shift | LT / LB |
 | Fireball | left click (aims at the mouse) | RT (aims with the right stick) |
 | Heal (stand still) | Q | X |
-| Reload mana (hold anywhere) | R | Y |
+| Reload mana (hold) | R | Y |
 | Record an Echo / hold to let Echoes fade | E | B |
 | Use, pull, ring, inscribe a rune cube | W / Up | D-pad up |
 | Pick up / set down a rune cube | F | R3 |
-| Rune overview (switch cubes off) | Tab | Back |
+| Rune overview | Tab | Back |
 | Pause, map, ledger, settings | Esc | Start |
 | Fullscreen | F11 | |
 
-Keys can be changed in Settings & Controls, which also has brightness (Dim, Normal, Bright),
-guidance (new players start on Light; Full adds the extra cues) and assist options
-(damage taken, unlimited mana, always sprint, crouch toggle) and reduced motion.
+Keys can be changed in **Settings & Controls**, which also has brightness, guidance and
+assist options (damage taken, unlimited mana, always sprint, crouch toggle) and reduced
+motion.
+
+## Running from source
+
+Open the project in Godot 4.7.2 and press **F5**; the title screen is the main scene. After
+a fresh clone, run `godot --headless --path . --import` once so Godot's class cache is built.
+
+## Exporting
+
+The export presets are in `export_presets.cfg`:
+
+| Preset | Output |
+|---|---|
+| Windows Desktop | `builds/windows/TheSealedBelfry.exe` |
+| Web | `builds/web/index.html` (zip the folder's contents for itch.io) |
+| Handheld (Linux arm64) | built by `bash tools/release/build_handheld_port.sh` (see `port/README.md`) |
+
+Exports need the Godot 4.7.2 export templates. Web builds use Godot's full audio mixer
+(`audio/general/default_playback_type.web = Stream`), which the game's audio buses need.
+
+## Project layout
+
+```
+assets/      art, fonts, audio and the tileset
+data/daily/  the verified table of generated-room solutions
+docs/        design documents and guides (see below)
+port/        files for the handheld (PortMaster) package
+scenes/      levels and reusable scenes (chapter, story, tutorial, player, puzzle, traps, ui, ...)
+scripts/     game code, in folders that match scenes/
+tests/       automated gameplay tests
+tools/       scripts that build levels, art and audio, verify generated rooms, and package builds
+```
 
 ## Tests
 
-Automated gameplay tests play the levels with simulated input. For a background run
-without a game window or desktop input:
-
-    godot --headless --path . --fixed-fps 60 --script res://tests/run_tests.gd -- all
-
-Headless runs skip screenshots and rendered-image/compiled-shader checks. Godot's
-headless Window does not track a virtual mouse, so targeted shooting tests use the
-player's projectile spawn method and cast signal. Those helpers exercise flight,
-collision and Echo recording, but bypass mouse aiming, shoot input, cost and cooldown.
-Other input, mana, rune costs, movement, damage and recovery checks still run.
-These are automated gameplay and layout checks, not direct visual playtesting.
-
-For the windowed suite and screenshot capture:
+The tests play the levels with simulated input:
 
     godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- [suite] [scenario]
 
-Suites: `tutorial`, `chapter`, `presentation`, `experience`, `rune` (Chapter 2 and the rune
-cubes), `wing` (the expanded journey), `prologue` (the preserved lantern route and bell aftermath), `adversarial` (targeted
-bug reproductions), `polish` (spell progression, reload, pushing, hints and bats), or `all` (the default).
-Screenshots go to `user://test_shots/`. Tests never touch a real save or settings file.
-The prologue suite saves its screenshots in `.godot/prologue_shots/`. Its checks simulate
-input and inspect state; screenshot inspection and human playtesting are separate checks.
+Suites: `tutorial`, `chapter`, `presentation`, `experience`, `rune`, `wing`, `prologue`,
+`adversarial`, `polish`, `daily`, or `all` (the default). Add `--headless` to run without a
+window (screenshots and a few rendering checks are skipped). Screenshots go to
+`user://test_shots/`. The tests never touch a real save or settings file.
 
 ## Tools
 
-Several things are generated by scripts in `tools/` (run with
-`godot --headless --path . --script res://tools/<name>.gd`):
+Run with `godot --headless --path . --script res://tools/<folder>/<name>.gd`.
 
-- `build_chapter.gd` writes `scenes/chapter/chapter_1.tscn` and the puzzle, creature and
-  trap scenes. **Change the chapter here, not in the scene file.**
-- `build_chapter2.gd` writes `scenes/chapter/chapter_2.tscn` and the rune pieces in
-  `scenes/runes/`. To play Chapter 2 straight away, open that scene and press **F6**.
-- `patch_tutorial.gd` makes targeted, repeatable edits to the hand-built tutorial.
-- `audit_wall_tiles.gd` checks that pillars, arcades and doors stand on the floor.
-- `generate_sfx.gd`, `generate_music.gd`: the synthesised sound effects and music.
-- `generate_atmosphere_art.gd`, `generate_icon.gd`, `build_echidna_frames.gd`,
-  `setup_echidna_player.gd`, `setup_torch_scene.gd`: art and scene setup.
+- `tools/levels/`: `build_chapter.gd`, `build_chapter2.gd` and `build_wings.gd` generate the
+  chapter and wing scenes (**change those levels here, not in the scene files**);
+  `patch_tutorial.gd` edits the hand-built tutorial; `audit_wall_tiles.gd` checks wall art
+  stands on the floor.
+- `tools/art/`: the sprite, portrait, prop and icon generators.
+- `tools/audio/`: the synthesised sound effects and music.
+- `tools/procgen/`: `verify_modules.gd` proves every generated room's solutions in the real
+  physics and writes `data/daily/verified.json`; `fit_difficulty.gd` and
+  `plot_difficulty.py` calibrate the difficulty score.
+- `tools/release/build_handheld_port.sh`: the handheld package.
 
-After a fresh clone, or after adding scripts with a `class_name`, run
-`godot --headless --path . --import` once so Godot's class cache is up to date.
+## Documents
 
-## More
-
-- `docs/GAME_DESIGN.md`: the game plan (v2, about two hours after the tutorial section): story, the
-  grandma scene, the Novices' Way, five chapters, earned spells, mana, combat, puzzles and the build
-  plan. `docs/GAME_DESIGN_v1_long.md` is the earlier 6 to 7 hour version, kept unchanged.
-- `docs/CHAPTER1_SOLUTIONS.md`: every room's solution, reset and saved ids.
-- `docs/CHAPTER2_SOLUTIONS.md`: Chapter 2 room by room, and every rune the cubes accept.
-- `docs/RUNE_SYSTEM_PROGRESS.md`: how the rune system works, its tuning, and its test record.
+- `docs/GAME_DESIGN.md`: the game plan.
+- `docs/STORY_PLAYTHROUGH.md`: the story, scene by scene.
+- `docs/CHAPTER1_SOLUTIONS.md`, `docs/CHAPTER2_SOLUTIONS.md`: room-by-room solutions.
+- `docs/DAILY_PUZZLE.md`, `docs/PROCGEN_DESIGN.md`: the generated levels and their difficulty.
+- `docs/PRESENTATION.md`: rendering, light, audio and animation.
 - `docs/PLAYTEST_CHECKLIST.md`: what a human playtester should check.
-- `docs/IMPLEMENTATION_PROGRESS.md`, `docs/PRESENTATION.md`: how things are built.
+- `docs/IMPLEMENTATION_PROGRESS.md`: the development log.
 - `CREDITS.md`: fonts, art and audio sources.
-
-The main journey uses `scenes/story/nan_cottage.tscn` and `scripts/story/nan_cottage.gd`
-for Nan's conversation and garden exit. It continues through `pilgrims_path.tscn`
-and `well_descent.tscn`, authored by `scripts/story/witch_prologue.gd`. The alternate
-`scenes/story/nan_lantern_cottage.tscn` remains available. Its dialogue and alternate bell aftermath
-remain in `story_dialogue.gd` and `bell_aftermath.gd`. The main journey uses the expanded
-interludes defined by `Journey`; the two cottage scenes each contain one root and one script resource.
-
-Shared layout checks in `scripts/fx/world_layout.gd` ground cosmetic floor props, keep
-them clear of shrines and hint skulls, and recess the floor beneath legacy hoists.
-Newly generated hoists get the same wells from `tools/build_chapter.gd`. Signs use
-a single nearest-sign caption at the screen edge, hidden while notifications are shown.

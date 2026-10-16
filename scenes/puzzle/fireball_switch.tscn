@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/fireball_switch.gd" id="1_o8f1p"]
+
+[node name="FireballSwitch" type="Area2D" unique_id=1352464544]
+script = ExtResource("1_o8f1p")

@@ -2,7 +2,7 @@ class_name Creature
 extends CharacterBody2D
 
 ## The dungeon's roaming creatures, one script for every kind (KINDS), built
-## in code from their pixel strips (tools/generate_creature_sprites.gd). Each
+## in code from their pixel strips (tools/art/generate_creature_sprites.gd). Each
 ## level has its own (CreatureSpawner places them in the stretches between
 ## puzzles). Four ways of moving:
 ##   flyer    hovers near home, swoops at Echidna when she comes close, then
@@ -23,7 +23,7 @@ signal defeated
 const STRIPS := "res://assets/sprites/creatures/creature_%s.png"
 ## Pixel art is drawn 1x and shown this many times bigger.
 const DRAW_SCALE := 3.0
-const DAMAGE_NUMBER := preload("res://scenes/damage_number.tscn")
+const DAMAGE_NUMBER := preload("res://scenes/ui/damage_number.tscn")
 const GRAVITY := 900.0
 
 ## kind: how it moves, health, speeds, sight, contact damage, and its traits.

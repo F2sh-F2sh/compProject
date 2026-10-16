@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://scripts/piston_trap.gd" id="1_rsjie"]
-
-[node name="PistonTrap" type="Node2D" unique_id=436390824]
-script = ExtResource("1_rsjie")

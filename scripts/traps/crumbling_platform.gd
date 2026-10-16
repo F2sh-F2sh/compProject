@@ -9,7 +9,7 @@ extends Node2D
 
 enum State { SOLID, CRACKING, FALLEN }
 
-const TILE := preload("res://assets/TileSet/platforms/tiles/08_cap_mid.png")
+const TILE := preload("res://assets/tileset/platforms/tiles/08_cap_mid.png")
 const TILE_TOP := 18.0
 
 @export var width_tiles := 1:

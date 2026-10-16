@@ -10,7 +10,7 @@ extends Node2D
 ## the tide where it is, and rising water freezes where it first meets the
 ## cold: to stop it at the hour the cold must lie just above the mark. Held
 ## anywhere else, it says how far short it is. The frame and float are pixel
-## sprites (tools/generate_cistern_sprites.gd); the water is drawn.
+## sprites (tools/art/generate_cistern_sprites.gd); the water is drawn.
 ## The node sits on the floor at the column's centre.
 
 signal power_changed(powered: bool)

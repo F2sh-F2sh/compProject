@@ -16,7 +16,7 @@ extends CharacterBody2D
 
 enum State { PATROL, PURSUE, WINDUP, STRIKE, RECOVER, FROZEN, WAKING }
 
-const TEXTURE := preload("res://assets/TileSet/props/sprites/gargoyle.png")
+const TEXTURE := preload("res://assets/tileset/props/sprites/gargoyle.png")
 ## The crouching body, without the statue's rock pile.
 const REGION := Rect2(28, 63, 72, 45)
 const ART_SCALE := 0.8
