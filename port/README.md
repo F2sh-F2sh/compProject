@@ -7,7 +7,7 @@ Godot 4.7.1 runtime, drawn through Westonpack with Godot's Compatibility (OpenGL
 ## Build it (on the PC)
 
 ```bash
-bash tools/build_handheld_port.sh
+bash tools/release/build_handheld_port.sh
 ```
 
 This exports `sealedbelfry.pck` with the "Handheld (Linux arm64)" preset and assembles

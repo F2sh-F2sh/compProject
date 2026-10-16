@@ -9,7 +9,7 @@ extends Node2D
 ## Everything is built from the surface and town pixel-art packs (SurfaceArt),
 ## with street scenery at 2x and people sized against Echidna.
 
-const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
+const FRAMES := preload("res://assets/sprites/echidna/echidna_frames.tres")
 const PUDDLE := preload("res://scenes/fx/puddle.tscn")
 const WAYMARK := preload("res://scenes/puzzle/waymark.tscn")
 ## Chalk arrows low on the walls along the lane, pointing on to Nan's door.
@@ -285,7 +285,7 @@ func _house(parent: Node, house: String, x: float, lit: Array) -> Sprite2D:
 
 
 ## A house's door that can swing open (frames cut from the house itself by
-## tools/generate_story_sprites.gd); hidden while shut.
+## tools/art/generate_story_sprites.gd); hidden while shut.
 func _opening_door(parent: Node, frames_name: String, x: float, house: String, door_at: Vector2) -> AnimatedSprite2D:
 	var size := SurfaceArt.size_of(house)
 	var painted_bottom := SurfaceArt.tex(house).get_image().get_used_rect().end.y
@@ -436,14 +436,14 @@ func _villager(parent: Node, villager_name: String, sprite: String, x: float, li
 # ------------------------------------------------------------------ Echidna
 
 func _build_player() -> void:
-	player = load("res://scenes/Player.tscn").instantiate()
+	player = load("res://scenes/player/player.tscn").instantiate()
 	player.name = "Player"
 	player.position = Vector2(START_X, FLOOR_Y - 2)
 	player.z_index = 1
 	player.collision_mask = 2
 	camera = Camera2D.new()
 	camera.name = "Camera2D"
-	camera.set_script(load("res://scripts/camera_bounds.gd"))
+	camera.set_script(load("res://scripts/world/camera_bounds.gd"))
 	camera.set("bounds", BOUNDS)
 	camera.set("base_zoom", Vector2(2, 2))
 	camera.zoom = Vector2(2, 2)
@@ -470,7 +470,7 @@ func _build_post_and_menu() -> void:
 	var post := CanvasLayer.new()
 	post.name = "PostFX"
 	post.layer = 1
-	post.set_script(load("res://scripts/post_fx.gd"))
+	post.set_script(load("res://scripts/fx/post_fx.gd"))
 	post.set("follows_brightness", false)
 	var screen := ColorRect.new()
 	screen.name = "Screen"
@@ -546,7 +546,6 @@ func _build_ui() -> void:
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(_fade)
-
 
 
 func _start_wind() -> void:
@@ -754,9 +753,3 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		_leave()
 
-
-static func _circle(c: Vector2, r: float, n := 16) -> PackedVector2Array:
-	var pts := PackedVector2Array()
-	for k in n:
-		pts.append(c + Vector2.from_angle(TAU * k / n) * r)
-	return pts

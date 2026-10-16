@@ -1,8 +1,0 @@
-[gd_scene format=3 uid="uid://cpnnb5pyj84l3"]
-
-[ext_resource type="Texture2D" uid="uid://lthkhn4peitv" path="res://assets/Spikes.png" id="1_7a7y0"]
-
-[node name="Spike" type="Node2D" unique_id=113670540]
-
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1119975866]
-texture = ExtResource("1_7a7y0")

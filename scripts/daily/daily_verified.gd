@@ -120,11 +120,11 @@ static func source_hash() -> int:
 	for directory in ["res://scripts/daily/modules", "res://scripts/runes/effects"]:
 		for file in DirAccess.get_files_at(directory):
 			if file.ends_with(".gd"): paths.append(directory.path_join(file))
-	paths.append_array(["res://scripts/daily/daily_verified.gd", "res://scripts/daily/daily_kit.gd", "res://tools/verify_modules.gd", "res://scripts/daily/daily_module.gd", "res://scripts/daily/daily_mechanism.gd",
+	paths.append_array(["res://scripts/daily/daily_verified.gd", "res://scripts/daily/daily_kit.gd", "res://tools/procgen/verify_modules.gd", "res://scripts/daily/daily_module.gd", "res://scripts/daily/daily_mechanism.gd",
 		"res://scripts/daily/daily_piston.gd", "res://scripts/daily/daily_chain.gd", "res://scripts/daily/daily_root.gd",
 		"res://scripts/runes/rune_carrier.gd", "res://scripts/daily/room_kit.gd", "res://scripts/runes/rune_book.gd",
-		"res://scripts/runes/wind_body.gd", "res://scripts/runes/rune_cube.gd", "res://scripts/player.gd",
-		"res://scripts/piston_trap.gd", "res://scripts/puzzle/circuit.gd", "res://scripts/puzzle/spectral_platform.gd"])
+		"res://scripts/runes/wind_body.gd", "res://scripts/runes/rune_cube.gd", "res://scripts/player/player.gd",
+		"res://scripts/traps/piston_trap.gd", "res://scripts/puzzle/circuit.gd", "res://scripts/puzzle/spectral_platform.gd"])
 	paths.sort()
 	var combined := ""
 	for path in paths: combined += path + "\n" + FileAccess.get_file_as_string(path).replace("\r\n", "\n") + "\n"
@@ -148,7 +148,7 @@ static func module_hash(id: String, normalize_lines := true, scoped_portal := tr
 			if file.ends_with(".gd"): paths.append(directory.path_join(file))
 	paths.append_array(["res://scripts/daily/modules/" + id + ".gd", "res://scripts/daily/daily_module.gd",
 		"res://scripts/daily/room_kit.gd", "res://scripts/runes/rune_book.gd", "res://scripts/runes/rune_cube.gd",
-		"res://scripts/runes/wind_body.gd", "res://scripts/player.gd", "res://scripts/piston_trap.gd",
+		"res://scripts/runes/wind_body.gd", "res://scripts/player/player.gd", "res://scripts/traps/piston_trap.gd",
 		"res://scripts/puzzle/circuit.gd", "res://scripts/puzzle/spectral_platform.gd"])
 	if id not in ["gust_alley", "dead_weight", "updraft"]:
 		paths.append_array(["res://scripts/daily/daily_mechanism.gd", "res://scripts/daily/daily_piston.gd"])

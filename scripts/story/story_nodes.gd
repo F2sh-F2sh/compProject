@@ -129,7 +129,7 @@ class Cube extends Node2D:
 			_glows.append(g)
 		_update_glows()
 
-	## The size of a socket, in art pixels (as tools/generate_story_sprites.gd
+	## The size of a socket, in art pixels (as tools/art/generate_story_sprites.gd
 	## _cube() carves them).
 	func _cell() -> int:
 		var w := _texture.get_width()

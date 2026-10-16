@@ -38,7 +38,7 @@ const SUPPORTED := {
 	"space/portal": [EIGHT, [&"normal", &"long"]],
 }
 
-## Tuning (all in one place; see docs/RUNE_SYSTEM_PROGRESS.md)
+## Tuning (all in one place)
 const WIND_FORCE := 1200.0         # enough for a crate, not for a stone block
 const WIND_REACH := 320.0
 const WIND_WIDTH := 96.0

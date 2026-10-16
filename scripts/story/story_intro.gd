@@ -16,7 +16,7 @@ const LOWBELL := "res://scenes/story/lowbell.tscn"
 const SIZE := Vector2(1152, 648)
 const NARRATION_FONTS := ["Palatino Linotype", "Book Antiqua", "Georgia", "Cambria", "Times New Roman", "serif"]
 const HUSH_SHADER := preload("res://assets/shaders/story_hush.gdshader")
-const ECHIDNA := preload("res://assets/sprites/Echidna/echidna_frames.tres")
+const ECHIDNA := preload("res://assets/sprites/echidna/echidna_frames.tres")
 ## The pack sky's darkest blue, above the painting.
 const SKY_TOP := SurfaceArt.SKY_TOP
 const SKIP_HOLD := 0.9
@@ -837,7 +837,7 @@ func _the_bell_sings(p: Node2D) -> void:
 	var swing := p.create_tween().set_loops().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	swing.tween_property(bell, "rotation", 0.26, 1.6)
 	swing.tween_property(bell, "rotation", -0.26, 1.6)
-	# In time with the peal's notes (tools/generate_story_music.gd)
+	# In time with the peal's notes (tools/audio/generate_story_music.gd)
 	var t := p.create_tween()
 	t.tween_interval(0.3)
 	for k in 5:
@@ -1177,5 +1177,3 @@ func _porch(p: Node2D, pair: bool) -> Dictionary:
 	StoryStage.piece(nc, "hk_grass", Vector2(40, 226), Color(0.28, 0.3, 0.38))
 	StoryStage.piece(nc, "hk_grass", Vector2(340, 226), Color(0.28, 0.3, 0.38), true)
 	return {"nan": nan, "echidna": echidna, "stars": stars, "warm": warm}
-
-

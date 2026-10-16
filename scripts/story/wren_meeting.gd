@@ -1,7 +1,7 @@
 class_name WrenMeeting
 extends Node2D
 
-## Wren, Ilse's daughter: a small pixel figure (tools/generate_gallery_sprites.gd)
+## Wren, Ilse's daughter: a small pixel figure (tools/art/generate_gallery_sprites.gd)
 ## who breathes, blinks and turns to look at Echidna. The first time Echidna
 ## comes close they talk, Persona-style (DialogueBox: both portraits, the
 ## words in a framed box); Echidna holds still while they do, each line moves

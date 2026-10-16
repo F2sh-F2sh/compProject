@@ -10,7 +10,7 @@ extends Node2D
 ## above (she can jump up through it and land on top) while the cold lasts and
 ## LINGER seconds after, flickering for the last WARN of them; then it is water
 ## again and carries on from where it was. The jet is drawn (an effect); the
-## basin and spout are a pixel sprite (tools/generate_cistern_sprites.gd).
+## basin and spout are a pixel sprite (tools/art/generate_cistern_sprites.gd).
 ## The node sits on the floor at the nozzle's centre.
 
 const WIDTH := 28.0

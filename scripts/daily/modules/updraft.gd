@@ -1,32 +1,19 @@
 class_name UpdraftModule
 extends DailyModule
 
-## Updraft: a wall of stone higher than a charged jump, a cube whose direction
-## is carved "up", and nothing else. Push can't blow upward (the rune book
-## says so), Lift can: raise a column of wind, rise in it and drift onto the
-## wall (the story's Observatory Room 3, "Across the Teeth", without the
-## spikes). The exit is open once she is over the wall.
+## Updraft: a wall too high to jump and a cube carved to blow "up". Push can't
+## blow upward but Lift can, so she rides the column of wind over the wall
+## (based on the Observatory's third room, without the spikes).
 ##
-## Parameters
-##   dist    columns from the cube to the wall (always 1: the wall stands right
-##           beside the cube; one column further, only the wide Large column
-##           reaches it, which would be a one-answer puzzle)
-##   rows    wall height in tiles (3 or 4: 192 or 256 px; a charged jump is 132)
-##   width   wall width in columns (3..4)
-##   lock    0: the form and modifier are open (find Lift); 1: Lift is carved
-##           too, only the modifier is open (the gentlest)
-##   guided  chalk waymarks on the walls (off at Grand and above)
-##   profile 0: level ridge; 1: descending steps; 2: a lower landing.
-##           The first rise and its wind demand are identical in all three.
-##
-## Which sentences are claimed (VERIFIED) was measured in the real physics.
+## Parameters: dist (cube to wall; always 1, since further away only Large
+## reaches it), rows (wall height, 3-4 tiles), width (3-4 columns), lock (0:
+## choose form and modifier, 1: Lift carved, only the modifier), guided (chalk
+## waymarks), profile (0: level ridge, 1: steps down, 2: a lower landing).
 
-## "rows/dist": the sentences measured to work there, with room to spare.
+## "rows/dist": the modifiers measured to work there, with room to spare.
 const VERIFIED := {
 	"3/1": ["normal", "strong", "long", "large"],
-
 	"4/1": ["normal", "strong", "long", "large"],
-
 }
 
 

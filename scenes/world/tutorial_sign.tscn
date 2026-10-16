@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/world/tutorial_sign.gd" id="1_8kree"]
+
+[node name="TutorialSign" type="Node2D" unique_id=1507923509]
+script = ExtResource("1_8kree")

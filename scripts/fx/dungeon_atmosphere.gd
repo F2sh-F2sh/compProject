@@ -15,7 +15,7 @@ const FAR := preload("res://assets/fx/far_fog.png")
 const MID := preload("res://assets/fx/mid_ruins.png")
 const FRONT_TOP := preload("res://assets/fx/front_vines.png")
 const FRONT_BOTTOM := preload("res://assets/fx/front_thorns.png")
-const WALL_ATLAS := "res://assets/TileSet/walls/walls_atlas_64.png"
+const WALL_ATLAS := "res://assets/tileset/walls/walls_atlas_64.png"
 
 ## The brick back-wall layer to break open.
 @export var wall_path: NodePath

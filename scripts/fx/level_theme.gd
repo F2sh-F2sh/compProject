@@ -116,7 +116,7 @@ static func apply(level: Node) -> String:
 
 
 ## Small props on the tops of ledges and hanging under the ceilings
-## (tools/generate_level_props.gd), placed the same way every time.
+## (tools/art/generate_level_props.gd), placed the same way every time.
 static func _scatter_props(level: Node, id: String) -> void:
 	var holder := Node2D.new()
 	holder.name = "ThemeProps"

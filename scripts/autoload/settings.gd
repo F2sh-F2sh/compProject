@@ -328,7 +328,10 @@ func _apply_window() -> void:
 func _ensure_bus(bus_name: String, send_to: String) -> int:
 	var index := AudioServer.get_bus_index(bus_name)
 	if index == -1:
-		AudioServer.add_bus()
+		# On Godot Web sample playback, add_bus() can scramble the browser's
+		# bus routing table when buses are created dynamically. Growing
+		# bus_count uses the same engine path without that Web routing bug.
+		AudioServer.bus_count = AudioServer.bus_count + 1
 		index = AudioServer.bus_count - 1
 		AudioServer.set_bus_name(index, bus_name)
 	AudioServer.set_bus_send(index, send_to)

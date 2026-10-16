@@ -170,11 +170,6 @@ func deactivate_all(reason := "") -> int:
 	return n
 
 
-## True while any player-powered rune keeps drawing mana.
-func player_upkeep_running() -> bool:
-	return cubes.any(func(c): return c.is_active and not c.fed_by_dungeon() and c.upkeep() > 0.0)
-
-
 # ---------------------------------------------------------------- mana
 
 ## The most mana she can hold here (a room's warding circle may lower it).
@@ -385,7 +380,8 @@ func _on_room_reset_done(_room: Room) -> void:
 # ---------------------------------------------------------------- debug view
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F3:
+	# Developer view (F3): editor and debug builds only
+	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F3:
 		debug_draw = not debug_draw
 		for cube in cubes:
 			cube.queue_redraw()

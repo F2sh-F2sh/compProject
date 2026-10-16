@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://scripts/portcullis_gate.gd" id="1_xcbqv"]
-
-[node name="PortcullisGate" type="Node2D" unique_id=1340211129]
-script = ExtResource("1_xcbqv")

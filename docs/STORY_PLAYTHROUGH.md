@@ -427,7 +427,7 @@ stair into the dark, past the vast folded wing of something breathing.
 
 ## Chapter 5 · The Eye (the ending)
 
-**As built (2026-10-08): one dark chamber, staged like the reels** (`build_eye()` in `tools/build_wings.gd`,
+**As built (2026-10-08): one dark chamber, staged like the reels** (`build_eye()` in `tools/levels/build_wings.gd`,
 `scripts/story/eye_scene.gd`). The camera draws back. The held moment hangs over the great cube as a vast pale moth,
 wings of frozen night, breathing; four chains run from it to the floor round the cube, their plates marked ICE,
 FREEZE, SELF and PERSIST. Snow hangs in the air and does not fall. Ilse kneels at the head of Wren's bed holding

@@ -1,7 +1,7 @@
 class_name DungeonUI
 extends RefCounted
 
-## The dungeon UI kit (tools/generate_ui_sprites.gd, assets/ui/): carved dark
+## The dungeon UI kit (tools/art/generate_ui_sprites.gd, assets/ui/): carved dark
 ## stone, gold filigree and crimson gems. The Theme (assets/ui/
 ## dungeon_theme.tres, the project's default) styles every plain control;
 ## this class holds the palette and builds the pieces a theme can't: a

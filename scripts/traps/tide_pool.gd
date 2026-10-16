@@ -11,7 +11,7 @@ extends Node2D
 ## and a moment after (rising water freezes where it first meets the cold;
 ## water already in the cold freezes where it is). Powered by a circuit, it
 ## drains for good (saved). Pixel-art water across its top
-## (tools/generate_cistern_sprites.gd); the depth and the ice are drawn.
+## (tools/art/generate_cistern_sprites.gd); the depth and the ice are drawn.
 ## The node sits on the basin floor's surface, centred on the basin.
 
 signal power_changed(powered: bool)

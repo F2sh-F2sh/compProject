@@ -35,12 +35,12 @@ Back to front (z index in brackets):
   `scroll_offset` every frame so planes line up with the world at
   `reference_center`, and so the foreground stays pinned to the top and bottom
   of the view at any zoom. `tests/presentation_suite.gd` checks both.
-- **Art:** `tools/generate_atmosphere_art.gd` paints `assets/fx/*.png` (fog, ruins,
+- **Art:** `tools/art/generate_atmosphere_art.gd` paints `assets/fx/*.png` (fog, ruins,
   vines, thorns, the shaft light texture, glow and mote sprites) from noise and
   hand-placed shapes with a fixed seed. All layers tile horizontally.
 
 ### Camera
-`scripts/camera_bounds.gd` now trails the player with exponential damping:
+`scripts/world/camera_bounds.gd` now trails the player with exponential damping:
 7 per second horizontally and 4.5 vertically, so jumps feel weighty. It leans
 ahead by 0.24 s of her horizontal speed, up to 56 px, and snaps on teleports,
 respawns and room resets. Room limits still clamp it, and shake and camera
@@ -76,14 +76,14 @@ alternate their lean. A beam is made of:
   pulse in step.
 - `GlowFX.embers()` gives additive sparks drifting upward, each born at a
   slightly different brightness.
-- Used on: wall torches (`tools/setup_torch_scene.gd` bakes them into
-  `scenes/torch_light.tscn`), lit braziers, fireballs (halo plus an ember
+- Used on: wall torches (`tools/levels/setup_torch_scene.gd` bakes them into
+  `scenes/world/torch_light.tscn`), lit braziers, fireballs (halo plus an ember
   trail), lore pages and lit shrines.
 
 ## 2. Echidna's sprite pipeline
 
-`tools/build_echidna_frames.gd` generates `assets/sprites/Echidna/echidna_frames.tres`.
-`tools/setup_echidna_player.gd` wires it into `scenes/Player.tscn`.
+`tools/art/build_echidna_frames.gd` generates `assets/sprites/echidna/echidna_frames.tres`.
+`tools/levels/setup_echidna_player.gd` wires it into `scenes/player/player.tscn`.
 
 - **Sheets used, all unchanged:** `EchidnaIdle.png`, `EchidnaWalk.png`,
   `EchidnaHoldJump.png`, and the jump sheet. There is no `Echidna.png` in the
@@ -174,7 +174,7 @@ instead of switching.
 - a chapter `Room` with `combat = true` (Rooms 4 and 7, which have gargoyles);
 - a `CombatZone` area (the tutorial's slime arena).
 
-**The loops** come from `tools/generate_music.gd`: additive synthesis, a
+**The loops** come from `tools/audio/generate_music.gd`: additive synthesis, a
 piano-like voice with inharmonic partials and a hammer knock, and a circular
 reverb. Loops are seamless by construction, and a test checks each join
 against the local waveform slope. No external music tool was called, since
@@ -199,14 +199,14 @@ so the zones never touch gameplay.
 ## 4. How to rebuild
 
 ```
-godot --headless --path . --script res://tools/generate_atmosphere_art.gd
-godot --headless --path . --script res://tools/generate_music.gd
-godot --headless --path . --script res://tools/generate_sfx.gd
+godot --headless --path . --script res://tools/art/generate_atmosphere_art.gd
+godot --headless --path . --script res://tools/audio/generate_music.gd
+godot --headless --path . --script res://tools/audio/generate_sfx.gd
 godot --headless --path . --import
-godot --headless --path . --script res://tools/build_echidna_frames.gd
-godot --headless --path . --script res://tools/setup_echidna_player.gd
-godot --headless --path . --script res://tools/setup_torch_scene.gd
-godot --headless --path . --script res://tools/build_chapter.gd
+godot --headless --path . --script res://tools/art/build_echidna_frames.gd
+godot --headless --path . --script res://tools/levels/setup_echidna_player.gd
+godot --headless --path . --script res://tools/levels/setup_torch_scene.gd
+godot --headless --path . --script res://tools/levels/build_chapter.gd
 ```
 Tests (need a window): `godot --path . --fixed-fps 60 --script res://tests/run_tests.gd -- presentation [scenario]`
 

@@ -14,7 +14,7 @@ extends Node
 ## drone swells, the Music bus low-pass opens, the pulse fades in and the
 ## piano steps back a little: slightly more tense, never a hard switch.
 ##
-## The loops are synthesised by tools/generate_music.gd (see its header for
+## The loops are synthesised by tools/audio/generate_music.gd (see its header for
 ## a prompt to generate a richer replacement with a music tool). Any
 ## replacement just needs the same file names and matching loop lengths.
 

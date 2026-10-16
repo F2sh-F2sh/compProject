@@ -9,14 +9,14 @@ extends Node2D
 ##
 ## Everything here is pixel art: the room from the surface and town packs
 ## (SurfaceArt), Nan, the hearth, the table, the jar shelf and the garden door
-## from tools/generate_cottage_sprites.gd. It is walked with the real player,
+## from tools/art/generate_cottage_sprites.gd. It is walked with the real player,
 ## in a room two screens wide; the story runs as one coroutine (`_story`), and
 ## `stage` says where it is, for the tests and the hints.
 ##
 ## What Nan says is plain on purpose: Echidna has lost her spells as well as
 ## Nan's memory, and the way to win them back is the monks' words in stone.
 
-const FRAMES := preload("res://assets/sprites/Echidna/echidna_frames.tres")
+const FRAMES := preload("res://assets/sprites/echidna/echidna_frames.tres")
 const SELF_PATH := "res://scenes/story/nan_cottage.tscn"
 
 const FLOOR_Y := 534.0
@@ -245,14 +245,14 @@ func _box(body: StaticBody2D, r: Rect2) -> void:
 # ------------------------------------------------------------------ Echidna and the UI
 
 func _build_player() -> void:
-	player = load("res://scenes/Player.tscn").instantiate()
+	player = load("res://scenes/player/player.tscn").instantiate()
 	player.name = "Player"
 	player.position = Vector2(DOOR_X + 60.0, FLOOR_Y - 2)
 	player.z_index = 1
 	player.collision_mask = 2
 	camera = Camera2D.new()
 	camera.name = "Camera2D"
-	camera.set_script(load("res://scripts/camera_bounds.gd"))
+	camera.set_script(load("res://scripts/world/camera_bounds.gd"))
 	camera.set("bounds", BOUNDS)
 	camera.set("base_zoom", Vector2(ZOOM, ZOOM))
 	camera.zoom = Vector2(ZOOM, ZOOM)
@@ -282,7 +282,7 @@ func _build_post_and_menu() -> void:
 	var post := CanvasLayer.new()
 	post.name = "PostFX"
 	post.layer = 1
-	post.set_script(load("res://scripts/post_fx.gd"))
+	post.set_script(load("res://scripts/fx/post_fx.gd"))
 	post.set("follows_brightness", false)
 	var screen := ColorRect.new()
 	screen.name = "Screen"

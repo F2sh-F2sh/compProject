@@ -15,8 +15,6 @@ const INK := Color("e8dcc0")
 const DIM := Color("8a8092")
 const DIFFICULTY_NAMES := ["Gentle", "Steady", "Hard", "Grand"]
 
-## The difficulty the random trial uses (the button cycles it).
-static var trial_difficulty := 2
 
 ## The day shown: today, or an earlier one to practise.
 var day := 0
@@ -296,12 +294,6 @@ func _play(ranked: bool) -> void:
 	var difficulty := DailyGenerator.difficulty_for_day(day)
 	DailyRun.start("daily" if ranked else "practice", DailyGenerator.seed_for_day(day), day, difficulty,
 		DailyGenerator.tier_for_difficulty(difficulty))
-	SceneFade.change(get_tree(), DailyRun.SCENE)
-
-
-func _trial() -> void:
-	var seed_value := DailyRng.mix(Time.get_ticks_usec())
-	DailyRun.start("trial", seed_value, 0, trial_difficulty, DailyGenerator.tier_for_difficulty(trial_difficulty))
 	SceneFade.change(get_tree(), DailyRun.SCENE)
 
 

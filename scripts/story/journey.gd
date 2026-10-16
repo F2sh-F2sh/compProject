@@ -1,9 +1,8 @@
 class_name Journey
 extends RefCounted
 
-## The order of the game, in one place: where each stop is, and where the
-## next one goes. Before this, the way on was written into Lowbell, the title
-## screen, the tutorial's exit and Chapter 1.
+## The order of the game in one place: where each stop is and where the next
+## one goes.
 ##
 ##   Title -> story pictures -> the Novices' Way:
 ##     Part 1 The Passage (tutorial_level) -> Part 2 The Belfry (chapter 1)
@@ -20,11 +19,10 @@ extends RefCounted
 ## shown to the player, so old saves keep working. The wings use the flags
 ## "kiln.", "cistern.", "lamps.", "galleries." and "eye.".
 
-## ADMIN, TEMPORARY (for testing): every level can be played without
-## finishing the one before it. Every door on the Long Stair opens, and the
-## title's "Choose a Level" adds a page that starts any wing's room or the Eye
-## directly (with the spells and words of everything before it). Set this to
-## false to turn it all off. The automated tests always turn it off.
+## Testing switch (off in the released game): every level can be played
+## without finishing the one before it, every door on the Long Stair opens, and
+## "Choose a Level" gains a page that starts any wing room or the Eye directly.
+## The automated tests always turn it off.
 static var admin_unlock := false
 ## The room a level starts in ("R2"), set by that admin page; used once.
 static var admin_start_room := ""
@@ -33,14 +31,14 @@ const TITLE := "res://scenes/ui/title_screen.tscn"
 const STORY := "res://scenes/story/story_intro.tscn"
 const LOWBELL := "res://scenes/story/lowbell.tscn"
 const COTTAGE := "res://scenes/story/nan_cottage.tscn"
-const PASSAGE := "res://scenes/tutorial_level.tscn"
-const MOVEMENT := "res://scenes/tutorial_movement.tscn"
+const PASSAGE := "res://scenes/tutorial/tutorial_level.tscn"
+const MOVEMENT := "res://scenes/tutorial/tutorial_movement.tscn"
 const BELFRY := "res://scenes/chapter/chapter_1.tscn"
 const OBSERVATORY := "res://scenes/chapter/chapter_2.tscn"
 ## Story pictures after the bell rings (before Part 3) and after the dome opens.
 const BELL_INTERLUDE := "res://scenes/story/interlude_bell.tscn"
 const DOME_INTERLUDE := "res://scenes/story/interlude_dome.tscn"
-## The Long Stair, its four wings and the Eye (tools/build_wings.gd).
+## The Long Stair, its four wings and the Eye (tools/levels/build_wings.gd).
 const LANDING := "res://scenes/chapter/landing.tscn"
 const KILN := "res://scenes/chapter/wing_kiln.tscn"
 const CISTERN := "res://scenes/chapter/wing_cistern.tscn"
@@ -162,26 +160,10 @@ static func admin_prepare(scene_path: String, room := "R1") -> void:
 			teach_words(WINGS[i]["words"])
 
 
-## The pictures that follow a wing's bell ("" for a scene that is not a wing).
-static func wing_after(scene_path: String) -> String:
-	for w in WINGS:
-		if w["scene"] == scene_path:
-			return w["after"]
-	return ""
-
-
 ## Teaches the words a wing's bell gives (saved).
 static func teach_words(words: Array) -> void:
 	for w in words:
 		GameState.set_flag("rune.frag.%s" % w)
-
-
-## Where "Continue" goes once the Novices' Way is done and nothing more
-## specific is saved: the Landing, or the Eye once it is open and not yet done.
-static func after_novices_way() -> String:
-	if not GameState.has_flag("ch2.complete"):
-		return ""
-	return LANDING
 
 
 ## Starting a later part straight from the title (or testing one) gives Echidna

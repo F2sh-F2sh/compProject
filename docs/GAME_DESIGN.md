@@ -458,7 +458,7 @@ mist, grade, torch colour, drifting air, props and ambience bed: Passage mossy t
 indigo, Landing dusk violet, Kilnworks ember, Cistern aqua, Lampworks sepia gold, Galleries pastel pink, the Eye
 blue-black.
 The packs have no forge, cistern or lamp pieces, so new props and creatures are made as pixel
-sprites by a generator tool (like `tools/generate_story_sprites.gd`), in the packs' palette, never as
+sprites by a generator tool (like `tools/art/generate_story_sprites.gd`), in the packs' palette, never as
 drawn shapes.
 
 ---
@@ -467,7 +467,7 @@ drawn shapes.
 
 **As built (2026-10-08):** one dark chamber, the story's last room, with no puzzle but the sentence: the
 moth in its chains over the great cube, Wren walking in with Echidna, Ilse's plea, the clues and Wren's
-replies (`build_eye()` in `tools/build_wings.gd`, `scripts/story/eye_scene.gd`; details in
+replies (`build_eye()` in `tools/levels/build_wings.gd`, `scripts/story/eye_scene.gd`; details in
 `docs/STORY_PLAYTHROUGH.md`, Chapter 5). The plan below is the older, bigger version, not built.
 
 *Chapter 5, about 20 min.* Three approach rooms (Hush zones, Hushlings, Choristers) lead to the dome.
@@ -535,11 +535,11 @@ the Eye, the ending.
 Ilse (frozen), the Kept Flame shrine, the Spring, five Kindle points, forge, anvil, belt, basin, lamp
 props, Nan's interior props, and per-region mood tints on the existing far and mid backdrops.
 
-**Technical changes** (representative files): `scripts/player.gd` (ability flags, charged flame, Kindle),
-`scripts/player/heal_channel.gd`, `scripts/MagicUI.gd` and the pause/settings strings that repeat the
+**Technical changes** (representative files): `scripts/player/player.gd` (ability flags, charged flame, Kindle),
+`scripts/player/heal_channel.gd`, `scripts/ui/magic_ui.gd` and the pause/settings strings that repeat the
 costs; new `scripts/puzzle/ability_shrine.gd` (modelled on `rune_tablet.gd`), `kindle_point.gd`, mana
 pickup (copy of `pickup.gd`); new `scripts/creatures/creature.gd`; `scripts/story/journey.gd`;
-builders `tools/build_kilnworks.gd` etc. extending `tools/build_chapter.gd` (new files, so existing
+builders `tools/build_kilnworks.gd` etc. extending `tools/levels/build_chapter.gd` (new files, so existing
 rooms don't shift); tests `tests/kiln_suite.gd` etc. (each room gets a `solve_rN`), and a helper that
 grants all abilities for the tests that assume them (66 fireball references today).
 

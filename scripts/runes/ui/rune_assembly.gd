@@ -2,7 +2,7 @@ class_name RuneAssembly
 extends CanvasLayer
 
 ## The screen for inscribing one cube, as a carved stone wheel (after the
-## dungeon kit, tools/generate_rune_ui_sprites.gd). The game pauses while it
+## dungeon kit, tools/art/generate_rune_ui_sprites.gd). The game pauses while it
 ## is open.
 ##   Left: the wheel. Its four sockets hold the sentence's words (essence at
 ##   the top, form right, direction below, modifier left); the sentence's

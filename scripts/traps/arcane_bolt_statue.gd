@@ -24,7 +24,7 @@ extends Node2D
 @export var muzzle := 20.0
 @export var active := true
 
-const PLAQUE := preload("res://assets/TileSet/walls/tiles/22_plaque_skull.png")
+const PLAQUE := preload("res://assets/tileset/walls/tiles/22_plaque_skull.png")
 
 var _timer := 0.0
 var _charging := false

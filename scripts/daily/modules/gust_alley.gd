@@ -1,34 +1,17 @@
 class_name GustAlleyModule
 extends DailyModule
 
-## Gust Alley: a dungeon-powered cube with open quadrants, a crate, a kerb and
-## a plate that only loose objects press. Blow the crate along the floor onto
-## the plate and the gate opens (the story's Observatory Room 1, with the words
-## given by the vocabulary instead of a tablet).
+## Gust Alley: blow a crate along the floor onto a plate to open the gate
+## (based on the Observatory's first room).
 ##
-## Parameters
-##   mirror  the wind has to blow left (the cluster is mirrored; the exit
-##           gate stays on the right)
-##   lock    0: essence and form are carved (pick the direction and the
-##              modifier);
-##           1: essence and direction are carved (pick the form and the
-##              modifier);
-##           2: all but the modifier are carved (the gentlest)
-##   guided  chalk waymarks on the walls (off at Grand and above)
-##   gap    columns from the cube to the crate (2..3)
-##   run     columns from the crate to the kerb (3..5; fewer when gap is 3)
+## Parameters: mirror (blow left instead of right), lock (0: choose direction
+## and modifier, 1: form and modifier, 2: only the modifier), guided (chalk
+## waymarks), gap (cube to crate, 2-3 columns), run (crate to kerb, 3-5).
 ##
-## What works: wind/push, along the carved heading, with a modifier strong
-## enough to carry the crate far enough. A diagonal push, a lift, or the wrong
-## way does not (and is not claimed).
-##
-## How far a push carries a crate was measured in the real physics
-## (tests/daily_suite.gd, "sweep"): the wind pushes a crate while it is inside
-## the cube's reach (320 px, 560 with Long, measured from the cube's centre),
-## then it coasts: about 81 px after a normal wind and 153 px after a strong
-## one. The crate has to travel `run * 64 - 111` px to rest on the plate; the
-## module claims a sentence only if it carries the crate that far with a
-## margin, so the oracle never over-promises.
+## Measured in the physics (the daily suite's "sweep"): wind pushes the crate
+## while it is within 320 px of the cube (560 with Long), then it coasts about
+## 81 px (Normal) or 153 px (Strong). The crate must travel run * 64 - 111 px;
+## a sentence only counts if it gets there with a margin.
 
 const PUSH_MODIFIERS := ["normal", "strong", "long", "large"]
 const REACH := 320.0

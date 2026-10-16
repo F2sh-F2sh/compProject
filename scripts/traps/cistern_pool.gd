@@ -10,7 +10,7 @@ extends Area2D
 ## the banks: it holds while the cold lasts and LINGER seconds after,
 ## flickering for the last WARN of them, then gives way. Rune cubes can't be
 ## set down over it (it is a hazard zone, frozen or not).
-## Pixel-art water (tools/generate_cistern_sprites.gd); the ice is drawn,
+## Pixel-art water (tools/art/generate_cistern_sprites.gd); the ice is drawn,
 ## like the Ice Bridge's.
 ## The node sits on the trench floor's surface, centred on the trench (a pit
 ## one tile deep: its rim, the floor beside it, is TILE above the node).
@@ -145,12 +145,6 @@ func get_recovery_position(player: Node2D) -> Vector2:
 func get_hazard_rect() -> Rect2:
 	var w := get_width()
 	return Rect2(global_position + Vector2(-w / 2.0, -TILE), Vector2(w, TILE))
-
-
-## True if the strip under world x is ice now.
-func is_frozen_at(x: float) -> bool:
-	var i := int(floor((x - (global_position.x - get_width() / 2.0)) / SEGMENT))
-	return i >= 0 and i < frozen_left.size() and frozen_left[i] > 0.0
 
 
 ## How much of it is ice, 0 to 1 (for tests and steps).

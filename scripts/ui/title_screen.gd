@@ -6,9 +6,8 @@ extends Node2D
 ## Echidna small before it; snow and drifting motes over it all. The glass
 ## logo sits top left, the menu is plain words bottom left (no boxes), and the
 ## version bottom right. The menu: Continue (where you left off), New Game
-## (the illustrated story, then Lowbell), Choose a Level (the Novices' Way:
-## the Passage, the Belfry, the Observatory, and the Long Stair), Settings &
-## Controls, and Quit. A line under the menu shows progress.
+## (the illustrated story, then Lowbell), Daily Puzzle (generated puzzles and
+## the Endless mode), Settings & Controls, and Quit. A line under the menu shows progress.
 
 const FONT := Fonts.UI
 const MENU_FONT := Fonts.BOOK
@@ -24,15 +23,7 @@ const INK := Color("e8dcc0")
 
 var continue_button: Button
 var new_button: Button
-var tutorial_button: Button
 var daily_button: Button
-var part_1_button: Button
-var part_2_button: Button
-var part_3_button: Button
-var landing_button: Button
-var admin_button: Button
-var _parts: VBoxContainer
-var _admin: VBoxContainer
 var _menu: VBoxContainer
 var _settings: VBoxContainer
 var _progress: Label
@@ -122,7 +113,7 @@ func _build_scene() -> void:
 	SurfaceArt.sprite(shrine, "hk_crystals", Vector2(1110, ground_y + 4), 1.4).modulate = Color(0.6, 0.75, 1.0)
 	# Echidna, small before it, her lantern lit
 	_echidna = AnimatedSprite2D.new()
-	_echidna.sprite_frames = load("res://assets/sprites/Echidna/echidna_frames.tres")
+	_echidna.sprite_frames = load("res://assets/sprites/echidna/echidna_frames.tres")
 	_echidna.animation = &"idle"
 	_echidna.play()
 	_echidna.flip_h = false
@@ -225,7 +216,7 @@ func _build_ui() -> void:
 
 	var title_block := TextureRect.new()
 	title_block.name = "TitleBlock"
-	title_block.texture = preload("res://assets/ui/menu/aero_title.png")
+	title_block.texture = preload("res://assets/ui/menu/title_logo.png")
 	title_block.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	title_block.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	title_block.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -246,6 +237,12 @@ func _build_ui() -> void:
 	version.size = Vector2(168, 28)
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	root.add_child(version)
+	var credit := _label("Created by Ishaan Tiwari and Aarav Singh", MENU_FONT, 18, Color(INK, 0.55))
+	credit.name = "Credit"
+	credit.position = Vector2(VIEW.x - 432, VIEW.y - 72)
+	credit.size = Vector2(400, 28)
+	credit.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	root.add_child(credit)
 	_description = _label("", Fonts.BOOK_ITALIC, 18, Color(INK, 0.7))
 	_description.position = Vector2(96, VIEW.y - 54)
 	_description.size = Vector2(620, 28)
@@ -266,8 +263,6 @@ func _build_ui() -> void:
 	_menu.add_child(continue_button)
 	new_button = _button("New Game", _on_new_game)
 	_menu.add_child(new_button)
-	tutorial_button = _button("Choose a Level", _on_tutorial)
-	_menu.add_child(tutorial_button)
 	daily_button = _button("Daily Puzzle", _on_daily)
 	_menu.add_child(daily_button)
 	_menu.add_child(_button("Settings & Controls", func(): _show_settings(true)))
@@ -276,32 +271,6 @@ func _build_ui() -> void:
 	_progress.custom_minimum_size = Vector2(440, 30)
 	_progress.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_menu.add_child(_progress)
-
-	# "Choose a Level" opens the levels: Level 1 (the tutorial, the first place
-	# in the dungeon), Level 2 and Level 3, all on the Novices' Way, then the
-	# Long Stair
-	_parts = VBoxContainer.new()
-	_parts.visible = false
-	_parts.add_theme_constant_override("separation", 0)
-	column.add_child(_parts)
-	_parts.add_child(_label("The Novices' Way", FONT, 16, GOLD))
-	part_1_button = _button("Level 1 · The Passage (tutorial)", _on_part_1)
-	_parts.add_child(part_1_button)
-	part_2_button = _button("Level 2 · The Belfry", func(): _jump_to(CHAPTER))
-	_parts.add_child(part_2_button)
-	part_3_button = _button("Level 3 · The Observatory", func(): _jump_to(CHAPTER_2))
-	_parts.add_child(part_3_button)
-	_parts.add_child(_label("After it", FONT, 16, GOLD))
-	landing_button = _button("The Long Stair · the four wings", func(): _jump_to(Journey.LANDING))
-	_parts.add_child(landing_button)
-	if Journey.admin_unlock:
-		admin_button = _button("Admin: any wing, any room", func(): _show_admin(true))
-		_parts.add_child(admin_button)
-		_build_admin(column)
-	_parts.add_child(_button("Back", func(): _show_parts(false)))
-	for child in _parts.get_children():
-		if child is MenuWord:
-			child.label_size = 24
 
 	_settings = VBoxContainer.new()
 	_settings.visible = false
@@ -453,87 +422,6 @@ func _on_new_game() -> void:
 	_start(STORY)
 
 
-func _on_tutorial() -> void:
-	_show_parts(true)
-
-
-func _show_parts(show: bool) -> void:
-	_describe("Choose a Level" if show else "New Game")
-	_menu.visible = not show
-	_parts.visible = show
-	_menu_column.call_deferred("reset_size")
-	if show:
-		part_1_button.grab_focus()
-	else:
-		tutorial_button.grab_focus()
-
-
-## Part 1 always replays from its start.
-func _on_part_1() -> void:
-	GameState.clear_progress("ability.")
-	GameState.clear_progress("tutorial.")
-	GameState.set_flag("story.movement_done", false)
-	GameState.clear_checkpoint(TUTORIAL)
-	GameState.clear_checkpoint(Journey.MOVEMENT)
-	_start(Journey.MOVEMENT)
-
-
-## Starting a later part straight from the list: Echidna has the spells she
-## would have remembered on the way there.
-func _jump_to(path: String) -> void:
-	Journey.skipping_to(path)
-	_start(path)
-
-
-# ------------------------------------------------------------------ admin (temporary)
-
-## The admin page: every room of the four wings, and the Eye, each started
-## directly with the spells and words of everything before it.
-const ADMIN_ROOMS := [
-	["Kilnworks · The Cold Forge", Journey.KILN, "R1"], ["Kilnworks · The Kiln Heart", Journey.KILN, "R2"],
-	["Cistern · The Still Water", Journey.CISTERN, "R1"], ["Cistern · The Great Sluice", Journey.CISTERN, "R2"],
-	["Lampworks · The Reading Room", Journey.LAMPS, "R1"], ["Lampworks · The Lamp Stair", Journey.LAMPS, "R2"],
-	["Galleries · The First Door", Journey.GALLERIES, "R1"], ["Galleries · The Fold Bell", Journey.GALLERIES, "R2"],
-	["The Eye", Journey.EYE, "R1"],
-]
-
-
-func _build_admin(column: VBoxContainer) -> void:
-	_admin = VBoxContainer.new()
-	_admin.visible = false
-	_admin.add_theme_constant_override("separation", 8)
-	column.add_child(_admin)
-	_admin.add_child(_label("Admin: start any room (nothing before it needs finishing)", FONT, 13, Color("ffd88a")))
-	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 6)
-	_admin.add_child(grid)
-	for spec in ADMIN_ROOMS:
-		var b := _button(spec[0], _admin_jump.bind(spec[1], spec[2]))
-		b.custom_minimum_size = Vector2(300, 30)
-		b.label_size = 18
-		grid.add_child(b)
-	_admin.add_child(_button("Back", func(): _show_admin(false)))
-
-
-func _show_admin(show: bool) -> void:
-	_box_art.visible = not show
-	_menu_column.size.x = 600 if show else 485
-	_parts.visible = not show
-	_admin.visible = show
-	if show:
-		((_admin.get_child(1) as GridContainer).get_child(0) as Button).grab_focus()
-	elif admin_button:
-		admin_button.grab_focus()
-
-
-func _admin_jump(path: String, room: String) -> void:
-	Journey.admin_prepare(path, room)
-	Journey.admin_start_room = room
-	_start(path)
-
-
 func _start(path: String) -> void:
 	if _starting:
 		return
@@ -546,7 +434,6 @@ func _describe(option: String) -> void:
 	match option:
 		"Continue": _description.text = "Return to your last shrine and continue Echidna's journey."
 		"New Game", "Press again: start over": _description.text = "A frozen night. A silent bell. Begin Echidna's story."
-		"Choose a Level": _description.text = "Revisit a lesson or enter the chapters you have discovered."
 		"Daily Puzzle": _description.text = "A new puzzle every day, the same for everyone. How many ways can you find?"
 		"Settings & Controls": _description.text = "Adjust sound, display, controls and accessibility."
 		"Quit": _description.text = "Leave the belfry. Your saved journey will be waiting."
@@ -558,10 +445,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if _settings.visible:
 			_show_settings(false)
-		elif _admin and _admin.visible:
-			_show_admin(false)
-		elif _parts.visible:
-			_show_parts(false)
 		else:
 			return
 		get_viewport().set_input_as_handled()
@@ -569,5 +452,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## The Daily Puzzle screen (a new puzzle every day, a streak, a board).
 func _on_daily() -> void:
+	# The title's own words are hidden meanwhile, so arrow keys and a pad
+	# can't wander from the Daily Puzzle screen onto them.
+	_menu_column.visible = false
 	var menu := DailyMenu.open(self)
-	menu.closed.connect(func(): daily_button.grab_focus())
+	menu.closed.connect(func():
+		_menu_column.visible = true
+		daily_button.grab_focus())

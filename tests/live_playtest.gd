@@ -23,7 +23,7 @@ func _process(_delta: float) -> bool:
 	return false
 
 class SceneShortcuts extends Node:
-	const PATHS := ["ui/title_screen", "story/lowbell", "story/nan_cottage", "story/pilgrims_path", "story/well_descent", "tutorial_level", "chapter/chapter_1", "chapter/chapter_2"]
+	const PATHS := ["ui/title_screen", "story/lowbell", "story/nan_cottage", "story/pilgrims_path", "story/well_descent", "tutorial/tutorial_level", "chapter/chapter_1", "chapter/chapter_2"]
 	func _input(event: InputEvent) -> void:
 		if event is InputEventKey and event.pressed and not event.echo and event.keycode >= KEY_F1 and event.keycode <= KEY_F8:
 			get_viewport().set_input_as_handled()

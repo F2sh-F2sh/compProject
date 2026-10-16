@@ -4,7 +4,7 @@
 # The Sealed Belfry on PortMaster handhelds (aarch64 with 1 GB or more, such as the Anbernic
 # RG35XX Plus / H / SP / 2024 on Knulli or muOS): the game's pck on PortMaster's stock Godot
 # 4.7.1 runtime, drawn through Westonpack on the Compatibility (OpenGL ES) renderer.
-# Built by tools/build_handheld_port.sh. The controller renumbering below (mapping_pad,
+# Built by tools/release/build_handheld_port.sh. The controller renumbering below (mapping_pad,
 # godot_joy_mapping) is adapted from crxssrazr93's Dome Keeper and Pathogenic ports (MIT,
 # see sealedbelfry/licenses/LICENSE.crxssrazr93-ports.txt).
 

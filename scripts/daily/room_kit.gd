@@ -2,7 +2,7 @@ class_name RoomKit
 extends RefCounted
 
 ## Builds a level's rooms while the game runs. This is a port, to run-time, of
-## the helpers the story's level builders use (tools/build_chapter.gd,
+## the helpers the story's level builders use (tools/levels/build_chapter.gd,
 ## build_chapter2.gd, build_wings.gd), so a daily puzzle is made of exactly the
 ## same tiles, rooms, gates, circuits and rune pieces as the story's rooms.
 ## It is a copy on purpose: the builders write the story's saved scenes and
@@ -17,7 +17,7 @@ const T := 64
 const FLOOR_Y := 534
 const LOW_CEIL := 4
 const HIGH_CEIL := 0
-const TILESET_PATH := "res://assets/TileSet/dungeon_tileset.tres"
+const TILESET_PATH := "res://assets/tileset/dungeon_tileset.tres"
 const PUZZLE := "res://scenes/puzzle/"
 const RUNES := "res://scenes/runes/"
 const AMBIENT := Color(0.5, 0.48, 0.64)
@@ -156,7 +156,7 @@ func decor(x: int, y: int, tile: Vector2i) -> void:
 
 func torch(parent: Node, col: int, row := 6) -> void:
 	decor(col, row, W_TORCH)
-	inst("res://scenes/torch_light.tscn", parent, "Torch%d_%d" % [col, row], Vector2(cx(col), row * T + 22 + 14))
+	inst("res://scenes/world/torch_light.tscn", parent, "Torch%d_%d" % [col, row], Vector2(cx(col), row * T + 22 + 14))
 
 
 # ------------------------------------------------------------------ rooms
@@ -195,7 +195,7 @@ func make_room(id: String, title: String, x0: int, x1: int, ceil_row: int, entry
 func gate(parent: Node, gate_name: String, col: int, height := 150.0, props := {}) -> Node:
 	var p := {"height": height}
 	p.merge(props)
-	return inst("res://scenes/portcullis_gate.tscn", parent, gate_name, Vector2(cx(col), FLOOR_Y), p)
+	return inst("res://scenes/puzzle/portcullis_gate.tscn", parent, gate_name, Vector2(cx(col), FLOOR_Y), p)
 
 
 func circuit(parent: Node, circuit_name: String, sources: Array, targets: Array, props := {}) -> Node:
@@ -265,4 +265,4 @@ func stone(parent: Node, stone_name: String, x: float, props := {}, surface := f
 
 
 func plate(parent: Node, plate_name: String, x: float, props := {}) -> Node:
-	return inst("res://scenes/pressure_plate.tscn", parent, plate_name, Vector2(x, FLOOR_Y), props)
+	return inst("res://scenes/puzzle/pressure_plate.tscn", parent, plate_name, Vector2(x, FLOOR_Y), props)

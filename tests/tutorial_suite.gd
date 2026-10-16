@@ -2,7 +2,7 @@ extends Node
 
 ## Gameplay tests for the tutorial level. Run through tests/run_tests.gd.
 
-const LEVEL := "res://scenes/tutorial_level.tscn"
+const LEVEL := "res://scenes/tutorial/tutorial_level.tscn"
 const DT := 1.0 / 60.0
 const SHOTS := "user://test_shots/"
 # PistonTrap.Phase values (kept numeric so this file doesn't depend on class load order)
@@ -1010,7 +1010,7 @@ func scenario_legacy_level() -> void:
 	if is_instance_valid(get_tree().current_scene):
 		get_tree().current_scene.queue_free()
 	await get_tree().process_frame
-	lvl = load("res://scenes/TestingPlayerMovement.tscn").instantiate()
+	lvl = load("res://scenes/tutorial/movement_sandbox.tscn").instantiate()
 	get_tree().root.add_child(lvl)
 	get_tree().current_scene = lvl
 	await seconds(1.0)
