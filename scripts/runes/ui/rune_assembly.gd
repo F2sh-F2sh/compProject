@@ -461,6 +461,7 @@ func _build() -> void:
 	_preview_view.canvas_item_default_texture_filter = Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
 	container.add_child(_preview_view)
 	_preview_camera = Camera2D.new()
+	_preview_camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	_preview_view.add_child(_preview_camera)
 	var paper := PanelContainer.new()
 	paper.theme_type_variation = &"ParchmentPanel"

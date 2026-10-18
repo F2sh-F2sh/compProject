@@ -23594,201 +23594,201 @@
 		},
 		"updraft": {
 			"dist=1|lock=0|mirror=false|profile=0|rows=3|width=3": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 3,
-				"width": 3
+				"profile": 0.0,
+				"rows": 3.0,
+				"width": 3.0
 			},
 			"dist=1|lock=0|mirror=false|profile=0|rows=3|width=4": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 3,
-				"width": 4
+				"profile": 0.0,
+				"rows": 3.0,
+				"width": 4.0
 			},
 			"dist=1|lock=0|mirror=false|profile=0|rows=4|width=3": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 4,
-				"width": 3
+				"profile": 0.0,
+				"rows": 4.0,
+				"width": 3.0
 			},
 			"dist=1|lock=0|mirror=false|profile=0|rows=4|width=4": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 4,
-				"width": 4
+				"profile": 0.0,
+				"rows": 4.0,
+				"width": 4.0
 			},
 			"dist=1|lock=0|mirror=false|profile=1|rows=3|width=3": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 3,
-				"width": 3
+				"profile": 1.0,
+				"rows": 3.0,
+				"width": 3.0
 			},
 			"dist=1|lock=0|mirror=false|profile=1|rows=3|width=4": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 3,
-				"width": 4
+				"profile": 1.0,
+				"rows": 3.0,
+				"width": 4.0
 			},
 			"dist=1|lock=0|mirror=false|profile=1|rows=4|width=3": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 4,
-				"width": 3
+				"profile": 1.0,
+				"rows": 4.0,
+				"width": 3.0
 			},
 			"dist=1|lock=0|mirror=false|profile=1|rows=4|width=4": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 4,
-				"width": 4
+				"profile": 1.0,
+				"rows": 4.0,
+				"width": 4.0
 			},
 			"dist=1|lock=0|mirror=false|profile=2|rows=3|width=3": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 3,
-				"width": 3
+				"profile": 2.0,
+				"rows": 3.0,
+				"width": 3.0
 			},
 			"dist=1|lock=0|mirror=false|profile=2|rows=3|width=4": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 3,
-				"width": 4
+				"profile": 2.0,
+				"rows": 3.0,
+				"width": 4.0
 			},
 			"dist=1|lock=0|mirror=false|profile=2|rows=4|width=3": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 4,
-				"width": 3
+				"profile": 2.0,
+				"rows": 4.0,
+				"width": 3.0
 			},
 			"dist=1|lock=0|mirror=false|profile=2|rows=4|width=4": {
-				"dist": 1,
-				"lock": 0,
+				"dist": 1.0,
+				"lock": 0.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 4,
-				"width": 4
+				"profile": 2.0,
+				"rows": 4.0,
+				"width": 4.0
 			},
 			"dist=1|lock=1|mirror=false|profile=0|rows=3|width=3": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 3,
-				"width": 3
+				"profile": 0.0,
+				"rows": 3.0,
+				"width": 3.0
 			},
 			"dist=1|lock=1|mirror=false|profile=0|rows=3|width=4": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 3,
-				"width": 4
+				"profile": 0.0,
+				"rows": 3.0,
+				"width": 4.0
 			},
 			"dist=1|lock=1|mirror=false|profile=0|rows=4|width=3": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 4,
-				"width": 3
+				"profile": 0.0,
+				"rows": 4.0,
+				"width": 3.0
 			},
 			"dist=1|lock=1|mirror=false|profile=0|rows=4|width=4": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 0,
-				"rows": 4,
-				"width": 4
+				"profile": 0.0,
+				"rows": 4.0,
+				"width": 4.0
 			},
 			"dist=1|lock=1|mirror=false|profile=1|rows=3|width=3": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 3,
-				"width": 3
+				"profile": 1.0,
+				"rows": 3.0,
+				"width": 3.0
 			},
 			"dist=1|lock=1|mirror=false|profile=1|rows=3|width=4": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 3,
-				"width": 4
+				"profile": 1.0,
+				"rows": 3.0,
+				"width": 4.0
 			},
 			"dist=1|lock=1|mirror=false|profile=1|rows=4|width=3": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 4,
-				"width": 3
+				"profile": 1.0,
+				"rows": 4.0,
+				"width": 3.0
 			},
 			"dist=1|lock=1|mirror=false|profile=1|rows=4|width=4": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 1,
-				"rows": 4,
-				"width": 4
+				"profile": 1.0,
+				"rows": 4.0,
+				"width": 4.0
 			},
 			"dist=1|lock=1|mirror=false|profile=2|rows=3|width=3": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 3,
-				"width": 3
+				"profile": 2.0,
+				"rows": 3.0,
+				"width": 3.0
 			},
 			"dist=1|lock=1|mirror=false|profile=2|rows=3|width=4": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 3,
-				"width": 4
+				"profile": 2.0,
+				"rows": 3.0,
+				"width": 4.0
 			},
 			"dist=1|lock=1|mirror=false|profile=2|rows=4|width=3": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 4,
-				"width": 3
+				"profile": 2.0,
+				"rows": 4.0,
+				"width": 3.0
 			},
 			"dist=1|lock=1|mirror=false|profile=2|rows=4|width=4": {
-				"dist": 1,
-				"lock": 1,
+				"dist": 1.0,
+				"lock": 1.0,
 				"mirror": false,
-				"profile": 2,
-				"rows": 4,
-				"width": 4
+				"profile": 2.0,
+				"rows": 4.0,
+				"width": 4.0
 			}
 		}
 	},
 	"repeats": 3,
-	"source_hash": 365312979,
+	"source_hash": 2442295209,
 	"verification_rules": 2,
 	"version": 10
 }

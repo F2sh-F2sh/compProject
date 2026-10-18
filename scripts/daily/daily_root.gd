@@ -232,7 +232,7 @@ func _on_room_entered(room: Room) -> void:
 
 
 ## A cube went on: counts as a cast, and is what the room's clearing is
-## credited to (the codex of ways).
+## credited to (the record of solutions).
 func _on_cube_activated(cube: RuneCube) -> void:
 	if _transitioning: return
 	DailyRun.casts += 1

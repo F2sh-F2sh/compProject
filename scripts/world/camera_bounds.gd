@@ -54,6 +54,12 @@ var _floor_y := 0.0
 var _has_floor := false
 
 
+func _init() -> void:
+	# Camera2D checks interpolation when entering the tree, before _ready.
+	# Start in physics mode; refresh_motion_mode applies the user's setting.
+	process_callback = CAMERA2D_PROCESS_PHYSICS
+
+
 func _ready() -> void:
 	# The camera moves itself, trailing its parent instead of being rigidly attached
 	top_level = true

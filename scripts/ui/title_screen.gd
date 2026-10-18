@@ -266,7 +266,7 @@ func _build_ui() -> void:
 	daily_button = _button("Daily Puzzle", _on_daily)
 	_menu.add_child(daily_button)
 	_menu.add_child(_button("Settings & Controls", func(): _show_settings(true)))
-	_menu.add_child(_button("Quit", func(): get_tree().quit()))
+	_menu.add_child(_button("Quit", func(): AudioDirector.quit_game()))
 	_progress = _label("", MENU_FONT, 18, Color(GOLD, 0.75))
 	_progress.custom_minimum_size = Vector2(440, 30)
 	_progress.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

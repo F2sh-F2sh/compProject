@@ -1,6 +1,6 @@
 # Generated levels that scale in difficulty, and the Endless mode: a build spec
 
-This document is written so a developer **or another AI** can build the rest of the feature without anything else
+This document is written so a developer can build the rest of the feature without anything else
 to go on. It says how the system works, how it looks and how to build it, step by step, with file names, function
 signatures, numbers and tests. Read sections 0–2 before writing any code.
 

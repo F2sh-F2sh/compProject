@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" path="res://scenes/world/tutorial_sign.tscn" id="12_nveny"]
 [ext_resource type="Script" uid="uid://yoc2be05t4c0" path="res://scripts/puzzle/room_sprite.gd" id="14_40et1"]
 [ext_resource type="PackedScene" path="res://scenes/world/torch_light.tscn" id="15_ta0bg"]
-[ext_resource type="Texture2D" uid="uid://dd6l2gtpos6v2" path="res://assets/tileset/props/sprites/skull_pile.png" id="17_plvb7"]
+[ext_resource type="Texture2D" uid="uid://85b0whpm1ltd" path="res://assets/tileset/props/sprites/skull_pile.png" id="17_plvb7"]
 [ext_resource type="Script" uid="uid://df61ba772ac5w" path="res://scripts/fx/dungeon_atmosphere.gd" id="18_ukpbs"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="19_ou1tt"]
 [ext_resource type="Script" uid="uid://cv6bwccwjybxk" path="res://scripts/world/camera_bounds.gd" id="22_07adr"]

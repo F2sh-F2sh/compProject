@@ -24,6 +24,8 @@ func _ready() -> void:
 ## at: a world position for positional sound, or null for UI/global sound.
 ## dry: skip the room's reverb and use the quiet Foley bus (footsteps).
 func play(sound: String, at: Variant = null, volume_db := 0.0, pitch_variation := 0.05, dry := false) -> void:
+	if AudioDirector.is_quitting:
+		return
 	var stream := _stream(sound)
 	if stream == null:
 		return

@@ -97,4 +97,4 @@ func _run() -> void:
 		failed += suite.failed
 		suite.queue_free()
 	print("RESULT passed=%d failed=%d" % [passed, failed])
-	quit(1 if failed > 0 else 0)
+	await root.get_node("AudioDirector").quit_game(1 if failed > 0 else 0)

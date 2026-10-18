@@ -362,7 +362,7 @@ func _build() -> void:
 	_icon("system", "power", "System", [
 		_restart_button,
 		_row("Return to Title", "door", null, _on_title),
-		_row("Quit Game", "cross", null, func(): _play("select"); get_tree().quit()),
+		_row("Quit Game", "cross", null, func(): _play("select"); AudioDirector.quit_game()),
 	])
 	_describe_rows()
 

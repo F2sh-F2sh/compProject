@@ -1,9 +1,9 @@
 [gd_resource type="TileSet" format=3 uid="uid://biqt50kbculv7"]
 
-[ext_resource type="Texture2D" uid="uid://dplgucj3acae2" path="res://assets/tileset/platforms/platforms_atlas_64.png" id="1_ltu8e"]
-[ext_resource type="Texture2D" uid="uid://eh684xhg65y4" path="res://assets/tileset/platforms/platforms_atlas_64_n.png" id="2_orsug"]
-[ext_resource type="Texture2D" uid="uid://cruvvguyclsve" path="res://assets/tileset/walls/walls_atlas_64.png" id="3_warwm"]
-[ext_resource type="Texture2D" uid="uid://b6eyvmggptla1" path="res://assets/tileset/walls/walls_atlas_64_n.png" id="4_p6wns"]
+[ext_resource type="Texture2D" uid="uid://dxmqnw8qp6q6n" path="res://assets/tileset/platforms/platforms_atlas_64.png" id="1_ltu8e"]
+[ext_resource type="Texture2D" uid="uid://dj7r381ljnrsq" path="res://assets/tileset/platforms/platforms_atlas_64_n.png" id="2_orsug"]
+[ext_resource type="Texture2D" uid="uid://cj806ko0o3bsp" path="res://assets/tileset/walls/walls_atlas_64.png" id="3_warwm"]
+[ext_resource type="Texture2D" uid="uid://c2n66fh508tdx" path="res://assets/tileset/walls/walls_atlas_64_n.png" id="4_p6wns"]
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_vp3pt"]
 polygon = PackedVector2Array(-32, 0, 32, 0, 32, 32, -32, 32)

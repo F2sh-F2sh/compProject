@@ -191,8 +191,7 @@ Details, timing tables and the full verification record are in
 
 ## Enjoyment pass (2026-09-28/29)
 
-Driven by beta-tester feedback and an audit of what made the game less fun. Plan:
-`C:\Users\Ishaan\.claude\plans\vectorized-greeting-fern.md`. Local checkpoint commit
+Driven by beta-tester feedback and an audit of what made the game less fun. Local checkpoint commit
 `87278ca` was made first (not pushed); everything since is uncommitted.
 
 **Phase 1: beta-tester fixes**
@@ -1493,7 +1492,7 @@ guide: `docs/DAILY_PUZZLE.md`.
 - **Tests:** `tests/daily_suite.gd` (rng, calendar, kit, generator 1,600 specs, simulation 140/140 through
   the real rune cubes, score, code, store, persistence, fairness, cards, level, look). Note: `run_tests.gd`
   must load `DailyStore` at run time (it reaches autoloads that are not up while the script compiles).
-- **Further ideas:** solution codex, medals, Sunday Grand board, online board. The procedural expansion below
+- **Further ideas:** solution journal, medals, Sunday Grand board, online board. The procedural expansion below
   supersedes the old module and Random trial notes.
 
 ## Known limitations and decisions
@@ -1511,8 +1510,6 @@ guide: `docs/DAILY_PUZZLE.md`.
 
 ## Handoff notes
 
-- If a usage limit interrupts work, resume from this file. Model selection cannot be
-  changed from inside the session; use `/model` in the Claude Code UI if needed.
 - To add a room: add a `room_N_*()` function to `tools/levels/build_chapter.gd` (shell →
   features → `make_room` → pieces → circuits → hint/page/signs/decor), a `solve_rN()` and
   `scenario_roomN()` to `tests/chapter_suite.gd`, and chain it into `scenario_full_run`.

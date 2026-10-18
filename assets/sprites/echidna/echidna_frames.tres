@@ -1,11 +1,11 @@
 [gd_resource type="SpriteFrames" format=3 uid="uid://caeqe4m0db3wh"]
 
-[ext_resource type="Texture2D" uid="uid://uvtvwhxas8yc" path="res://assets/sprites/echidna/EchidnaCharge.png" id="1_kuynb"]
-[ext_resource type="Texture2D" uid="uid://gp8stoocp36r" path="res://assets/sprites/echidna/EchidnaChargeWisps.png" id="2_pp1f3"]
-[ext_resource type="Texture2D" uid="uid://tp5wuekvknw0" path="res://assets/sprites/echidna/EchidnaAir.png" id="3_l1v4i"]
-[ext_resource type="Texture2D" uid="uid://dvqqbfecyeb6f" path="res://assets/sprites/echidna/EchidnaIdle.png" id="4_kb4xc"]
-[ext_resource type="Texture2D" uid="uid://vjihthv1sq5c" path="res://assets/sprites/echidna/EchidnaPush.png" id="5_m6fku"]
-[ext_resource type="Texture2D" uid="uid://brw2gdpk4u7x5" path="res://assets/sprites/echidna/EchidnaWalk.png" id="6_wb573"]
+[ext_resource type="Texture2D" uid="uid://d2xm5go6nxi5l" path="res://assets/sprites/Echidna/EchidnaCharge.png" id="1_kuynb"]
+[ext_resource type="Texture2D" uid="uid://nalegmil360m" path="res://assets/sprites/Echidna/EchidnaChargeWisps.png" id="2_pp1f3"]
+[ext_resource type="Texture2D" uid="uid://dddu0i7chbsr3" path="res://assets/sprites/Echidna/EchidnaAir.png" id="3_l1v4i"]
+[ext_resource type="Texture2D" uid="uid://bneq50408vxx5" path="res://assets/sprites/Echidna/EchidnaIdle.png" id="4_kb4xc"]
+[ext_resource type="Texture2D" uid="uid://b3w8h6tqmr482" path="res://assets/sprites/Echidna/EchidnaPush.png" id="5_m6fku"]
+[ext_resource type="Texture2D" uid="uid://cl6hm6wv5gys" path="res://assets/sprites/Echidna/EchidnaWalk.png" id="6_wb573"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eg3hm"]
 atlas = ExtResource("1_kuynb")

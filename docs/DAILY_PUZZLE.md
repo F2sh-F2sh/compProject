@@ -7,7 +7,7 @@ the story's levels, builders and save are unchanged.
 ## Why it exists (the problem it addresses)
 
 The team's problem statement is *building critical thinking and problem solving through a puzzle game*
-(sources and wording: the plan in `.claude/plans`, and `docs/IMPLEMENTATION_PROGRESS.md`). The daily puzzle is the
+(see `docs/IMPLEMENTATION_PROGRESS.md`). The daily puzzle is the
 part of the game that serves it directly:
 
 - **No walkthrough to copy.** A seed makes a new puzzle; the answer to yesterday's doesn't help.
@@ -113,7 +113,7 @@ Small additions elsewhere: `RuneManager.kit_override`, `LevelTheme.BY_CHAPTER["d
 
 ## Further ideas
 
-The solution codex, medals, a separate Sunday Grand board and an online board remain outside the
+The solution journal, medals, a separate Sunday Grand board and an online board remain outside the
 `PROCGEN_DESIGN.md` expansion. Endless, verified tables, two-beat rooms and the eight specified new modules
 are implemented below.
 

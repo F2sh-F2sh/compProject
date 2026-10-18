@@ -53,10 +53,12 @@ var _bed_level := 0.0
 var _bed_tween: Tween
 ## The story cue playing now, if any (see play_cue()).
 var cue: AudioStreamPlayer
+var is_quitting := false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().auto_accept_quit = false
 	get_tree().scene_changed.connect(_on_scene_changed)
 	for layer in LAYERS:
 		var player := _looping_player(MUSIC_DIR + LAYERS[layer][0], Settings.MUSIC_BUS)
@@ -70,6 +72,34 @@ func _ready() -> void:
 	if ambience:
 		ambience.play()
 	_apply_mix()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		quit_game()
+
+
+## Stop playback while the audio server can still retire its mixing voices.
+## Releasing streams during _exit_tree is too late for that asynchronous work.
+func quit_game(exit_code := 0) -> void:
+	if is_quitting:
+		return
+	is_quitting = true
+	_stop_audio(get_tree().root)
+	# Use wall time: fixed-fps tests and paused menus must also allow the audio
+	# thread to finish its fade-out and release the stopped playback streams.
+	var deadline := Time.get_ticks_msec() + 150
+	while Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
+	get_tree().quit(exit_code)
+
+
+func _stop_audio(node: Node) -> void:
+	if node is AudioStreamPlayer or node is AudioStreamPlayer2D or node is AudioStreamPlayer3D:
+		node.stop()
+		node.stream = null
+	for child in node.get_children():
+		_stop_audio(child)
 
 
 func _looping_player(path: String, bus: String) -> AudioStreamPlayer:
@@ -126,6 +156,8 @@ func reset_combat() -> void:
 
 
 func _process(delta: float) -> void:
+	if is_quitting:
+		return
 	# Drop requests from sources that no longer exist (a level was unloaded)
 	for key in _combat_sources.keys():
 		if not is_instance_id_valid(key):
@@ -159,6 +191,8 @@ func _apply_mix() -> void:
 ## steps back for it and the Music bus's low-pass opens so it rings clear,
 ## then the music comes back when it ends (or stop_cue() is called).
 func play_cue(file: String, db := 0.0, duck_to := -26.0) -> AudioStreamPlayer:
+	if is_quitting:
+		return null
 	stop_cue(0.6)
 	var path := MUSIC_DIR + file
 	if not ResourceLoader.exists(path):
@@ -196,6 +230,8 @@ func stop_cue(seconds := 1.5) -> void:
 ## Crossfades to a level's ambience bed (assets/audio/sfx/bed_<name>.wav),
 ## or out to none with "". Follows fade_ambience() like the cave ambience.
 func set_bed(bed: String, seconds := 2.0) -> void:
+	if is_quitting:
+		return
 	if bed == bed_name:
 		return
 	bed_name = bed

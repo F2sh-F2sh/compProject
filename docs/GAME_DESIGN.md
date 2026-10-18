@@ -494,7 +494,7 @@ rooms that take under 90 s (too easy) or over 8 min (too hard). Assist options s
 
 ---
 
-## 14. Build plan (30 Sep – 20 Oct 2026; two people, Claude building the rooms)
+## 14. Build plan (30 Sep – 20 Oct 2026)
 
 Milestones; the game is playable end to end after each one.
 
