@@ -1,11 +1,22 @@
 # The Sealed Belfry
 
+![The Sealed Belfry title screen](docs/images/cover.png)
+
 A 2D puzzle-platformer about Echidna, a young witch who goes down into a sealed abbey to
 ring its great bell. You solve rooms by writing four-word rune sentences (essence, form,
 direction, modifier) onto stone cubes: wind to push and lift, fire, ice bridges, light and
 portals. Most rooms can be solved more than one way.
 
-Made with **Godot 4.7.2**. Play it on itch.io: <https://ish2601.itch.io/the-sealed-belfry>
+Made by **Ishaan Tiwari** and **Aarav Singh** with **Godot 4.7.2**.
+
+![Echidna in the Kilnworks](docs/images/kiln-heart.png)
+
+## Play
+
+- **In your browser**: <https://ish2601.itch.io/the-sealed-belfry>. No install needed;
+  a keyboard and mouse or a controller both work.
+- **From source**: install [Godot 4.7.2](https://godotengine.org/download/archive/), clone
+  this repository and follow [Running from source](#running-from-source) below.
 
 ## What's in the game
 
@@ -41,8 +52,15 @@ motion.
 
 ## Running from source
 
-Open the project in Godot 4.7.2 and press **F5**; the title screen is the main scene. After
-a fresh clone, run `godot --headless --path . --import` once so Godot's class cache is built.
+1. Install Godot 4.7.2 (the standard build; .NET is not needed).
+2. Clone the repository:
+
+       git clone https://github.com/F2sh-F2sh/compProject.git
+
+3. Run `godot --headless --path compProject --import` once so Godot builds its import and
+   class caches.
+4. Open `compProject/project.godot` in Godot and press **F5**. The title screen is the main
+   scene.
 
 ## Exporting
 
@@ -105,4 +123,9 @@ Run with `godot --headless --path . --script res://tools/<folder>/<name>.gd`.
 - `docs/PRESENTATION.md`: rendering, light, audio and animation.
 - `docs/PLAYTEST_CHECKLIST.md`: what a human playtester should check.
 - `docs/IMPLEMENTATION_PROGRESS.md`: the development log.
-- `CREDITS.md`: fonts, art and audio sources.
+
+## License
+
+The code and game files are under the [MIT License](LICENSE), copyright 2026 Ishaan Tiwari
+and Aarav Singh. The fonts in `assets/fonts/` are under the SIL Open Font License 1.1;
+each font's licence is in its own folder.
